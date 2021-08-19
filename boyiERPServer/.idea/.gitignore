@@ -2,5 +2,5 @@
 /shelf/
 /workspace.xml
 *.log
-logs/*
+/logs/
 /target/
