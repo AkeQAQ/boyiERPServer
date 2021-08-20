@@ -27,6 +27,9 @@ public class BaseController {
     @Autowired
     public SysRoleMenuService sysRoleMenuService;
 
+    @Autowired
+    public BaseMaterialGroupService baseMaterialGroupService;
+
     /**
      * 获取页面
      * @return
