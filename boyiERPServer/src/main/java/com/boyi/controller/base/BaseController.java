@@ -30,6 +30,9 @@ public class BaseController {
     @Autowired
     public BaseMaterialGroupService baseMaterialGroupService;
 
+    @Autowired
+    public BaseMaterialService baseMaterialService;
+
     /**
      * 获取页面
      * @return

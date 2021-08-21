@@ -76,9 +76,14 @@ public class DBConstant {
          *  1:代表 禁止状态
          */
         public static final Integer STATUS_FIELDVALUE_1 = 1;
+
+        public static final String PARENT_ID_FIELDNAME ="parent_id";
+
     }
 
     public static class TABLE_BASE_MATERIAL{
+        public static final String NAME_FIELDNAME = "name";
+
         public static final String STATUS_FIELDNAME = "status";
         /**
          *  0:代表 正常状态
