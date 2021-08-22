@@ -19,15 +19,18 @@ import java.time.LocalDateTime;
 public class BaseMaterial  {
 
     private static final long serialVersionUID = 1L;
+
     private LocalDateTime created;
     private LocalDateTime updated;
 
     private Integer status;
+    private String id;
 
     /**
-     * 主键，物料唯一编码
+     * 子编码
      */
-    private String id;
+    private String subId;
+
 
     /**
      * 物料分组ID

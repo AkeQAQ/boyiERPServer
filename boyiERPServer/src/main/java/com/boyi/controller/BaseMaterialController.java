@@ -63,10 +63,13 @@ public class BaseMaterialController extends BaseController {
             pageData = baseMaterialService.page(getPage());
         } else {
             String queryField = "";
-            if (searchField.equals("groupId")) {
-                queryField = "group_id";
-            } else if (searchField.equals("id")) {
+            if (searchField.equals("id")) {
                 queryField = "id";
+            }
+            else if (searchField.equals("groupId")) {
+                queryField = "group_id";
+            } else if (searchField.equals("sub_id")) {
+                queryField = "sub_id";
             } else if (searchField.equals("name")) {
                 queryField = "name";
             } else {
@@ -101,8 +104,15 @@ public class BaseMaterialController extends BaseController {
         baseMaterial.setCreateduser(principal.getName());
         baseMaterial.setUpdateuser(principal.getName());
 
-        baseMaterialService.save(baseMaterial);
-        return ResponseResult.succ("新增成功");
+        baseMaterial.setId(baseMaterial.getGroupId()+"."+baseMaterial.getSubId());
+
+        try {
+            baseMaterialService.save(baseMaterial);
+            return ResponseResult.succ("新增成功");
+        } catch (DuplicateKeyException e) {
+            log.error("物料，插入异常",e);
+            return ResponseResult.fail("唯一编码重复!");
+        }
     }
 
 
@@ -118,7 +128,8 @@ public class BaseMaterialController extends BaseController {
             baseMaterialService.updateById(baseMaterial);
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
-            return ResponseResult.fail("名称重复!");
+            log.error("物料，更新异常",e);
+            return ResponseResult.fail("唯一编码重复!");
         }
     }
 
