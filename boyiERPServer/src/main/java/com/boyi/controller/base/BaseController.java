@@ -33,6 +33,15 @@ public class BaseController {
     @Autowired
     public BaseMaterialService baseMaterialService;
 
+    @Autowired
+    public BaseSupplierGroupService baseSupplierGroupService;
+
+    @Autowired
+    public BaseSupplierService baseSupplierService;
+
+    @Autowired
+    public BaseDepartmentService baseDepartmentService;
+
     /**
      * 获取页面
      * @return

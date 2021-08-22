@@ -118,6 +118,9 @@ public class SysMenuController extends BaseController {
         log.info("操作人:[{}],修改菜单,param:{},update content:{}",principal.getName(),sysMenuDto,sysMenu);
         // 清除所有与该菜单相关的权限缓存
         sysUserService.clearUserAuthorityInfoByMenuId(sysMenu.getId());
+
+        //TODO 菜单禁用的话，其他地方也不能使用，status的伪删除作用要发挥出来，明天都全部检查一次
+
         return ResponseResult.succ("编辑成功");
     }
 

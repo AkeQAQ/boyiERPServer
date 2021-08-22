@@ -4,13 +4,9 @@ package com.boyi.controller;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
-import com.boyi.entity.BaseMaterial;
-import com.boyi.entity.SysUser;
-import com.boyi.entity.SysUserRole;
-import com.boyi.service.BaseMaterialService;
+import com.boyi.entity.BaseSupplier;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -32,35 +28,35 @@ import java.util.Arrays;
  */
 @Slf4j
 @RestController
-@RequestMapping("/baseData/material")
-public class BaseMaterialController extends BaseController {
+@RequestMapping("/baseData/supplier")
+public class BaseSupplierController extends BaseController {
 
 
     /**
-     * 获取物料 分页全部数据
+     * 获取供应商 分页全部数据
      */
     @GetMapping("/listByGroupId")
-    @PreAuthorize("hasAuthority('baseData:material:list')")
+    @PreAuthorize("hasAuthority('baseData:supplier:list')")
     public ResponseResult listByGroupId(String searchStr) {
-        Page<BaseMaterial> pageData = null;
+        Page<BaseSupplier> pageData = null;
         if(searchStr.equals("全部")){
-            pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>());
+            pageData = baseSupplierService.page(getPage(),new QueryWrapper<BaseSupplier>());
         }else {
-            pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>().eq("group_id",searchStr));
+            pageData = baseSupplierService.page(getPage(),new QueryWrapper<BaseSupplier>().eq("group_id",searchStr));
         }
         return ResponseResult.succ(pageData);
     }
 
     /**
-     * 获取物料 分页全部数据
+     * 获取供应商 分页全部数据
      */
     @GetMapping("/list")
-    @PreAuthorize("hasAuthority('baseData:material:list')")
+    @PreAuthorize("hasAuthority('baseData:supplier:list')")
     public ResponseResult list(String searchStr, String searchField) {
-        Page<BaseMaterial> pageData = null;
+        Page<BaseSupplier> pageData = null;
         if (searchField == "") {
             log.info("未选择搜索字段，全查询");
-            pageData = baseMaterialService.page(getPage());
+            pageData = baseSupplierService.page(getPage());
         } else {
             String queryField = "";
             if (searchField.equals("id")) {
@@ -76,69 +72,69 @@ public class BaseMaterialController extends BaseController {
                 return ResponseResult.fail("搜索字段不存在");
             }
             log.info("搜索字段:{},查询内容:{}", searchField, searchStr);
-            pageData = baseMaterialService.page(getPage(), new QueryWrapper<BaseMaterial>()
+            pageData = baseSupplierService.page(getPage(), new QueryWrapper<BaseSupplier>()
                     .like(StrUtil.isNotBlank(searchStr), queryField, searchStr));
         }
         return ResponseResult.succ(pageData);
     }
 
     /**
-     * 查询物料
+     * 查询供应商
      */
     @GetMapping("/queryById")
-    @PreAuthorize("hasAuthority('baseData:material:list')")
+    @PreAuthorize("hasAuthority('baseData:supplier:list')")
     public ResponseResult queryById(String id) {
-        BaseMaterial baseMaterial = baseMaterialService.getById(id);
-        return ResponseResult.succ(baseMaterial);
+        BaseSupplier BaseSupplier = baseSupplierService.getById(id);
+        return ResponseResult.succ(BaseSupplier);
     }
 
     /**
-     * 新增物料
+     * 新增供应商
      */
     @PostMapping("/save")
-    @PreAuthorize("hasAuthority('baseData:material:save')")
-    public ResponseResult save(Principal principal, @Validated @RequestBody BaseMaterial baseMaterial) {
+    @PreAuthorize("hasAuthority('baseData:supplier:save')")
+    public ResponseResult save(Principal principal, @Validated @RequestBody BaseSupplier BaseSupplier) {
         LocalDateTime now = LocalDateTime.now();
-        baseMaterial.setCreated(now);
-        baseMaterial.setUpdated(now);
-        baseMaterial.setCreateduser(principal.getName());
-        baseMaterial.setUpdateuser(principal.getName());
+        BaseSupplier.setCreated(now);
+        BaseSupplier.setUpdated(now);
+        BaseSupplier.setCreateduser(principal.getName());
+        BaseSupplier.setUpdateuser(principal.getName());
 
-        baseMaterial.setId(baseMaterial.getGroupId()+"."+baseMaterial.getSubId());
+        BaseSupplier.setId(BaseSupplier.getGroupId()+"."+BaseSupplier.getSubId());
 
         try {
-            baseMaterialService.save(baseMaterial);
+            baseSupplierService.save(BaseSupplier);
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
-            log.error("物料，插入异常",e);
+            log.error("供应商，插入异常",e);
             return ResponseResult.fail("唯一编码重复!");
         }
     }
 
 
     /**
-     * 修改物料
+     * 修改供应商
      */
     @PostMapping("/update")
-    @PreAuthorize("hasAuthority('baseData:material:update')")
-    public ResponseResult update(Principal principal, @Validated @RequestBody BaseMaterial baseMaterial) {
-        baseMaterial.setUpdated(LocalDateTime.now());
-        baseMaterial.setUpdateuser(principal.getName());
+    @PreAuthorize("hasAuthority('baseData:supplier:update')")
+    public ResponseResult update(Principal principal, @Validated @RequestBody BaseSupplier BaseSupplier) {
+        BaseSupplier.setUpdated(LocalDateTime.now());
+        BaseSupplier.setUpdateuser(principal.getName());
         try {
-            baseMaterialService.updateById(baseMaterial);
+            baseSupplierService.updateById(BaseSupplier);
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
-            log.error("物料，更新异常",e);
+            log.error("供应商，更新异常",e);
             return ResponseResult.fail("唯一编码重复!");
         }
     }
 
     @Transactional
     @PostMapping("/del")
-    @PreAuthorize("hasAuthority('baseData:material:del')")
+    @PreAuthorize("hasAuthority('baseData:supplier:del')")
     public ResponseResult delete(@RequestBody String[] ids) {
 
-        baseMaterialService.removeByIds(Arrays.asList(ids));
+        baseSupplierService.removeByIds(Arrays.asList(ids));
 
         return ResponseResult.succ("删除成功");
     }

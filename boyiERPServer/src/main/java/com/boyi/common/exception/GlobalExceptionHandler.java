@@ -2,6 +2,7 @@ package com.boyi.common.exception;
 
 import com.boyi.controller.base.ResponseResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
@@ -48,6 +49,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseResult handler(RuntimeException e) {
         log.error("运行时异常：----------------{}", e);
+        if(e instanceof DuplicateKeyException){
+            return ResponseResult.fail("有字段重复冲突，请检查!");
+        }
         return ResponseResult.fail(e.getMessage());
     }
 
