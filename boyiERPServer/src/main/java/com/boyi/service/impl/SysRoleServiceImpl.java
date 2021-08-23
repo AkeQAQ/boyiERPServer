@@ -27,8 +27,7 @@ import java.util.List;
 @Service
 public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> implements SysRoleService {
 
-    @Autowired
-    SysRoleMenuMapper sysRoleMenuMapper;
+
     @Autowired
     SysRoleMapper sysRoleMapper;
 
@@ -41,19 +40,6 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
         return sysRoles;
     }
 
-    @Override
-    public List<Long> getRoleMenusIds(Long id) {
-        List<SysRoleMenu> roles = sysRoleMenuMapper.selectList(new QueryWrapper<SysRoleMenu>().select("id","menu_id","role_id")
-                .eq("role_id",id));
-
-        ArrayList<Long> roleIds = new ArrayList<>();
-
-        roles.forEach( role ->{
-            roleIds.add(role.getMenuId());
-        });
-
-        return roleIds;
-    }
 
     @Override
     public List<SysRole> listValid() {

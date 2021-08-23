@@ -7,6 +7,7 @@ import com.boyi.entity.SysMenu;
 import com.boyi.entity.SysUser;
 import com.boyi.mapper.SysMenuMapper;
 import com.boyi.mapper.SysUserMapper;
+import com.boyi.mapper.SysUserRoleMapper;
 import com.boyi.service.SysMenuService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,25 +30,28 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
     @Autowired
     SysUserServiceImpl sysUserService;
 
-    @Autowired
-    SysUserMapper sysUserMapper;
 
     @Autowired
     SysMenuMapper sysMenuMapper;
+
+    @Autowired
+    SysUserRoleMapper sysUserRoleMapper;
+
 
     /**
      * 获取当前用户菜单导航
      */
     @Override
-    public List<SysNavDto> getCurrentUserNav(SysUser sysUser)throws Exception {
+    public List<SysNavDto> getCurrentUserNav(Long userId)throws Exception {
         // 获取用户的所有菜单
-        List<Long> menuIds = sysUserMapper.getNavMenuIds(sysUser.getId());
+        List<Long> menuIds = sysUserRoleMapper.getNavMenuIds(userId);
         if(menuIds == null || menuIds.isEmpty()){
             throw new Exception("该用户没有任何权限，请先分配角色");
         }
         List<SysMenu> menus = buildTreeMenu(this.listByIds(menuIds));
         return convert(menus);
     }
+
 
     /**
      * 把list转成树形结构的数据
@@ -82,6 +86,7 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             dto.setPath(m.getUrl());
             dto.setRouterName(m.getAuthority());
             dto.setComponent(m.getComponent());
+            dto.setStatus(m.getStatus());
             if (m.getChildren().size() > 0) {
                 dto.setChildren(convert(m.getChildren()));
             }

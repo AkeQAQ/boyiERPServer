@@ -47,22 +47,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public SysUser getByUsername(String username) {
-        return getOne(new QueryWrapper<SysUser>().eq("user_name", username));
+        return getOne(new QueryWrapper<SysUser>().eq("user_name", username).eq("status",0));
     }
 
-    @Override
-    public List<Long> getUserRolesIds(Long userId){
-        List<SysUserRole> roles = sysUserRoleMapper.selectList(new QueryWrapper<SysUserRole>().select("id","user_id","role_id")
-                .eq("user_id",userId));
-
-        ArrayList<Long> roleIds = new ArrayList<>();
-
-        roles.forEach( role ->{
-            roleIds.add(role.getRoleId());
-        });
-
-        return roleIds;
-    }
 
     @Override
     public String getUserAuthorityInfo(SysUser sysUser) {
@@ -86,10 +73,15 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             }
 
             // 获取菜单操作编码
-            List<Long> menuIds = sysUserMapper.getNavMenuIds(userId);
+            List<Long> menuIds = sysUserRoleMapper.getNavMenuIds(userId);
             if (menuIds.size() > 0) {
                 List<SysMenu> menus = sysMenuMapper.selectBatchIds(menuIds);
-                String menuPerms = menus.stream().map(m -> m.getAuthority()).collect(Collectors.joining(","));
+                String menuPerms = "";
+                for (SysMenu m : menus) {
+                    if(m.getStatus() == 0){
+                        menuPerms= menuPerms.concat(m.getAuthority()).concat(",");
+                    }
+                }
 
                 authority = authority.concat(",");
                 authority = authority.concat(menuPerms);

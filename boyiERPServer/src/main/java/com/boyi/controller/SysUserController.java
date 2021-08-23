@@ -46,6 +46,7 @@ public class SysUserController extends BaseController {
     @PreAuthorize("hasAuthority('sysManage:user:list')")
     public ResponseResult getUserInfo(Principal principal) {
         String username = principal.getName();
+
         SysUser sysUser = sysUserService.getByUsername(username);   // ROLE_Admin,sysManage:user:save
 
         Map<Object, Object> returnMap = MapUtil.builder().put("id", sysUser.getId()).put("userName", sysUser.getUserName()).map();
@@ -92,8 +93,7 @@ public class SysUserController extends BaseController {
     @GetMapping("/queryRolesByUserId")
     @PreAuthorize("hasAuthority('sysManage:user:list')")
     public ResponseResult queryRolesByUserId(Long id) {
-        List<Long> userRolesIds = sysUserService.getUserRolesIds(id);
-//        List<SysRole> sysRoles = sysRoleService.listRolesByUserId(id);
+        List<Long> userRolesIds = sysUserRoleService.getUserRolesIds(id);
 
         return ResponseResult.succ(userRolesIds.toArray());
     }

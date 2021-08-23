@@ -17,7 +17,7 @@ import java.util.List;
  */
 public interface SysMenuService extends IService<SysMenu> {
 
-    List<SysNavDto> getCurrentUserNav(SysUser sysUser) throws Exception;
+    List<SysNavDto> getCurrentUserNav(Long userId) throws Exception;
 
     List<SysMenu> buildTreeMenu(List<SysMenu> menus);
 

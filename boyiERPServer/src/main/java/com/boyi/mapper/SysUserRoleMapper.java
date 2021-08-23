@@ -4,6 +4,8 @@ import com.boyi.entity.SysUserRole;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * <p>
  *  Mapper 接口
@@ -14,5 +16,6 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface SysUserRoleMapper extends BaseMapper<SysUserRole> {
+    List<Long> getNavMenuIds(Long userId);
 
 }

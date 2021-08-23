@@ -56,7 +56,7 @@ public class SysMenuController extends BaseController {
         String username = principal.getName();
         SysUser sysUser = sysUserService.getByUsername(username);   // ROLE_Admin,sys:user:save
         String[] authoritys = StringUtils.tokenizeToStringArray(sysUserService.getUserAuthorityInfo(sysUser), ",");
-        Map<Object, Object> returnMap = MapUtil.builder().put("nav", sysMenuService.getCurrentUserNav(sysUser)).put("auth", authoritys).map();
+        Map<Object, Object> returnMap = MapUtil.builder().put("nav", sysMenuService.getCurrentUserNav(sysUser.getId())).put("auth", authoritys).map();
         return ResponseResult.succ(returnMap);
     }
 

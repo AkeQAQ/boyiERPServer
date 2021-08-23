@@ -83,7 +83,7 @@ public class SysRoleController extends BaseController {
     @GetMapping("/queryMenusByRoleId")
     @PreAuthorize("hasAuthority('sysManage:role:list')")
     public ResponseResult queryMenusByRoleId(Long id) {
-        List<Long> roleMenusIds = sysRoleService.getRoleMenusIds(id);
+        List<Long> roleMenusIds = sysRoleMenuService.getRoleMenusIds(id);
 
         return ResponseResult.succ(roleMenusIds.toArray());
     }
