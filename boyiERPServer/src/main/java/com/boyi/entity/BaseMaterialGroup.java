@@ -41,5 +41,9 @@ public class BaseMaterialGroup  {
      */
     private String code;
 
+    /**
+     *  分组下的子增长ID
+     */
+    private Integer autoSubId;
 
 }

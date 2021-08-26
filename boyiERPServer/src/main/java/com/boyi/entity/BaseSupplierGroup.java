@@ -39,5 +39,6 @@ public class BaseSupplierGroup {
      */
     private String code;
 
+    private Integer autoSubId;
 
 }

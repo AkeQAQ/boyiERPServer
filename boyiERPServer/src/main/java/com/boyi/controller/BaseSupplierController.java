@@ -1,12 +1,16 @@
 package com.boyi.controller;
 
 
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
+import com.boyi.entity.BaseMaterialGroup;
 import com.boyi.entity.BaseSupplier;
+import com.boyi.entity.BaseSupplierGroup;
+import com.boyi.entity.BaseUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,7 +20,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -33,16 +40,32 @@ public class BaseSupplierController extends BaseController {
 
 
     /**
+     * 获取有效数据
+     */
+    @PostMapping("/getSearchAllData")
+    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    public ResponseResult getSearchAllData() {
+        List<BaseSupplier> baseSuppliers = baseSupplierService.list(new QueryWrapper<BaseSupplier>().eq("status", 0));
+
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        baseSuppliers.forEach(obj ->{
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName()).map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
+
+    /**
      * 获取供应商 分页全部数据
      */
-    @GetMapping("/listByGroupId")
+    @GetMapping("/listByGroupCode")
     @PreAuthorize("hasAuthority('baseData:supplier:list')")
-    public ResponseResult listByGroupId(String searchStr) {
+    public ResponseResult listByGroupCode(String searchStr) {
         Page<BaseSupplier> pageData = null;
         if(searchStr.equals("全部")){
             pageData = baseSupplierService.page(getPage(),new QueryWrapper<BaseSupplier>());
         }else {
-            pageData = baseSupplierService.page(getPage(),new QueryWrapper<BaseSupplier>().eq("group_id",searchStr));
+            pageData = baseSupplierService.page(getPage(),new QueryWrapper<BaseSupplier>().eq("group_code",searchStr));
         }
         return ResponseResult.succ(pageData);
     }
@@ -62,8 +85,8 @@ public class BaseSupplierController extends BaseController {
             if (searchField.equals("id")) {
                 queryField = "id";
             }
-            else if (searchField.equals("groupId")) {
-                queryField = "group_id";
+            else if (searchField.equals("groupCode")) {
+                queryField = "group_code";
             } else if (searchField.equals("subId")) {
                 queryField = "sub_id";
             } else if (searchField.equals("name")) {
@@ -93,17 +116,26 @@ public class BaseSupplierController extends BaseController {
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('baseData:supplier:save')")
-    public ResponseResult save(Principal principal, @Validated @RequestBody BaseSupplier BaseSupplier) {
+    public ResponseResult save(Principal principal, @Validated @RequestBody BaseSupplier baseSupplier) {
         LocalDateTime now = LocalDateTime.now();
-        BaseSupplier.setCreated(now);
-        BaseSupplier.setUpdated(now);
-        BaseSupplier.setCreateduser(principal.getName());
-        BaseSupplier.setUpdateuser(principal.getName());
+        baseSupplier.setCreated(now);
+        baseSupplier.setUpdated(now);
+        baseSupplier.setCreatedUser(principal.getName());
+        baseSupplier.setUpdateUser(principal.getName());
 
-        BaseSupplier.setId(BaseSupplier.getGroupId()+"."+BaseSupplier.getSubId());
+
+        BaseSupplierGroup group = baseSupplierGroupService.getOne(new QueryWrapper<BaseSupplierGroup>().eq("code", baseSupplier.getGroupCode()));
+
+        baseSupplier.setSubId(group.getAutoSubId());
+
+        baseSupplier.setId(baseSupplier.getGroupCode()+"."+baseSupplier.getSubId());
 
         try {
-            baseSupplierService.save(BaseSupplier);
+            // 先自增该分组的ID
+            group.setAutoSubId(group.getAutoSubId()+1);
+            baseSupplierGroupService.updateById(group);
+
+            baseSupplierService.save(baseSupplier);
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
             log.error("供应商，插入异常",e);
@@ -119,7 +151,7 @@ public class BaseSupplierController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:supplier:update')")
     public ResponseResult update(Principal principal, @Validated @RequestBody BaseSupplier BaseSupplier) {
         BaseSupplier.setUpdated(LocalDateTime.now());
-        BaseSupplier.setUpdateuser(principal.getName());
+        BaseSupplier.setUpdateUser(principal.getName());
         try {
             baseSupplierService.updateById(BaseSupplier);
             return ResponseResult.succ("编辑成功");

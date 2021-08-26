@@ -29,13 +29,12 @@ public class BaseMaterial  {
     /**
      * 子编码
      */
-    private String subId;
-
+    private Integer subId;
 
     /**
      * 物料分组ID
      */
-    private String groupId;
+    private String groupCode;
 
     private String name;
 
@@ -47,14 +46,14 @@ public class BaseMaterial  {
     /**
      * 创建人
      */
-    @TableField("createdUser")
-    private String createduser;
+    @TableField("created_user")
+    private String createdUser;
 
     /**
      * 修改人
      */
-    @TableField("updateUser")
-    private String updateuser;
+    @TableField("update_user")
+    private String updateUser;
 
     /**
      * 规格型号

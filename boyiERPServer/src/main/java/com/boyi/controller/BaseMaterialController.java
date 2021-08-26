@@ -1,15 +1,14 @@
 package com.boyi.controller;
 
 
+import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
-import com.boyi.entity.BaseMaterial;
-import com.boyi.entity.SysUser;
-import com.boyi.entity.SysUserRole;
+import com.boyi.entity.*;
 import com.boyi.service.BaseMaterialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
@@ -20,7 +19,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -36,17 +38,56 @@ import java.util.Arrays;
 public class BaseMaterialController extends BaseController {
 
 
+
+    /**
+     * 用于增量表格搜索输入建议框的数据
+     */
+    @PostMapping("/loadTableSearchMaterialDetailAll")
+    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    public ResponseResult loadTableSearchMaterialDetailAll() {
+        List<BaseMaterial> baseSuppliers = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("status", 0));
+
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        baseSuppliers.forEach(obj ->{
+            Map<Object, Object> returnMap = MapUtil.builder().put(
+                    "value",obj.getId()+" : "+obj.getName() )
+                    .put("id", obj.getId())
+                    .put("obj", obj)
+                    .map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
+
+
+    /**
+     * 获取有效数据
+     */
+    @PostMapping("/getSearchAllData")
+    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    public ResponseResult getSearchAllData() {
+        List<BaseMaterial> baseSuppliers = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("status", 0));
+
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        baseSuppliers.forEach(obj ->{
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName()).map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
+
+
     /**
      * 获取物料 分页全部数据
      */
-    @GetMapping("/listByGroupId")
+    @GetMapping("/listByGroupCode")
     @PreAuthorize("hasAuthority('baseData:material:list')")
-    public ResponseResult listByGroupId(String searchStr) {
+    public ResponseResult listByGroupCode(String searchStr) {
         Page<BaseMaterial> pageData = null;
         if(searchStr.equals("全部")){
             pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>());
         }else {
-            pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>().eq("group_id",searchStr));
+            pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>().eq("group_code",searchStr));
         }
         return ResponseResult.succ(pageData);
     }
@@ -66,8 +107,8 @@ public class BaseMaterialController extends BaseController {
             if (searchField.equals("id")) {
                 queryField = "id";
             }
-            else if (searchField.equals("groupId")) {
-                queryField = "group_id";
+            else if (searchField.equals("groupCode")) {
+                queryField = "group_code";
             } else if (searchField.equals("subId")) {
                 queryField = "sub_id";
             } else if (searchField.equals("name")) {
@@ -101,13 +142,23 @@ public class BaseMaterialController extends BaseController {
         LocalDateTime now = LocalDateTime.now();
         baseMaterial.setCreated(now);
         baseMaterial.setUpdated(now);
-        baseMaterial.setCreateduser(principal.getName());
-        baseMaterial.setUpdateuser(principal.getName());
+        baseMaterial.setCreatedUser(principal.getName());
+        baseMaterial.setUpdateUser(principal.getName());
 
-        baseMaterial.setId(baseMaterial.getGroupId()+"."+baseMaterial.getSubId());
+        BaseMaterialGroup group = baseMaterialGroupService.getOne(new QueryWrapper<BaseMaterialGroup>().eq("code", baseMaterial.getGroupCode()));
+
+        baseMaterial.setSubId(group.getAutoSubId());
+
+        baseMaterial.setId(group.getCode()+"."+group.getAutoSubId());
 
         try {
+            // 先自增该分组的ID
+            group.setAutoSubId(group.getAutoSubId()+1);
+            baseMaterialGroupService.updateById(group);
+
+            // 再保存
             baseMaterialService.save(baseMaterial);
+
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
             log.error("物料，插入异常",e);
@@ -123,7 +174,7 @@ public class BaseMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:material:update')")
     public ResponseResult update(Principal principal, @Validated @RequestBody BaseMaterial baseMaterial) {
         baseMaterial.setUpdated(LocalDateTime.now());
-        baseMaterial.setUpdateuser(principal.getName());
+        baseMaterial.setUpdateUser(principal.getName());
         try {
             baseMaterialService.updateById(baseMaterial);
             return ResponseResult.succ("编辑成功");
