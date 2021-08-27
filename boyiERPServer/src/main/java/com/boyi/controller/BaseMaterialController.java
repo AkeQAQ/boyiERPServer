@@ -59,14 +59,29 @@ public class BaseMaterialController extends BaseController {
         return ResponseResult.succ(returnList);
     }
 
-
     /**
      * 获取有效数据
+     */
+    @PostMapping("/getSearchAllValideData")
+    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    public ResponseResult getSearchAllValideData() {
+        List<BaseMaterial> baseSuppliers = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("status", 0));
+
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        baseSuppliers.forEach(obj ->{
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName()).map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
+
+    /**
+     * 获取全部数据
      */
     @PostMapping("/getSearchAllData")
     @PreAuthorize("hasAuthority('baseData:unit:list')")
     public ResponseResult getSearchAllData() {
-        List<BaseMaterial> baseSuppliers = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("status", 0));
+        List<BaseMaterial> baseSuppliers = baseMaterialService.list();
 
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
         baseSuppliers.forEach(obj ->{
@@ -145,6 +160,15 @@ public class BaseMaterialController extends BaseController {
         baseMaterial.setCreatedUser(principal.getName());
         baseMaterial.setUpdateUser(principal.getName());
 
+        // 需要先判断，同名称，同规格，同基本单位是否存在
+        List<BaseMaterial> list = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("name", baseMaterial.getName())
+                .eq("unit", baseMaterial.getUnit())
+                .eq("specs", baseMaterial.getSpecs())
+                .eq("group_code",baseMaterial.getGroupCode()));
+        if(list != null && list.size() > 0){
+            return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
+        }
+
         BaseMaterialGroup group = baseMaterialGroupService.getOne(new QueryWrapper<BaseMaterialGroup>().eq("code", baseMaterial.getGroupCode()));
 
         baseMaterial.setSubId(group.getAutoSubId());
@@ -175,6 +199,15 @@ public class BaseMaterialController extends BaseController {
     public ResponseResult update(Principal principal, @Validated @RequestBody BaseMaterial baseMaterial) {
         baseMaterial.setUpdated(LocalDateTime.now());
         baseMaterial.setUpdateUser(principal.getName());
+
+        // 需要先判断，同名称，同规格，同基本单位是否存在
+        List<BaseMaterial> list = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("name", baseMaterial.getName())
+                .eq("unit", baseMaterial.getUnit())
+                .eq("specs", baseMaterial.getSpecs())
+                .eq("group_code",baseMaterial.getGroupCode()));
+        if(list != null && list.size() > 0){
+            return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
+        }
         try {
             baseMaterialService.updateById(baseMaterial);
             return ResponseResult.succ("编辑成功");

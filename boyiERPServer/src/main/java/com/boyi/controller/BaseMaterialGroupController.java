@@ -54,6 +54,7 @@ public class BaseMaterialGroupController extends BaseController {
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('baseData:material:update')")
     public ResponseResult update(Principal principal, @Validated @RequestBody BaseMaterialGroup baseMaterialGroup) {
+
         baseMaterialGroup.setUpdated(LocalDateTime.now());
         baseMaterialGroupService.updateById(baseMaterialGroup);
         log.info("操作人:[{}],修改菜单,update content:{}",principal.getName(),baseMaterialGroup);
@@ -66,11 +67,18 @@ public class BaseMaterialGroupController extends BaseController {
      */
     @GetMapping("/delById")
     @PreAuthorize("hasAuthority('baseData:material:del')")
-    public ResponseResult delById(Principal principal,Long id) {
-        int count = baseMaterialGroupService.count(new QueryWrapper<BaseMaterialGroup>().eq(DBConstant.TABLE_BASE_MATERIAL_GROUP.PARENT_ID_FIELDNAME, id));
-        if (count > 0) {
+    public ResponseResult delById(Principal principal,Long id,String groupCode) {
+        List<BaseMaterialGroup> groups = baseMaterialGroupService.getListByParentId(id);
+        if (groups!=null && groups.size() > 0) {
             return ResponseResult.fail("请先删除子分组");
         }
+
+        // 假如该子分组下面有物料信息，则不能删除
+        Integer count = baseMaterialService.countByGroupCode(groupCode);
+        if(count > 0){
+            return ResponseResult.fail("该分组有物料信息，请先删除!");
+        }
+
 
         boolean flag = baseMaterialGroupService.removeById(id);
         if(flag){

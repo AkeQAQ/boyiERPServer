@@ -3,6 +3,7 @@ package com.boyi.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -21,13 +22,15 @@ import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * <p>
- * 供应商-物料报价表 前端控制器
+ * 报价-物料报价表 前端控制器
  * </p>
  *
  * @author sunke
@@ -42,7 +45,7 @@ public class BaseSupplierMaterialController extends BaseController {
     BaseSupplierMaterialServiceImpl baseSupplierMaterialServiceImpl;
 
     /**
-     * 查询供应商
+     * 查询报价
      */
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
@@ -52,7 +55,7 @@ public class BaseSupplierMaterialController extends BaseController {
     }
 
     /**
-     * 获取供应商 分页全部数据
+     * 获取报价 分页全部数据
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
@@ -80,7 +83,7 @@ public class BaseSupplierMaterialController extends BaseController {
     }
 
     /**
-     * 新增供应商
+     * 新增报价
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:save')")
@@ -88,13 +91,12 @@ public class BaseSupplierMaterialController extends BaseController {
         if(baseSupplierMaterial.getEndDate() != null && baseSupplierMaterial.getEndDate().isBefore(baseSupplierMaterial.getStartDate()) ){
             return ResponseResult.fail("生效日期不能大于失效日期!");
         }
-        String materialId = baseSupplierMaterial.getMaterialId();
-        String supplierId = baseSupplierMaterial.getSupplierId();
-        LocalDate startDate = baseSupplierMaterial.getStartDate();
+
         // 查询表中是否已经有该数据，有的话，新增的起始日期要求> 老数据的结束日期
-        int count = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>().eq("supplier_id", supplierId).eq("material_id", materialId).ge("end_date", startDate).eq("status",0));
+        int count = baseSupplierMaterialService.isRigionExcludeSelf(baseSupplierMaterial);
+
         if(count > 0){
-            return ResponseResult.fail("该起始日期前仍有有效日期，请检查!");
+            return ResponseResult.fail("日期区间冲突，请检查!");
         }
 
         LocalDateTime now = LocalDateTime.now();
@@ -106,19 +108,29 @@ public class BaseSupplierMaterialController extends BaseController {
         if(baseSupplierMaterial.getEndDate() == null){
             baseSupplierMaterial.setEndDate(LocalDate.of(2100,01,01));
         }
-        baseSupplierMaterial.setStatus(0);
+        baseSupplierMaterial.setStatus(1);
         try {
             baseSupplierMaterialService.save(baseSupplierMaterial);
+/*
+            UpdateWrapper<BaseSupplierMaterial> updateWrapper = new UpdateWrapper<>();
+            updateWrapper.eq("supplier_id", supplierId)
+                    .eq("material_id", materialId)
+                    .lt("end_date",baseSupplierMaterial.getEndDate().format(fmt))
+                    .set("status",1);
+            baseSupplierMaterialService.update(updateWrapper);
+            // 讲之前的该报价，该物料的历史记录，都设置过期
+
+ */
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
-            log.error("供应商，插入异常",e);
+            log.error("报价，插入异常",e);
             return ResponseResult.fail("唯一编码重复!");
         }
     }
 
 
     /**
-     * 修改供应商
+     * 修改报价
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:update')")
@@ -126,13 +138,11 @@ public class BaseSupplierMaterialController extends BaseController {
         if(baseSupplierMaterial.getEndDate().isBefore(baseSupplierMaterial.getStartDate()) ){
             return ResponseResult.fail("生效日期不能大于失效日期!");
         }
-        String materialId = baseSupplierMaterial.getMaterialId();
-        String supplierId = baseSupplierMaterial.getSupplierId();
-        LocalDate startDate = baseSupplierMaterial.getStartDate();
         // 查询表中是否已经有该数据，有的话，新增的起始日期要求> 老数据的结束日期
-        int count = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>().eq("supplier_id", supplierId).eq("material_id", materialId).ge("end_date", startDate).eq("status",0).ne("id",baseSupplierMaterial.getId()));
+
+        int count = baseSupplierMaterialService.isRigionExcludeSelf(baseSupplierMaterial);
         if(count > 0){
-            return ResponseResult.fail("该起始日期前仍有有效日期，请检查!");
+            return ResponseResult.fail("日期区间冲突，请检查!");
         }
 
         baseSupplierMaterial.setUpdated(LocalDateTime.now());
@@ -142,7 +152,7 @@ public class BaseSupplierMaterialController extends BaseController {
             log.info("报价模块-更新内容:{}",baseSupplierMaterial);
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
-            log.error("供应商，更新异常",e);
+            log.error("报价，更新异常",e);
             return ResponseResult.fail("唯一编码重复!");
         }
     }
@@ -159,11 +169,30 @@ public class BaseSupplierMaterialController extends BaseController {
     }
 
     /**
-     * 修改供应商
+     * 修改报价
      */
-    @GetMapping("/statusStop")
+    @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:del')")
-    public ResponseResult statusStop(Principal principal,Long id) {
+    public ResponseResult statusPass(Principal principal,Long id) {
+
+        BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();
+        baseSupplierMaterial.setUpdated(LocalDateTime.now());
+        baseSupplierMaterial.setUpdateUser(principal.getName());
+        baseSupplierMaterial.setId(id);
+        baseSupplierMaterial.setStatus(0);
+        baseSupplierMaterialService.updateById(baseSupplierMaterial);
+        log.info("报价模块-审核通过内容:{}",baseSupplierMaterial);
+
+        return ResponseResult.succ("审核通过");
+    }
+
+
+    /**
+     * 修改报价
+     */
+    @GetMapping("/statusReturn")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:del')")
+    public ResponseResult statusReturn(Principal principal,Long id) {
 
         BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();
         baseSupplierMaterial.setUpdated(LocalDateTime.now());
@@ -171,9 +200,11 @@ public class BaseSupplierMaterialController extends BaseController {
         baseSupplierMaterial.setId(id);
         baseSupplierMaterial.setStatus(1);
         baseSupplierMaterialService.updateById(baseSupplierMaterial);
-        log.info("报价模块-禁用内容:{}",baseSupplierMaterial);
-        return ResponseResult.succ("禁用成功");
+        log.info("报价模块-反审核通过内容:{}",baseSupplierMaterial);
+
+        return ResponseResult.succ("反审核成功");
     }
+
 
     public static void main(String[] args) {
         LocalDateTime start = LocalDateTime.of(2021, 8, 25, 0, 0, 0);

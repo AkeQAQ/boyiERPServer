@@ -5,6 +5,8 @@ import com.boyi.entity.BaseMaterialGroup;
 import com.boyi.entity.BaseSupplier;
 import com.boyi.entity.BaseSupplierGroup;
 
+import java.util.List;
+
 /**
  * <p>
  * 基础模块-物料分组表 服务类
@@ -14,5 +16,5 @@ import com.boyi.entity.BaseSupplierGroup;
  * @since 2021-08-20
  */
 public interface BaseSupplierGroupService extends IService<BaseSupplierGroup> {
-
+    public List<BaseSupplierGroup> getListByParentId(Long id);
 }

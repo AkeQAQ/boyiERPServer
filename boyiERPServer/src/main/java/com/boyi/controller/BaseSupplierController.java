@@ -42,10 +42,26 @@ public class BaseSupplierController extends BaseController {
     /**
      * 获取有效数据
      */
+    @PostMapping("/getSearchAllValideData")
+    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    public ResponseResult getSearchAllValideData() {
+        List<BaseSupplier> baseSuppliers = baseSupplierService.list(new QueryWrapper<BaseSupplier>().eq("status", 0));
+
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        baseSuppliers.forEach(obj ->{
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName()).map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
+
+    /**
+     * 获取全部
+     */
     @PostMapping("/getSearchAllData")
     @PreAuthorize("hasAuthority('baseData:unit:list')")
     public ResponseResult getSearchAllData() {
-        List<BaseSupplier> baseSuppliers = baseSupplierService.list(new QueryWrapper<BaseSupplier>().eq("status", 0));
+        List<BaseSupplier> baseSuppliers = baseSupplierService.list();
 
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
         baseSuppliers.forEach(obj ->{

@@ -13,5 +13,6 @@ import com.boyi.entity.BaseSupplier;
  * @since 2021-08-21
  */
 public interface BaseSupplierService extends IService<BaseSupplier> {
+    Integer countByGroupCode(String groupCode);
 
 }

@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.format.DateTimeFormatter;
 
 public class BaseController {
+    public DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
     @Autowired
     public HttpServletRequest req;
 

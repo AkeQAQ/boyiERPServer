@@ -1,5 +1,6 @@
 package com.boyi.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boyi.entity.BaseMaterial;
 import com.boyi.mapper.BaseMaterialMapper;
 import com.boyi.service.BaseMaterialService;
@@ -17,4 +18,9 @@ import org.springframework.stereotype.Service;
 @Service
 public class BaseMaterialServiceImpl extends ServiceImpl<BaseMaterialMapper, BaseMaterial> implements BaseMaterialService {
 
+
+    @Override
+    public Integer countByGroupCode(String groupCode){
+        return this.count(new QueryWrapper<BaseMaterial>().eq("group_code", groupCode));
+    }
 }

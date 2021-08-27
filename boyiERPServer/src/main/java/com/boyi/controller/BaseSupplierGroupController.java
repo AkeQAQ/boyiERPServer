@@ -62,11 +62,18 @@ public class BaseSupplierGroupController extends BaseController {
      */
     @GetMapping("/delById")
     @PreAuthorize("hasAuthority('baseData:supplier:del')")
-    public ResponseResult delById(Principal principal,Long id) {
-        int count = baseSupplierGroupService.count(new QueryWrapper<BaseSupplierGroup>().eq(DBConstant.TABLE_BASE_MATERIAL_GROUP.PARENT_ID_FIELDNAME, id));
-        if (count > 0) {
+    public ResponseResult delById(Principal principal,Long id,String groupCode) {
+        List<BaseSupplierGroup> groups = baseSupplierGroupService.getListByParentId(id);
+        if (groups!=null && groups.size() > 0) {
             return ResponseResult.fail("请先删除子分组");
         }
+
+        // 假如该子分组下面有物料信息，则不能删除
+        Integer count = baseSupplierService.countByGroupCode(groupCode);
+        if(count > 0){
+            return ResponseResult.fail("该分组有供应商信息，请先删除!");
+        }
+
 
         boolean flag = baseSupplierGroupService.removeById(id);
         if(flag){

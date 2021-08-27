@@ -15,4 +15,5 @@ import java.util.List;
  */
 public interface BaseMaterialGroupService extends IService<BaseMaterialGroup> {
 
+    public List<BaseMaterialGroup> getListByParentId(Long id);
 }

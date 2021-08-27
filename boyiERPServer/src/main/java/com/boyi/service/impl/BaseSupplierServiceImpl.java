@@ -1,5 +1,6 @@
 package com.boyi.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.boyi.entity.BaseMaterial;
 import com.boyi.entity.BaseSupplier;
@@ -20,4 +21,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class BaseSupplierServiceImpl extends ServiceImpl<BaseSupplierMapper, BaseSupplier> implements BaseSupplierService {
 
+    @Override
+    public Integer countByGroupCode(String groupCode) {
+        return this.count(new QueryWrapper<BaseSupplier>().eq("group_code", groupCode));
+    }
 }
