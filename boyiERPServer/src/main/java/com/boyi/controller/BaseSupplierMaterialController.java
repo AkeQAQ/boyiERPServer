@@ -5,11 +5,14 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.BaseMaterial;
 import com.boyi.entity.BaseSupplier;
 import com.boyi.entity.BaseSupplierMaterial;
+import com.boyi.entity.RepositoryBuyinDocument;
+import com.boyi.service.RepositoryBuyinDocumentService;
 import com.boyi.service.impl.BaseSupplierMaterialServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,7 +141,7 @@ public class BaseSupplierMaterialController extends BaseController {
         if(baseSupplierMaterial.getEndDate().isBefore(baseSupplierMaterial.getStartDate()) ){
             return ResponseResult.fail("生效日期不能大于失效日期!");
         }
-        // 查询表中是否已经有该数据，有的话，新增的起始日期要求> 老数据的结束日期
+        // 查询表中是否已经有同供应商，同物料的时间区间冲突
 
         int count = baseSupplierMaterialService.isRigionExcludeSelf(baseSupplierMaterial);
         if(count > 0){
@@ -169,17 +172,24 @@ public class BaseSupplierMaterialController extends BaseController {
     }
 
     /**
-     * 修改报价
+     * 审核通过
      */
     @GetMapping("/statusPass")
-    @PreAuthorize("hasAuthority('baseData:supplierMaterial:del')")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:valid')")
     public ResponseResult statusPass(Principal principal,Long id) {
+
+        // 1. 采购价目反审核，先查询是否有采购入库审核完成的引用，有则不能修改
+        BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
+        Integer count= repositoryBuyinDocumentService.getBySupplierMaterial(one);
+        if(count > 0){
+            return ResponseResult.fail("有"+count+"条关联的入库记录");
+        }
 
         BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();
         baseSupplierMaterial.setUpdated(LocalDateTime.now());
         baseSupplierMaterial.setUpdateUser(principal.getName());
         baseSupplierMaterial.setId(id);
-        baseSupplierMaterial.setStatus(0);
+        baseSupplierMaterial.setStatus(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0);
         baseSupplierMaterialService.updateById(baseSupplierMaterial);
         log.info("报价模块-审核通过内容:{}",baseSupplierMaterial);
 
@@ -188,12 +198,18 @@ public class BaseSupplierMaterialController extends BaseController {
 
 
     /**
-     * 修改报价
+     * 反审核
      */
     @GetMapping("/statusReturn")
-    @PreAuthorize("hasAuthority('baseData:supplierMaterial:del')")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:valid')")
     public ResponseResult statusReturn(Principal principal,Long id) {
 
+        // 1. 采购价目反审核，先查询是否有采购入库审核完成的引用，有则不能修改
+        BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
+        Integer count= repositoryBuyinDocumentService.getBySupplierMaterial(one);
+        if(count > 0){
+            return ResponseResult.fail("有"+count+"条关联的入库记录");
+        }
         BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();
         baseSupplierMaterial.setUpdated(LocalDateTime.now());
         baseSupplierMaterial.setUpdateUser(principal.getName());

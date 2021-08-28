@@ -4,6 +4,7 @@ package com.boyi.controller;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
@@ -204,12 +205,35 @@ public class BaseMaterialController extends BaseController {
         List<BaseMaterial> list = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("name", baseMaterial.getName())
                 .eq("unit", baseMaterial.getUnit())
                 .eq("specs", baseMaterial.getSpecs())
-                .eq("group_code",baseMaterial.getGroupCode()));
+                .eq("group_code",baseMaterial.getGroupCode())
+                .ne("id",baseMaterial.getId()));
         if(list != null && list.size() > 0){
             return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
         }
         try {
-            baseMaterialService.updateById(baseMaterial);
+            // 1. 查询以前的信息
+            BaseMaterial oldOne = baseMaterialService.getById(baseMaterial.getId());
+            if(!oldOne.getName().equals(baseMaterial.getName()) ||
+                !oldOne.getUnit().equals(baseMaterial.getUnit())||
+                !oldOne.getSpecs().equals(baseMaterial.getSpecs())||
+                !oldOne.getStatus().equals(baseMaterial.getStatus())){
+
+                // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
+                int count = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>()
+                        .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, baseMaterial.getId())
+                        .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,
+                                DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0));
+                if(count>0){
+                    log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录",baseMaterial.getId(),count);
+                    return ResponseResult.fail("物料ID["+baseMaterial.getId()+"]不能修改，存在"+count+"个 审核完成的 采购价目记录");
+                }
+
+                baseMaterialService.updateById(baseMaterial);
+                log.info("物料ID[{}]更新成功，old{},new:{}.",baseMaterial.getId(),oldOne,baseMaterial);
+            }else {
+                return ResponseResult.fail("没有信息更改!");
+            }
+
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
             log.error("物料，更新异常",e);
@@ -222,6 +246,12 @@ public class BaseMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:material:del')")
     public ResponseResult delete(@RequestBody String[] ids) {
 
+        int count = repositoryBuyinDocumentDetailService.count(new QueryWrapper<RepositoryBuyinDocumentDetail>()
+                .in("material_id", ids));
+
+        if(count > 0){
+            return ResponseResult.fail("请先删除"+count+"条对应入库记录!");
+        }
         baseMaterialService.removeByIds(Arrays.asList(ids));
 
         return ResponseResult.succ("删除成功");

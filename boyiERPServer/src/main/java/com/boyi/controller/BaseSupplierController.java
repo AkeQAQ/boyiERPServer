@@ -7,10 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
-import com.boyi.entity.BaseMaterialGroup;
-import com.boyi.entity.BaseSupplier;
-import com.boyi.entity.BaseSupplierGroup;
-import com.boyi.entity.BaseUnit;
+import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -181,6 +178,13 @@ public class BaseSupplierController extends BaseController {
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('baseData:supplier:del')")
     public ResponseResult delete(@RequestBody String[] ids) {
+
+        int count = repositoryBuyinDocumentService.count(new QueryWrapper<RepositoryBuyinDocument>()
+                .in("supplier_id", ids));
+
+        if(count > 0){
+            return ResponseResult.fail("请先删除"+count+"条对应入库记录!");
+        }
 
         baseSupplierService.removeByIds(Arrays.asList(ids));
 

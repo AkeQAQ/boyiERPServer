@@ -111,5 +111,35 @@ public class DBConstant {
          */
         public static final Integer STATUS_FIELDVALUE_1 = 1;
     }
+    public static class TABLE_BASE_SUPPLIER_MATERIAL{
 
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_REPOSITORY_BUYIN_DOCUMENT{
+
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String SUPPLIER_DOCUMENT_NUM_FIELDNAME = "supplier_document_num";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
 }
