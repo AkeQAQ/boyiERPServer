@@ -15,5 +15,4 @@ import java.util.List;
  */
 public interface BaseUnitService extends IService<BaseUnit> {
 
-    List<BaseUnit> listValid();
 }

@@ -21,7 +21,6 @@ public class BaseSupplier {
     private LocalDateTime created;
     private LocalDateTime updated;
 
-    private Integer status;
     private String id;
     /**
      * 分组ID

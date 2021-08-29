@@ -19,6 +19,8 @@ public class SysRole extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    private Integer status;
+
     @TableField("role_name")
     private String roleName;
 

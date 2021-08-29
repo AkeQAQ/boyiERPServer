@@ -53,46 +53,14 @@ public class DBConstant {
     }
 
     public static class TABLE_BASE_UNIT{
-        public static final String STATUS_FIELDNAME = "status";
-        /**
-         *  0:代表 正常状态
-         */
-        public static final Integer STATUS_FIELDVALUE_0 = 0;
-
-        /**
-         *  1:代表 禁止状态
-         */
-        public static final Integer STATUS_FIELDVALUE_1 = 1;
     }
 
     public static class TABLE_BASE_MATERIAL_GROUP{
-        public static final String STATUS_FIELDNAME = "status";
-        /**
-         *  0:代表 正常状态
-         */
-        public static final Integer STATUS_FIELDVALUE_0 = 0;
-
-        /**
-         *  1:代表 禁止状态
-         */
-        public static final Integer STATUS_FIELDVALUE_1 = 1;
-
         public static final String PARENT_ID_FIELDNAME ="parent_id";
 
     }
 
     public static class TABLE_BASE_SUPPLIER_GROUP{
-        public static final String STATUS_FIELDNAME = "status";
-        /**
-         *  0:代表 正常状态
-         */
-        public static final Integer STATUS_FIELDVALUE_0 = 0;
-
-        /**
-         *  1:代表 禁止状态
-         */
-        public static final Integer STATUS_FIELDVALUE_1 = 1;
-
         public static final String PARENT_ID_FIELDNAME ="parent_id";
 
     }
@@ -100,21 +68,13 @@ public class DBConstant {
     public static class TABLE_BASE_MATERIAL{
         public static final String NAME_FIELDNAME = "name";
 
-        public static final String STATUS_FIELDNAME = "status";
-        /**
-         *  0:代表 正常状态
-         */
-        public static final Integer STATUS_FIELDVALUE_0 = 0;
-
-        /**
-         *  1:代表 禁止状态
-         */
-        public static final Integer STATUS_FIELDVALUE_1 = 1;
     }
     public static class TABLE_BASE_SUPPLIER_MATERIAL{
 
         public static final String STATUS_FIELDNAME = "status";
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+
         /**
          *  0:代表 审核通过
          */

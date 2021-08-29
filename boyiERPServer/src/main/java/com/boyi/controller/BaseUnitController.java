@@ -78,7 +78,7 @@ public class BaseUnitController extends BaseController {
     @PostMapping("/listValide")
     @PreAuthorize("hasAuthority('baseData:unit:list')")
     public ResponseResult listValide() {
-        List<BaseUnit> baseUnits = baseUnitService.listValid();
+        List<BaseUnit> baseUnits = baseUnitService.list();
         return ResponseResult.succ(baseUnits);
     }
 

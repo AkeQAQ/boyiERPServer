@@ -22,6 +22,8 @@ public class RepositoryBuyinDocument extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    private Integer status;
+
     /**
      * 供应商ID外键
      */

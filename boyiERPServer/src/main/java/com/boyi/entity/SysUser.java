@@ -27,6 +27,9 @@ public class SysUser extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    private Integer status;
+
+
     @NotBlank(message = "用户名不能为空")
     private String userName;
 

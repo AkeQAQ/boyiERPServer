@@ -46,7 +46,7 @@ public class BaseMaterialController extends BaseController {
     @PostMapping("/loadTableSearchMaterialDetailAll")
     @PreAuthorize("hasAuthority('baseData:unit:list')")
     public ResponseResult loadTableSearchMaterialDetailAll() {
-        List<BaseMaterial> baseSuppliers = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("status", 0));
+        List<BaseMaterial> baseSuppliers = baseMaterialService.list();
 
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
         baseSuppliers.forEach(obj ->{
@@ -55,22 +55,6 @@ public class BaseMaterialController extends BaseController {
                     .put("id", obj.getId())
                     .put("obj", obj)
                     .map();
-            returnList.add(returnMap);
-        });
-        return ResponseResult.succ(returnList);
-    }
-
-    /**
-     * 获取有效数据
-     */
-    @PostMapping("/getSearchAllValideData")
-    @PreAuthorize("hasAuthority('baseData:unit:list')")
-    public ResponseResult getSearchAllValideData() {
-        List<BaseMaterial> baseSuppliers = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("status", 0));
-
-        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
-        baseSuppliers.forEach(obj ->{
-            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName()).map();
             returnList.add(returnMap);
         });
         return ResponseResult.succ(returnList);
@@ -215,14 +199,13 @@ public class BaseMaterialController extends BaseController {
             BaseMaterial oldOne = baseMaterialService.getById(baseMaterial.getId());
             if(!oldOne.getName().equals(baseMaterial.getName()) ||
                 !oldOne.getUnit().equals(baseMaterial.getUnit())||
-                !oldOne.getSpecs().equals(baseMaterial.getSpecs())||
-                !oldOne.getStatus().equals(baseMaterial.getStatus())){
+                !oldOne.getSpecs().equals(baseMaterial.getSpecs())){
 
                 // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
                 int count = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>()
                         .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, baseMaterial.getId())
-                        .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,
-                                DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0));
+                                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0)
+                        );
                 if(count>0){
                     log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录",baseMaterial.getId(),count);
                     return ResponseResult.fail("物料ID["+baseMaterial.getId()+"]不能修改，存在"+count+"个 审核完成的 采购价目记录");
@@ -252,6 +235,13 @@ public class BaseMaterialController extends BaseController {
         if(count > 0){
             return ResponseResult.fail("请先删除"+count+"条对应入库记录!");
         }
+        int count2 = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>()
+                .in("material_id", ids));
+
+        if(count2 > 0){
+            return ResponseResult.fail("请先删除"+count2+"条对应价目记录!");
+        }
+
         baseMaterialService.removeByIds(Arrays.asList(ids));
 
         return ResponseResult.succ("删除成功");

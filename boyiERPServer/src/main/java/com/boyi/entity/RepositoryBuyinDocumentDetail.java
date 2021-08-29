@@ -36,11 +36,18 @@ public class RepositoryBuyinDocumentDetail {
      */
     private Integer num;
 
+    /**
+     *  备注信息
+     */
+    private String comment;
+
     @TableField(exist = false)  // 字段数据库忽略
     private String materialName;
     @TableField(exist = false)  // 字段数据库忽略
     private String unit;
     @TableField(exist = false)  // 字段数据库忽略
     private String specs;
+    @TableField(exist = false)  // 字段数据库忽略
+    private Double price;
 
 }

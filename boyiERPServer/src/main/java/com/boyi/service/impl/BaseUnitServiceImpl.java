@@ -23,12 +23,4 @@ import java.util.List;
 @Service
 public class BaseUnitServiceImpl extends ServiceImpl<BaseUnitMapper, BaseUnit> implements BaseUnitService {
 
-    @Autowired
-    BaseUnitMapper baseUnitMapper;
-
-    @Override
-    public List<BaseUnit> listValid() {
-        return baseUnitMapper.selectList(new QueryWrapper<BaseUnit>().eq(
-                DBConstant.TABLE_BASE_UNIT.STATUS_FIELDNAME, DBConstant.TABLE_BASE_UNIT.STATUS_FIELDVALUE_0));
-    }
 }

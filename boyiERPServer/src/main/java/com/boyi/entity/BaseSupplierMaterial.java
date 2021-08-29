@@ -30,6 +30,8 @@ public class BaseSupplierMaterial extends BaseEntity {
     @TableField(exist = false)
     private String materialName;
 
+    private Integer status;
+
     /**
      * 供应商ID
      */

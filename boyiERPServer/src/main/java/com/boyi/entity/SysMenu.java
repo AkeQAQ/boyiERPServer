@@ -26,6 +26,8 @@ public class SysMenu extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    private Integer status;
+
     /**
      * 父菜单ID，一级菜单为0
      */

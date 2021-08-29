@@ -64,6 +64,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('repository:buyIn:list')")
     public ResponseResult queryById(Long id) {
+//        RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.one(new QueryWrapper<RepositoryBuyinDocument>().eq("id", id));
         RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getById(id);
 
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.list(new QueryWrapper<RepositoryBuyinDocumentDetail>().eq("document_id", id));
@@ -75,7 +76,19 @@ public class RepositoryBuyinDocumentController extends BaseController {
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
+
+            // 查询对应的价目记录
+            BaseSupplierMaterial one = baseSupplierMaterialService.getOne(new QueryWrapper<BaseSupplierMaterial>()
+                    .eq("supplier_id", supplier.getId())
+                    .eq("material_id", material.getId())
+                    .le("start_date", repositoryBuyinDocument.getBuyInDate())
+                    .ge("end_date", repositoryBuyinDocument.getBuyInDate())
+                    .eq("status",0));
+            if(one != null){
+                detail.setPrice(one.getPrice());
+            }
         }
+
 
 
         repositoryBuyinDocument.setSupplierName(supplier.getName());

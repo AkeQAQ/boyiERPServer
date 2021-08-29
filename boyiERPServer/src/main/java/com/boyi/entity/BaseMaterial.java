@@ -23,7 +23,6 @@ public class BaseMaterial  {
     private LocalDateTime created;
     private LocalDateTime updated;
 
-    private Integer status;
     private String id;
 
     /**
