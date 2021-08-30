@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -71,11 +72,15 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         BaseSupplier supplier = baseSupplierService.getById(repositoryBuyinDocument.getSupplierId());
 
+        Long totalNum = 0L;
+        Double totalAmount = 0D;
+
         for (RepositoryBuyinDocumentDetail detail : details){
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
+
 
             // 查询对应的价目记录
             BaseSupplierMaterial one = baseSupplierMaterialService.getOne(new QueryWrapper<BaseSupplierMaterial>()
@@ -86,10 +91,15 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     .eq("status",0));
             if(one != null){
                 detail.setPrice(one.getPrice());
+                totalAmount += detail.getPrice() * detail.getNum();
             }
+
+            totalNum += detail.getNum();
         }
 
 
+        repositoryBuyinDocument.setTotalNum( totalNum);
+        repositoryBuyinDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 
         repositoryBuyinDocument.setSupplierName(supplier.getName());
 
@@ -130,6 +140,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
 
                 for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
+                    item.setId(null);
                     item.setDocumentId(repositoryBuyinDocument.getId());
                 }
 

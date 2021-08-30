@@ -65,6 +65,14 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private Double amount; // =price*num
 
 
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private Long totalNum; // 该单据总数目
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private Double totalAmount; // 该单据总金额
+
+
     private String createdUser;
     private String updatedUser;
 
