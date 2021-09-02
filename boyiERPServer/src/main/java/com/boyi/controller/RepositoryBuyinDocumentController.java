@@ -3,22 +3,25 @@ package com.boyi.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
-import com.boyi.service.RepositoryBuyinDocumentService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.math.BigDecimal;
 import java.security.Principal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,6 +40,8 @@ import java.util.List;
 @RequestMapping("/repository/buyIn")
 public class RepositoryBuyinDocumentController extends BaseController {
 
+    @Value("${poi.repositoryBuyInDemoPath}")
+    private String poiDemoPath;
 
     @Transactional
     @PostMapping("/del")
@@ -91,7 +96,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     .eq("status",0));
             if(one != null){
                 detail.setPrice(one.getPrice());
-                totalAmount += detail.getPrice() * detail.getNum();
+                double amount = detail.getPrice() * detail.getNum();
+                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+                totalAmount += amount;
             }
 
             totalNum += detail.getNum();
@@ -181,13 +188,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
             }
             repositoryBuyinDocumentService.save(repositoryBuyinDocument);
 
-
-
             for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
                 item.setDocumentId(repositoryBuyinDocument.getId());
             }
 
             repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
+
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
             log.error("采购入库单，插入异常",e);
@@ -196,11 +202,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
     }
 
     /**
-     * 获取采购入库 分页全部数据
+     * 获取采购入库 分页导出
      */
-    @GetMapping("/list")
-    @PreAuthorize("hasAuthority('repository:buyIn:list')")
-    public ResponseResult list(String searchStr, String searchField) {
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('repository:buyIn:export')")
+    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
         Page<RepositoryBuyinDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -210,6 +216,62 @@ public class RepositoryBuyinDocumentController extends BaseController {
             }
             else if (searchField.equals("materialName")) {
                 queryField = "material_name";
+
+            }else if (searchField.equals("id")) {
+                queryField = "id";
+
+            } else {
+            }
+        }else {
+
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+        pageData = repositoryBuyinDocumentService.innerQuery(getPage(),
+                new QueryWrapper<RepositoryBuyinDocument>().
+                        like(StrUtil.isNotBlank(searchStr)
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                        .ge(StrUtil.isNotBlank(searchStartDate),"buy_in_date",searchStartDate)
+                        .le(StrUtil.isNotBlank(searchEndDate),"buy_in_date",searchEndDate));
+
+        // 导出
+
+//        return ResponseResult.succ(pageData);
+
+//        ExcelUtil<RepositoryBuyinDocument> util = new ExcelUtil<RepositoryBuyinDocument>(RepositoryBuyinDocument.class);// 创建工具类.
+
+//            response.reset();
+
+            //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(new File(poiDemoPath));){
+//            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=utf-8");
+//            response.setHeader("Content-Disposition", "attachment;filename=" + new String(("采购订单" + ".xlsx").getBytes(), "iso-8859-1"));
+
+            new ExcelExportUtil(RepositoryBuyinDocument.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * 获取采购入库 分页全部数据
+     */
+    @GetMapping("/list")
+    @PreAuthorize("hasAuthority('repository:buyIn:list')")
+    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+        Page<RepositoryBuyinDocument> pageData = null;
+        List<String> ids = new ArrayList<>();
+        String queryField = "";
+        if (searchField != "") {
+            if (searchField.equals("supplierName")) {
+                queryField = "supplier_name";
+            }
+            else if (searchField.equals("materialName")) {
+                queryField = "material_name";
+
+            }else if (searchField.equals("id")) {
+                queryField = "id";
 
             } else {
                 return ResponseResult.fail("搜索字段不存在");
@@ -222,7 +284,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
         pageData = repositoryBuyinDocumentService.innerQuery(getPage(),
                 new QueryWrapper<RepositoryBuyinDocument>().
                         like(StrUtil.isNotBlank(searchStr)
-                                && StrUtil.isNotBlank(searchField),queryField,searchStr));
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                        .ge(StrUtil.isNotBlank(searchStartDate),"buy_in_date",searchStartDate)
+                        .le(StrUtil.isNotBlank(searchEndDate),"buy_in_date",searchEndDate));
         return ResponseResult.succ(pageData);
     }
 
@@ -241,6 +305,19 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_0);
         repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
         log.info("仓库模块-审核通过内容:{}",repositoryBuyinDocument);
+
+
+        // 1. 根据单据ID 获取该单据的全部详情信息，TODO 把详情表，冗余一个供应商ID吧,然后把controller的查询操作，都封装到方法里，进行公用吧
+        /*repositoryBuyinDocumentDetailService.list
+
+        // 2. 遍历更新 一个供应商，一个物料对应的库存数量
+        // 采购入库审核通过之后，要把数量更新
+        UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.eq("supplier_id", supplierId)
+                .eq("material_id", materialId)
+                .setSql("num += " + num);
+        repositoryStockService.update(updateWrapper);*/
+
 
         return ResponseResult.succ("审核通过");
     }

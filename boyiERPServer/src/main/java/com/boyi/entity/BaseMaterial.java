@@ -23,6 +23,7 @@ public class BaseMaterial  {
     private LocalDateTime created;
     private LocalDateTime updated;
 
+
     private String id;
 
     /**
@@ -59,10 +60,6 @@ public class BaseMaterial  {
      */
     private String specs;
 
-    /**
-     * 图片路径
-     */
-    private String picUrl;
 
 
 }

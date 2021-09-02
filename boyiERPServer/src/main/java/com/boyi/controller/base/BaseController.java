@@ -55,6 +55,9 @@ public class BaseController {
     @Autowired
     public RepositoryBuyinDocumentDetailService repositoryBuyinDocumentDetailService;
 
+    @Autowired
+    public RepositoryStockService repositoryStockService;
+
     /**
      * 获取页面
      * @return

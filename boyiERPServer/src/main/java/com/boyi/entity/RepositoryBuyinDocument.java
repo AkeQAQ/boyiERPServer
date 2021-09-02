@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,6 +23,7 @@ public class RepositoryBuyinDocument extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    @ExcelAttribute(sort = 3)
     private Integer status;
 
     /**
@@ -37,6 +39,7 @@ public class RepositoryBuyinDocument extends BaseEntity {
     /**
      * 入库日期
      */
+    @ExcelAttribute(sort = 1)
     private LocalDate buyInDate;
 
     /**
@@ -48,23 +51,33 @@ public class RepositoryBuyinDocument extends BaseEntity {
 
     // 用于多表查询的额外字段
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 2)
     private String supplierName;
+
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 4)
     private String materialId;
+
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 5)
     private String materialName;
+
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 6)
     private String unit;
+
+    @ExcelAttribute(sort = 8)
     @TableField(exist = false)  // 字段数据库忽略
     private Double price;
+
+    @ExcelAttribute(sort = 7)
     @TableField(exist = false)  // 字段数据库忽略
     private Integer num;
 
 
+    @ExcelAttribute(sort = 9)
     @TableField(exist = false)  // 字段数据库忽略
     private Double amount; // =price*num
-
-
 
     @TableField(exist = false)  // 字段数据库忽略
     private Long totalNum; // 该单据总数目
