@@ -1,6 +1,7 @@
 package com.boyi.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.common.dto.SysNavDto;
 import com.boyi.entity.SysMenu;
 import com.boyi.entity.SysUserRole;
@@ -29,8 +30,11 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
 
     @Override
     public List<Long> getUserRolesIds(Long userId){
-        List<SysUserRole> roles = sysUserRoleMapper.selectList(new QueryWrapper<SysUserRole>().select("id","user_id","role_id")
-                .eq("user_id",userId));
+        List<SysUserRole> roles = sysUserRoleMapper.selectList(new QueryWrapper<SysUserRole>()
+                .select(DBConstant.TABLE_USER_ROLE.ID_FIELDNAME
+                        ,DBConstant.TABLE_USER_ROLE.USER_ID_FIELDNAME
+                        ,DBConstant.TABLE_USER_ROLE.ROLE_ID_FIELDNAME)
+                .eq(DBConstant.TABLE_USER_ROLE.USER_ID_FIELDNAME,userId));
 
         ArrayList<Long> roleIds = new ArrayList<>();
 
@@ -39,6 +43,16 @@ public class SysUserRoleServiceImpl extends ServiceImpl<SysUserRoleMapper, SysUs
         });
 
         return roleIds;
+    }
+
+    @Override
+    public void removeByUserIds(Long[] ids) {
+        this.remove(new QueryWrapper<SysUserRole>().in(DBConstant.TABLE_USER_ROLE.USER_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public void removeByUserId(Long userId) {
+        this.remove(new QueryWrapper<SysUserRole>().eq(DBConstant.TABLE_USER_ROLE.USER_ID_FIELDNAME, userId));
     }
 
 

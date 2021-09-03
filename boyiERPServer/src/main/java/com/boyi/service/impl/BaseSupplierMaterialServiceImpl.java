@@ -1,7 +1,9 @@
 package com.boyi.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.mapper.BaseSupplierMaterialMapper;
 import com.boyi.service.BaseSupplierMaterialService;
@@ -41,5 +43,50 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
     @Override
     public int isRigionExcludeSelf(BaseSupplierMaterial baseSupplierMaterial) {
         return baseSupplierMaterialMapper.isRigionExcludeSelf(baseSupplierMaterial);
+    }
+
+    @Override
+    public BaseSupplierMaterial getSuccessPrice(String supplierId, String materialId, LocalDate buyInDate) {
+        return this.getOne(new QueryWrapper<BaseSupplierMaterial>()
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.SUPPLIER_ID_FIELDNAME, supplierId)
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, materialId)
+                .le(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.START_DATE_FIELDNAME,buyInDate)
+                .ge(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.END_DATE_FIELDNAME, buyInDate)
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME, DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0));
+    }
+
+    @Override
+    public int countSuccessByMaterialId(String id) {
+        return this.count(new QueryWrapper<BaseSupplierMaterial>()
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, id)
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0)
+        );
+    }
+
+    @Override
+    public int countByMaterialId(String[] ids) {
+        return this.count(new QueryWrapper<BaseSupplierMaterial>()
+                .in(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public int countSuccessBySupplierId(String id) {
+        return this.count(new QueryWrapper<BaseSupplierMaterial>()
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.SUPPLIER_ID_FIELDNAME, id)
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0)
+        );
+    }
+
+    @Override
+    public int countBySupplierId(String[] ids) {
+        return this.count(new QueryWrapper<BaseSupplierMaterial>()
+                .in(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.SUPPLIER_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public Page<BaseSupplierMaterial> innerQueryBySearch(Page page, String queryField, String searchField, String searchStr) {
+        return this.innerQuery(page
+                ,new QueryWrapper<BaseSupplierMaterial>()
+                        .like(StrUtil.isNotBlank(searchStr) && StrUtil.isNotBlank(searchField),queryField,searchStr));
     }
 }

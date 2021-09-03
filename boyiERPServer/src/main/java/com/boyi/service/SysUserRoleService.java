@@ -17,4 +17,7 @@ public interface SysUserRoleService extends IService<SysUserRole> {
 
     List<Long> getUserRolesIds(Long userId);
 
+    void removeByUserIds(Long[] ids);
+
+    void removeByUserId(Long userId);
 }

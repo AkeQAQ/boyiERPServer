@@ -1,6 +1,7 @@
 package com.boyi.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.SysRoleMenu;
 import com.boyi.mapper.SysRoleMenuMapper;
 import com.boyi.service.SysRoleMenuService;
@@ -26,8 +27,9 @@ public class SysRoleMenuServiceImpl extends ServiceImpl<SysRoleMenuMapper, SysRo
 
     @Override
     public List<Long> getRoleMenusIds(Long id) {
-        List<SysRoleMenu> roles = sysRoleMenuMapper.selectList(new QueryWrapper<SysRoleMenu>().select("id","menu_id","role_id")
-                .eq("role_id",id));
+        List<SysRoleMenu> roles = sysRoleMenuMapper.selectList(new QueryWrapper<SysRoleMenu>()
+                .select(DBConstant.TABLE_ROLE_MENU.ID_FIELDNAME,DBConstant.TABLE_ROLE_MENU.MENU_ID_FIELDNAME,DBConstant.TABLE_ROLE_MENU.ROLE_ID_FIELDNAME)
+                .eq(DBConstant.TABLE_ROLE_MENU.ROLE_ID_FIELDNAME,id));
 
         ArrayList<Long> roleIds = new ArrayList<>();
 
@@ -36,5 +38,20 @@ public class SysRoleMenuServiceImpl extends ServiceImpl<SysRoleMenuMapper, SysRo
         });
 
         return roleIds;
+    }
+
+    @Override
+    public void removeByMenuId(Long id) {
+        this.remove(new QueryWrapper<SysRoleMenu>().eq(DBConstant.TABLE_ROLE_MENU.MENU_ID_FIELDNAME, id));
+    }
+
+    @Override
+    public void removeByRoleIds(Long[] ids) {
+        this.remove(new QueryWrapper<SysRoleMenu>().in(DBConstant.TABLE_ROLE_MENU.ROLE_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public void removeByRoleId(Long roleId) {
+        this.remove(new QueryWrapper<SysRoleMenu>().eq(DBConstant.TABLE_ROLE_MENU.ROLE_ID_FIELDNAME, roleId));
     }
 }

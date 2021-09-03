@@ -21,4 +21,13 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     RepositoryBuyinDocument one(QueryWrapper<RepositoryBuyinDocument> id);
 
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
+
+    // 该单据编号 该供应商，不包括本ID的条数
+    int countSupplierOneDocNumExcludSelf(String supplierDocumentNum, String supplierId, Long id);
+    // 该单据编号 该供应商
+    int countSupplierOneDocNum(String supplierDocumentNum, String supplierId);
+
+    Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
+
+    int countBySupplierId(String ids[]);
 }

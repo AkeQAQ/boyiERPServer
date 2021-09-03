@@ -1,5 +1,6 @@
 package com.boyi.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.BaseDepartment;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface BaseDepartmentService extends IService<BaseDepartment> {
 
+    Page<BaseDepartment> pageBySearch(Page page, String searchName);
 }

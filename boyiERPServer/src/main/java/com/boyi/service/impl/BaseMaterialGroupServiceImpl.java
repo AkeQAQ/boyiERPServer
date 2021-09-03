@@ -26,4 +26,9 @@ public class BaseMaterialGroupServiceImpl extends ServiceImpl<BaseMaterialGroupM
         List<BaseMaterialGroup> list = this.list(new QueryWrapper<BaseMaterialGroup>().eq(DBConstant.TABLE_BASE_MATERIAL_GROUP.PARENT_ID_FIELDNAME, id));
         return list;
     }
+
+    @Override
+    public BaseMaterialGroup getByCode(String groupCode) {
+        return this.getOne(new QueryWrapper<BaseMaterialGroup>().eq(DBConstant.TABLE_BASE_MATERIAL_GROUP.CODE_FIELDNAME,groupCode ));
+    }
 }

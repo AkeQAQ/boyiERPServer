@@ -119,8 +119,6 @@ public class SysMenuController extends BaseController {
         // 清除所有与该菜单相关的权限缓存
         sysUserService.clearUserAuthorityInfoByMenuId(sysMenu.getId());
 
-        //TODO 菜单禁用的话，其他地方也不能使用，status的伪删除作用要发挥出来，明天都全部检查一次
-
         return ResponseResult.succ("编辑成功");
     }
 
@@ -141,7 +139,7 @@ public class SysMenuController extends BaseController {
         boolean flag = sysMenuService.removeById(id);
         if(flag){
             // 同步删除中间关联表
-            sysRoleMenuService.remove(new QueryWrapper<SysRoleMenu>().eq(DBConstant.TABLE_ROLE_MENU.MENU_FIELDNAME, id));
+            sysRoleMenuService.removeByMenuId(id);
             log.info("操作人:[{}],删除菜单id:{},并且同时删除 roleMenu中间表",principal.getName(), id);
             return ResponseResult.succ("删除成功");
         }else {

@@ -12,6 +12,7 @@ import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.SysUser;
 import com.boyi.entity.SysUserRole;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,6 +35,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/sys/user")
 public class SysUserController extends BaseController {
+
+    @Value("${boyi.resetPass}")
+    private String resetPass;
 
     @Autowired
     BCryptPasswordEncoder passwordEncoder;
@@ -78,8 +82,8 @@ public class SysUserController extends BaseController {
     @PreAuthorize("hasAuthority('sysManage:user:list')")
     public ResponseResult list(String searchUserName) {
 
-        Page<SysUser> pageData = sysUserService.page(getPage(), new QueryWrapper<SysUser>()
-                .like(StrUtil.isNotBlank(searchUserName), "user_name", searchUserName));
+        Page<SysUser> pageData = sysUserService.pageBySearch(getPage(),searchUserName);
+
 
         pageData.getRecords().forEach(u -> {
             u.setSysRoles(sysRoleService.listRolesByUserId(u.getId()));
@@ -108,7 +112,7 @@ public class SysUserController extends BaseController {
         LocalDateTime now = LocalDateTime.now();
         sysUser.setCreated(now);
         sysUser.setUpdated(now);
-        sysUser.setPassword(passwordEncoder.encode("888888"));
+        sysUser.setPassword(passwordEncoder.encode(resetPass));
         sysUserService.save(sysUser);
         return ResponseResult.succ("新增成功");
     }
@@ -144,7 +148,7 @@ public class SysUserController extends BaseController {
     public ResponseResult delete(@RequestBody Long[] ids) {
 
         sysUserService.removeByIds(Arrays.asList(ids));
-        sysUserRoleService.remove(new QueryWrapper<SysUserRole>().in("user_id", ids));
+        sysUserRoleService.removeByUserIds(ids);
 
         return ResponseResult.succ("删除成功");
     }
@@ -164,7 +168,7 @@ public class SysUserController extends BaseController {
             userRoles.add(sysUserRole);
         });
 
-        sysUserRoleService.remove(new QueryWrapper<SysUserRole>().eq(DBConstant.TABLE_USER.USER_ID_FIELDNAME, userId));
+        sysUserRoleService.removeByUserId(userId);
         sysUserRoleService.saveBatch(userRoles);
 
         SysUser sysUser = sysUserService.getById(userId);
@@ -180,7 +184,7 @@ public class SysUserController extends BaseController {
 
         SysUser sysUser = sysUserService.getById(id);
 
-        sysUser.setPassword(passwordEncoder.encode("888888"));
+        sysUser.setPassword(passwordEncoder.encode(resetPass));
         sysUser.setUpdated(LocalDateTime.now());
 
         sysUserService.updateById(sysUser);

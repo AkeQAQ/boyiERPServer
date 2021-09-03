@@ -46,10 +46,7 @@ public class SysRoleController extends BaseController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('sysManage:role:list')")
     public ResponseResult list(String searchRoleName) {
-
-        Page<SysRole> pageData = sysRoleService.page(getPage(), new QueryWrapper<SysRole>()
-                .like(StrUtil.isNotBlank(searchRoleName), "role_name", searchRoleName));
-
+        Page<SysRole> pageData = sysRoleService.pageBySearch(getPage(),searchRoleName);
         return ResponseResult.succ(pageData);
     }
 
@@ -72,7 +69,7 @@ public class SysRoleController extends BaseController {
     public ResponseResult delete(@RequestBody Long[] ids) {
 
         sysRoleService.removeByIds(Arrays.asList(ids));
-        sysRoleMenuService.remove(new QueryWrapper<SysRoleMenu>().in("role_id", ids));
+        sysRoleMenuService.removeByRoleIds(ids);
 
         return ResponseResult.succ("删除成功");
     }
@@ -103,7 +100,7 @@ public class SysRoleController extends BaseController {
             roleMenus.add(sysRoleMenu);
         });
 
-        sysRoleMenuService.remove(new QueryWrapper<SysRoleMenu>().eq(DBConstant.TABLE_ROLE.ROLE_ID_FIELDNAME, roleId));
+        sysRoleMenuService.removeByRoleId(roleId);
         sysRoleMenuService.saveBatch(roleMenus);
 
         // 删除缓存

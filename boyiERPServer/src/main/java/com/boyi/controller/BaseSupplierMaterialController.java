@@ -53,7 +53,7 @@ public class BaseSupplierMaterialController extends BaseController {
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
     public ResponseResult queryById(String id) {
-        BaseSupplierMaterial baseSupplierMaterial = baseSupplierMaterialServiceImpl.one(new QueryWrapper<BaseSupplierMaterial>().eq("id",id));
+        BaseSupplierMaterial baseSupplierMaterial = baseSupplierMaterialServiceImpl.getById(id);
         return ResponseResult.succ(baseSupplierMaterial);
     }
 
@@ -81,7 +81,9 @@ public class BaseSupplierMaterialController extends BaseController {
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = baseSupplierMaterialService.innerQuery(getPage(),new QueryWrapper<BaseSupplierMaterial>().like(StrUtil.isNotBlank(searchStr) && StrUtil.isNotBlank(searchField),queryField,searchStr));
+        pageData = baseSupplierMaterialService.innerQueryBySearch(getPage(),
+                queryField,searchField,searchStr);
+
         return ResponseResult.succ(pageData);
     }
 
@@ -114,16 +116,7 @@ public class BaseSupplierMaterialController extends BaseController {
         baseSupplierMaterial.setStatus(1);
         try {
             baseSupplierMaterialService.save(baseSupplierMaterial);
-/*
-            UpdateWrapper<BaseSupplierMaterial> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq("supplier_id", supplierId)
-                    .eq("material_id", materialId)
-                    .lt("end_date",baseSupplierMaterial.getEndDate().format(fmt))
-                    .set("status",1);
-            baseSupplierMaterialService.update(updateWrapper);
-            // 讲之前的该报价，该物料的历史记录，都设置过期
 
- */
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
             log.error("报价，插入异常",e);
@@ -178,7 +171,7 @@ public class BaseSupplierMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:valid')")
     public ResponseResult statusPass(Principal principal,Long id) {
 
-        // 1. 采购价目反审核，先查询是否有采购入库审核完成的引用，有则不能修改
+        // 1. 采购价目审核，先查询是否有采购入库审核完成的引用，有则不能修改
         BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
         Integer count= repositoryBuyinDocumentService.getBySupplierMaterial(one);
         if(count > 0){

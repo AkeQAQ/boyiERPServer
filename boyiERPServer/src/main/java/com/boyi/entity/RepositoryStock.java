@@ -1,5 +1,6 @@
 package com.boyi.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -34,5 +35,13 @@ public class RepositoryStock {
 
     private LocalDateTime updated;
 
+    @TableField(exist = false)  // 字段数据库忽略
+    private String materialName;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String unit;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String specs;
 
 }

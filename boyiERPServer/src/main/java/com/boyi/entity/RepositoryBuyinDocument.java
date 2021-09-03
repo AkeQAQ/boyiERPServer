@@ -72,7 +72,7 @@ public class RepositoryBuyinDocument extends BaseEntity {
 
     @ExcelAttribute(sort = 7)
     @TableField(exist = false)  // 字段数据库忽略
-    private Integer num;
+    private Double num;
 
 
     @ExcelAttribute(sort = 9)
@@ -80,7 +80,7 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private Double amount; // =price*num
 
     @TableField(exist = false)  // 字段数据库忽略
-    private Long totalNum; // 该单据总数目
+    private Double totalNum; // 该单据总数量
 
     @TableField(exist = false)  // 字段数据库忽略
     private Double totalAmount; // 该单据总金额

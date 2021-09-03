@@ -88,8 +88,6 @@ public class BaseUnitController extends BaseController {
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('baseData:unit:save')")
     public ResponseResult save(Principal principal, @Validated @RequestBody BaseUnit baseUnit) {
-        final String encoding = System.getProperty("file.encoding");
-        System.out.println(encoding);
         LocalDateTime now = LocalDateTime.now();
         baseUnit.setCreated(now);
         baseUnit.setUpdated(now);

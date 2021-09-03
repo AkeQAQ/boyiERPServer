@@ -23,4 +23,16 @@ public interface BaseSupplierMaterialService extends IService<BaseSupplierMateri
     List<BaseSupplierMaterial> myList(QueryWrapper<BaseSupplierMaterial> eq);
 
     int isRigionExcludeSelf( BaseSupplierMaterial baseSupplierMaterial);
+
+    BaseSupplierMaterial getSuccessPrice(String supplierId, String materialId, LocalDate buyInDate);
+
+    int countSuccessByMaterialId(String id);
+
+    int countByMaterialId(String[] ids);
+
+    int countSuccessBySupplierId(String id);
+
+    int countBySupplierId(String[] ids);
+
+    Page<BaseSupplierMaterial> innerQueryBySearch(Page page, String queryField, String searchField, String searchStr);
 }

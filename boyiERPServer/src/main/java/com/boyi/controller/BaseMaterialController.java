@@ -38,8 +38,6 @@ import java.util.Map;
 @RequestMapping("/baseData/material")
 public class BaseMaterialController extends BaseController {
 
-
-
     /**
      * 用于增量表格搜索输入建议框的数据
      */
@@ -87,7 +85,7 @@ public class BaseMaterialController extends BaseController {
         if(searchStr.equals("全部")){
             pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>());
         }else {
-            pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>().eq("group_code",searchStr));
+            pageData = baseMaterialService.pageByGroupCode(getPage(),searchStr);
         }
         return ResponseResult.succ(pageData);
     }
@@ -117,8 +115,7 @@ public class BaseMaterialController extends BaseController {
                 return ResponseResult.fail("搜索字段不存在");
             }
             log.info("搜索字段:{},查询内容:{}", searchField, searchStr);
-            pageData = baseMaterialService.page(getPage(), new QueryWrapper<BaseMaterial>()
-                    .like(StrUtil.isNotBlank(searchStr), queryField, searchStr));
+            pageData = baseMaterialService.pageBySearch(getPage(),queryField,searchStr);
         }
         return ResponseResult.succ(pageData);
     }
@@ -146,15 +143,17 @@ public class BaseMaterialController extends BaseController {
         baseMaterial.setUpdateUser(principal.getName());
 
         // 需要先判断，同名称，同规格，同基本单位是否存在
-        List<BaseMaterial> list = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("name", baseMaterial.getName())
-                .eq("unit", baseMaterial.getUnit())
-                .eq("specs", baseMaterial.getSpecs())
-                .eq("group_code",baseMaterial.getGroupCode()));
+        List<BaseMaterial> list = baseMaterialService.listSame(
+                baseMaterial.getName(),
+                baseMaterial.getUnit(),
+                baseMaterial.getSpecs(),
+                baseMaterial.getGroupCode());
+
         if(list != null && list.size() > 0){
             return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
         }
 
-        BaseMaterialGroup group = baseMaterialGroupService.getOne(new QueryWrapper<BaseMaterialGroup>().eq("code", baseMaterial.getGroupCode()));
+        BaseMaterialGroup group = baseMaterialGroupService.getByCode(baseMaterial.getGroupCode());
 
         baseMaterial.setSubId(group.getAutoSubId());
 
@@ -186,11 +185,12 @@ public class BaseMaterialController extends BaseController {
         baseMaterial.setUpdateUser(principal.getName());
 
         // 需要先判断，同名称，同规格，同基本单位是否存在
-        List<BaseMaterial> list = baseMaterialService.list(new QueryWrapper<BaseMaterial>().eq("name", baseMaterial.getName())
-                .eq("unit", baseMaterial.getUnit())
-                .eq("specs", baseMaterial.getSpecs())
-                .eq("group_code",baseMaterial.getGroupCode())
-                .ne("id",baseMaterial.getId()));
+        List<BaseMaterial> list = baseMaterialService.listSameExcludSelf(baseMaterial.getName(),
+                baseMaterial.getUnit(),
+                baseMaterial.getSpecs(),
+                baseMaterial.getGroupCode(),
+                baseMaterial.getId());
+
         if(list != null && list.size() > 0){
             return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
         }
@@ -202,10 +202,8 @@ public class BaseMaterialController extends BaseController {
                 !oldOne.getSpecs().equals(baseMaterial.getSpecs())){
 
                 // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
-                int count = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>()
-                        .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, baseMaterial.getId())
-                                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0)
-                        );
+                int count = baseSupplierMaterialService.countSuccessByMaterialId(baseMaterial.getId());
+
                 if(count>0){
                     log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录",baseMaterial.getId(),count);
                     return ResponseResult.fail("物料ID["+baseMaterial.getId()+"]不能修改，存在"+count+"个 审核完成的 采购价目记录");
@@ -229,20 +227,22 @@ public class BaseMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:material:del')")
     public ResponseResult delete(@RequestBody String[] ids) {
 
-        int count = repositoryBuyinDocumentDetailService.count(new QueryWrapper<RepositoryBuyinDocumentDetail>()
-                .in("material_id", ids));
+        int count = repositoryBuyinDocumentDetailService.countByMaterialId(ids);
 
         if(count > 0){
             return ResponseResult.fail("请先删除"+count+"条对应入库记录!");
         }
-        int count2 = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>()
-                .in("material_id", ids));
+        int count2 = baseSupplierMaterialService.countByMaterialId(ids);
+
 
         if(count2 > 0){
             return ResponseResult.fail("请先删除"+count2+"条对应价目记录!");
         }
 
         baseMaterialService.removeByIds(Arrays.asList(ids));
+
+        // 删除物料之后，要删除该物料的库存记录
+        repositoryStockService.removeByMaterialId(ids);
 
         return ResponseResult.succ("删除成功");
     }

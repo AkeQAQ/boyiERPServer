@@ -1,6 +1,9 @@
 package com.boyi.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.SysMenu;
 import com.boyi.entity.SysRole;
 import com.boyi.entity.SysUser;
@@ -47,7 +50,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public SysUser getByUsername(String username) {
-        return getOne(new QueryWrapper<SysUser>().eq("user_name", username).eq("status",0));
+
+        return getOne(new QueryWrapper<SysUser>().eq(DBConstant.TABLE_USER.USER_NAME_FIELDNAME, username)
+                .eq(DBConstant.TABLE_USER.STATUS_FIELDNAME,DBConstant.TABLE_USER.STATUS_FIELDVALUE_0));
     }
 
 
@@ -65,7 +70,8 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
             authority = (String) UserName_Own_Roles_Auth.get("GrantedAuthority:" + sysUser.getUserName());
         } else {
             List<SysRole> roles = sysRoleMapper.selectList(new QueryWrapper<SysRole>()
-                    .inSql("id", "select role_id from sys_user_role where user_id = " + userId));
+                    .inSql(DBConstant.TABLE_USER_ROLE.ID_FIELDNAME,
+                            "select role_id from sys_user_role where user_id = " + userId));
 
             // 获取角色编码
             if (roles.size() > 0) {
@@ -102,7 +108,9 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
 
     @Override
     public void clearUserAuthorityInfoByRoleId(Long roleId) {
-        List<SysUser> sysUsers = this.list(new QueryWrapper<SysUser>().inSql("id", "select user_id from sys_user_role where role_id = " + roleId));
+        List<SysUser> sysUsers = this.list(new QueryWrapper<SysUser>().inSql(
+                DBConstant.TABLE_USER_ROLE.ID_FIELDNAME,
+                "select user_id from sys_user_role where role_id = " + roleId));
         sysUsers.forEach(u -> {
             this.clearUserAuthorityInfo(u.getUserName());
         });
@@ -114,6 +122,12 @@ public class SysUserServiceImpl extends ServiceImpl<SysUserMapper, SysUser> impl
         sysUsers.forEach(u -> {
             this.clearUserAuthorityInfo(u.getUserName());
         });
+    }
+
+    @Override
+    public Page<SysUser> pageBySearch(Page page, String searchUserName) {
+        return this.page(page, new QueryWrapper<SysUser>()
+                .like(StrUtil.isNotBlank(searchUserName), DBConstant.TABLE_USER.USER_NAME_FIELDNAME, searchUserName));
     }
 
     public static void main(String[] args) {

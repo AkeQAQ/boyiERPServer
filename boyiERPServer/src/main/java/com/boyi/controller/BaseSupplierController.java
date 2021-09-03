@@ -9,6 +9,7 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
+import com.boyi.service.BaseSupplierService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -62,7 +63,7 @@ public class BaseSupplierController extends BaseController {
         if(searchStr.equals("全部")){
             pageData = baseSupplierService.page(getPage(),new QueryWrapper<BaseSupplier>());
         }else {
-            pageData = baseSupplierService.page(getPage(),new QueryWrapper<BaseSupplier>().eq("group_code",searchStr));
+            pageData = baseSupplierService.pageByGroupCode(getPage(),searchStr);
         }
         return ResponseResult.succ(pageData);
     }
@@ -92,8 +93,7 @@ public class BaseSupplierController extends BaseController {
                 return ResponseResult.fail("搜索字段不存在");
             }
             log.info("搜索字段:{},查询内容:{}", searchField, searchStr);
-            pageData = baseSupplierService.page(getPage(), new QueryWrapper<BaseSupplier>()
-                    .like(StrUtil.isNotBlank(searchStr), queryField, searchStr));
+            pageData = baseSupplierService.pageBySearch(getPage(), queryField, searchStr);
         }
         return ResponseResult.succ(pageData);
     }
@@ -120,8 +120,7 @@ public class BaseSupplierController extends BaseController {
         baseSupplier.setCreatedUser(principal.getName());
         baseSupplier.setUpdateUser(principal.getName());
 
-
-        BaseSupplierGroup group = baseSupplierGroupService.getOne(new QueryWrapper<BaseSupplierGroup>().eq("code", baseSupplier.getGroupCode()));
+        BaseSupplierGroup group = baseSupplierGroupService.getByCode(baseSupplier.getGroupCode());
 
         baseSupplier.setSubId(group.getAutoSubId());
 
@@ -158,10 +157,7 @@ public class BaseSupplierController extends BaseController {
                     !oldOne.getAddress().equals(baseSupplier.getAddress())){
 
                 // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
-                int count = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>()
-                        .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.SUPPLIER_ID_FIELDNAME, baseSupplier.getId())
-                                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0)
-                        );
+                int count = baseSupplierMaterialService.countSuccessBySupplierId(baseSupplier.getId());
                 if(count>0){
                     log.info("供应商ID[{}]不能修改，存在{}个 审核完成的 采购价目记录",baseSupplier.getId(),count);
                     return ResponseResult.fail("供应商ID["+baseSupplier.getId()+"]不能修改，存在"+count+"个 审核完成的 采购价目记录");
@@ -184,21 +180,22 @@ public class BaseSupplierController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:supplier:del')")
     public ResponseResult delete(@RequestBody String[] ids) {
 
-        int count = repositoryBuyinDocumentService.count(new QueryWrapper<RepositoryBuyinDocument>()
-                .in("supplier_id", ids));
+        int count = repositoryBuyinDocumentService.countBySupplierId(ids);
 
         if(count > 0){
             return ResponseResult.fail("请先删除"+count+"条对应入库记录!");
         }
 
-        int count2 = baseSupplierMaterialService.count(new QueryWrapper<BaseSupplierMaterial>()
-                .in("supplier_id", ids));
+        int count2 = baseSupplierMaterialService.countBySupplierId(ids);
 
         if(count2 > 0){
             return ResponseResult.fail("请先删除"+count2+"条对应价目记录!");
         }
 
         baseSupplierService.removeByIds(Arrays.asList(ids));
+
+        // 删除物料之后，要删除该物料的库存记录
+        repositoryStockService.removeBySupplierId(ids);
 
         return ResponseResult.succ("删除成功");
     }

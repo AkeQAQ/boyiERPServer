@@ -16,4 +16,9 @@ import java.util.List;
 public interface SysRoleMenuService extends IService<SysRoleMenu> {
     List<Long> getRoleMenusIds(Long id);
 
+    void removeByMenuId(Long id);
+
+    void removeByRoleIds(Long[] ids);
+
+    void removeByRoleId(Long roleId);
 }

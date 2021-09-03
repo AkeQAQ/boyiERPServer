@@ -29,4 +29,9 @@ public class BaseSupplierGroupServiceImpl extends ServiceImpl<BaseSupplierGroupM
         List<BaseSupplierGroup> list = this.list(new QueryWrapper<BaseSupplierGroup>().eq(DBConstant.TABLE_BASE_SUPPLIER_GROUP.PARENT_ID_FIELDNAME, id));
         return list;
     }
+
+    @Override
+    public BaseSupplierGroup getByCode(String groupCode) {
+        return this.getOne(new QueryWrapper<BaseSupplierGroup>().eq(DBConstant.TABLE_BASE_SUPPLIER_GROUP.NAME_FIELDNAME, groupCode));
+    }
 }

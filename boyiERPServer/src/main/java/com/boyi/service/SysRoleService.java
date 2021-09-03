@@ -1,5 +1,6 @@
 package com.boyi.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.SysRole;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -19,4 +20,6 @@ public interface SysRoleService extends IService<SysRole> {
 
 
     List<SysRole> listValid();
+
+    Page<SysRole> pageBySearch(Page page, String searchRoleName);
 }

@@ -35,12 +35,17 @@ public class RepositoryBuyinDocumentDetail {
     /**
      * 采购入库数量
      */
-    private Integer num;
+    private Double num;
 
     /**
      *  备注信息
      */
     private String comment;
+
+    /**
+     *  供应商ID
+     */
+    private String supplierId;
 
     @TableField(exist = false)  // 字段数据库忽略
     private String materialName;

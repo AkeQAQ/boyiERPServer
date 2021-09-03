@@ -1,6 +1,8 @@
 package com.boyi.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.SysMenu;
 import com.boyi.entity.SysRole;
@@ -35,7 +37,8 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     public List<SysRole> listRolesByUserId(Long userId) {
 
         List<SysRole> sysRoles = this.list(new QueryWrapper<SysRole>()
-                .inSql("id", "select role_id from sys_user_role where user_id = " + userId));
+                .inSql(DBConstant.TABLE_USER_ROLE.ID_FIELDNAME,
+                        "select role_id from sys_user_role where user_id = " + userId));
 
         return sysRoles;
     }
@@ -45,5 +48,11 @@ public class SysRoleServiceImpl extends ServiceImpl<SysRoleMapper, SysRole> impl
     public List<SysRole> listValid() {
         return sysRoleMapper.selectList(new QueryWrapper<SysRole>().eq(
                 DBConstant.TABLE_ROLE.STATUS_FIELDNAME, DBConstant.TABLE_ROLE.STATUS_FIELDVALUE_0));
+    }
+
+    @Override
+    public Page<SysRole> pageBySearch(Page page, String searchRoleName) {
+        return this.page(page, new QueryWrapper<SysRole>()
+                .like(StrUtil.isNotBlank(searchRoleName), DBConstant.TABLE_ROLE.ROLE_NAME_FIELDNAME, searchRoleName));
     }
 }

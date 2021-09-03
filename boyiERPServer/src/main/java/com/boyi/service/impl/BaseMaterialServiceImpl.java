@@ -1,11 +1,16 @@
 package com.boyi.service.impl;
 
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseMaterial;
 import com.boyi.mapper.BaseMaterialMapper;
 import com.boyi.service.BaseMaterialService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -21,6 +26,35 @@ public class BaseMaterialServiceImpl extends ServiceImpl<BaseMaterialMapper, Bas
 
     @Override
     public Integer countByGroupCode(String groupCode){
-        return this.count(new QueryWrapper<BaseMaterial>().eq("group_code", groupCode));
+        return this.count(new QueryWrapper<BaseMaterial>().eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME, groupCode));
+    }
+
+    @Override
+    public Page<BaseMaterial> pageByGroupCode(Page page, String searchStr) {
+        return this.page(page,new QueryWrapper<BaseMaterial>().eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME,searchStr));
+    }
+    @Override
+    public Page<BaseMaterial> pageBySearch(Page page,String queryField, String searchStr) {
+        return this.page(page, new QueryWrapper<BaseMaterial>()
+                .like(StrUtil.isNotBlank(searchStr), queryField, searchStr));
+    }
+
+    @Override
+    public List<BaseMaterial> listSame(String name, String unit, String specs, String groupCode) {
+        return this.list(new QueryWrapper<BaseMaterial>()
+                .eq(DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME, name)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.UNIT_FIELDNAME, unit)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.SPECS_FIELDNAME, specs)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME,groupCode));
+    }
+
+    @Override
+    public List<BaseMaterial> listSameExcludSelf(String name, String unit, String specs, String groupCode, String id) {
+        return this.list(new QueryWrapper<BaseMaterial>()
+                .eq(DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME, name)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.UNIT_FIELDNAME,unit)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.SPECS_FIELDNAME, specs)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME,groupCode)
+                .ne(DBConstant.TABLE_BASE_MATERIAL.ID,id));
     }
 }

@@ -42,10 +42,7 @@ public class BaseDepartmentController extends BaseController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('baseData:department:list')")
     public ResponseResult list(String searchName) {
-
-        Page<BaseDepartment> pageData = baseDepartmentService.page(getPage(), new QueryWrapper<BaseDepartment>()
-                .like(StrUtil.isNotBlank(searchName), "name", searchName));
-
+        Page<BaseDepartment> pageData = baseDepartmentService.pageBySearch(getPage(),searchName);
         return ResponseResult.succ(pageData);
     }
 
@@ -71,7 +68,6 @@ public class BaseDepartmentController extends BaseController {
         BaseDepartment BaseDepartment = baseDepartmentService.getById(id);
         return ResponseResult.succ(BaseDepartment);
     }
-
 
     /**
      *  修改部门

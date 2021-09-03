@@ -1,5 +1,6 @@
 package com.boyi.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -27,4 +28,6 @@ public interface SysUserService extends IService<SysUser> {
 
     // 删除所有与该菜单关联的所有用户的权限信息
     void clearUserAuthorityInfoByMenuId(Long menuId);
+
+    Page<SysUser> pageBySearch(Page page, String searchUserName);
 }

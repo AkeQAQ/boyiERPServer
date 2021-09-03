@@ -17,4 +17,6 @@ import java.util.List;
  */
 public interface BaseSupplierGroupService extends IService<BaseSupplierGroup> {
     public List<BaseSupplierGroup> getListByParentId(Long id);
+
+    BaseSupplierGroup getByCode(String groupCode);
 }
