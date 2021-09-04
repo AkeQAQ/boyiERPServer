@@ -1,6 +1,8 @@
 package com.boyi.controller.base;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.OrderBuyorderDocument;
+import com.boyi.entity.OrderBuyorderDocumentDetail;
 import com.boyi.entity.RepositoryBuyinDocumentDetail;
 import com.boyi.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,13 @@ public class BaseController {
 
     @Autowired
     public RepositoryStockService repositoryStockService;
+
+    @Autowired
+    public OrderBuyorderDocumentService orderBuyorderDocumentService;
+
+    @Autowired
+    public OrderBuyorderDocumentDetailService orderBuyorderDocumentDetailService;
+
 
     /**
      * 获取页面

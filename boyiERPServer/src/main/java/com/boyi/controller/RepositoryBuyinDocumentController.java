@@ -124,6 +124,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
+        // 普通采购入库，priceDate = buyInDate
+        if(repositoryBuyinDocument.getPriceDate()==null){
+            repositoryBuyinDocument.setPriceDate(repositoryBuyinDocument.getBuyInDate());
+        }
+
         try {
 
             // 1. 先查询该供应商，该单号是否已经有记录，有则不能插入
@@ -173,7 +178,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocument.setCreatedUser(principal.getName());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
         repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
-
+        // 普通采购入库，priceDate = buyInDate
+        if(repositoryBuyinDocument.getPriceDate()==null){
+            repositoryBuyinDocument.setPriceDate(repositoryBuyinDocument.getBuyInDate());
+        }
         try {
             // 1. 先查询该供应商，该单号是否已经有记录，有则不能插入
             int exitCount = repositoryBuyinDocumentService.countSupplierOneDocNum(
@@ -182,6 +190,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(exitCount > 0){
                 return ResponseResult.fail("该供应商的单据已经存在！请确认信息!");
             }
+
             repositoryBuyinDocumentService.save(repositoryBuyinDocument);
 
             for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
@@ -228,7 +237,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
-            new ExcelExportUtil(RepositoryBuyinDocument.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx");
+            new ExcelExportUtil(RepositoryBuyinDocument.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.statusMap);
         } catch (Exception e) {
             log.error("导出模块报错.",e);
         }

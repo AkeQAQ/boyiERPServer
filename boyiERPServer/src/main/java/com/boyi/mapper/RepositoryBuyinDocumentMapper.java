@@ -27,14 +27,14 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "select t.*,(sm.price * num) amount ,sm.price price from (" +
             "select  doc.id id, " +
             "        doc.buy_in_date , " +
+            "        doc.price_date , " +
             "        sup.name supplier_name, " +
             "       sup.id supId, " +
             "        doc.status, " +
             "        m.id material_id, " +
             "        m.name material_name, " +
             "        m.unit , " +
-            " " +
-            "        docD.num from " +
+            "        docD.order_seq, docD.num from " +
             "                        repository_buyin_document doc , " +
             "                        repository_buyin_document_detail docD, " +
             "                        base_supplier sup, " +
@@ -46,7 +46,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             ") t " +
             "left join base_supplier_material sm " +
             "on sm.status=0 and t.material_id = sm.material_id and supId = sm.supplier_id" +
-            " and t.buy_in_date between  sm.start_date and sm.end_date order by id desc";
+            " and t.price_date between  sm.start_date and sm.end_date order by id desc";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询
@@ -70,6 +70,6 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
     @Select("select count(1) from repository_buyin_document rbd," +
             "              repository_buyin_document_detail rbdd" +
             " where rbd.status = 0 and rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
-            " and rbdd.material_id = #{materialId} and rbd.buy_in_date between #{startDate} and #{endDate}")
+            " and rbdd.material_id = #{materialId} and rbd.price_date between #{startDate} and #{endDate}")
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
 }

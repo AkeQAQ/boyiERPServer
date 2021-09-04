@@ -15,10 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -45,7 +42,7 @@ public class ExcelExportUtil<T> {
     /**
      * 基于注解导出
      */
-    public void export(HttpServletResponse response, InputStream is, List<T> objs, String fileName) throws Exception {
+    public void export(HttpServletResponse response, InputStream is, List<T> objs, String fileName, Map<Integer,String> statusMap) throws Exception {
 
         XSSFWorkbook workbook = new XSSFWorkbook(is);
         Sheet sheet = workbook.getSheetAt(0);
@@ -65,7 +62,11 @@ public class ExcelExportUtil<T> {
                         if(i == ea.sort()) { //列序号
                             try{
                                 Object f = field.get(t);
-                                cell.setCellValue(f ==null ? "":field.get(t).toString());
+                                if("status".equals(field.getName())){
+                                    cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }else{
+                                    cell.setCellValue(f ==null ? "":field.get(t).toString());
+                                }
                             }catch (Exception e){
                                 e.printStackTrace();
                             }

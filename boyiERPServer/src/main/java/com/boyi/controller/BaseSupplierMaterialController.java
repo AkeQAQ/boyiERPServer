@@ -175,7 +175,7 @@ public class BaseSupplierMaterialController extends BaseController {
         BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
         Integer count= repositoryBuyinDocumentService.getBySupplierMaterial(one);
         if(count > 0){
-            return ResponseResult.fail("有"+count+"条关联的入库记录");
+            return ResponseResult.fail("该供应商，该物料，该时间区已有"+count+"条审核通过的采购入库记录");
         }
 
         BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();
@@ -201,7 +201,7 @@ public class BaseSupplierMaterialController extends BaseController {
         BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
         Integer count= repositoryBuyinDocumentService.getBySupplierMaterial(one);
         if(count > 0){
-            return ResponseResult.fail("有"+count+"条关联的入库记录");
+            return ResponseResult.fail("该供应商，该物料，该时间区已有"+count+"条审核通过的采购入库记录");
         }
         BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();
         baseSupplierMaterial.setUpdated(LocalDateTime.now());

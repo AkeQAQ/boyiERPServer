@@ -11,15 +11,15 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 仓库模块-采购入库单据表
+ * 订单模块-采购订单单据表
  * </p>
  *
  * @author sunke
- * @since 2021-08-26
+ * @since 2021-09-04
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class RepositoryBuyinDocument extends BaseEntity {
+public class OrderBuyorderDocument extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,33 +32,22 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private String supplierId;
 
     /**
-     * 供应商单据编号
-     */
-    private String supplierDocumentNum;
-
-    /**
-     * 入库日期
+     * 采购日期
      */
     @ExcelAttribute(sort = 1)
-    private LocalDate buyInDate;
+    private LocalDate orderDate;
 
-    /**
-     * 价目日期
-     */
-    @ExcelAttribute(sort = 8)
-    private LocalDate priceDate;
+    private String createdUser;
 
-    /**
-     *  采购订单下推进行入库的的主键ID
-     */
-    private Long orderId;
+    private String updatedUser;
+
 
 
     /**
      *  明细信息 用于接收前端数据
      */
     @TableField(exist = false)  // 字段数据库忽略
-    private List<RepositoryBuyinDocumentDetail> rowList;
+    private List<OrderBuyorderDocumentDetail> rowList;
 
 
     // 用于多表查询的额外字段
@@ -86,7 +75,6 @@ public class RepositoryBuyinDocument extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     private Double num;
 
-
     @ExcelAttribute(sort = 10)
     @TableField(exist = false)  // 字段数据库忽略
     private Double amount; // =price*num
@@ -97,8 +85,9 @@ public class RepositoryBuyinDocument extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     private Double totalAmount; // 该单据总金额
 
+    @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 8)
+    private LocalDate doneDate; // 该单据总金额
 
-    private String createdUser;
-    private String updatedUser;
 
 }

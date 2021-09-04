@@ -1,5 +1,8 @@
 package com.boyi.common.constant;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class DBConstant {
      public static class TABLE_ROLE_MENU{
          public static final String ID_FIELDNAME = "id";
@@ -150,11 +153,21 @@ public class DBConstant {
     }
 
     public static class TABLE_REPOSITORY_BUYIN_DOCUMENT{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
         public static final String ID_FIELDNAME = "id";
         public static final String STATUS_FIELDNAME = "status";
         public static final String SUPPLIER_DOCUMENT_NUM_FIELDNAME = "supplier_document_num";
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String BUY_IN_DATE_FIELDNAME = "buy_in_date";
+        public static final String PRICE_DATE_FIELDNAME = "price_date";
+
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
@@ -177,6 +190,52 @@ public class DBConstant {
         public static final String DOCUMENT_ID_FIELDNAME = "document_id";
         public static final String NUM_FIELDNAME = "num";
         public static final String COMMENT_FIELDNAME = "comment";
+        public static final String ORDER_SEQ_FIELDNAME = "order_seq";
+
+    }
+
+
+    public static class TABLE_ORDER_BUYORDER_DOCUMENT{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已完成");
+            statusMap2.put(1,"未完成");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String SUPPLIER_DOCUMENT_NUM_FIELDNAME = "supplier_document_num";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String ORDER_DATE_FIELDNAME = "order_date";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+
+        /**
+         *  0:代表 已完成
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 未完成
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL{
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String DOCUMENT_ID_FIELDNAME = "document_id";
+        public static final String NUM_FIELDNAME = "num";
+        public static final String COMMENT_FIELDNAME = "comment";
+        public static final String DONE_DATE_FIELDNAME = "done_date";
+        public static final String ORDER_SEQ_FIELDNAME = "order_seq";
+
     }
 
     public static class TABLE_BASE_SUPPLIER{
