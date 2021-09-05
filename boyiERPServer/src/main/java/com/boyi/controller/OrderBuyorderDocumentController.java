@@ -69,7 +69,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         if (exitCount > 0) {
             return ResponseResult.fail("该供应商的单据已经存在！请确认信息!");
         }
-        // 2. 插入记录到入库表以及详情表
+        // 4. 插入记录到入库表以及详情表
         repositoryBuyinDocumentService.save(repositoryBuyinDocument);
 
         List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByDocumentId(id);
@@ -84,13 +84,45 @@ public class OrderBuyorderDocumentController extends BaseController {
             detail.setSupplierId(item.getSupplierId());
             detail.setOrderSeq(item.getOrderSeq());
             detailArrayList.add(detail);
+
+            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getSupplierId()
+                    ,detail.getMaterialId()
+                    ,detail.getNum());
         }
 
         repositoryBuyinDocumentDetailService.saveBatch(detailArrayList);
 
-        // 3. 修改订单状态为已完成
-        orderBuyorderDocumentService.statusSuccess(id);
-        return ResponseResult.succ("新增成功");
+        // 5. 修改订单状态为已完成
+        orderBuyorderDocumentService.statusSuccess(id,repositoryBuyinDocument.getSupplierDocumentNum(),repositoryBuyinDocument.getBuyInDate());
+        return ResponseResult.succ("下推入库成功");
+
+    }
+
+    @Transactional
+    @PostMapping("/returnPush")
+    @PreAuthorize("hasAuthority('order:buyOrder:push')")
+    public ResponseResult returnPush(Principal principal,Long id) {
+        // 1. 根据该订单ID,删除对应的入库单据记录
+        RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getByOrderId(id);
+        List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(repositoryBuyinDocument.getId());
+
+        repositoryBuyinDocumentService.removeById(repositoryBuyinDocument.getId());
+        repositoryBuyinDocumentDetailService.removeByDocId(repositoryBuyinDocument.getId());
+
+        // 2. 修改订单状态为未完成
+        orderBuyorderDocumentService.statusNotSuccess(id);
+
+        // 3. 修改库存
+        for (RepositoryBuyinDocumentDetail detail : details){
+            try {
+                repositoryStockService.subNumBySupplierIdAndMaterialId(detail.getSupplierId()
+                        ,detail.getMaterialId()
+                        ,detail.getNum());
+            } catch (Exception e) {
+                log.error("数据异常",e);
+            }
+        }
+        return ResponseResult.succ("撤销入库成功");
 
     }
 

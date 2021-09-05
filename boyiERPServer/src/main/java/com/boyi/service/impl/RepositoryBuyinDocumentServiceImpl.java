@@ -70,4 +70,11 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
         return this.count(new QueryWrapper<RepositoryBuyinDocument>()
                 .in(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SUPPLIER_ID_FIELDNAME, ids));
     }
+
+    @Override
+    public RepositoryBuyinDocument getByOrderId(Long id) {
+        return this.getOne(new QueryWrapper<RepositoryBuyinDocument>()
+                .eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.ORDER_ID_FIELDNAME, id));
+    }
+
 }

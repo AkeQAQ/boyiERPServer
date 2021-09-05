@@ -51,4 +51,13 @@ public interface BaseSupplierMaterialMapper extends BaseMapper<BaseSupplierMater
             "              )t where NOT ((end_date < #{startDate}) OR (start_date > #{endDate}))" +
             "")
     int isRigionExcludeSelf(BaseSupplierMaterial baseSupplierMaterial);
+
+    @Select("select count(1) from (" +
+            "                  select *" +
+            "                  from base_supplier_material" +
+            "                  where supplier_id = #{supplierId}" +
+            "                    and material_id = #{materialId}" +
+            "              )t where NOT ((end_date < #{startDate}) OR (start_date > #{endDate}))" +
+            "")
+    int isRigion(BaseSupplierMaterial baseSupplierMaterial);
 }

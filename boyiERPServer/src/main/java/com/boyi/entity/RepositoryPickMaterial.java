@@ -11,31 +11,34 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 订单模块-采购订单单据表
+ * 仓库模块-领料模块
  * </p>
  *
  * @author sunke
- * @since 2021-09-04
+ * @since 2021-09-05
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class OrderBuyorderDocument extends BaseEntity {
+public class RepositoryPickMaterial extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @ExcelAttribute(sort = 3)
     private Integer status;
 
     /**
-     * 供应商ID外键
+     * 领料日期
      */
-    private String supplierId;
+    private LocalDate pickDate;
 
     /**
-     * 采购日期
+     * 领料部门ID
      */
-    @ExcelAttribute(sort = 1)
-    private LocalDate orderDate;
+    private Long departmentId;
+
+    /**
+     * 领料人名
+     */
+    private String pickUser;
 
     private String createdUser;
 
@@ -43,61 +46,34 @@ public class OrderBuyorderDocument extends BaseEntity {
 
 
     /**
-     * 供应商单据编号
-     */
-    private String supplierDocumentNum;
-
-    /**
-     * 入库日期
-     */
-    private LocalDate buyInDate;
-
-    /**
      *  明细信息 用于接收前端数据
      */
     @TableField(exist = false)  // 字段数据库忽略
-    private List<OrderBuyorderDocumentDetail> rowList;
+    private List<RepositoryPickMaterialDetail> rowList;
 
 
     // 用于多表查询的额外字段
-    @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 2)
-    private String supplierName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 4)
     private String materialId;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 5)
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 6)
     private String unit;
 
-    @ExcelAttribute(sort = 9)
     @TableField(exist = false)  // 字段数据库忽略
-    private Double price;
+    private String specs;
 
-    @ExcelAttribute(sort = 7)
     @TableField(exist = false)  // 字段数据库忽略
     private Double num;
-
-    @ExcelAttribute(sort = 10)
-    @TableField(exist = false)  // 字段数据库忽略
-    private Double amount; // =price*num
 
     @TableField(exist = false)  // 字段数据库忽略
     private Double totalNum; // 该单据总数量
 
     @TableField(exist = false)  // 字段数据库忽略
-    private Double totalAmount; // 该单据总金额
+    private String departmentName; // 部门名称
 
-    @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 8)
-    private LocalDate doneDate; // 该单据总金额
 
-    @TableField(exist = false)  // 字段数据库忽略
-    private String orderSeq; // 该单据总金额
 }

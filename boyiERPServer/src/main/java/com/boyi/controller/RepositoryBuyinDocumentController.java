@@ -124,6 +124,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
+        repositoryBuyinDocument.setPriceDate(repositoryBuyinDocument.getBuyInDate());
         // 普通采购入库，priceDate = buyInDate
         if(repositoryBuyinDocument.getPriceDate()==null){
             repositoryBuyinDocument.setPriceDate(repositoryBuyinDocument.getBuyInDate());

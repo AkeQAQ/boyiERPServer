@@ -98,7 +98,7 @@ public class BaseSupplierMaterialController extends BaseController {
         }
 
         // 查询表中是否已经有该数据，有的话，新增的起始日期要求> 老数据的结束日期
-        int count = baseSupplierMaterialService.isRigionExcludeSelf(baseSupplierMaterial);
+        int count = baseSupplierMaterialService.isRigion(baseSupplierMaterial);
 
         if(count > 0){
             return ResponseResult.fail("日期区间冲突，请检查!");

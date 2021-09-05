@@ -97,6 +97,8 @@ public class RepositoryBuyinDocument extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     private Double totalAmount; // 该单据总金额
 
+    @TableField(exist = false)  // 字段数据库忽略
+    private String orderSeq; // 采购订单的单号
 
     private String createdUser;
     private String updatedUser;

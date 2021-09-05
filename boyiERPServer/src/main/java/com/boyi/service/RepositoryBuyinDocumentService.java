@@ -30,4 +30,6 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
 
     int countBySupplierId(String ids[]);
+
+    RepositoryBuyinDocument getByOrderId(Long id);
 }

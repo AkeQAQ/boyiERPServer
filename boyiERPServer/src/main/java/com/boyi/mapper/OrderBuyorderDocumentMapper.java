@@ -3,8 +3,9 @@ package com.boyi.mapper;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.BaseSupplierMaterial;
-import com.boyi.entity.RepositoryBuyinDocument;
+import com.boyi.entity.OrderBuyorderDocument;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.boyi.entity.OrderBuyorderDocument;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -13,31 +14,31 @@ import java.util.List;
 
 /**
  * <p>
- * 仓库模块-采购入库单据表 Mapper 接口
+ * 订单模块-采购订单单据表 Mapper 接口
  * </p>
  *
  * @author sunke
- * @since 2021-08-26
+ * @since 2021-09-04
  */
 @Repository
-
-public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyinDocument> {
+public interface OrderBuyorderDocumentMapper extends BaseMapper<OrderBuyorderDocument> {
 
     String querySql = "" +
             "select t.*,(sm.price * num) amount ,sm.price price from (" +
             "select  doc.id id, " +
-            "        doc.buy_in_date , " +
-            "        doc.order_id , " +
-            "        doc.price_date , " +
+            "        doc.order_date , " +
             "        sup.name supplier_name, " +
             "       sup.id supId, " +
             "        doc.status, " +
             "        m.id material_id, " +
             "        m.name material_name, " +
             "        m.unit , " +
-            "        docD.order_seq, docD.num from " +
-            "                        repository_buyin_document doc , " +
-            "                        repository_buyin_document_detail docD, " +
+            "        docD.done_date , " +
+            "        docD.order_seq , " +
+
+            "        docD.num from " +
+            "                        order_buyorder_document doc , " +
+            "                        order_buyorder_document_detail docD, " +
             "                        base_supplier sup, " +
             "                        base_material m " +
             " " +
@@ -47,30 +48,30 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             ") t " +
             "left join base_supplier_material sm " +
             "on sm.status=0 and t.material_id = sm.material_id and supId = sm.supplier_id" +
-            " and t.price_date between  sm.start_date and sm.end_date order by id desc,order_seq desc";
+            " and t.order_date between  sm.start_date and sm.end_date order by id desc,order_seq desc";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询
      */
     @Select(wrapperSql)
-    Page<RepositoryBuyinDocument> page(Page page, @Param("ew") Wrapper queryWrapper);
+    Page<OrderBuyorderDocument> page(Page page, @Param("ew") Wrapper queryWrapper);
 
     /**
      * 普通查询
      */
     @Select(wrapperSql)
-    List<RepositoryBuyinDocument> list(@Param("ew") Wrapper queryWrapper);
+    List<OrderBuyorderDocument> list(@Param("ew") Wrapper queryWrapper);
 
     /**
      * 单独查询
      */
     @Select(wrapperSql)
-    RepositoryBuyinDocument one(@Param("ew") Wrapper queryWrapper);
+    OrderBuyorderDocument one(@Param("ew") Wrapper queryWrapper);
 
 
-    @Select("select count(1) from repository_buyin_document rbd," +
-            "              repository_buyin_document_detail rbdd" +
+    @Select("select count(1) from order_buyorder_document rbd," +
+            "              order_buyorder_document_detail rbdd" +
             " where rbd.status = 0 and rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
-            " and rbdd.material_id = #{materialId} and rbd.price_date between #{startDate} and #{endDate}")
+            " and rbdd.material_id = #{materialId} and rbd.order_date between #{startDate} and #{endDate}")
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
 }

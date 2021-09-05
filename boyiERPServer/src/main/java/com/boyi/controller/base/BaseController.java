@@ -66,6 +66,11 @@ public class BaseController {
     @Autowired
     public OrderBuyorderDocumentDetailService orderBuyorderDocumentDetailService;
 
+    @Autowired
+    public RepositoryPickMaterialService repositoryPickMaterialService;
+
+    @Autowired
+    public RepositoryPickMaterialDetailService repositoryPickMaterialDetailService;
 
     /**
      * 获取页面

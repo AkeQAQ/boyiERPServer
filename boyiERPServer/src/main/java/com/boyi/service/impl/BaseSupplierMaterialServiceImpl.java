@@ -89,4 +89,9 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
                 ,new QueryWrapper<BaseSupplierMaterial>()
                         .like(StrUtil.isNotBlank(searchStr) && StrUtil.isNotBlank(searchField),queryField,searchStr));
     }
+
+    @Override
+    public int isRigion(BaseSupplierMaterial baseSupplierMaterial) {
+        return baseSupplierMaterialMapper.isRigion(baseSupplierMaterial);
+    }
 }

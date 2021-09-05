@@ -10,6 +10,7 @@ import com.boyi.common.dto.PassWordDto;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.BaseDepartment;
+import com.boyi.entity.BaseSupplier;
 import com.boyi.service.BaseDepartmentService;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -35,6 +36,23 @@ import java.util.Map;
 @RestController
 @RequestMapping("/baseData/department")
 public class BaseDepartmentController extends BaseController {
+
+    /**
+     * 获取全部
+     */
+    @PostMapping("/getSearchAllData")
+    @PreAuthorize("hasAuthority('baseData:department:list')")
+    public ResponseResult getSearchAllData() {
+        List<BaseDepartment> baseDepartments = baseDepartmentService.list();
+
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        baseDepartments.forEach(obj ->{
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName()).map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
+
 
     /**
      * 获取部门 分页全部数据

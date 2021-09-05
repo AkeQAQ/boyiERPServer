@@ -167,6 +167,7 @@ public class DBConstant {
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String BUY_IN_DATE_FIELDNAME = "buy_in_date";
         public static final String PRICE_DATE_FIELDNAME = "price_date";
+        public static final String ORDER_ID_FIELDNAME = "order_id";
 
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
@@ -208,8 +209,12 @@ public class DBConstant {
         public static final String ID_FIELDNAME = "id";
         public static final String STATUS_FIELDNAME = "status";
         public static final String SUPPLIER_DOCUMENT_NUM_FIELDNAME = "supplier_document_num";
+        public static final String BUY_IN_DATE_FIELDNAME = "buy_in_date";
+
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String ORDER_DATE_FIELDNAME = "order_date";
+
+
 
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
@@ -262,6 +267,46 @@ public class DBConstant {
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String UPDATED_FIELDNAME = "updated";
+        public static final String NUM_FIELDNAME = "num";
+
+    }
+
+
+    public static class TABLE_REPOSITORY_PICK_MATERIAL{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String DEPARTMENT_ID_FIELDNAME = "department_id";
+        public static final String PICK_DATE_FIELDNAME = "pick_date";
+        public static final String PICK_USER_FIELDNAME = "pick_user";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_REPOSITORY_PICK_MATERIAL_DETAIL{
+        public static final String ID_FIELDNAME = "id";
+        public static final String DOCUMENT_ID_FIELDNAME = "document_id";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String NUM_FIELDNAME = "num";
 
     }
