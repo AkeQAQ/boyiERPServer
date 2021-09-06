@@ -85,8 +85,7 @@ public class OrderBuyorderDocumentController extends BaseController {
             detail.setOrderSeq(item.getOrderSeq());
             detailArrayList.add(detail);
 
-            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getSupplierId()
-                    ,detail.getMaterialId()
+            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getMaterialId()
                     ,detail.getNum());
         }
 
@@ -101,27 +100,20 @@ public class OrderBuyorderDocumentController extends BaseController {
     @Transactional
     @PostMapping("/returnPush")
     @PreAuthorize("hasAuthority('order:buyOrder:push')")
-    public ResponseResult returnPush(Principal principal,Long id) {
-        // 1. 根据该订单ID,删除对应的入库单据记录
+    public ResponseResult returnPush(Principal principal,Long id)throws Exception {
+
         RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getByOrderId(id);
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(repositoryBuyinDocument.getId());
 
+        // 1. 修改库存
+        repositoryStockService.subNumByMaterialId(details);
+        // 2. 根据该订单ID,删除对应的入库单据记录
         repositoryBuyinDocumentService.removeById(repositoryBuyinDocument.getId());
         repositoryBuyinDocumentDetailService.removeByDocId(repositoryBuyinDocument.getId());
 
         // 2. 修改订单状态为未完成
         orderBuyorderDocumentService.statusNotSuccess(id);
 
-        // 3. 修改库存
-        for (RepositoryBuyinDocumentDetail detail : details){
-            try {
-                repositoryStockService.subNumBySupplierIdAndMaterialId(detail.getSupplierId()
-                        ,detail.getMaterialId()
-                        ,detail.getNum());
-            } catch (Exception e) {
-                log.error("数据异常",e);
-            }
-        }
         return ResponseResult.succ("撤销入库成功");
 
     }
@@ -345,10 +337,9 @@ public class OrderBuyorderDocumentController extends BaseController {
 
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByDocumentId(id);
-        // 2. 遍历更新 一个供应商，一个物料对应的库存数量
+        // 2. 遍历更新 一个物料对应的库存数量
         for (OrderBuyorderDocumentDetail detail : details){
-            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getSupplierId()
-                    ,detail.getMaterialId()
+            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getMaterialId()
                     ,detail.getNum());
         }
 

@@ -5,8 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
-import com.boyi.entity.BaseSupplierMaterial;
-import com.boyi.entity.RepositoryStock;
+import com.boyi.entity.*;
 import com.boyi.mapper.RepositoryStockMapper;
 import com.boyi.service.RepositoryStockService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,6 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -30,19 +32,18 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
     RepositoryStockMapper repositoryStockMapper;
 
     @Override
-    public void addNumBySupplierIdAndMaterialId(String supplierId, String materialId, Double num) {
+    public void addNumBySupplierIdAndMaterialId(String materialId, Double num) {
 
-        RepositoryStock stock = this.getBySupplierIdAndMaterialId(supplierId,materialId);
+        RepositoryStock stock = this.getBySupplierIdAndMaterialId(materialId);
         if(stock == null){
             stock = new RepositoryStock();
-            stock.setSupplierId(supplierId);
             stock.setMaterialId(materialId);
             stock.setNum(num);
             stock.setUpdated(LocalDateTime.now());
             this.save(stock);
         }else{
             UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
-            updateWrapper.eq(DBConstant.TABLE_REPOSITORY_STOCK.SUPPLIER_ID_FIELDNAME,supplierId)
+            updateWrapper
                     .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
                     .setSql(" num = num +"+num)
                     .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
@@ -52,25 +53,128 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
     }
 
     @Override
-    public void subNumBySupplierIdAndMaterialId(String supplierId, String materialId, Double num)throws Exception {
+    public void subNumByMaterialId(List<RepositoryBuyinDocumentDetail> details)throws Exception {
+        HashMap<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
 
-        RepositoryStock stock = this.getBySupplierIdAndMaterialId(supplierId,materialId);
-
-        if(stock == null){
-            throw new Exception("该供应商:"+supplierId+"，该物料："+materialId+"不存在，不能减库存!");
+        // 1. 遍历获取一个物料要减少的数目。
+        for (RepositoryBuyinDocumentDetail detail : details) {
+            Double materialNum = map.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            map.put(detail.getMaterialId(),materialNum+detail.getNum());
         }
-        UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.eq(DBConstant.TABLE_REPOSITORY_STOCK.SUPPLIER_ID_FIELDNAME,supplierId)
-                .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                .setSql(" num = num -"+num)
-                .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
-        this.update(updateWrapper);
+
+        // 2. 不够则返回
+        for(Map.Entry<String,Double> entry : map.entrySet()){
+            String materialId = entry.getKey();
+            RepositoryStock stock = this.getBySupplierIdAndMaterialId(entry.getKey());
+            if(stock == null){
+                throw new Exception("，该物料库存："+materialId+"不存在，不能减库存!");
+            }
+            if(stock.getNum() < entry.getValue()){
+                throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于领料的数量:"+entry.getValue()+"不能减库存!");
+            }
+        }
+
+        // 3. 够，则减少DB
+        for(Map.Entry<String,Double> entry : map.entrySet()){
+            String materialId = entry.getKey();
+            Double num = entry.getValue();
+
+            UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+            updateWrapper
+                    .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
+                    .setSql(" num = num -"+num)
+                    .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
+            this.update(updateWrapper);
+        }
+    }
+
+
+    @Override
+    public void subNumReturnMaterialId(List<RepositoryReturnMaterialDetail> details)throws Exception {
+        HashMap<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
+
+        // 1. 遍历获取一个物料要减少的数目。
+        for (RepositoryReturnMaterialDetail detail : details) {
+            Double materialNum = map.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+
+
+        // 2. 不够则返回
+        for(Map.Entry<String,Double> entry : map.entrySet()){
+            String materialId = entry.getKey();
+            RepositoryStock stock = this.getBySupplierIdAndMaterialId(entry.getKey());
+            if(stock == null){
+                throw new Exception("，该物料库存："+materialId+"不存在，不能减库存!");
+            }
+            if(stock.getNum() < entry.getValue()){
+                throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于退料的数量:"+entry.getValue()+"不能减库存!");
+            }
+        }
+
+        // 3. 够，则减少DB
+        for(Map.Entry<String,Double> entry : map.entrySet()){
+            String materialId = entry.getKey();
+            Double num = entry.getValue();
+
+            UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+            updateWrapper
+                    .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
+                    .setSql(" num = num -"+num)
+                    .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
+            this.update(updateWrapper);
+        }
     }
 
     @Override
-    public RepositoryStock getBySupplierIdAndMaterialId(String supplierId, String materialId) {
+    public void subNumBySupplierIdAndMaterialId(List<RepositoryPickMaterialDetail> details)throws Exception {
+        HashMap<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
+
+        // 1. 遍历获取一个物料要减少的数目。
+        for (RepositoryPickMaterialDetail detail : details) {
+            Double materialNum = map.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+
+
+        // 2. 不够则返回
+        for(Map.Entry<String,Double> entry : map.entrySet()){
+            String materialId = entry.getKey();
+            RepositoryStock stock = this.getBySupplierIdAndMaterialId(entry.getKey());
+            if(stock == null){
+                throw new Exception("，该物料库存："+materialId+"不存在，不能减库存!");
+            }
+            if(stock.getNum() < entry.getValue()){
+                throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于领料的数量:"+entry.getValue()+"不能减库存!");
+            }
+        }
+
+        // 3. 够，则减少DB
+        for(Map.Entry<String,Double> entry : map.entrySet()){
+            String materialId = entry.getKey();
+            Double num = entry.getValue();
+
+            UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+            updateWrapper
+                    .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
+                    .setSql(" num = num -"+num)
+                    .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
+            this.update(updateWrapper);
+        }
+    }
+
+    @Override
+    public RepositoryStock getBySupplierIdAndMaterialId( String materialId) {
         return this.getOne(new QueryWrapper<RepositoryStock>()
-                .eq(DBConstant.TABLE_REPOSITORY_STOCK.SUPPLIER_ID_FIELDNAME, supplierId)
                 .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME, materialId));
     }
 
@@ -78,12 +182,6 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
     public void removeByMaterialId(String[] ids) {
         this.remove(new QueryWrapper<RepositoryStock>()
                 .in(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,ids));
-    }
-
-    @Override
-    public void removeBySupplierId(String[] ids) {
-        this.remove(new QueryWrapper<RepositoryStock>()
-                .in(DBConstant.TABLE_REPOSITORY_STOCK.SUPPLIER_ID_FIELDNAME,ids));
     }
 
     @Override

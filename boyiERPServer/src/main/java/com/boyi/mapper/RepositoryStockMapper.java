@@ -22,8 +22,7 @@ public interface RepositoryStockMapper extends BaseMapper<RepositoryStock> {
 
     String querySql = "select m.id material_id,m.name material_name,m.unit unit,m.specs specs," +
             "s.num num from" +
-            " base_material m ," +
-            "(select material_id,sum(num) num from repository_stock  group by material_id) s " +
+            " base_material m ,repository_stock s " +
             " where m.id = s.material_id ";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**

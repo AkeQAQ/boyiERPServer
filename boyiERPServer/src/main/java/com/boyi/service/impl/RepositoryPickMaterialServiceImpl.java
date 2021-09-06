@@ -50,4 +50,9 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
                         .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME,searchEndDate));
     }
 
+    @Override
+    public Double countByDepartmentIdMaterialId(Long departmentId, String materialId) {
+        return repositoryPickMaterialMapper.countByDepartmentAndMaterial(departmentId,materialId);
+    }
+
 }

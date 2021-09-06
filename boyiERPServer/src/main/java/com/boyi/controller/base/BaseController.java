@@ -72,6 +72,13 @@ public class BaseController {
     @Autowired
     public RepositoryPickMaterialDetailService repositoryPickMaterialDetailService;
 
+    @Autowired
+    public RepositoryReturnMaterialService repositoryReturnMaterialService;
+
+    @Autowired
+    public RepositoryReturnMaterialDetailService repositoryReturnMaterialDetailService;
+
+
     /**
      * 获取页面
      * @return

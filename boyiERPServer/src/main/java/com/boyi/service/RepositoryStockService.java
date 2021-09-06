@@ -1,9 +1,10 @@
 package com.boyi.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.boyi.entity.BaseSupplierMaterial;
-import com.boyi.entity.RepositoryStock;
+import com.boyi.entity.*;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
  * <p>
@@ -15,15 +16,17 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface RepositoryStockService extends IService<RepositoryStock> {
 
-    void addNumBySupplierIdAndMaterialId(String supplierId, String materialId, Double num);
+    void addNumBySupplierIdAndMaterialId( String materialId, Double num);
 
-    void subNumBySupplierIdAndMaterialId(String supplierId, String materialId, Double num) throws Exception;
+    void subNumBySupplierIdAndMaterialId(List<RepositoryPickMaterialDetail> stocks) throws Exception;
+    void subNumByMaterialId(List<RepositoryBuyinDocumentDetail> stocks) throws Exception;
 
-    RepositoryStock getBySupplierIdAndMaterialId(String supplierId, String materialId);
+    void subNumReturnMaterialId(List<RepositoryReturnMaterialDetail> stocks) throws Exception;
+
+
+    RepositoryStock getBySupplierIdAndMaterialId(String materialId);
 
     void removeByMaterialId(String[] ids);
-
-    void removeBySupplierId(String[] ids);
 
     Page<RepositoryStock> pageBySearch(Page page, String queryField, String searchField, String searchStr);
 }

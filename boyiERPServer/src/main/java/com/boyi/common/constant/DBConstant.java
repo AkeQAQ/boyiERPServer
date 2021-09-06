@@ -310,4 +310,44 @@ public class DBConstant {
         public static final String NUM_FIELDNAME = "num";
 
     }
+
+
+    public static class TABLE_REPOSITORY_RETURN_MATERIAL{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String DEPARTMENT_ID_FIELDNAME = "department_id";
+        public static final String RETURN_DATE_FIELDNAME = "return_date";
+        public static final String RETURN_USER_FIELDNAME = "return_user";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_REPOSITORY_RETURN_MATERIAL_DETAIL{
+        public static final String ID_FIELDNAME = "id";
+        public static final String DOCUMENT_ID_FIELDNAME = "document_id";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String NUM_FIELDNAME = "num";
+
+    }
 }

@@ -194,9 +194,6 @@ public class BaseSupplierController extends BaseController {
 
         baseSupplierService.removeByIds(Arrays.asList(ids));
 
-        // 删除物料之后，要删除该物料的库存记录
-        repositoryStockService.removeBySupplierId(ids);
-
         return ResponseResult.succ("删除成功");
     }
 }

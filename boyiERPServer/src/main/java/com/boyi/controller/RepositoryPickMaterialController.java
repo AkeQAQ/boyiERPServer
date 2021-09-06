@@ -19,9 +19,7 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -143,7 +141,7 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdated(now);
         repositoryPickMaterial.setCreatedUser(principal.getName());
         repositoryPickMaterial.setUpdatedUser(principal.getName());
-        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
         try {
 
             repositoryPickMaterialService.save(repositoryPickMaterial);
@@ -232,65 +230,91 @@ public class RepositoryPickMaterialController extends BaseController {
     /**
      * 审核通过
      */
-    /*@GetMapping("/statusPass")
+    @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
-    public ResponseResult statusPass(Principal principal,Long id) {
+    public ResponseResult statusPass(Principal principal,Long id)throws Exception {
 
-        RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
-        repositoryPickMaterial.setUpdated(LocalDateTime.now());
-        repositoryPickMaterial.setUpdatedUser(principal.getName());
-        repositoryPickMaterial.setId(id);
-        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_0);
-        repositoryPickMaterialService.updateById(repositoryPickMaterial);
-        log.info("仓库模块-审核通过内容:{}",repositoryPickMaterial);
 
         // 领料审核通过之后，要把数量更新
 
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryPickMaterialDetail> details = repositoryPickMaterialDetailService.listByDocumentId(id);
         // 2. 遍历更新 一个供应商，一个物料对应的库存数量
-        for (RepositoryPickMaterialDetail detail : details){
-            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getSupplierId()
-                    ,detail.getMaterialId()
-                    ,detail.getNum());
-        }
-
-        return ResponseResult.succ("审核通过");
-    }
-*/
-
-    /**
-     * 反审核
-     */
-  /*  @GetMapping("/statusReturn")
-    @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
-    public ResponseResult statusReturn(Principal principal,Long id) {
-
-
+        repositoryStockService.subNumBySupplierIdAndMaterialId(details);
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
         repositoryPickMaterial.setUpdatedUser(principal.getName());
         repositoryPickMaterial.setId(id);
-        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_0);
         repositoryPickMaterialService.updateById(repositoryPickMaterial);
-        log.info("仓库模块-反审核通过内容:{}",repositoryPickMaterial);
+        log.info("仓库模块-领料模块-审核通过内容:{}",repositoryPickMaterial);
 
-        // 领料反审核之后，要把数量更新
+        return ResponseResult.succ("审核通过");
+    }
+
+
+    /**
+     * 反审核
+     */
+    @GetMapping("/statusReturn")
+    @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
+    public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
 
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryPickMaterialDetail> details = repositoryPickMaterialDetailService.listByDocumentId(id);
-        // 2. 遍历更新 一个供应商，一个物料对应的库存数量
-        for (RepositoryPickMaterialDetail detail : details){
-            try {
-                repositoryStockService.subNumBySupplierIdAndMaterialId(detail.getSupplierId()
-                        ,detail.getMaterialId()
-                        ,detail.getNum());
-            } catch (Exception e) {
-                log.error("数据异常",e);
+
+        RepositoryPickMaterial repositoryPickMaterial1 = repositoryPickMaterialService.getById(id);
+
+        HashMap<String, Double> map = new HashMap<>();// 一个物料，需要添加的数目
+        // 1. 遍历获取一个物料要添加的数目。
+        for (RepositoryPickMaterialDetail detail : details) {
+            Double materialNum = map.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
             }
+            map.put(detail.getMaterialId(),materialNum+detail.getNum());
         }
+        // 2. 反审核之后，该部门，该物料的审核通过的领料数目 要求>= 该部门，该物料的审核通过的退料数目
+        for (Map.Entry<String,Double> entry : map.entrySet()) {
+            String materialId = entry.getKey();
+            Double needAddNum = entry.getValue();// 该单据该物料，需要反审核进行入库的数目
+
+            // 查询该部门，该物料 审核通过的，总领料数目.
+            Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(repositoryPickMaterial1.getDepartmentId(),
+                    materialId);
+
+            // 假如反审核通过之后的，剩下的该部门，该物料的领料数目
+            double calNum = pickCount - needAddNum;
+
+            // 查询该部门，该物料 审核完成的退料数目
+            Double returnCount = repositoryReturnMaterialService.countByDepartmentIdMaterialId(repositoryPickMaterial1.getDepartmentId(),
+                    materialId);
+            returnCount  = returnCount==null?0L:returnCount;
+
+            if(calNum < returnCount){
+                throw new Exception("该部门:"+repositoryPickMaterial1.getDepartmentId()+",该物料:" +materialId+
+                        "(总领料数目:"+pickCount+" - 反审核数目:"+needAddNum+")="+calNum+" < 退料审核通过的数目:"+returnCount);
+            }
+
+        }
+        // 领料反审核之后，要把数量更新
+
+        // 2. 遍历更新 一个物料对应的库存数量
+        for (Map.Entry<String,Double> entry : map.entrySet()) {
+            String materialId = entry.getKey();
+            Double needAddNum = entry.getValue();// 该单据该物料，需要退料进行入库的数目
+            repositoryStockService.addNumBySupplierIdAndMaterialId(materialId,needAddNum);
+        }
+        RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
+        repositoryPickMaterial.setUpdated(LocalDateTime.now());
+        repositoryPickMaterial.setUpdatedUser(principal.getName());
+        repositoryPickMaterial.setId(id);
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
+        repositoryPickMaterialService.updateById(repositoryPickMaterial);
+        log.info("仓库模块-反审核通过内容:{}",repositoryPickMaterial);
+
 
         return ResponseResult.succ("反审核成功");
-    }*/
+    }
 
 }

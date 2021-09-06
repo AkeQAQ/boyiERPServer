@@ -295,10 +295,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(id);
-        // 2. 遍历更新 一个供应商，一个物料对应的库存数量
+        // 2. 遍历更新 ，一个物料对应的库存数量
         for (RepositoryBuyinDocumentDetail detail : details){
-            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getSupplierId()
-                    ,detail.getMaterialId()
+            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getMaterialId()
                     ,detail.getNum());
         }
 
@@ -311,7 +310,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
      */
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('repository:buyIn:valid')")
-    public ResponseResult statusReturn(Principal principal,Long id) {
+    public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
 
 
         RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
@@ -327,15 +326,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(id);
         // 2. 遍历更新 一个供应商，一个物料对应的库存数量
-        for (RepositoryBuyinDocumentDetail detail : details){
-            try {
-                repositoryStockService.subNumBySupplierIdAndMaterialId(detail.getSupplierId()
-                        ,detail.getMaterialId()
-                        ,detail.getNum());
-            } catch (Exception e) {
-                log.error("数据异常",e);
-            }
-        }
+        repositoryStockService.subNumByMaterialId(details);
 
         return ResponseResult.succ("反审核成功");
     }
