@@ -23,9 +23,7 @@ import java.io.*;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -55,8 +53,19 @@ public class RepositoryBuyinDocumentController extends BaseController {
             return ResponseResult.fail("采购入库删除失败");
         }
 
+        List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(ids[0]);
+
         boolean flagDetail = repositoryBuyinDocumentDetailService.delByDocumentIds(ids);
         log.info("删除采购入库表详情信息,document_id:{},是否成功：{}",ids,flagDetail?"成功":"失败");
+
+        // 假如是采购订单类型的，还需要更新采购订单的状态
+        if(details.get(0).getOrderDetailId() != null){
+            List<Long> orderDetailIds = new ArrayList<>();// 删除了的orderDetailID集合
+            for (RepositoryBuyinDocumentDetail item : details) {
+                orderDetailIds.add(item.getOrderDetailId());
+            }
+            orderBuyorderDocumentDetailService.statusNotSuccess(orderDetailIds);
+        }
 
         if(!flagDetail){
             return ResponseResult.fail("采购入库详情表没有删除成功!");
@@ -109,8 +118,6 @@ public class RepositoryBuyinDocumentController extends BaseController {
         return ResponseResult.succ(repositoryBuyinDocument);
     }
 
-
-
     /**
      * 修改入库
      */
@@ -124,39 +131,66 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
-        repositoryBuyinDocument.setPriceDate(repositoryBuyinDocument.getBuyInDate());
-        // 普通采购入库，priceDate = buyInDate
-        if(repositoryBuyinDocument.getPriceDate()==null){
-            repositoryBuyinDocument.setPriceDate(repositoryBuyinDocument.getBuyInDate());
-        }
 
         try {
 
-            // 1. 先查询该供应商，该单号是否已经有记录，有则不能插入
-            int exitCount = repositoryBuyinDocumentService.countSupplierOneDocNumExcludSelf(
-                    repositoryBuyinDocument.getSupplierDocumentNum(),
-                    repositoryBuyinDocument.getSupplierId(),
-                    repositoryBuyinDocument.getId());
+            // 分2种情况，采购订单来源的，和采购入库来源的
 
-            if(exitCount > 0){
-                return ResponseResult.fail("该供应商的单据已经存在！请确认信息!");
-            }
+            // 采购入库来源的处理:
+            if(repositoryBuyinDocument.getSourceType() == DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SOURCE_TYPE_FIELDVALUE_0){
 
-            //2. 先删除老的，再插入新的
-            boolean flag = repositoryBuyinDocumentDetailService.removeByDocId(repositoryBuyinDocument.getId());
-            if(flag){
-                repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
+                // 1. 先查询该供应商，该单号是否已经有记录，有则不能插入
+                int exitCount = repositoryBuyinDocumentService.countSupplierOneDocNumExcludSelf(
+                        repositoryBuyinDocument.getSupplierDocumentNum(),
+                        repositoryBuyinDocument.getSupplierId(),
+                        repositoryBuyinDocument.getId());
 
-                for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
-                    item.setId(null);
-                    item.setDocumentId(repositoryBuyinDocument.getId());
-                    item.setSupplierId(repositoryBuyinDocument.getSupplierId());
+                if(exitCount > 0){
+                    return ResponseResult.fail("该供应商的单据已经存在！请确认信息!");
                 }
 
-                repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
-                log.info("采购入库模块-更新内容:{}",repositoryBuyinDocument);
+                //2. 先删除老的，再插入新的
+                boolean flag = repositoryBuyinDocumentDetailService.removeByDocId(repositoryBuyinDocument.getId());
+                if(flag){
+                    repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
+
+                    for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
+                        item.setId(null);
+                        item.setDocumentId(repositoryBuyinDocument.getId());
+                        item.setSupplierId(repositoryBuyinDocument.getSupplierId());
+                        item.setPriceDate(repositoryBuyinDocument.getBuyInDate());
+                    }
+
+                    repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
+                    log.info("采购入库模块-更新内容:{}",repositoryBuyinDocument);
+                }else{
+                    return ResponseResult.fail("操作失败，期间detail删除失败");
+                }
             }else{
-                return ResponseResult.fail("操作失败，期间detail删除失败");
+                // 假如是采购订单来源的，需要删除对应记录
+
+                Set<Long> detailIds = new HashSet<>();// 现在的ID集合
+                for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()) {
+                    detailIds.add(item.getId());
+                }
+                List<RepositoryBuyinDocumentDetail> olds = repositoryBuyinDocumentDetailService.listByDocumentId(repositoryBuyinDocument.getRowList().get(0).getDocumentId());
+
+                List<Long> needSubIds = new ArrayList<>();// 删除了的ID集合
+                List<Long> orderDetailIds = new ArrayList<>();// 删除了的orderDetailID集合
+                for (RepositoryBuyinDocumentDetail item : olds) {
+                    if(!detailIds.contains(item.getId())){
+                        needSubIds.add(item.getId());
+                        orderDetailIds.add(item.getOrderDetailId());
+                    }
+                }
+                if(needSubIds.size() != 0){
+                    // 1. 根据document_id，删除现有ID之外的数据
+                    repositoryBuyinDocumentDetailService.removeByDocIdAndInIds(repositoryBuyinDocument.getId(),needSubIds);
+                    // 2. 修改，采购订单，该详情的状态
+                    orderBuyorderDocumentDetailService.statusNotSuccess(orderDetailIds);
+                    log.info("[采购入库]-[更新],更新订单detail 的id:{},状态改未下推",orderDetailIds);
+                }
+
             }
 
             return ResponseResult.succ("编辑成功");
@@ -179,10 +213,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocument.setCreatedUser(principal.getName());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
         repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
-        // 普通采购入库，priceDate = buyInDate
-        if(repositoryBuyinDocument.getPriceDate()==null){
-            repositoryBuyinDocument.setPriceDate(repositoryBuyinDocument.getBuyInDate());
-        }
+        repositoryBuyinDocument.setSourceType(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SOURCE_TYPE_FIELDVALUE_0);
         try {
             // 1. 先查询该供应商，该单号是否已经有记录，有则不能插入
             int exitCount = repositoryBuyinDocumentService.countSupplierOneDocNum(
@@ -197,6 +228,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
             for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
                 item.setDocumentId(repositoryBuyinDocument.getId());
                 item.setSupplierId(repositoryBuyinDocument.getSupplierId());
+
+                // 普通采购入库，priceDate = buyInDate
+                item.setPriceDate(repositoryBuyinDocument.getBuyInDate());
             }
 
             repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());

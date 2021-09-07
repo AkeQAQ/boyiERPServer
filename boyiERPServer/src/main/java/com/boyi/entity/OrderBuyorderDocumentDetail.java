@@ -48,6 +48,11 @@ public class OrderBuyorderDocumentDetail  {
      */
     private String supplierId;
 
+    /**
+     *  状态
+     */
+    private Integer status;
+
     @TableField(exist = false)  // 字段数据库忽略
     private String materialName;
     @TableField(exist = false)  // 字段数据库忽略
@@ -69,5 +74,9 @@ public class OrderBuyorderDocumentDetail  {
      */
     private String orderSeq;
 
+    /**
+     * 采购日期
+     */
+    private LocalDate orderDate;
 
 }

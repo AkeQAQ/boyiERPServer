@@ -8,6 +8,7 @@ import com.boyi.service.RepositoryBuyinDocumentDetailService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -42,5 +43,18 @@ public class RepositoryBuyinDocumentDetailServiceImpl extends ServiceImpl<Reposi
     public int countByMaterialId(String[] ids) {
         return this.count(new QueryWrapper<RepositoryBuyinDocumentDetail>()
                 .in(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public List<RepositoryBuyinDocumentDetail> listByOrderDetailId(Long[] orderDetailIds) {
+        return this.list(new QueryWrapper<RepositoryBuyinDocumentDetail>()
+                .in(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.ORDER_DETAIL_ID_FIELDNAME, orderDetailIds)
+                .orderByAsc(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME));
+    }
+    @Override
+    public void removeByDocIdAndInIds(Long id, List<Long> detailIds) {
+        this.remove(new QueryWrapper<RepositoryBuyinDocumentDetail>()
+                .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ID_FIELDNAME,detailIds)
+                .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME,id));
     }
 }

@@ -60,11 +60,9 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
     }
 
     @Override
-    public void statusSuccess(Long id, String supplierDocumentNum, LocalDate buyInDate) {
+    public void statusSuccess(Long id) {
         OrderBuyorderDocument orderBuyorderDocument = new OrderBuyorderDocument();
         orderBuyorderDocument.setId(id);
-        orderBuyorderDocument.setBuyInDate(buyInDate);
-        orderBuyorderDocument.setSupplierDocumentNum(supplierDocumentNum);
         orderBuyorderDocument.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDVALUE_0);
         this.updateById(orderBuyorderDocument);
     }
@@ -78,8 +76,7 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
         orderBuyorderDocument.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDVALUE_1);
         this.updateById(orderBuyorderDocument);*/
         UpdateWrapper<OrderBuyorderDocument> order = new UpdateWrapper<>();
-        UpdateWrapper<OrderBuyorderDocument> updateWrapper = order.set(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.SUPPLIER_DOCUMENT_NUM_FIELDNAME, null)
-                .set(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.BUY_IN_DATE_FIELDNAME, null)
+        UpdateWrapper<OrderBuyorderDocument> updateWrapper = order
                 .set(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDNAME, DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDVALUE_1)
                 .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ID_FIELDNAME, id);
         this.update(updateWrapper);

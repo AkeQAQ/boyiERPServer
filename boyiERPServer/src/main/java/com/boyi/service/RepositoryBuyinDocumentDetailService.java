@@ -3,6 +3,7 @@ package com.boyi.service;
 import com.boyi.entity.RepositoryBuyinDocumentDetail;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,4 +24,8 @@ public interface RepositoryBuyinDocumentDetailService extends IService<Repositor
     boolean removeByDocId(Long id);
 
     int countByMaterialId(String[] ids);
+
+    List<RepositoryBuyinDocumentDetail> listByOrderDetailId(Long[] orderDetailIds);
+
+    void removeByDocIdAndInIds(Long id, List<Long> detailIds);
 }

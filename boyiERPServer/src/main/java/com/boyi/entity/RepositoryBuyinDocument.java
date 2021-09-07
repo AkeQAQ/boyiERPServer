@@ -42,16 +42,10 @@ public class RepositoryBuyinDocument extends BaseEntity {
     @ExcelAttribute(sort = 1)
     private LocalDate buyInDate;
 
-    /**
-     * 价目日期
-     */
-    @ExcelAttribute(sort = 8)
-    private LocalDate priceDate;
+    private String createdUser;
+    private String updatedUser;
 
-    /**
-     *  采购订单下推进行入库的的主键ID
-     */
-    private Long orderId;
+    private Integer sourceType;
 
 
     /**
@@ -100,7 +94,11 @@ public class RepositoryBuyinDocument extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     private String orderSeq; // 采购订单的单号
 
-    private String createdUser;
-    private String updatedUser;
+    @TableField(exist = false)  // 字段数据库忽略
+    private LocalDate priceDate; // 采购订单详情的采购价
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private Long orderId; // 采购订单的ID
+
 
 }

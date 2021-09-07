@@ -28,7 +28,7 @@ public interface OrderBuyorderDocumentService extends IService<OrderBuyorderDocu
 
     int countBySupplierId(String ids[]);
 
-    void statusSuccess(Long id,String supplierDocumentNum, LocalDate buyInDate);
+    void statusSuccess(Long id);
 
     void statusNotSuccess(Long id);
 }

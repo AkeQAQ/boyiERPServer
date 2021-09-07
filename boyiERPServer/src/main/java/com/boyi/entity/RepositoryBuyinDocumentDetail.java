@@ -3,8 +3,11 @@ package com.boyi.entity;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.boyi.common.utils.ExcelAttribute;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.time.LocalDate;
 
 /**
  * <p>
@@ -52,6 +55,20 @@ public class RepositoryBuyinDocumentDetail {
      */
     private String orderSeq;
 
+    /**
+     * 价目日期
+     */
+    private LocalDate priceDate;
+
+    /**
+     *  采购订单下推进行入库的的主键ID
+     */
+    private Long orderId;
+
+    /**
+     *  采购订单详情下推进行入库的的主键ID
+     */
+    private Long orderDetailId;
 
     @TableField(exist = false)  // 字段数据库忽略
     private String materialName;

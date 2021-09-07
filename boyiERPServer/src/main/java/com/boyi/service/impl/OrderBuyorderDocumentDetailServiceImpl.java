@@ -1,7 +1,9 @@
 package com.boyi.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.OrderBuyorderDocument;
 import com.boyi.entity.OrderBuyorderDocumentDetail;
 import com.boyi.entity.OrderBuyorderDocumentDetail;
 import com.boyi.mapper.OrderBuyorderDocumentDetailMapper;
@@ -42,5 +44,24 @@ public class OrderBuyorderDocumentDetailServiceImpl extends ServiceImpl<OrderBuy
     public int countByMaterialId(String[] ids) {
         return this.count(new QueryWrapper<OrderBuyorderDocumentDetail>()
                 .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public void statusSuccess(Long[] orderDetailIds) {
+        UpdateWrapper<OrderBuyorderDocumentDetail> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDNAME
+                ,DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_0)
+                .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ID_FIELDNAME,orderDetailIds);
+        this.update(updateWrapper);
+    }
+
+
+    @Override
+    public void statusNotSuccess(List<Long> orderDetailIds) {
+        UpdateWrapper<OrderBuyorderDocumentDetail> updateWrapper = new UpdateWrapper<>();
+        updateWrapper.set(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDNAME
+                        ,DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1)
+                .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ID_FIELDNAME,orderDetailIds);
+        this.update(updateWrapper);
     }
 }

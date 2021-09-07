@@ -43,16 +43,6 @@ public class OrderBuyorderDocument extends BaseEntity {
 
 
     /**
-     * 供应商单据编号
-     */
-    private String supplierDocumentNum;
-
-    /**
-     * 入库日期
-     */
-    private LocalDate buyInDate;
-
-    /**
      *  明细信息 用于接收前端数据
      */
     @TableField(exist = false)  // 字段数据库忽略
@@ -100,4 +90,11 @@ public class OrderBuyorderDocument extends BaseEntity {
 
     @TableField(exist = false)  // 字段数据库忽略
     private String orderSeq; // 该单据总金额
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private Long detailId; // 详情ID
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private Integer detailStatus; // 详情的状态
+
 }

@@ -27,15 +27,18 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "select t.*,(sm.price * num) amount ,sm.price price from (" +
             "select  doc.id id, " +
             "        doc.buy_in_date , " +
-            "        doc.order_id , " +
-            "        doc.price_date , " +
-            "        sup.name supplier_name, " +
-            "       sup.id supId, " +
             "        doc.status, " +
+            "        doc.source_type, " +
+            "        sup.name supplier_name, " +
+            "        sup.id supId, " +
             "        m.id material_id, " +
             "        m.name material_name, " +
             "        m.unit , " +
-            "        docD.order_seq, docD.num from " +
+            "        docD.order_seq," +
+            "        docD.num," +
+            "        docD.order_id , " +
+            "        docD.price_date  " +
+            " from " +
             "                        repository_buyin_document doc , " +
             "                        repository_buyin_document_detail docD, " +
             "                        base_supplier sup, " +
@@ -71,6 +74,6 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
     @Select("select count(1) from repository_buyin_document rbd," +
             "              repository_buyin_document_detail rbdd" +
             " where rbd.status = 0 and rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
-            " and rbdd.material_id = #{materialId} and rbd.price_date between #{startDate} and #{endDate}")
+            " and rbdd.material_id = #{materialId} and rbdd.price_date between #{startDate} and #{endDate}")
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
 }

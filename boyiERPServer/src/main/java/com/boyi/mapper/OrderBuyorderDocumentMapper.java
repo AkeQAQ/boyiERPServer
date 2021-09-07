@@ -28,14 +28,15 @@ public interface OrderBuyorderDocumentMapper extends BaseMapper<OrderBuyorderDoc
             "select  doc.id id, " +
             "        doc.order_date , " +
             "        sup.name supplier_name, " +
-            "       sup.id supId, " +
+            "        sup.id supId, " +
             "        doc.status, " +
             "        m.id material_id, " +
             "        m.name material_name, " +
             "        m.unit , " +
             "        docD.done_date , " +
             "        docD.order_seq , " +
-
+            "        docD.id detail_id, " +
+            "        docD.status detail_status , " +
             "        docD.num from " +
             "                        order_buyorder_document doc , " +
             "                        order_buyorder_document_detail docD, " +

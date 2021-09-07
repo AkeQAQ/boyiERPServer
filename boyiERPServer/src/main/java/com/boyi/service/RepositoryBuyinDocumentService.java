@@ -6,6 +6,8 @@ import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.RepositoryBuyinDocument;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.ArrayList;
+
 /**
  * <p>
  * 仓库模块-采购入库单据表 服务类
@@ -32,4 +34,5 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     int countBySupplierId(String ids[]);
 
     RepositoryBuyinDocument getByOrderId(Long id);
+
 }

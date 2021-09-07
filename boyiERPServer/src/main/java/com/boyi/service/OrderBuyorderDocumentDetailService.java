@@ -23,4 +23,7 @@ public interface OrderBuyorderDocumentDetailService extends IService<OrderBuyord
     boolean removeByDocId(Long id);
 
     int countByMaterialId(String[] ids);
+
+    void statusSuccess(Long[] orderDetailIds);
+    void statusNotSuccess(List<Long> orderDetailIds);
 }
