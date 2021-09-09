@@ -331,7 +331,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(id);
         // 2. 遍历更新 ，一个物料对应的库存数量
         for (RepositoryBuyinDocumentDetail detail : details){
-            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getMaterialId()
+            repositoryStockService.addNumByMaterialId(detail.getMaterialId()
                     ,detail.getNum());
         }
 
@@ -352,16 +352,47 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
         repositoryBuyinDocument.setId(id);
         repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
-        repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
-        log.info("仓库模块-反审核通过内容:{}",repositoryBuyinDocument);
 
-        // 采购入库反审核之后，要把数量更新
 
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(id);
-        // 2. 遍历更新 一个供应商，一个物料对应的库存数量
-        repositoryStockService.subNumByMaterialId(details);
+        String supplierId = details.get(0).getSupplierId();
+        // 2. 得到一个物料，需要减少的数量
+        Map<String, Double> subMap = new HashMap<>();// 一个物料，需要减少的数目
+        for (RepositoryBuyinDocumentDetail detail : details) {
+            Double materialNum = subMap.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            subMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+        // 3. 减少之后的该供应商，该物料的审核通过完成的入库数目 >= 该供应商，该物料 审核通过的退料数目
 
+        for (Map.Entry<String,Double> entry : subMap.entrySet()) {
+            String materialId = entry.getKey();
+            Double needSubNum = entry.getValue();// 该单据该物料，需要反审核进行出库的数目
+
+            // 查询该供应商，该物料 审核通过的，总入库数目.
+            Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(supplierId,materialId);
+
+            // 假如反审核通过之后的，剩下的该供应商，该物料的入库数目
+            double calNum = pushCount - needSubNum;
+
+            // 查询该供应商，该物料 审核完成的退料数目
+            Double returnCount = repositoryBuyoutDocumentService.countBySupplierIdAndMaterialId(supplierId,materialId);
+            returnCount  = returnCount==null?0L:returnCount;
+
+            if(calNum < returnCount){
+                throw new Exception("该供应商:"+supplierId+",该物料:" +materialId+
+                        "(总入库数目:"+pushCount+" - 反审核数目:"+needSubNum+")="+calNum+" < 退料审核通过的数目:"+returnCount);
+            }
+        }
+
+        // 4. 减少库存
+        repositoryStockService.subNumByMaterialId(subMap);
+
+        repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
+        log.info("仓库模块-反审核通过内容:{}",repositoryBuyinDocument);
         return ResponseResult.succ("反审核成功");
     }
 

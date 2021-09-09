@@ -79,6 +79,20 @@ public class BaseController {
     public RepositoryReturnMaterialDetailService repositoryReturnMaterialDetailService;
 
 
+    @Autowired
+    public RepositoryBuyoutDocumentService repositoryBuyoutDocumentService;
+
+    @Autowired
+    public RepositoryBuyoutDocumentDetailService repositoryBuyoutDocumentDetailService;
+
+    @Autowired
+    public OrderProductpricePreService orderProductpricePreService;
+
+
+    @Autowired
+    public OrderProductpriceRealService orderProductpriceRealService;
+
+
     /**
      * 获取页面
      * @return

@@ -5,6 +5,7 @@ import com.boyi.entity.*;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -16,15 +17,13 @@ import java.util.List;
  */
 public interface RepositoryStockService extends IService<RepositoryStock> {
 
-    void addNumBySupplierIdAndMaterialId( String materialId, Double num);
+    void addNumByMaterialId( String materialId, Double num);
 
     void subNumBySupplierIdAndMaterialId(List<RepositoryPickMaterialDetail> stocks) throws Exception;
-    void subNumByMaterialId(List<RepositoryBuyinDocumentDetail> stocks) throws Exception;
-
+    void subNumByMaterialId(Map<String, Double> details) throws Exception;
     void subNumReturnMaterialId(List<RepositoryReturnMaterialDetail> stocks) throws Exception;
 
-
-    RepositoryStock getBySupplierIdAndMaterialId(String materialId);
+    RepositoryStock getByMaterialId(String materialId);
 
     void removeByMaterialId(String[] ids);
 

@@ -80,4 +80,9 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
                 .eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.ORDER_ID_FIELDNAME, id));
     }
 
+    @Override
+    public Double countBySupplierIdAndMaterialId(String supplierId, String materialId) {
+        return repositoryBuyinDocumentMapper.getSumNumBySupplierIdAndMaterialId(supplierId,materialId);
+    }
+
 }

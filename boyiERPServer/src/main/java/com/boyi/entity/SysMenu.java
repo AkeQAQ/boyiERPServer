@@ -9,8 +9,7 @@ import javax.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>

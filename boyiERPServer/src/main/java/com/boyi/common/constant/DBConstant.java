@@ -387,4 +387,126 @@ public class DBConstant {
         public static final String NUM_FIELDNAME = "num";
 
     }
+
+
+    public static class TABLE_REPOSITORY_BUYOUT_DOCUMENT{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String BUY_OUT_DATE_FIELDNAME = "buy_out_date";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+
+        /**
+         *  0:代表 采购入库
+         */
+        public static final Integer SOURCE_TYPE_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 订单入库
+         */
+        public static final Integer SOURCE_TYPE_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_REPOSITORY_BUYOUT_DOCUMENT_DETAIL{
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String DOCUMENT_ID_FIELDNAME = "document_id";
+        public static final String NUM_FIELDNAME = "num";
+        public static final String COMMENT_FIELDNAME = "comment";
+        public static final String PRICE_DATE_FIELDNAME = "price_date";
+    }
+
+
+    public static class TABLE_ORDER_PRODUCTPRICEPRE{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已确认");
+            statusMap2.put(1,"未确认");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String COMPANY_NUM_FIELDNAME = "company_num";
+        public static final String COSTOMER_FIELDNAME = "customer";
+        public static final String SAVE_PATH_FIELDNAME = "save_path";
+        public static final String PRICE_FIELDNAME = "price";
+        public static final String UPLOAD_NAME_FIELDNAME = "upload_name";
+
+
+
+        /**
+         *  0:代表 已确认
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 未确认
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+
+    public static class TABLE_ORDER_PRODUCTPRICEREAL{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已确认");
+            statusMap2.put(1,"未确认");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String COMPANY_NUM_FIELDNAME = "company_num";
+        public static final String COSTOMER_FIELDNAME = "customer";
+        public static final String SAVE_PATH_FIELDNAME = "save_path";
+        public static final String PRICE_FIELDNAME = "price";
+        public static final String UPLOAD_NAME_FIELDNAME = "upload_name";
+        public static final String PRE_ID_NAME_FIELDNAME = "upload_name";
+
+
+
+        /**
+         *  0:代表 已确认
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 未确认
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
 }

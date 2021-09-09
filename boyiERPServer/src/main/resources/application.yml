@@ -23,4 +23,9 @@ boyi:
 
 poi:
   repositoryBuyInDemoPath: D:/demo.xlsx
+  repositoryBuyOutDemoPath: D:/demo.xlsx
   orderBuyOrderDemoPath: D:/orderDemo.xlsx
+
+orderProductPrice:
+  pre: D:/pre/
+  real: D:/real/

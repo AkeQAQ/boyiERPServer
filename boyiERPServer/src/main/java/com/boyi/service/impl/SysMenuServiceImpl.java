@@ -13,8 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -87,8 +86,24 @@ public class SysMenuServiceImpl extends ServiceImpl<SysMenuMapper, SysMenu> impl
             dto.setRouterName(m.getAuthority());
             dto.setComponent(m.getComponent());
             dto.setStatus(m.getStatus());
+            dto.setOrderType(m.getOrderType());
             if (m.getChildren().size() > 0) {
-                dto.setChildren(convert(m.getChildren()));
+                List<SysNavDto> convert = convert(m.getChildren());
+                TreeSet<SysNavDto> sysMenus = new TreeSet<>(new Comparator<SysNavDto>() {
+                    @Override
+                    public int compare(SysNavDto o1, SysNavDto o2) {
+                        if(o1.getOrderType() != null && o2.getOrderType() != null){
+                            int compareTo = o1.getOrderType().compareTo(o2.getOrderType());
+                            return compareTo == 0 ? -1 : compareTo;
+                        }else {
+                            return -1;
+                        }
+                    }
+                });
+                sysMenus.addAll(convert);
+                ArrayList<SysNavDto> sysNavDtos = new ArrayList<>();
+                sysNavDtos.addAll(sysMenus);
+                dto.setChildren(sysNavDtos);
             }
             menuDtos.add(dto);
         });

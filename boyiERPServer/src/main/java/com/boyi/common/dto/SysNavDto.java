@@ -16,5 +16,6 @@ class SysNavDto implements Serializable {
     private String routerName;
     private String component;
     private Integer status;
+    private Integer orderType;
     List<SysNavDto> children = new ArrayList<>();
 }

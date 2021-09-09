@@ -366,7 +366,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByDocumentId(id);
         // 2. 遍历更新 一个物料对应的库存数量
         for (OrderBuyorderDocumentDetail detail : details){
-            repositoryStockService.addNumBySupplierIdAndMaterialId(detail.getMaterialId()
+            repositoryStockService.addNumByMaterialId(detail.getMaterialId()
                     ,detail.getNum());
         }
 

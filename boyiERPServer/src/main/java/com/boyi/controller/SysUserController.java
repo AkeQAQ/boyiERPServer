@@ -47,7 +47,6 @@ public class SysUserController extends BaseController {
      * Principal 标识注入的当前用户
      */
     @GetMapping("/getUserInfo")
-    @PreAuthorize("hasAuthority('sysManage:user:list')")
     public ResponseResult getUserInfo(Principal principal) {
         String username = principal.getName();
 

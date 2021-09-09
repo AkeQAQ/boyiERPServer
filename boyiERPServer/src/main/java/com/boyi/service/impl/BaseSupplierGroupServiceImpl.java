@@ -32,6 +32,6 @@ public class BaseSupplierGroupServiceImpl extends ServiceImpl<BaseSupplierGroupM
 
     @Override
     public BaseSupplierGroup getByCode(String groupCode) {
-        return this.getOne(new QueryWrapper<BaseSupplierGroup>().eq(DBConstant.TABLE_BASE_SUPPLIER_GROUP.NAME_FIELDNAME, groupCode));
+        return this.getOne(new QueryWrapper<BaseSupplierGroup>().eq(DBConstant.TABLE_BASE_SUPPLIER_GROUP.CODE_FIELDNAME, groupCode));
     }
 }

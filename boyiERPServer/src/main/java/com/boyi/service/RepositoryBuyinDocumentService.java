@@ -35,4 +35,5 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
 
     RepositoryBuyinDocument getByOrderId(Long id);
 
+    Double countBySupplierIdAndMaterialId(String supplierId, String materialId);
 }

@@ -303,7 +303,7 @@ public class RepositoryPickMaterialController extends BaseController {
         for (Map.Entry<String,Double> entry : map.entrySet()) {
             String materialId = entry.getKey();
             Double needAddNum = entry.getValue();// 该单据该物料，需要退料进行入库的数目
-            repositoryStockService.addNumBySupplierIdAndMaterialId(materialId,needAddNum);
+            repositoryStockService.addNumByMaterialId(materialId,needAddNum);
         }
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
