@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpricePreMapper, OrderProductpricePre> implements OrderProductpricePreService {
 
     @Override
-    public void updateFilePathByCompanyNumAndCustomer(Integer companyNum, String customer, String storePath) {
+    public void updateFilePathByCompanyNumAndCustomer(String companyNum, String customer, String storePath) {
         UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.SAVE_PATH_FIELDNAME,storePath)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,companyNum)
@@ -30,7 +30,7 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
     }
 
     @Override
-    public OrderProductpricePre getByCustomerAndCompanyNum(String customer, Integer companyNum) {
+    public OrderProductpricePre getByCustomerAndCompanyNum(String customer, String companyNum) {
         return this.getOne(new QueryWrapper<OrderProductpricePre>()
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,companyNum)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COSTOMER_FIELDNAME,customer));
@@ -40,7 +40,7 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
     public void updateStatusSuccess(Long id) {
         UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
-                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_0)
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_2)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
         this.update(update);
     }
@@ -50,6 +50,7 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
         UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_1)
+                .set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_JSON_FIELDNAME,null)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
         this.update(update);
     }
@@ -60,5 +61,23 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,preId)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_0));
+    }
+
+    @Override
+    public void updateStatusFinal(Long id) {
+        UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
+        update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_0)
+                .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
+        this.update(update);
+    }
+
+    @Override
+    public void updateStatusReturnReal(Long id) {
+        UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
+        update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_2)
+                .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
+        this.update(update);
     }
 }

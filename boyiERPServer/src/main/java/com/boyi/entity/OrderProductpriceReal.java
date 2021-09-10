@@ -21,7 +21,7 @@ public class OrderProductpriceReal extends BaseEntity {
     /**
      * 公司货号
      */
-    private Integer companyNum;
+    private String companyNum;
 
     /**
      * 客户公司名称

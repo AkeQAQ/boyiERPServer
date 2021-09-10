@@ -24,7 +24,7 @@ import org.springframework.stereotype.Service;
 public class OrderProductpriceRealServiceImpl extends ServiceImpl<OrderProductpriceRealMapper, OrderProductpriceReal> implements OrderProductpriceRealService {
 
     @Override
-    public void updateFilePathByCompanyNumAndCustomer(Integer companyNum, String customer, String storePath) {
+    public void updateFilePathByCompanyNumAndCustomer(String companyNum, String customer, String storePath) {
         UpdateWrapper<OrderProductpriceReal> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEREAL.SAVE_PATH_FIELDNAME,storePath)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEREAL.COMPANY_NUM_FIELDNAME,companyNum)
@@ -33,7 +33,7 @@ public class OrderProductpriceRealServiceImpl extends ServiceImpl<OrderProductpr
     }
 
     @Override
-    public OrderProductpriceReal getByCustomerAndCompanyNum(String customer, Integer companyNum) {
+    public OrderProductpriceReal getByCustomerAndCompanyNum(String customer, String companyNum) {
         return this.getOne(new QueryWrapper<OrderProductpriceReal>()
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEREAL.COMPANY_NUM_FIELDNAME,companyNum)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEREAL.COSTOMER_FIELDNAME,customer));

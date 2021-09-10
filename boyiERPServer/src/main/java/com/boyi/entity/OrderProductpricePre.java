@@ -21,7 +21,7 @@ public class OrderProductpricePre extends BaseEntity {
     /**
      * 公司货号
      */
-    private Integer companyNum;
+    private String companyNum;
 
     /**
      * 客户公司名称
@@ -42,5 +42,9 @@ public class OrderProductpricePre extends BaseEntity {
     private Double price;
 
     private String uploadName;
+
+    private String excelJson; // 报价excel 内容
+
+    private String realJson; // 实际报价excel 内容
 
 }

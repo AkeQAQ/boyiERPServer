@@ -13,13 +13,17 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface OrderProductpricePreService extends IService<OrderProductpricePre> {
 
-    void updateFilePathByCompanyNumAndCustomer(Integer companyNum, String customer, String storePath);
+    void updateFilePathByCompanyNumAndCustomer(String companyNum, String customer, String storePath);
 
-    OrderProductpricePre getByCustomerAndCompanyNum(String customer, Integer companyNum);
+    OrderProductpricePre getByCustomerAndCompanyNum(String customer, String companyNum);
 
     void updateStatusSuccess(Long id);
 
     void updateStatusReturn(Long id);
 
     OrderProductpricePre getByIdAndStatusSuccess(Long preId);
+
+    void updateStatusFinal(Long id);
+
+    void updateStatusReturnReal(Long id);
 }

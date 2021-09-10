@@ -444,6 +444,9 @@ public class DBConstant {
             Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
             statusMap2.put(0,"已确认");
             statusMap2.put(1,"未确认");
+
+            statusMap2.put(2,"报价确认");
+            statusMap2.put(3,"实际价确认");
             statusMap = statusMap2;
         }
         public static final Map<Integer,String> statusMap;
@@ -460,6 +463,9 @@ public class DBConstant {
         public static final String PRICE_FIELDNAME = "price";
         public static final String UPLOAD_NAME_FIELDNAME = "upload_name";
 
+        public static final String EXCEL_JSON_FIELDNAME = "excel_json";
+        public static final String REAL_JSON_FIELDNAME = "real_json";
+
 
 
         /**
@@ -471,6 +477,14 @@ public class DBConstant {
          *  1:代表 未确认
          */
         public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 报价确认
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 实际确认
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
     }
 
 
@@ -478,7 +492,7 @@ public class DBConstant {
         static{
             Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
             statusMap2.put(0,"已确认");
-            statusMap2.put(1,"未确认");
+            statusMap2.put(1,"未报价确认");
             statusMap = statusMap2;
         }
         public static final Map<Integer,String> statusMap;
@@ -504,9 +518,24 @@ public class DBConstant {
         public static final Integer STATUS_FIELDVALUE_0 = 0;
 
         /**
-         *  1:代表 未确认
+         *  1:代表 未报价确认
          */
         public static final Integer STATUS_FIELDVALUE_1 = 1;
+
+    }
+
+    public static class TABLE_SPREAD_DEMO{
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String TYPE_FIELDNAME = "type";
+        public static final String DEMO_JSON_FIELDNAME = "demo_json";
+
+
+
+        /**
+         *  报价模板
+         */
+        public static final Integer TYPE_BAOJIA_FIELDVALUE_0 = 0;
     }
 
 }

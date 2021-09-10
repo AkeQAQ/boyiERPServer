@@ -14,9 +14,9 @@ import com.boyi.entity.OrderProductpriceReal;
  */
 public interface OrderProductpriceRealService extends IService<OrderProductpriceReal> {
 
-    void updateFilePathByCompanyNumAndCustomer(Integer companyNum, String customer, String storePath);
+    void updateFilePathByCompanyNumAndCustomer(String companyNum, String customer, String storePath);
 
-    OrderProductpriceReal getByCustomerAndCompanyNum(String customer, Integer companyNum);
+    OrderProductpriceReal getByCustomerAndCompanyNum(String customer, String companyNum);
 
     void updateStatusSuccess(Long id);
 

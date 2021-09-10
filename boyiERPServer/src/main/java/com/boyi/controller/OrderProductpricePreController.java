@@ -53,6 +53,130 @@ public class OrderProductpricePreController extends BaseController {
     @Value("${orderProductPrice.real}")
     private String orderProductPriceRealPath;
 
+
+    /**
+     * 查询实际报价详情内容
+     */
+    @GetMapping("/queryRealById")
+    @PreAuthorize("hasAuthority('order:productPricePre:real')")
+    public ResponseResult queryRealById(Long id) {
+        OrderProductpricePre orderPrice = orderProductpricePreService.getById(id);
+        if(orderPrice.getRealJson() == null || orderPrice.getRealJson().isEmpty()){
+            orderPrice.setRealJson(orderPrice.getExcelJson());
+        }
+        return ResponseResult.succ(orderPrice);
+    }
+
+    /**
+     * 保存实际报价
+     */
+    @PostMapping("/setStreadReal")
+    @PreAuthorize("hasAuthority('order:productPricePre:real')")
+    public ResponseResult setStreadReal(Principal principal,@Validated @RequestBody OrderProductpricePre orderProductpricePre) {
+        LocalDateTime now = LocalDateTime.now();
+        orderProductpricePre.setCreated(now);
+        orderProductpricePre.setUpdated(now);
+        orderProductpricePre.setCreatedUser(principal.getName());
+        orderProductpricePre.setUpdateUser(principal.getName());
+
+        try {
+            orderProductpricePreService.updateById(orderProductpricePre);
+            return ResponseResult.succ("保存实际价格成功");
+        } catch (Exception e) {
+            log.error("修改异常", e);
+            return ResponseResult.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 获取报价模板
+     */
+    @GetMapping("/getStreadDemo")
+    @PreAuthorize("hasAuthority('order:productPricePre:save')")
+    public ResponseResult getStreadDemo() {
+        try {
+            SpreadDemo dbObj = spreadDemoService.getByType(DBConstant.TABLE_SPREAD_DEMO.TYPE_BAOJIA_FIELDVALUE_0);
+            return ResponseResult.succ(dbObj);
+        } catch (Exception e) {
+            log.error("设置模板异常", e);
+            return ResponseResult.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 设置报价模板
+     */
+    @PostMapping("/setStreadDemo")
+    @PreAuthorize("hasAuthority('order:productPricePre:save')")
+    public ResponseResult setStreadDemo(@Validated @RequestBody SpreadDemo spreadDemo) {
+        try {
+            SpreadDemo dbObj = spreadDemoService.getByType(DBConstant.TABLE_SPREAD_DEMO.TYPE_BAOJIA_FIELDVALUE_0);
+            if(dbObj == null ){
+                spreadDemo.setType(DBConstant.TABLE_SPREAD_DEMO.TYPE_BAOJIA_FIELDVALUE_0);
+                spreadDemoService.save(spreadDemo);
+            }else {
+                dbObj.setDemoJson(spreadDemo.getDemoJson());
+                spreadDemoService.updateById(dbObj);
+            }
+            return ResponseResult.succ("设置模板成功");
+        } catch (Exception e) {
+            log.error("设置模板异常", e);
+            return ResponseResult.fail(e.getMessage());
+        }
+    }
+
+    /**
+     * 保存
+     */
+    @PostMapping("/update")
+    @PreAuthorize("hasAuthority('order:productPricePre:update')")
+    public ResponseResult update(Principal principal,@Validated @RequestBody OrderProductpricePre orderProductpricePre) {
+        LocalDateTime now = LocalDateTime.now();
+        orderProductpricePre.setCreated(now);
+        orderProductpricePre.setUpdated(now);
+        orderProductpricePre.setCreatedUser(principal.getName());
+        orderProductpricePre.setUpdateUser(principal.getName());
+        orderProductpricePre.setStatus(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_1);
+
+        try {
+            orderProductpricePreService.updateById(orderProductpricePre);
+            return ResponseResult.succ("编辑成功");
+        } catch (Exception e) {
+            log.error("修改异常", e);
+            return ResponseResult.fail(e.getMessage());
+        }
+    }
+
+
+
+    /**
+     * 新增
+     */
+    @PostMapping("/save")
+    @PreAuthorize("hasAuthority('order:productPricePre:save')")
+    public ResponseResult save(Principal principal,@Validated @RequestBody OrderProductpricePre orderProductpricePre) {
+        LocalDateTime now = LocalDateTime.now();
+        orderProductpricePre.setCreated(now);
+        orderProductpricePre.setUpdated(now);
+        orderProductpricePre.setCreatedUser(principal.getName());
+        orderProductpricePre.setUpdateUser(principal.getName());
+        orderProductpricePre.setStatus(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_1);
+
+        try {
+            OrderProductpricePre old = orderProductpricePreService.getByCustomerAndCompanyNum(orderProductpricePre.getCustomer(),
+                    orderProductpricePre.getCompanyNum());
+            if(old != null){
+                return ResponseResult.fail("该客户公司，该货号已存在历史记录!不允许添加");
+            }
+            orderProductpricePreService.save(orderProductpricePre);
+            return ResponseResult.succ("新增成功");
+        } catch (Exception e) {
+            log.error("插入异常", e);
+            return ResponseResult.fail(e.getMessage());
+        }
+    }
+
+
     @Transactional
     @PostMapping("/returnValid")
     @PreAuthorize("hasAuthority('order:productPricePre:returnValid')")
@@ -64,12 +188,34 @@ public class OrderProductpricePreController extends BaseController {
     }
 
     @Transactional
+    @PostMapping("/returnRealValid")
+    @PreAuthorize("hasAuthority('order:productPricePre:returnValid')")
+    public ResponseResult returnRealValid(@RequestBody Long id) {
+
+        OrderProductpricePre old = orderProductpricePreService.getById(id);
+        orderProductpricePreService.updateStatusReturnReal(id);
+        return ResponseResult.succ("反审核成功");
+    }
+
+    @Transactional
     @PostMapping("/valid")
     @PreAuthorize("hasAuthority('order:productPricePre:valid')")
     public ResponseResult valid(@RequestBody Long id) {
 
         OrderProductpricePre old = orderProductpricePreService.getById(id);
         orderProductpricePreService.updateStatusSuccess(id);
+        return ResponseResult.succ("审核成功");
+    }
+
+
+    @Transactional
+    @PostMapping("/realValid")
+    @PreAuthorize("hasAuthority('order:productPricePre:real')")
+    public ResponseResult realValid(@RequestBody Long id) {
+
+        OrderProductpricePre old = orderProductpricePreService.getById(id);
+        orderProductpricePreService.updateStatusSuccess(id);
+        orderProductpricePreService.updateStatusFinal(id);
         return ResponseResult.succ("审核成功");
     }
 
@@ -99,9 +245,6 @@ public class OrderProductpricePreController extends BaseController {
         if(!flag){
             return ResponseResult.fail("新成品核算预估删除失败");
         }
-        // 删除文件
-        File file = new File(old.getSavePath());
-        file.delete();
         return ResponseResult.succ("删除成功");
     }
 
@@ -121,7 +264,7 @@ public class OrderProductpricePreController extends BaseController {
      */
     @PostMapping("/upload")
     @PreAuthorize("hasAuthority('order:productPricePre:save')")
-    public ResponseResult upload(Principal principal, Integer companyNum, String customer,Double price ,MultipartFile[] files) {
+    public ResponseResult upload(Principal principal, String companyNum, String customer,Double price ,MultipartFile[] files) {
         LocalDateTime now = LocalDateTime.now();
         OrderProductpricePre orderProductpricePre = new OrderProductpricePre();
         orderProductpricePre.setCreated(now);

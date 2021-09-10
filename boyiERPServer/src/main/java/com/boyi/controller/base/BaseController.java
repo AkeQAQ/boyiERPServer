@@ -92,6 +92,8 @@ public class BaseController {
     @Autowired
     public OrderProductpriceRealService orderProductpriceRealService;
 
+    @Autowired
+    public SpreadDemoService spreadDemoService;
 
     /**
      * 获取页面
