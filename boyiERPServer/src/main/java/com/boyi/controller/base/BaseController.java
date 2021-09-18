@@ -1,9 +1,6 @@
 package com.boyi.controller.base;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.boyi.entity.OrderBuyorderDocument;
-import com.boyi.entity.OrderBuyorderDocumentDetail;
-import com.boyi.entity.RepositoryBuyinDocumentDetail;
 import com.boyi.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestUtils;
@@ -90,7 +87,7 @@ public class BaseController {
 
 
     @Autowired
-    public OrderProductpriceRealService orderProductpriceRealService;
+    public ProduceCraftService produceCraftService;
 
     @Autowired
     public SpreadDemoService spreadDemoService;

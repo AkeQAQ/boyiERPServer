@@ -26,6 +26,10 @@ public class ResponseResult implements Serializable {
     private String msg;
     private Object data;
 
+    public static String succJSON(String data) {
+        return data;
+    }
+
     public static ResponseResult succ(Object data) {
         return succ(SUCCESS_CODE, SUCCESS_MSG, data);
     }

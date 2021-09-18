@@ -4,9 +4,11 @@ import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
+
 /**
  * <p>
- * 新产品成本核算-实际
+ *  工艺单模块
  * </p>
  *
  * @author sunke
@@ -14,7 +16,7 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class OrderProductpriceReal extends BaseEntity {
+public class ProduceCraft extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
@@ -32,16 +34,16 @@ public class OrderProductpriceReal extends BaseEntity {
 
     private String updateUser;
 
-    /**
-     * 文件存储路径
-     */
-    private String savePath;
-
     private Integer status;
 
-    private Double price;
+    private String excelJson;
+    private String realJson;
 
-    private String uploadName;
-    private Long preId;
+    private String lastUpdateUser;
+    private LocalDateTime lastUpdateDate;
+
+    private String devLastUpdateUser;
+    private LocalDateTime devLastUpdateDate;
+
 
 }

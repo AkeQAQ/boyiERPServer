@@ -9,6 +9,8 @@ import com.boyi.service.OrderProductpricePreService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+
 /**
  * <p>
  * 新产品成本核算-报价 服务实现类
@@ -37,20 +39,27 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
     }
 
     @Override
-    public void updateStatusSuccess(Long id) {
+    public void updateStatusSuccess(String updateUser,Long id) {
+        OrderProductpricePre old = this.getById(id);
         UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_2)
+                .set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_JSON_FIELDNAME,
+                        old.getExcelJson())
+                .set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.UPDATED_USER_FIELDNAME,updateUser)
+                .set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.UPDATED_FIELDNAME, LocalDateTime.now())
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
         this.update(update);
     }
 
     @Override
-    public void updateStatusReturn(Long id) {
+    public void updateStatusReturn(String updateUser,Long id) {
         UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_1)
                 .set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_JSON_FIELDNAME,null)
+                .set(DBConstant.TABLE_PRODUCE_CRAFT.UPDATED_USER_FIELDNAME,updateUser)
+                .set(DBConstant.TABLE_PRODUCE_CRAFT.UPDATED_FIELDNAME, LocalDateTime.now())
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
         this.update(update);
     }
@@ -64,19 +73,23 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
     }
 
     @Override
-    public void updateStatusFinal(Long id) {
+    public void updateStatusFinal(String updateUser,Long id) {
         UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_0)
+                .set(DBConstant.TABLE_PRODUCE_CRAFT.UPDATED_USER_FIELDNAME,updateUser)
+                .set(DBConstant.TABLE_PRODUCE_CRAFT.UPDATED_FIELDNAME, LocalDateTime.now())
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
         this.update(update);
     }
 
     @Override
-    public void updateStatusReturnReal(Long id) {
+    public void updateStatusReturnReal(String updateUser,Long id) {
         UpdateWrapper<OrderProductpricePre> update = new UpdateWrapper<>();
         update.set(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_2)
+                .set(DBConstant.TABLE_PRODUCE_CRAFT.UPDATED_USER_FIELDNAME,updateUser)
+                .set(DBConstant.TABLE_PRODUCE_CRAFT.UPDATED_FIELDNAME, LocalDateTime.now())
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
         this.update(update);
     }

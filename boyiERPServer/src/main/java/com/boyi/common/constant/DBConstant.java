@@ -123,7 +123,7 @@ public class DBConstant {
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
-        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
 
     }
     public static class TABLE_BASE_SUPPLIER_MATERIAL{
@@ -139,7 +139,7 @@ public class DBConstant {
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
-        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
 
         /**
          *  0:代表 审核通过
@@ -289,7 +289,7 @@ public class DBConstant {
         public static final String MOBILE_FIELDNAME = "mobile";
 
         public static final String CREATED_USER_FIELDNAME = "created_user";
-        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
     }
@@ -456,7 +456,7 @@ public class DBConstant {
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
-        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
         public static final String COMPANY_NUM_FIELDNAME = "company_num";
         public static final String COSTOMER_FIELDNAME = "customer";
         public static final String SAVE_PATH_FIELDNAME = "save_path";
@@ -465,6 +465,7 @@ public class DBConstant {
 
         public static final String EXCEL_JSON_FIELDNAME = "excel_json";
         public static final String REAL_JSON_FIELDNAME = "real_json";
+        public static final String REAL_PRICE_FIELDNAME = "real_price";
 
 
 
@@ -481,18 +482,17 @@ public class DBConstant {
          *  2:代表 报价确认
          */
         public static final Integer STATUS_FIELDVALUE_2 = 2;
-        /**
-         *  3:代表 实际确认
-         */
-        public static final Integer STATUS_FIELDVALUE_3 = 3;
     }
 
 
-    public static class TABLE_ORDER_PRODUCTPRICEREAL{
+    public static class TABLE_PRODUCE_CRAFT{
         static{
             Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
             statusMap2.put(0,"已确认");
-            statusMap2.put(1,"未报价确认");
+            statusMap2.put(1,"未确认");
+
+            statusMap2.put(2,"开发填写确认");
+            statusMap2.put(3,"最终确认");
             statusMap = statusMap2;
         }
         public static final Map<Integer,String> statusMap;
@@ -502,14 +502,11 @@ public class DBConstant {
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
-        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
         public static final String COMPANY_NUM_FIELDNAME = "company_num";
         public static final String COSTOMER_FIELDNAME = "customer";
-        public static final String SAVE_PATH_FIELDNAME = "save_path";
-        public static final String PRICE_FIELDNAME = "price";
-        public static final String UPLOAD_NAME_FIELDNAME = "upload_name";
-        public static final String PRE_ID_NAME_FIELDNAME = "upload_name";
-
+        public static final String EXCEL_JSON_NAME_FIELDNAME = "excel_json";
+        public static final String REAL_JSON_FIELDNAME = "real_json";
 
 
         /**
@@ -518,10 +515,13 @@ public class DBConstant {
         public static final Integer STATUS_FIELDVALUE_0 = 0;
 
         /**
-         *  1:代表 未报价确认
+         *  1:代表 未确认
          */
         public static final Integer STATUS_FIELDVALUE_1 = 1;
-
+        /**
+         *  2:代表 报价确认
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
     }
 
     public static class TABLE_SPREAD_DEMO{
@@ -536,6 +536,11 @@ public class DBConstant {
          *  报价模板
          */
         public static final Integer TYPE_BAOJIA_FIELDVALUE_0 = 0;
+
+        /**
+         *  工艺单模板
+         */
+        public static final Integer TYPE_GYD_FIELDVALUE_1 = 1;
     }
 
 }

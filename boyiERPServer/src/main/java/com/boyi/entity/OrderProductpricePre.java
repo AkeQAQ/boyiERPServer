@@ -4,6 +4,8 @@ import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDateTime;
+
 /**
  * <p>
  * 新产品成本核算-报价
@@ -46,5 +48,12 @@ public class OrderProductpricePre extends BaseEntity {
     private String excelJson; // 报价excel 内容
 
     private String realJson; // 实际报价excel 内容
+    private Double realPrice; // 实际报价
+
+    private LocalDateTime priceLastUpdateDate;
+    private LocalDateTime realPriceLastUpdateDate;
+    private String priceLastUpdateUser;
+    private String realPriceLastUpdateUser;
+
 
 }

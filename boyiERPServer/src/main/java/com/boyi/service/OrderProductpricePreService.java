@@ -17,13 +17,13 @@ public interface OrderProductpricePreService extends IService<OrderProductpriceP
 
     OrderProductpricePre getByCustomerAndCompanyNum(String customer, String companyNum);
 
-    void updateStatusSuccess(Long id);
+    void updateStatusSuccess(String updateUser,Long id);
 
-    void updateStatusReturn(Long id);
+    void updateStatusReturn(String updateUser,Long id);
 
     OrderProductpricePre getByIdAndStatusSuccess(Long preId);
 
-    void updateStatusFinal(Long id);
+    void updateStatusFinal(String updateUser,Long id);
 
-    void updateStatusReturnReal(Long id);
+    void updateStatusReturnReal(String updateUser,Long id);
 }

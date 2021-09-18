@@ -58,7 +58,7 @@ public class OrderProductpricePreController extends BaseController {
      * 查询实际报价详情内容
      */
     @GetMapping("/queryRealById")
-    @PreAuthorize("hasAuthority('order:productPricePre:real')")
+    @PreAuthorize("hasAuthority('order:productPricePre:list')")
     public ResponseResult queryRealById(Long id) {
         OrderProductpricePre orderPrice = orderProductpricePreService.getById(id);
         if(orderPrice.getRealJson() == null || orderPrice.getRealJson().isEmpty()){
@@ -74,10 +74,12 @@ public class OrderProductpricePreController extends BaseController {
     @PreAuthorize("hasAuthority('order:productPricePre:real')")
     public ResponseResult setStreadReal(Principal principal,@Validated @RequestBody OrderProductpricePre orderProductpricePre) {
         LocalDateTime now = LocalDateTime.now();
-        orderProductpricePre.setCreated(now);
         orderProductpricePre.setUpdated(now);
-        orderProductpricePre.setCreatedUser(principal.getName());
         orderProductpricePre.setUpdateUser(principal.getName());
+
+        orderProductpricePre.setRealPriceLastUpdateDate(now);
+        orderProductpricePre.setRealPriceLastUpdateUser(principal.getName());
+
 
         try {
             orderProductpricePreService.updateById(orderProductpricePre);
@@ -92,7 +94,7 @@ public class OrderProductpricePreController extends BaseController {
      * 获取报价模板
      */
     @GetMapping("/getStreadDemo")
-    @PreAuthorize("hasAuthority('order:productPricePre:save')")
+    @PreAuthorize("hasAuthority('order:productPricePre:list')")
     public ResponseResult getStreadDemo() {
         try {
             SpreadDemo dbObj = spreadDemoService.getByType(DBConstant.TABLE_SPREAD_DEMO.TYPE_BAOJIA_FIELDVALUE_0);
@@ -126,17 +128,17 @@ public class OrderProductpricePreController extends BaseController {
     }
 
     /**
-     * 保存
+     * 更新
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('order:productPricePre:update')")
     public ResponseResult update(Principal principal,@Validated @RequestBody OrderProductpricePre orderProductpricePre) {
         LocalDateTime now = LocalDateTime.now();
-        orderProductpricePre.setCreated(now);
         orderProductpricePre.setUpdated(now);
-        orderProductpricePre.setCreatedUser(principal.getName());
         orderProductpricePre.setUpdateUser(principal.getName());
         orderProductpricePre.setStatus(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_1);
+        orderProductpricePre.setPriceLastUpdateDate(now);
+        orderProductpricePre.setPriceLastUpdateUser(principal.getName());
 
         try {
             orderProductpricePreService.updateById(orderProductpricePre);
@@ -161,6 +163,8 @@ public class OrderProductpricePreController extends BaseController {
         orderProductpricePre.setCreatedUser(principal.getName());
         orderProductpricePre.setUpdateUser(principal.getName());
         orderProductpricePre.setStatus(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_1);
+        orderProductpricePre.setPriceLastUpdateDate(now);
+        orderProductpricePre.setPriceLastUpdateUser(principal.getName());
 
         try {
             OrderProductpricePre old = orderProductpricePreService.getByCustomerAndCompanyNum(orderProductpricePre.getCustomer(),
@@ -180,42 +184,36 @@ public class OrderProductpricePreController extends BaseController {
     @Transactional
     @PostMapping("/returnValid")
     @PreAuthorize("hasAuthority('order:productPricePre:returnValid')")
-    public ResponseResult returnValid(@RequestBody Long id) {
+    public ResponseResult returnValid(Principal principal,@RequestBody Long id) {
 
-        OrderProductpricePre old = orderProductpricePreService.getById(id);
-        orderProductpricePreService.updateStatusReturn(id);
+        orderProductpricePreService.updateStatusReturn(principal.getName(),id);
         return ResponseResult.succ("反审核成功");
     }
 
     @Transactional
     @PostMapping("/returnRealValid")
-    @PreAuthorize("hasAuthority('order:productPricePre:returnValid')")
-    public ResponseResult returnRealValid(@RequestBody Long id) {
+    @PreAuthorize("hasAuthority('order:productPricePre:returnRealValid')")
+    public ResponseResult returnRealValid(Principal principal,@RequestBody Long id) {
 
-        OrderProductpricePre old = orderProductpricePreService.getById(id);
-        orderProductpricePreService.updateStatusReturnReal(id);
+        orderProductpricePreService.updateStatusReturnReal(principal.getName(),id);
         return ResponseResult.succ("反审核成功");
     }
 
     @Transactional
     @PostMapping("/valid")
     @PreAuthorize("hasAuthority('order:productPricePre:valid')")
-    public ResponseResult valid(@RequestBody Long id) {
+    public ResponseResult valid(Principal principal,@RequestBody Long id) {
 
-        OrderProductpricePre old = orderProductpricePreService.getById(id);
-        orderProductpricePreService.updateStatusSuccess(id);
+        orderProductpricePreService.updateStatusSuccess(principal.getName(),id);
         return ResponseResult.succ("审核成功");
     }
 
 
     @Transactional
     @PostMapping("/realValid")
-    @PreAuthorize("hasAuthority('order:productPricePre:real')")
-    public ResponseResult realValid(@RequestBody Long id) {
-
-        OrderProductpricePre old = orderProductpricePreService.getById(id);
-        orderProductpricePreService.updateStatusSuccess(id);
-        orderProductpricePreService.updateStatusFinal(id);
+    @PreAuthorize("hasAuthority('order:productPricePre:realValid')")
+    public ResponseResult realValid(Principal principal,@RequestBody Long id) {
+        orderProductpricePreService.updateStatusFinal(principal.getName(),id);
         return ResponseResult.succ("审核成功");
     }
 
