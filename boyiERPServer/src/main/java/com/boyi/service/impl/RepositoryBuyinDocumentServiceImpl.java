@@ -37,8 +37,8 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     }
 
     @Override
-    public Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial){
-        return repositoryBuyinDocumentMapper.getBySupplierMaterial(baseSupplierMaterial);
+    public Integer getSupplierMaterialPassBetweenDate(BaseSupplierMaterial baseSupplierMaterial){
+        return repositoryBuyinDocumentMapper.getSupplierMaterialPassBetweenDate(baseSupplierMaterial);
     }
 
     @Override
@@ -82,7 +82,9 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
 
     @Override
     public Double countBySupplierIdAndMaterialId(String supplierId, String materialId) {
-        return repositoryBuyinDocumentMapper.getSumNumBySupplierIdAndMaterialId(supplierId,materialId);
+        Double count = repositoryBuyinDocumentMapper.getSumNumBySupplierIdAndMaterialId(supplierId, materialId);
+        count = count == null ? 0D:count;
+        return count;
     }
 
 }

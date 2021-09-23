@@ -22,7 +22,7 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
 
     RepositoryBuyinDocument one(QueryWrapper<RepositoryBuyinDocument> id);
 
-    Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
+    Integer getSupplierMaterialPassBetweenDate(BaseSupplierMaterial baseSupplierMaterial);
 
     // 该单据编号 该供应商，不包括本ID的条数
     int countSupplierOneDocNumExcludSelf(String supplierDocumentNum, String supplierId, Long id);

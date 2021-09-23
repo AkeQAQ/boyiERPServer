@@ -70,7 +70,6 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
             " where pm.id = pmd.document_id" +
             " and pm.department_id = bd.id" +
             " and pmd.material_id = #{materialId}" +
-            " and bd.id = #{departmentId}" +
-            " and pm.status = 0")
+            " and bd.id = #{departmentId}" )
     Double countByDepartmentAndMaterial(Long departmentId, String materialId);
 }

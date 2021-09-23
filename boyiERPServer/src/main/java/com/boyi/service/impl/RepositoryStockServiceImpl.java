@@ -31,6 +31,23 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
     @Autowired
     RepositoryStockMapper repositoryStockMapper;
 
+
+
+    @Override
+    public void addNumByMaterialIdFromMap(Map<String, Double> needAddMap) {
+        for(Map.Entry<String,Double> entry : needAddMap.entrySet()){
+            String materialId = entry.getKey();
+            Double num = entry.getValue();
+
+            UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+            updateWrapper
+                    .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
+                    .setSql(" num = num +"+num)
+                    .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
+            this.update(updateWrapper);
+        }
+    }
+
     @Override
     public void addNumByMaterialId(String materialId, Double num) {
 
@@ -49,25 +66,22 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
                     .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
             this.update(updateWrapper);
         }
+    }
+
+    @Override
+    public void subNumByMaterialIdNum(String materialId, Double num) {
+
+        UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+        updateWrapper
+                .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
+                .setSql(" num = num -"+num)
+                .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
+        this.update(updateWrapper);
 
     }
 
     @Override
     public void subNumByMaterialId(Map<String, Double> needSubMap)throws Exception {
-
-        // 2. 不够则返回
-        for(Map.Entry<String,Double> entry : needSubMap.entrySet()){
-            String materialId = entry.getKey();
-            RepositoryStock stock = this.getByMaterialId(entry.getKey());
-            if(stock == null){
-                throw new Exception("，该物料库存："+materialId+"不存在，不能减库存!");
-            }
-            if(stock.getNum() < entry.getValue()){
-                throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于要减少的数量:"+entry.getValue()+"不能减库存!");
-            }
-        }
-
-        // 3. 够，则减少DB
         for(Map.Entry<String,Double> entry : needSubMap.entrySet()){
             String materialId = entry.getKey();
             Double num = entry.getValue();
@@ -123,46 +137,6 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
     }
 
     @Override
-    public void subNumBySupplierIdAndMaterialId(List<RepositoryPickMaterialDetail> details)throws Exception {
-        HashMap<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
-
-        // 1. 遍历获取一个物料要减少的数目。
-        for (RepositoryPickMaterialDetail detail : details) {
-            Double materialNum = map.get(detail.getMaterialId());
-            if(materialNum == null){
-                materialNum= 0D;
-            }
-            map.put(detail.getMaterialId(),materialNum+detail.getNum());
-        }
-
-
-        // 2. 不够则返回
-        for(Map.Entry<String,Double> entry : map.entrySet()){
-            String materialId = entry.getKey();
-            RepositoryStock stock = this.getByMaterialId(entry.getKey());
-            if(stock == null){
-                throw new Exception("，该物料库存："+materialId+"不存在，不能减库存!");
-            }
-            if(stock.getNum() < entry.getValue()){
-                throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于领料的数量:"+entry.getValue()+"不能减库存!");
-            }
-        }
-
-        // 3. 够，则减少DB
-        for(Map.Entry<String,Double> entry : map.entrySet()){
-            String materialId = entry.getKey();
-            Double num = entry.getValue();
-
-            UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
-            updateWrapper
-                    .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                    .setSql(" num = num -"+num)
-                    .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
-            this.update(updateWrapper);
-        }
-    }
-
-    @Override
     public RepositoryStock getByMaterialId( String materialId) {
         return this.getOne(new QueryWrapper<RepositoryStock>()
                 .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME, materialId));
@@ -179,5 +153,20 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
         return repositoryStockMapper.page(page
                 ,new QueryWrapper<RepositoryStock>()
                         .like(StrUtil.isNotBlank(searchStr) && StrUtil.isNotBlank(searchField),queryField,searchStr));
+    }
+
+    @Override
+    public void validStockNum(Map<String, Double> needSubMap)throws Exception {
+        for(Map.Entry<String,Double> entry : needSubMap.entrySet()){
+            String materialId = entry.getKey();
+            RepositoryStock stock = this.getByMaterialId(materialId);
+            if(stock == null){
+                throw new Exception("，该物料库存："+materialId+"不存在，不能减库存!");
+            }
+            if(stock.getNum() < entry.getValue()){
+                throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于要减少的数量:"+entry.getValue()+"不能减库存!");
+            }
+        }
+
     }
 }

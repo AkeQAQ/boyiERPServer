@@ -4,6 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class DBConstant {
+    public static void main(String[] args) {
+        char n = 'n';
+        System.out.println((int)n);
+        System.out.println((int)'s');
+        System.out.println((int)'h');
+
+        System.out.println((int)'z');
+        System.out.println((int)'y');
+        System.out.println((int)'q');
+
+        System.out.println((int)'z');
+        System.out.println((int)'x');
+        System.out.println((int)'y');
+
+        System.out.println((int)'w');
+        System.out.println((int)'l');
+
+
+    }
      public static class TABLE_ROLE_MENU{
          public static final String ID_FIELDNAME = "id";
          public static final String MENU_ID_FIELDNAME = "menu_id";

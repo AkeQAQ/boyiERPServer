@@ -47,8 +47,14 @@ public class OrderBuyorderDocumentController extends BaseController {
     @Transactional
     @PostMapping("/push")
     @PreAuthorize("hasAuthority('order:buyOrder:push')")
-    public ResponseResult push(Principal principal,@RequestBody RepositoryBuyinDocument repositoryBuyinDocument,Long[] orderDetailIds) {
-        List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByIds(Arrays.asList(orderDetailIds));
+    public ResponseResult push(Principal principal,@RequestBody RepositoryBuyinDocument repositoryBuyinDocument,Long[] orderDetailIds,Long id) {
+        List<OrderBuyorderDocumentDetail> details = null;
+        if(id != null){
+            details = orderBuyorderDocumentDetailService.listByDocumentId(id);
+        }else {
+            details = orderBuyorderDocumentDetailService.listByIds(Arrays.asList(orderDetailIds));
+        }
+        List<Long> detailIds = new ArrayList<>();
         String supplierId = details.get(0).getSupplierId();
         // 已经是下推过的，则不能执行
         for (OrderBuyorderDocumentDetail detail: details){
@@ -58,6 +64,10 @@ public class OrderBuyorderDocumentController extends BaseController {
             if(!detail.getSupplierId().equals(supplierId)){
                 return ResponseResult.fail("请选择同供应商进行下推！！！");
             }
+            detailIds.add(detail.getId());
+        }
+        if(id != null){
+            orderDetailIds = detailIds.toArray(new Long[detailIds.size()]);
         }
 
         repositoryBuyinDocument.setSupplierId(supplierId);

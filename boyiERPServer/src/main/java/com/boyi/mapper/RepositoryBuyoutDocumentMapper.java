@@ -47,7 +47,7 @@ public interface RepositoryBuyoutDocumentMapper extends BaseMapper<RepositoryBuy
             ") t " +
             "left join base_supplier_material sm " +
             "on sm.status=0 and t.material_id = sm.material_id and supId = sm.supplier_id" +
-            " and t.price_date between  sm.start_date and sm.end_date ";
+            " and t.price_date between  sm.start_date and sm.end_date order by id desc ";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询
@@ -71,7 +71,7 @@ public interface RepositoryBuyoutDocumentMapper extends BaseMapper<RepositoryBuy
 
     @Select("select sum(num) from repository_buyout_document rbd," +
             "              repository_buyout_document_detail rbdd" +
-            " where rbd.status = 0 and rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
+            " where rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
             " and rbdd.material_id = #{materialId}")
     Double getSumNumBySupplierIdAndMaterialId(String supplierId, String materialId);
 }

@@ -43,6 +43,13 @@ public class RepositoryBuyoutDocumentController extends BaseController {
     @PreAuthorize("hasAuthority('repository:buyOut:del')")
     public ResponseResult delete(@RequestBody Long[] ids) {
 
+        // 入库对应的数量
+        List<RepositoryBuyoutDocumentDetail> details = repositoryBuyoutDocumentDetailService.listByDocumentId(ids[0]);
+        for (RepositoryBuyoutDocumentDetail detail : details){
+            repositoryStockService.addNumByMaterialId(detail.getMaterialId()
+                    ,detail.getNum());
+        }
+
         boolean flag = repositoryBuyoutDocumentService.removeByIds(Arrays.asList(ids));
 
         log.info("删除采购退料表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");
@@ -56,6 +63,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         if(!flagDetail){
             return ResponseResult.fail("采购退料详情表没有删除成功!");
         }
+
+
         return ResponseResult.succ("删除成功");
     }
 
@@ -109,7 +118,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('repository:buyOut:update')")
-    public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryBuyoutDocument repositoryBuyoutDocument) {
+    public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryBuyoutDocument repositoryBuyoutDocument)throws Exception {
 
         if(repositoryBuyoutDocument.getRowList() ==null || repositoryBuyoutDocument.getRowList().size() ==0){
             return ResponseResult.fail("物料信息不能为空");
@@ -119,6 +128,15 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
 
         try {
+
+            Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
+            Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
+            Map<String, Double> notUpdateMap = new HashMap<>();   // 需要增加库存的内容
+            // 校验退料数目
+            validCompareReturnNum(repositoryBuyoutDocument, needSubMap,needAddMap,notUpdateMap);
+
+            // 校验库存
+            repositoryStockService.validStockNum(needSubMap);
 
             //1. 先删除老的，再插入新的
             boolean flag = repositoryBuyoutDocumentDetailService.removeByDocId(repositoryBuyoutDocument.getId());
@@ -138,6 +156,11 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                 return ResponseResult.fail("操作失败，期间detail删除失败");
             }
 
+            // 4. 减少,添加库存
+            repositoryStockService.subNumByMaterialId(needSubMap);
+            repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
+
+
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
             log.error("供应商，更新异常",e);
@@ -145,12 +168,114 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         }
     }
 
+    private void validCompareReturnNum(RepositoryBuyoutDocument repositoryBuyoutDocument,
+                                       Map<String, Double> needSubMap,
+                                       Map<String, Double> needAddMap,
+                                       Map<String, Double> notUpdateMap) throws Exception{
+
+        // 判断2. 库存能否修改。
+        List<RepositoryBuyoutDocumentDetail> oldDetails = repositoryBuyoutDocumentDetailService.listByDocumentId(repositoryBuyoutDocument.getId());
+
+        // 新的物料数目：
+        Map<String, Double> newMap = new HashMap<>();
+        for (RepositoryBuyoutDocumentDetail detail : repositoryBuyoutDocument.getRowList()) {
+            Double materialNum = newMap.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            newMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+
+        // 2.  老的物料数目
+        Map<String, Double> oldMap = new HashMap<>();
+        for (RepositoryBuyoutDocumentDetail detail : oldDetails) {
+            Double materialNum = oldMap.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            oldMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+        Set<String> set = new HashSet<>();
+        set.addAll(oldMap.keySet());
+        set.addAll(newMap.keySet());
+
+        String oldSupplierId = oldDetails.get(0).getSupplierId();
+        String newSupplierId = repositoryBuyoutDocument.getSupplierId();
+
+        // 1. 假如供应商没变
+        // 1.1 判断物料的数目，能否修改库存
+        if(oldSupplierId.equals(newSupplierId)) {
+
+            // 3. 减少之后的该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目
+            for (String materialId : set) {
+                Double oldNum = oldMap.get(materialId)==null? 0D: oldMap.get(materialId);
+                Double newNum = newMap.get(materialId)==null? 0D: newMap.get(materialId);
+
+                // 老的物料里， 数目比 新的物料数目多的,就是要新增库存的，就不需要判断。
+                if(oldNum > newNum){
+                    needAddMap.put(materialId,oldNum - newNum );//需要新增的数目
+                    continue;
+                }else if(oldNum < newNum){
+                    needSubMap.put(materialId,newNum - oldNum ); // 需要减少的数目
+                }else {
+                    notUpdateMap.put(materialId,newNum);
+                    continue;
+                }
+                Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(newSupplierId,materialId);
+
+                // 查询该供应商，该物料退料数目
+                Double returnCount = repositoryBuyoutDocumentService.countBySupplierIdAndMaterialId(newSupplierId,materialId);
+
+                double calReturnNum = returnCount + (newNum-oldNum);
+
+                if(pushCount < calReturnNum){
+                    throw new Exception("该供应商:"+newSupplierId+",该物料:" +materialId+
+                            "(入库数目 :"+pushCount+"将会  < 修改后的退料的数目:"+calReturnNum);
+
+                }
+            }
+        }// 2. 假如供应商变更了
+        else {
+            // 新供应商新增了退料，需要判断
+            for (String materialId : set) {
+                Double oldNum = oldMap.get(materialId) == null ? 0D : oldMap.get(materialId);
+                Double newNum = newMap.get(materialId) == null ? 0D : newMap.get(materialId);
+                // 老的物料里， 数目比 新的物料数目多的,就是要新增库存的，就不需要判断。
+                if (oldNum > newNum) {
+                    needAddMap.put(materialId, oldNum - newNum);//需要新增的数目
+                } else if (oldNum < newNum) {
+                    needSubMap.put(materialId, newNum - oldNum); // 需要减少的数目
+                } else {
+                    notUpdateMap.put(materialId, newNum);
+                }
+
+                if (newNum == 0) {
+                    continue;
+                }
+
+                Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(newSupplierId, materialId);
+
+                // 查询该供应商，该物料退料数目
+                Double returnCount = repositoryBuyoutDocumentService.countBySupplierIdAndMaterialId(newSupplierId, materialId);
+
+                double calReturnNum = returnCount + newNum;
+
+                if (pushCount < calReturnNum) {
+                    throw new Exception("更换供应商:" + newSupplierId + ",该物料:" + materialId +
+                            "(入库数目 :" + pushCount + "将会  < 修改后的退料的数目:" + calReturnNum);
+
+                }
+            }
+        }
+
+    }
+
     /**
      * 新增退料
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:buyOut:save')")
-    public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryBuyoutDocument repositoryBuyoutDocument) {
+    public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryBuyoutDocument repositoryBuyoutDocument)throws Exception {
         LocalDateTime now = LocalDateTime.now();
         repositoryBuyoutDocument.setCreated(now);
         repositoryBuyoutDocument.setUpdated(now);
@@ -158,7 +283,38 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
         repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1);
 
+        String supplierId = repositoryBuyoutDocument.getSupplierId();
+        // 2. 得到一个物料，需要减少的数量
+        Map<String, Double> subMap = new HashMap<>();// 一个物料，需要减少的数目
+        for (RepositoryBuyoutDocumentDetail detail :  repositoryBuyoutDocument.getRowList()) {
+            Double materialNum = subMap.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            subMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+        // 3.该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目
+
+        for (Map.Entry<String,Double> entry : subMap.entrySet()) {
+            String materialId = entry.getKey();
+            Double returnNum = entry.getValue();// 该单据该物料，需要入库的数目
+
+            // 查询该供应商，该物料 总入库数目.
+            Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(supplierId,materialId);
+
+            // 查询该供应商，该物料 退料数目
+            Double returnCount = repositoryBuyoutDocumentService.countBySupplierIdAndMaterialId(supplierId,materialId);
+            double calNum = returnCount + returnNum;
+
+            if(pushCount < calNum){
+                throw new Exception("该供应商:"+supplierId+",该物料:" +materialId+
+                        " 入库数目:"+pushCount+ " < (历史退料数目:"+returnCount+" + 当前退料数目:"+returnNum+")="+calNum );
+            }
+        }
+
+
         try {
+
             repositoryBuyoutDocumentService.save(repositoryBuyoutDocument);
 
             for (RepositoryBuyoutDocumentDetail item : repositoryBuyoutDocument.getRowList()){
@@ -168,6 +324,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             }
 
             repositoryBuyoutDocumentDetailService.saveBatch(repositoryBuyoutDocument.getRowList());
+
+            repositoryStockService.subNumByMaterialId(subMap);
 
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
@@ -257,48 +415,6 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setId(id);
         repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_0);
 
-
-        // 采购退料审核通过之后，要把数量更新
-
-        // 1. 根据单据ID 获取该单据的全部详情信息，
-        List<RepositoryBuyoutDocumentDetail> details = repositoryBuyoutDocumentDetailService.listByDocumentId(id);
-
-        String supplierId = details.get(0).getSupplierId();
-        // 2. 得到一个物料，需要减少的数量
-        Map<String, Double> subMap = new HashMap<>();// 一个物料，需要减少的数目
-        for (RepositoryBuyoutDocumentDetail detail : details) {
-            Double materialNum = subMap.get(detail.getMaterialId());
-            if(materialNum == null){
-                materialNum= 0D;
-            }
-            subMap.put(detail.getMaterialId(),materialNum+detail.getNum());
-        }
-        // 3. 减少之后的该供应商，该物料的审核通过完成的入库数目 >= 该供应商，该物料 审核通过的退料数目
-
-        for (Map.Entry<String,Double> entry : subMap.entrySet()) {
-            String materialId = entry.getKey();
-            Double needSubNum = entry.getValue();// 该单据该物料，需要反审核进行出库的数目
-
-            // 查询该供应商，该物料 审核通过的，总入库数目.
-            Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(supplierId,materialId);
-            pushCount  = pushCount==null?0L:pushCount;
-            // 假如反审核通过之后的，剩下的该供应商，该物料的入库数目
-
-            // 查询该供应商，该物料 审核完成的退料数目
-            Double returnCount = repositoryBuyoutDocumentService.countBySupplierIdAndMaterialId(supplierId,materialId);
-            returnCount  = returnCount==null?0L:returnCount;
-            double calNum = returnCount + needSubNum;
-
-
-            if(pushCount < calNum){
-                throw new Exception("该供应商:"+supplierId+",该物料:" +materialId+
-                        " 入库审核通过的数目:"+pushCount+ " < (退料审核通过的数目:"+returnCount+" + 退料数目:"+needSubNum+")="+calNum );
-            }
-        }
-
-        // 4. 减少库存
-        repositoryStockService.subNumByMaterialId(subMap);
-
         repositoryBuyoutDocumentService.updateById(repositoryBuyoutDocument);
         log.info("仓库模块-审核通过内容:{}",repositoryBuyoutDocument);
         return ResponseResult.succ("审核通过");
@@ -321,14 +437,14 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocumentService.updateById(repositoryBuyoutDocument);
         log.info("仓库模块-反审核通过内容:{}",repositoryBuyoutDocument);
 
-        // 采购退料反审核之后，要把数量更新
+      /*  // 采购退料反审核之后，要把数量更新
 
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryBuyoutDocumentDetail> details = repositoryBuyoutDocumentDetailService.listByDocumentId(id);
         // 2. 遍历更新 一个物料对应的库存数量
         for (RepositoryBuyoutDocumentDetail detail: details){
             repositoryStockService.addNumByMaterialId(detail.getMaterialId(),detail.getNum());
-        }
+        }*/
 
         return ResponseResult.succ("反审核成功");
     }

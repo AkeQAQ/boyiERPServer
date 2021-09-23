@@ -46,7 +46,9 @@ public class RepositoryBuyoutDocumentServiceImpl extends ServiceImpl<RepositoryB
 
     @Override
     public Double countBySupplierIdAndMaterialId(String supplierId, String materialId) {
-        return repositoryBuyoutDocumentMapper.getSumNumBySupplierIdAndMaterialId(supplierId,materialId);
+        Double returnCount = repositoryBuyoutDocumentMapper.getSumNumBySupplierIdAndMaterialId(supplierId, materialId);
+        returnCount  = returnCount==null?0L:returnCount;
+        return returnCount;
     }
 
 }

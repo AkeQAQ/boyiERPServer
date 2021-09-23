@@ -44,7 +44,9 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
 
     @Override
     public Double countByDepartmentIdMaterialId(Long departmentId, String materialId) {
-        return repositoryReturnMaterialMapper.countByDepartmentAndMaterial(departmentId,materialId);
+        Double returnCount = repositoryReturnMaterialMapper.countByDepartmentAndMaterial(departmentId, materialId);
+        returnCount  = returnCount==null?0L:returnCount;
+        return returnCount;
 
     }
 

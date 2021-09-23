@@ -105,7 +105,7 @@ public class ProduceCraftController extends BaseController {
      * 设置工艺单模板
      */
     @PostMapping("/setStreadDemo")
-    @PreAuthorize("hasAuthority('produce:craft:save')")
+    @PreAuthorize("hasAuthority('produce:craft:real')")
     public ResponseResult setStreadDemo(@Validated @RequestBody SpreadDemo spreadDemo) {
         try {
             SpreadDemo dbObj = spreadDemoService.getByType(DBConstant.TABLE_SPREAD_DEMO.TYPE_GYD_FIELDVALUE_1);

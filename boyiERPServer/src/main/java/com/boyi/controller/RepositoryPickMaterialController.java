@@ -37,7 +37,47 @@ public class RepositoryPickMaterialController extends BaseController {
     @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('repository:pickMaterial:del')")
-    public ResponseResult delete(@RequestBody Long[] ids) {
+    public ResponseResult delete(@RequestBody Long[] ids)throws Exception {
+
+        // 1. 根据单据ID 获取该单据的全部详情信息，
+        List<RepositoryPickMaterialDetail> details = repositoryPickMaterialDetailService.listByDocumentId(ids[0]);
+
+        RepositoryPickMaterial repositoryPickMaterial1 = repositoryPickMaterialService.getById(ids[0]);
+
+        Map<String, Double> map = new HashMap<>();// 一个物料，需要添加的数目
+        // 1. 遍历获取一个物料要添加的数目。
+        for (RepositoryPickMaterialDetail detail : details) {
+            Double materialNum = map.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+        // 2. 领料数目 要求>=退料数目
+        for (Map.Entry<String,Double> entry : map.entrySet()) {
+            String materialId = entry.getKey();
+            Double needAddNum = entry.getValue();// 该单据该物料，需要进行入库的数目
+
+            // 查询该部门，该物料 领料数目.
+            Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(repositoryPickMaterial1.getDepartmentId(),
+                    materialId);
+
+            // 剩下的该部门，该物料的领料数目
+            double calNum = pickCount - needAddNum;
+
+            // 查询该部门，该物料 退料数目
+            Double returnCount = repositoryReturnMaterialService.countByDepartmentIdMaterialId(repositoryPickMaterial1.getDepartmentId(),
+                    materialId);
+
+            if(calNum < returnCount){
+                throw new Exception("该部门:"+repositoryPickMaterial1.getDepartmentId()+",该物料:" +materialId+
+                        "(总领料数目:"+pickCount+" - 当前删除数目:"+needAddNum+")="+calNum+" < 退料审核通过的数目:"+returnCount);
+            }
+
+        }
+
+        // 新增库存
+        repositoryStockService.addNumByMaterialIdFromMap(map);
 
         boolean flag = repositoryPickMaterialService.removeByIds(Arrays.asList(ids));
 
@@ -88,14 +128,12 @@ public class RepositoryPickMaterialController extends BaseController {
         return ResponseResult.succ(repositoryPickMaterial);
     }
 
-
-
     /**
      * 修改入库
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('repository:pickMaterial:update')")
-    public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryPickMaterial repositoryPickMaterial) {
+    public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryPickMaterial repositoryPickMaterial)throws Exception {
 
         if(repositoryPickMaterial.getRowList() ==null || repositoryPickMaterial.getRowList().size() ==0){
             return ResponseResult.fail("物料信息不能为空");
@@ -105,6 +143,20 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdatedUser(principal.getName());
 
         try {
+
+            Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
+            Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
+            Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
+            // 校验退料数目
+            validCompareReturnNumFromUpdate(repositoryPickMaterial, needSubMap,needAddMap,notUpdateMap);
+
+            // 校验库存
+            repositoryStockService.validStockNum(needSubMap);
+
+            // 减少库存
+            repositoryStockService.subNumByMaterialId(needSubMap);
+            // 添加库存
+            repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
 
             //1. 先删除老的，再插入新的
             boolean flag = repositoryPickMaterialDetailService.removeByDocId(repositoryPickMaterial.getId());
@@ -131,11 +183,119 @@ public class RepositoryPickMaterialController extends BaseController {
 
 
     /**
+     *  和退料比较，要求领料>=退料
+     * @param repositoryPickMaterial
+     * @param needSubMap
+     * @param needAddMap
+     * @param notUpdateMap
+     * @throws Exception
+     */
+    private void validCompareReturnNumFromUpdate(RepositoryPickMaterial repositoryPickMaterial,
+                                       Map<String, Double> needSubMap,
+                                       Map<String, Double> needAddMap,
+                                       Map<String, Double> notUpdateMap) throws Exception{
+
+        // 查询老的详情
+        RepositoryPickMaterial old = repositoryPickMaterialService.getById(repositoryPickMaterial.getId());
+        Long oldDepartmentId = old.getDepartmentId();
+        Long newDepartmentId = repositoryPickMaterial.getDepartmentId();
+
+        // 判断2. 库存能否修改。
+        List<RepositoryPickMaterialDetail> oldDetails = repositoryPickMaterialDetailService.listByDocumentId(repositoryPickMaterial.getId());
+
+        // 新的物料数目：
+        Map<String, Double> newMap = new HashMap<>();
+        for (RepositoryPickMaterialDetail detail : repositoryPickMaterial.getRowList()) {
+            Double materialNum = newMap.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            newMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+
+        // 2.  老的物料数目
+        Map<String, Double> oldMap = new HashMap<>();
+        for (RepositoryPickMaterialDetail detail : oldDetails) {
+            Double materialNum = oldMap.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            oldMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+        }
+
+        // 全部的物料
+        HashSet<String> set = new HashSet<>();
+        set.addAll(newMap.keySet());
+        set.addAll(oldMap.keySet());
+
+        // 3. 减少之后的该部门，该物料的领料数目 >= 该供应商，该物料 退料数目
+        for (String materialId : set) {
+            Double newNum = newMap.get(materialId);
+            Double oldNum = oldMap.get(materialId);
+
+            oldNum = oldNum == null? 0D: oldMap.get(materialId);
+            newNum = newNum == null? 0D: newMap.get(materialId);
+
+            // 供应商换了，老的领料要减少，新的要增加,老的要看能否减少
+            if(!oldDepartmentId.equals(newDepartmentId)){
+                // 老的物料里， 数目比 新的物料数目多的,就是要新增库存的，就不需要判断。
+                if(oldNum > newNum){
+                    needAddMap.put(materialId,oldNum - newNum );//库存新增的数目
+                }else if(oldNum < newNum){
+                    needSubMap.put(materialId,newNum - oldNum ); // 库存减少的数目
+                }else {
+                    notUpdateMap.put(materialId,newNum);
+                }
+                // 假如老的物料不存在的话，就不需要判断
+                if(oldNum == 0){
+                    continue;
+                }
+
+                Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(oldDepartmentId, materialId);
+
+                double calPickNum = pickCount - oldNum;
+
+                Double returnCount = repositoryReturnMaterialService.countByDepartmentIdMaterialId(oldDepartmentId,materialId);
+
+                if(calPickNum < returnCount){
+                    throw new Exception("该供应商:"+newDepartmentId+",该物料:" +materialId+
+                            "(修改后的领料数目 :"+calPickNum+"将会  < 退料的数目:"+returnCount);
+                }
+            }else{
+                // 老的物料里， 数目比 新的物料数目多的,就是要新增库存的，就不需要判断。
+                if(oldNum > newNum){
+                    needAddMap.put(materialId,oldNum - newNum );//库存新增的数目
+                }else if(oldNum < newNum){
+                    needSubMap.put(materialId,newNum - oldNum ); // 库存减少的数目
+                    continue;
+                }else {
+                    notUpdateMap.put(materialId,newNum);
+                    continue;
+                }
+                // 查询历史该供应商，该物料 总领料数目.
+                Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(newDepartmentId, materialId);
+
+                double calPickNum = pickCount - (oldNum-newNum);
+
+                // 查询该供应商，该物料退料数目
+                Double returnCount = repositoryReturnMaterialService.countByDepartmentIdMaterialId(newDepartmentId,materialId);
+
+                if(calPickNum < returnCount){
+                    throw new Exception("该供应商:"+newDepartmentId+",该物料:" +materialId+
+                            "(修改后的领料数目 :"+calPickNum+"将会  < 退料的数目:"+returnCount);
+
+                }
+            }
+
+        }
+    }
+
+    /**
      * 新增入库
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
-    public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryPickMaterial repositoryPickMaterial) {
+    public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryPickMaterial repositoryPickMaterial)throws Exception {
         LocalDateTime now = LocalDateTime.now();
         repositoryPickMaterial.setCreated(now);
         repositoryPickMaterial.setUpdated(now);
@@ -143,6 +303,20 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdatedUser(principal.getName());
         repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
         try {
+            Map<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
+            // 1. 遍历获取一个物料要减少的数目。
+            for (RepositoryPickMaterialDetail detail : repositoryPickMaterial.getRowList()) {
+                Double materialNum = map.get(detail.getMaterialId());
+                if(materialNum == null){
+                    materialNum= 0D;
+                }
+                map.put(detail.getMaterialId(),materialNum+detail.getNum());
+            }
+            // 校验库存
+            repositoryStockService.validStockNum(map);
+
+            // 减少库存
+            repositoryStockService.subNumByMaterialId(map);
 
             repositoryPickMaterialService.save(repositoryPickMaterial);
 
@@ -234,13 +408,6 @@ public class RepositoryPickMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
     public ResponseResult statusPass(Principal principal,Long id)throws Exception {
 
-
-        // 领料审核通过之后，要把数量更新
-
-        // 1. 根据单据ID 获取该单据的全部详情信息，
-        List<RepositoryPickMaterialDetail> details = repositoryPickMaterialDetailService.listByDocumentId(id);
-        // 2. 遍历更新 一个供应商，一个物料对应的库存数量
-        repositoryStockService.subNumBySupplierIdAndMaterialId(details);
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
         repositoryPickMaterial.setUpdatedUser(principal.getName());
@@ -260,51 +427,6 @@ public class RepositoryPickMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
 
-        // 1. 根据单据ID 获取该单据的全部详情信息，
-        List<RepositoryPickMaterialDetail> details = repositoryPickMaterialDetailService.listByDocumentId(id);
-
-        RepositoryPickMaterial repositoryPickMaterial1 = repositoryPickMaterialService.getById(id);
-
-        HashMap<String, Double> map = new HashMap<>();// 一个物料，需要添加的数目
-        // 1. 遍历获取一个物料要添加的数目。
-        for (RepositoryPickMaterialDetail detail : details) {
-            Double materialNum = map.get(detail.getMaterialId());
-            if(materialNum == null){
-                materialNum= 0D;
-            }
-            map.put(detail.getMaterialId(),materialNum+detail.getNum());
-        }
-        // 2. 反审核之后，该部门，该物料的审核通过的领料数目 要求>= 该部门，该物料的审核通过的退料数目
-        for (Map.Entry<String,Double> entry : map.entrySet()) {
-            String materialId = entry.getKey();
-            Double needAddNum = entry.getValue();// 该单据该物料，需要反审核进行入库的数目
-
-            // 查询该部门，该物料 审核通过的，总领料数目.
-            Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(repositoryPickMaterial1.getDepartmentId(),
-                    materialId);
-
-            // 假如反审核通过之后的，剩下的该部门，该物料的领料数目
-            double calNum = pickCount - needAddNum;
-
-            // 查询该部门，该物料 审核完成的退料数目
-            Double returnCount = repositoryReturnMaterialService.countByDepartmentIdMaterialId(repositoryPickMaterial1.getDepartmentId(),
-                    materialId);
-            returnCount  = returnCount==null?0L:returnCount;
-
-            if(calNum < returnCount){
-                throw new Exception("该部门:"+repositoryPickMaterial1.getDepartmentId()+",该物料:" +materialId+
-                        "(总领料数目:"+pickCount+" - 反审核数目:"+needAddNum+")="+calNum+" < 退料审核通过的数目:"+returnCount);
-            }
-
-        }
-        // 领料反审核之后，要把数量更新
-
-        // 2. 遍历更新 一个物料对应的库存数量
-        for (Map.Entry<String,Double> entry : map.entrySet()) {
-            String materialId = entry.getKey();
-            Double needAddNum = entry.getValue();// 该单据该物料，需要退料进行入库的数目
-            repositoryStockService.addNumByMaterialId(materialId,needAddNum);
-        }
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
         repositoryPickMaterial.setUpdatedUser(principal.getName());

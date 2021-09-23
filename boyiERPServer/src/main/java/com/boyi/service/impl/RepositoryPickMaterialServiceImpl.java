@@ -52,7 +52,9 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
 
     @Override
     public Double countByDepartmentIdMaterialId(Long departmentId, String materialId) {
-        return repositoryPickMaterialMapper.countByDepartmentAndMaterial(departmentId,materialId);
+        Double count = repositoryPickMaterialMapper.countByDepartmentAndMaterial(departmentId, materialId);
+        count = count ==null ? 0D : count;
+        return count;
     }
 
 }

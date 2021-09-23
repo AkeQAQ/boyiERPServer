@@ -51,6 +51,16 @@ public class RepositoryStockController extends BaseController {
 
         pageData = repositoryStockService.pageBySearch(getPage(),queryField,searchField,searchStr);
 
+        // 库存数量为0的过滤.
+        List<RepositoryStock> records = pageData.getRecords();
+        ArrayList<RepositoryStock> newRecords = new ArrayList<>();
+        for (RepositoryStock stock : records){
+            if(stock.getNum() != 0){
+                newRecords.add(stock);
+            }
+        }
+
+        pageData.setRecords(newRecords);
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
 
         return ResponseResult.succ(pageData);

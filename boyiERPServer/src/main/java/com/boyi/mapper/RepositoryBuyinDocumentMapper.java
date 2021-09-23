@@ -75,11 +75,11 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "              repository_buyin_document_detail rbdd" +
             " where rbd.status = 0 and rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
             " and rbdd.material_id = #{materialId} and rbdd.price_date between #{startDate} and #{endDate}")
-    Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
+    Integer getSupplierMaterialPassBetweenDate(BaseSupplierMaterial baseSupplierMaterial);
 
     @Select("select sum(num) from repository_buyin_document rbd," +
             "              repository_buyin_document_detail rbdd" +
-            " where rbd.status = 0 and rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
+            " where  rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
             " and rbdd.material_id = #{materialId}")
     Double getSumNumBySupplierIdAndMaterialId(String supplierId,String materialId);
 }

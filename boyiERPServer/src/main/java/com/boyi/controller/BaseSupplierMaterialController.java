@@ -173,7 +173,7 @@ public class BaseSupplierMaterialController extends BaseController {
 
         // 1. 采购价目审核，先查询是否有采购入库审核完成的引用，有则不能修改
         BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
-        Integer count= repositoryBuyinDocumentService.getBySupplierMaterial(one);
+        Integer count= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(one);
         if(count > 0){
             return ResponseResult.fail("该供应商，该物料，该时间区已有"+count+"条审核通过的采购入库记录");
         }
@@ -199,7 +199,7 @@ public class BaseSupplierMaterialController extends BaseController {
 
         // 1. 采购价目反审核，先查询是否有采购入库审核完成的引用，有则不能修改
         BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
-        Integer count= repositoryBuyinDocumentService.getBySupplierMaterial(one);
+        Integer count= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(one);
         if(count > 0){
             return ResponseResult.fail("该供应商，该物料，该时间区已有"+count+"条审核通过的采购入库记录");
         }

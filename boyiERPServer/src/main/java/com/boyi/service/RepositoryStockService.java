@@ -17,9 +17,13 @@ import java.util.Map;
  */
 public interface RepositoryStockService extends IService<RepositoryStock> {
 
-    void addNumByMaterialId( String materialId, Double num);
+    void addNumByMaterialIdFromMap(Map<String, Double> needAddMap)throws Exception;
 
-    void subNumBySupplierIdAndMaterialId(List<RepositoryPickMaterialDetail> stocks) throws Exception;
+    void addNumByMaterialId(String materialId, Double num);
+
+
+    void subNumByMaterialIdNum(String materialId, Double num);
+
     void subNumByMaterialId(Map<String, Double> details) throws Exception;
     void subNumReturnMaterialId(List<RepositoryReturnMaterialDetail> stocks) throws Exception;
 
@@ -28,4 +32,6 @@ public interface RepositoryStockService extends IService<RepositoryStock> {
     void removeByMaterialId(String[] ids);
 
     Page<RepositoryStock> pageBySearch(Page page, String queryField, String searchField, String searchStr);
+
+    public void validStockNum(Map<String, Double> subMap)throws Exception;
 }
