@@ -169,4 +169,20 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
         }
 
     }
+
+    @Override
+    public List<RepositoryStock> listByMaterialIds(List<String> ids) {
+        return this.list(new QueryWrapper<RepositoryStock>()
+                .in(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public void updateNum(String materialId, Double checkNum) {
+        UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+        updateWrapper
+                .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
+                .set(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,checkNum)
+                .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
+        this.update(updateWrapper);
+    }
 }

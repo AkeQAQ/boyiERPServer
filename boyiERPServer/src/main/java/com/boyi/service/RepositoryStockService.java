@@ -34,4 +34,8 @@ public interface RepositoryStockService extends IService<RepositoryStock> {
     Page<RepositoryStock> pageBySearch(Page page, String queryField, String searchField, String searchStr);
 
     public void validStockNum(Map<String, Double> subMap)throws Exception;
+
+    List<RepositoryStock> listByMaterialIds(List<String> ids);
+
+    void updateNum(String materialId, Double checkNum);
 }

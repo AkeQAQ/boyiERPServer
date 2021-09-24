@@ -562,4 +562,45 @@ public class DBConstant {
         public static final Integer TYPE_GYD_FIELDVALUE_1 = 1;
     }
 
+
+    public static class TABLE_REPOSITORY_CHECK{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String CHECK_DATE_FIELDNAME = "check_date";
+        public static final String CHECK_USER_FIELDNAME = "check_user";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_REPOSITORY_CHECK_DETAIL{
+        public static final String ID_FIELDNAME = "id";
+        public static final String DOCUMENT_ID_FIELDNAME = "document_id";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String CHECK_NUM_FIELDNAME = "check_num";
+        public static final String CHANGE_NUM_FIELDNAME = "change_num";
+
+    }
+
+
 }

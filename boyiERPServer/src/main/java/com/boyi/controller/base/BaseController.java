@@ -92,6 +92,11 @@ public class BaseController {
     @Autowired
     public SpreadDemoService spreadDemoService;
 
+    @Autowired
+    public RepositoryCheckService repositoryCheckService;
+
+    @Autowired
+    public RepositoryCheckDetailService repositoryCheckDetailService;
     /**
      * 获取页面
      * @return

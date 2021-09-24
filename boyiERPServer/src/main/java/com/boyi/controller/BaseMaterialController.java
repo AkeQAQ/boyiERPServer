@@ -20,10 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -38,16 +35,45 @@ import java.util.Map;
 @RequestMapping("/baseData/material")
 public class BaseMaterialController extends BaseController {
 
+    @PostMapping("/loadTableSearchMaterialDetailAllWithStock")
+    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    public ResponseResult loadTableSearchMaterialDetailAllWithStock() {
+        List<BaseMaterial> baseMaterials = baseMaterialService.list();
+        List<String> ids = new ArrayList<>();
+        for (BaseMaterial baseMaterial : baseMaterials){
+            ids.add(baseMaterial.getId());
+        }
+        List<RepositoryStock> stocks = repositoryStockService.listByMaterialIds(ids);
+
+        HashMap<String, Double> stockNum = new HashMap<>();
+        for (RepositoryStock stock : stocks) {
+            stockNum.put(stock.getMaterialId(),stock.getNum());
+        }
+
+            ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        baseMaterials.forEach(obj ->{
+            Double num = stockNum.get(obj.getId());
+            Map<Object, Object> returnMap = MapUtil.builder().put(
+                            "value",obj.getId()+" : "+obj.getName() )
+                    .put("id", obj.getId())
+                    .put("obj", obj)
+                    .put("stockNum",num == null ? 0D : num)
+                    .map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
+
     /**
      * 用于增量表格搜索输入建议框的数据
      */
     @PostMapping("/loadTableSearchMaterialDetailAll")
     @PreAuthorize("hasAuthority('baseData:unit:list')")
     public ResponseResult loadTableSearchMaterialDetailAll() {
-        List<BaseMaterial> baseSuppliers = baseMaterialService.list();
+        List<BaseMaterial> baseMaterials = baseMaterialService.list();
 
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
-        baseSuppliers.forEach(obj ->{
+        baseMaterials.forEach(obj ->{
             Map<Object, Object> returnMap = MapUtil.builder().put(
                     "value",obj.getId()+" : "+obj.getName() )
                     .put("id", obj.getId())
