@@ -6,7 +6,8 @@ import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.RepositoryBuyinDocument;
 import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * <p>
@@ -36,4 +37,6 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     RepositoryBuyinDocument getByOrderId(Long id);
 
     Double countBySupplierIdAndMaterialId(String supplierId, String materialId);
+
+    List<RepositoryBuyinDocument> countLTByCloseDate(LocalDate closeDate);
 }

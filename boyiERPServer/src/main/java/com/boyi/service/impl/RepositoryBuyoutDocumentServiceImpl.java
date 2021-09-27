@@ -6,12 +6,16 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseSupplierMaterial;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.entity.RepositoryBuyoutDocument;
 import com.boyi.mapper.RepositoryBuyoutDocumentMapper;
 import com.boyi.mapper.RepositoryBuyoutDocumentMapper;
 import com.boyi.service.RepositoryBuyoutDocumentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * <p>
@@ -49,6 +53,14 @@ public class RepositoryBuyoutDocumentServiceImpl extends ServiceImpl<RepositoryB
         Double returnCount = repositoryBuyoutDocumentMapper.getSumNumBySupplierIdAndMaterialId(supplierId, materialId);
         returnCount  = returnCount==null?0L:returnCount;
         return returnCount;
+    }
+
+    @Override
+    public List<RepositoryBuyoutDocument> countLTByCloseDate(LocalDate closeDate) {
+        return this.list(new QueryWrapper<RepositoryBuyoutDocument>()
+                .le(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.BUY_OUT_DATE_FIELDNAME, closeDate)
+                .eq(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDNAME,
+                        DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1));
     }
 
 }

@@ -23,11 +23,13 @@ public class RepositoryPickMaterial extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    @ExcelAttribute(sort = 2)
     private Integer status;
 
     /**
      * 领料日期
      */
+    @ExcelAttribute(sort = 1)
     private LocalDate pickDate;
 
     /**
@@ -44,6 +46,9 @@ public class RepositoryPickMaterial extends BaseEntity {
 
     private String updatedUser;
 
+    @ExcelAttribute(sort = 4)
+    private Integer produceDocNum; // 生产计划单号
+
 
     /**
      *  明细信息 用于接收前端数据
@@ -55,24 +60,30 @@ public class RepositoryPickMaterial extends BaseEntity {
     // 用于多表查询的额外字段
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 5)
     private String materialId;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 6)
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 8)
     private String unit;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 7)
     private String specs;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 9)
     private Double num;
 
     @TableField(exist = false)  // 字段数据库忽略
     private Double totalNum; // 该单据总数量
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 3)
     private String departmentName; // 部门名称
 
 

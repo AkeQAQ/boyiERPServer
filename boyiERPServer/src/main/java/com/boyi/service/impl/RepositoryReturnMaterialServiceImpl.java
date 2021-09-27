@@ -5,11 +5,15 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.RepositoryPickMaterial;
 import com.boyi.entity.RepositoryReturnMaterial;
 import com.boyi.mapper.RepositoryReturnMaterialMapper;
 import com.boyi.service.RepositoryReturnMaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * <p>
@@ -48,6 +52,14 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
         returnCount  = returnCount==null?0L:returnCount;
         return returnCount;
 
+    }
+
+    @Override
+    public List<RepositoryReturnMaterial> countLTByCloseDate(LocalDate closeDate) {
+        return this.list(new QueryWrapper<RepositoryReturnMaterial>()
+                .le(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.RETURN_DATE_FIELDNAME, closeDate)
+                .eq(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDNAME,
+                        DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_1));
     }
 
 }

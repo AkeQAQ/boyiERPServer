@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
-import com.boyi.entity.BaseSupplierMaterial;
-import com.boyi.entity.OrderBuyorderDocument;
-import com.boyi.entity.RepositoryPickMaterial;
+import com.boyi.entity.*;
 import com.boyi.entity.RepositoryPickMaterial;
 import com.boyi.mapper.OrderBuyorderDocumentMapper;
 import com.boyi.mapper.RepositoryPickMaterialMapper;
@@ -18,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * <p>
@@ -55,6 +54,14 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
         Double count = repositoryPickMaterialMapper.countByDepartmentAndMaterial(departmentId, materialId);
         count = count ==null ? 0D : count;
         return count;
+    }
+
+    @Override
+    public List<RepositoryPickMaterial> countLTByCloseDate(LocalDate closeDate) {
+        return this.list(new QueryWrapper<RepositoryPickMaterial>()
+                .le(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME, closeDate)
+                .eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDNAME,
+                        DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1));
     }
 
 }

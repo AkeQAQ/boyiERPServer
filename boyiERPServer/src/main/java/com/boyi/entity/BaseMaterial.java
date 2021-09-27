@@ -29,7 +29,7 @@ public class BaseMaterial  {
     /**
      * 子编码
      */
-    private Integer subId;
+    private String subId;
 
     /**
      * 物料分组ID

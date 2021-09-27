@@ -23,7 +23,7 @@ public class RepositoryBuyoutDocument extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @ExcelAttribute(sort = 3)
+    @ExcelAttribute(sort = 5)
     private Integer status;
 
     /**
@@ -38,6 +38,8 @@ public class RepositoryBuyoutDocument extends BaseEntity {
     private LocalDate buyOutDate;
 
     private String createdUser;
+
+    @ExcelAttribute(sort = 3)
     private String updatedUser;
 
 
@@ -54,18 +56,18 @@ public class RepositoryBuyoutDocument extends BaseEntity {
     private String supplierName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 4)
+    @ExcelAttribute(sort = 6)
     private String materialId;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 5)
+    @ExcelAttribute(sort = 7)
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 6)
+    @ExcelAttribute(sort = 8)
     private String unit;
 
-    @ExcelAttribute(sort = 7)
+    @ExcelAttribute(sort = 9)
     @TableField(exist = false)  // 字段数据库忽略
     private Double num;
 
@@ -73,13 +75,14 @@ public class RepositoryBuyoutDocument extends BaseEntity {
     private Double totalNum; // 该单据总数量
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 12)
     private LocalDate priceDate; // 采购订单详情的采购价
 
-    @ExcelAttribute(sort = 9)
+    @ExcelAttribute(sort = 10)
     @TableField(exist = false)  // 字段数据库忽略
     private Double price;
 
-    @ExcelAttribute(sort = 10)
+    @ExcelAttribute(sort = 11)
     @TableField(exist = false)  // 字段数据库忽略
     private Double amount; // =price*num
 

@@ -185,4 +185,9 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
                 .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
         this.update(updateWrapper);
     }
+
+    @Override
+    public List<RepositoryStock> listStockNumLTZero() {
+        return this.list(new QueryWrapper<RepositoryStock>().lt(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,0));
+    }
 }

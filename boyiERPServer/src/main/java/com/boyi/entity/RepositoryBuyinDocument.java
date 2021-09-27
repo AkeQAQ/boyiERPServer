@@ -23,7 +23,7 @@ public class RepositoryBuyinDocument extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @ExcelAttribute(sort = 3)
+    @ExcelAttribute(sort = 5)
     private Integer status;
 
     /**
@@ -43,6 +43,8 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private LocalDate buyInDate;
 
     private String createdUser;
+
+    @ExcelAttribute(sort = 3)
     private String updatedUser;
 
     private Integer sourceType;
@@ -61,27 +63,27 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private String supplierName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 4)
+    @ExcelAttribute(sort = 7)
     private String materialId;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 5)
+    @ExcelAttribute(sort = 8)
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 6)
+    @ExcelAttribute(sort = 9)
     private String unit;
 
-    @ExcelAttribute(sort = 9)
+    @ExcelAttribute(sort = 11)
     @TableField(exist = false)  // 字段数据库忽略
     private Double price;
 
-    @ExcelAttribute(sort = 7)
+    @ExcelAttribute(sort = 10)
     @TableField(exist = false)  // 字段数据库忽略
     private Double num;
 
 
-    @ExcelAttribute(sort = 10)
+    @ExcelAttribute(sort = 12)
     @TableField(exist = false)  // 字段数据库忽略
     private Double amount; // =price*num
 
@@ -92,9 +94,11 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private Double totalAmount; // 该单据总金额
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 6)
     private String orderSeq; // 采购订单的单号
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 13)
     private LocalDate priceDate; // 采购订单详情的采购价
 
     @TableField(exist = false)  // 字段数据库忽略

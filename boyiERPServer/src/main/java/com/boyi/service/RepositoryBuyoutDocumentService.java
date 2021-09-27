@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.RepositoryBuyoutDocument;
 
+import java.time.LocalDate;
+import java.util.List;
+
 /**
  * <p>
  * 仓库模块-采购退料单据表 服务类
@@ -22,4 +25,6 @@ public interface RepositoryBuyoutDocumentService extends IService<RepositoryBuyo
     Page<RepositoryBuyoutDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
 
     Double countBySupplierIdAndMaterialId(String supplierId, String materialId);
+
+    List<RepositoryBuyoutDocument> countLTByCloseDate(LocalDate closeDate);
 }

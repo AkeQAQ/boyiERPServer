@@ -28,6 +28,10 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
             "        doc.pick_date , " +
             "        doc.pick_user , " +
             "        doc.status, " +
+            "        doc.produce_doc_num, " +
+            "        doc.updated, " +
+            "        doc.updated_user, " +
+
             "        dep.name department_name, " +
             "        dep.id department_id, " +
             "        m.id material_id, " +

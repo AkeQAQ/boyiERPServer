@@ -48,6 +48,12 @@ public class OrderBuyorderDocumentController extends BaseController {
     @PostMapping("/push")
     @PreAuthorize("hasAuthority('order:buyOrder:push')")
     public ResponseResult push(Principal principal,@RequestBody RepositoryBuyinDocument repositoryBuyinDocument,Long[] orderDetailIds,Long id) {
+
+        boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+
         List<OrderBuyorderDocumentDetail> details = null;
         if(id != null){
             details = orderBuyorderDocumentDetailService.listByDocumentId(id);

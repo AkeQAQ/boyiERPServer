@@ -128,6 +128,11 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
 
         try {
+            /*RepositoryBuyoutDocument old = repositoryBuyoutDocumentService.getById(repositoryBuyoutDocument.getId());
+            boolean validIsClose = validIsClose(old.getBuyOutDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }*/
 
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
@@ -147,7 +152,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                     item.setId(null);
                     item.setDocumentId(repositoryBuyoutDocument.getId());
                     item.setSupplierId(repositoryBuyoutDocument.getSupplierId());
-                    item.setPriceDate(repositoryBuyoutDocument.getPriceDate());
+                    item.setPriceDate(repositoryBuyoutDocument.getBuyOutDate());
                 }
 
                 repositoryBuyoutDocumentDetailService.saveBatch(repositoryBuyoutDocument.getRowList());
@@ -283,6 +288,11 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
         repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1);
 
+        boolean validIsClose = validIsClose(repositoryBuyoutDocument.getBuyOutDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+
         String supplierId = repositoryBuyoutDocument.getSupplierId();
         // 2. 得到一个物料，需要减少的数量
         Map<String, Double> subMap = new HashMap<>();// 一个物料，需要减少的数目
@@ -321,6 +331,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                 item.setDocumentId(repositoryBuyoutDocument.getId());
                 item.setSupplierId(repositoryBuyoutDocument.getSupplierId());
                 item.setPriceDate(repositoryBuyoutDocument.getPriceDate());
+
+                item.setPriceDate(repositoryBuyoutDocument.getBuyOutDate());
             }
 
             repositoryBuyoutDocumentDetailService.saveBatch(repositoryBuyoutDocument.getRowList());
@@ -355,8 +367,6 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
             } else {
             }
-        }else {
-
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
@@ -427,7 +437,11 @@ public class RepositoryBuyoutDocumentController extends BaseController {
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('repository:buyOut:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
-
+        RepositoryBuyoutDocument old = repositoryBuyoutDocumentService.getById(id);
+        boolean validIsClose = validIsClose(old.getBuyOutDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
 
         RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();
         repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
@@ -448,5 +462,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
         return ResponseResult.succ("反审核成功");
     }
+
+
 
 }

@@ -3,16 +3,20 @@ package com.boyi.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -30,10 +34,14 @@ import java.util.*;
 @RequestMapping("/repository/returnMaterial")
 public class RepositoryReturnMaterialController extends BaseController {
 
+    @Value("${poi.repositoryReturnMaterialDemoPath}")
+    private String poiDemoPath;
+
     @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('repository:returnMaterial:del')")
     public ResponseResult delete(@RequestBody Long[] ids) throws Exception{
+
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryReturnMaterialDetail> details = repositoryReturnMaterialDetailService.listByDocumentId(ids[0]);
 
@@ -116,6 +124,12 @@ public class RepositoryReturnMaterialController extends BaseController {
         repositoryReturnMaterial.setUpdatedUser(principal.getName());
 
         try {
+           /* RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(repositoryReturnMaterial.getId());
+            boolean validIsClose = validIsClose(old.getReturnDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }*/
+
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
@@ -268,6 +282,11 @@ public class RepositoryReturnMaterialController extends BaseController {
         repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_1);
         try {
 
+            boolean validIsClose = validIsClose(repositoryReturnMaterial.getReturnDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }
+
             // 1. 根据单据ID 获取该单据的全部详情信息，
             Map<String, Double> map = new HashMap<>();// 一个物料，需要添加库存的数目
 
@@ -370,7 +389,11 @@ public class RepositoryReturnMaterialController extends BaseController {
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('repository:returnMaterial:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
-
+        RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(id);
+        boolean validIsClose = validIsClose(old.getReturnDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
 
         List<RepositoryReturnMaterialDetail> details = repositoryReturnMaterialDetailService.listByDocumentId(id);
         // 1. 遍历更新 一个物料对应的库存数量
@@ -385,6 +408,40 @@ public class RepositoryReturnMaterialController extends BaseController {
 
 
         return ResponseResult.succ("反审核成功");
+    }
+
+
+    /**
+     * 获取领料 分页导出
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('repository:returnMaterial:export')")
+    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+        Page<RepositoryReturnMaterial> pageData = null;
+        List<String> ids = new ArrayList<>();
+        String queryField = "";
+        if (searchField != "") {
+            if (searchField.equals("departmentName")) {
+                queryField = "department_name";
+            }
+            else if (searchField.equals("materialName")) {
+                queryField = "material_name";
+
+            }else if (searchField.equals("id")) {
+                queryField = "id";
+
+            }
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+        pageData = repositoryReturnMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(RepositoryReturnMaterial.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.statusMap);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
     }
 
 }

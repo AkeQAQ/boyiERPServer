@@ -38,4 +38,7 @@ public interface RepositoryStockService extends IService<RepositoryStock> {
     List<RepositoryStock> listByMaterialIds(List<String> ids);
 
     void updateNum(String materialId, Double checkNum);
+
+    List<RepositoryStock> listStockNumLTZero();
+
 }

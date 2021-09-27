@@ -63,6 +63,7 @@ public class BaseSupplierMaterialController extends BaseController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
     public ResponseResult list(String searchStr, String searchField) {
+        long start = System.currentTimeMillis();
         Page<BaseSupplierMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -83,7 +84,8 @@ public class BaseSupplierMaterialController extends BaseController {
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
         pageData = baseSupplierMaterialService.innerQueryBySearch(getPage(),
                 queryField,searchField,searchStr);
-
+        long end = System.currentTimeMillis();
+        log.info("查询list耗时:{}ms",(end-start));
         return ResponseResult.succ(pageData);
     }
 

@@ -1,6 +1,7 @@
 package com.boyi.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -22,11 +23,13 @@ public class RepositoryReturnMaterial extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
+    @ExcelAttribute(sort = 2)
     private Integer status;
 
     /**
      * 退料日期
      */
+    @ExcelAttribute(sort = 1)
     private LocalDate returnDate;
 
     /**
@@ -53,21 +56,27 @@ public class RepositoryReturnMaterial extends BaseEntity {
     // 用于多表查询的额外字段
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 4)
     private String materialId;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 5)
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 7)
     private String unit;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 6)
     private String specs;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 8)
     private Double num;
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 3)
     private String departmentName; // 部门名称
 
 

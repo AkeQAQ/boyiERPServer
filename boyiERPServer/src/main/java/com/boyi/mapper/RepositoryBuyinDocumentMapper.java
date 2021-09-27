@@ -29,6 +29,8 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "        doc.buy_in_date , " +
             "        doc.status, " +
             "        doc.source_type, " +
+            "        doc.updated , " +
+            "        doc.updated_user , " +
             "        sup.name supplier_name, " +
             "        sup.id supId, " +
             "        m.id material_id, " +
@@ -37,6 +39,8 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "        docD.order_seq," +
             "        docD.num," +
             "        docD.order_id , " +
+
+
             "        docD.price_date  " +
             " from " +
             "                        repository_buyin_document doc , " +

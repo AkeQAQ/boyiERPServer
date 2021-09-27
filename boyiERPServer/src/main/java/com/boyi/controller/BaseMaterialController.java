@@ -94,7 +94,8 @@ public class BaseMaterialController extends BaseController {
 
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
         baseSuppliers.forEach(obj ->{
-            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName()).map();
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName())
+                    .put("unit",obj.getUnit()).map();
             returnList.add(returnMap);
         });
         return ResponseResult.succ(returnList);
@@ -181,14 +182,15 @@ public class BaseMaterialController extends BaseController {
 
         BaseMaterialGroup group = baseMaterialGroupService.getByCode(baseMaterial.getGroupCode());
 
-        baseMaterial.setSubId(group.getAutoSubId());
-
-        baseMaterial.setId(group.getCode()+"."+group.getAutoSubId());
-
-        try {
+        if(baseMaterial.getSubId()==null || baseMaterial.getSubId().isEmpty()){
+            baseMaterial.setSubId(group.getAutoSubId()+"");
+            baseMaterial.setId(group.getCode()+"."+group.getAutoSubId());
             // 先自增该分组的ID
             group.setAutoSubId(group.getAutoSubId()+1);
             baseMaterialGroupService.updateById(group);
+        }
+
+        try {
 
             // 再保存
             baseMaterialService.save(baseMaterial);

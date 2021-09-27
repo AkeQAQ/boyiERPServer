@@ -29,6 +29,8 @@ public interface RepositoryBuyoutDocumentMapper extends BaseMapper<RepositoryBuy
             "select  doc.id id, " +
             "        doc.buy_out_date , " +
             "        doc.status, " +
+            "        doc.updated , " +
+            "        doc.updated_user , " +
             "        sup.name supplier_name, " +
             "        sup.id supId, " +
             "        m.id material_id, " +

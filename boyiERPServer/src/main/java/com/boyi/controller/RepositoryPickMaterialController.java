@@ -8,6 +8,7 @@ import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,9 @@ import java.util.*;
 @RestController
 @RequestMapping("/repository/pickMaterial")
 public class RepositoryPickMaterialController extends BaseController {
+
+    @Value("${poi.repositoryPickMaterialDemoPath}")
+    private String poiDemoPath;
 
     @Transactional
     @PostMapping("/del")
@@ -143,7 +147,12 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdatedUser(principal.getName());
 
         try {
-
+           /* RepositoryPickMaterial old = repositoryPickMaterialService.getById(repositoryPickMaterial.getId());
+            boolean validIsClose = validIsClose(old.getPickDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }
+*/
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
@@ -303,6 +312,12 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdatedUser(principal.getName());
         repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
         try {
+
+            boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }
+
             Map<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
             // 1. 遍历获取一个物料要减少的数目。
             for (RepositoryPickMaterialDetail detail : repositoryPickMaterial.getRowList()) {
@@ -335,7 +350,7 @@ public class RepositoryPickMaterialController extends BaseController {
 
     /**
      * 获取领料 分页导出
-     *//*
+     */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('repository:pickMaterial:export')")
     public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
@@ -343,8 +358,8 @@ public class RepositoryPickMaterialController extends BaseController {
         List<String> ids = new ArrayList<>();
         String queryField = "";
         if (searchField != "") {
-            if (searchField.equals("supplierName")) {
-                queryField = "supplier_name";
+            if (searchField.equals("departmentName")) {
+                queryField = "department_name";
             }
             else if (searchField.equals("materialName")) {
                 queryField = "material_name";
@@ -354,8 +369,6 @@ public class RepositoryPickMaterialController extends BaseController {
 
             } else {
             }
-        }else {
-
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
@@ -363,11 +376,11 @@ public class RepositoryPickMaterialController extends BaseController {
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
-            new ExcelExportUtil(RepositoryPickMaterial.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.statusMap);
+            new ExcelExportUtil(RepositoryPickMaterial.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.statusMap);
         } catch (Exception e) {
             log.error("导出模块报错.",e);
         }
-    }*/
+    }
 
     /**
      * 获取领料 分页全部数据
@@ -426,6 +439,11 @@ public class RepositoryPickMaterialController extends BaseController {
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
+        RepositoryPickMaterial old = repositoryPickMaterialService.getById(id);
+        boolean validIsClose = validIsClose(old.getPickDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
 
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());

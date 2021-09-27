@@ -16,6 +16,8 @@ public class BaseEntity implements Serializable {
     @ExcelAttribute(sort = 0)
     private Long id;
     private LocalDateTime created;
+
+    @ExcelAttribute(sort = 4)
     private LocalDateTime updated;
 
 }

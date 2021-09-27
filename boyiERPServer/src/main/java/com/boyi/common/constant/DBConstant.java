@@ -581,6 +581,7 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String PRODUCE_DOC_NUM_FIELDNAME = "produce_doc_num";
 
         /**
          *  0:代表 审核通过
@@ -599,6 +600,17 @@ public class DBConstant {
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String CHECK_NUM_FIELDNAME = "check_num";
         public static final String CHANGE_NUM_FIELDNAME = "change_num";
+
+    }
+
+
+    public static class TABLE_REPOSITORY_CLOSE{
+        public static final String ID_FIELDNAME = "id";
+        public static final String CLOSE_DATE_FIELDNAME = "close_date";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
 
     }
 

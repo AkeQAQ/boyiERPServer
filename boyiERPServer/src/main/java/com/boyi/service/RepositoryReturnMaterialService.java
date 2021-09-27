@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.RepositoryReturnMaterial;
 
+import java.time.LocalDate;
+import java.util.List;
+
 /**
  * <p>
  * 仓库模块-退料模块 服务类
@@ -22,4 +25,6 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
     Page<RepositoryReturnMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
 
     Double countByDepartmentIdMaterialId(Long departmentId, String materialId);
+
+    List<RepositoryReturnMaterial> countLTByCloseDate(LocalDate closeDate);
 }

@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -172,6 +173,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         try {
 
+          /*  RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(repositoryBuyinDocument.getId());
+            boolean validIsClose = validIsClose(old.getBuyInDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }
+*/
             // 分2种情况，采购订单来源的，和采购入库来源的
 
             // 采购入库来源的处理:
@@ -437,6 +444,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:buyIn:save')")
     public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryBuyinDocument repositoryBuyinDocument) {
+
         LocalDateTime now = LocalDateTime.now();
         repositoryBuyinDocument.setCreated(now);
         repositoryBuyinDocument.setUpdated(now);
@@ -445,6 +453,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
         repositoryBuyinDocument.setSourceType(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SOURCE_TYPE_FIELDVALUE_0);
         try {
+            boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }
 
             validExistSupplierDocNum(repositoryBuyinDocument);
 
@@ -471,6 +483,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
             return ResponseResult.fail("唯一编码重复!");
         }
     }
+
+
+
 
     /**
      * 获取采购入库 分页导出
@@ -566,6 +581,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @PreAuthorize("hasAuthority('repository:buyIn:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
 
+        RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(id);
+        boolean validIsClose = validIsClose(old.getBuyInDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
 
         RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());

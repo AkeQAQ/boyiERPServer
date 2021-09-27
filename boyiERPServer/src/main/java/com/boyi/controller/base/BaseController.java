@@ -1,11 +1,13 @@
 package com.boyi.controller.base;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.RepositoryClose;
 import com.boyi.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class BaseController {
@@ -97,6 +99,10 @@ public class BaseController {
 
     @Autowired
     public RepositoryCheckDetailService repositoryCheckDetailService;
+
+    @Autowired
+    public RepositoryCloseService repositoryCloseService;
+
     /**
      * 获取页面
      * @return
@@ -106,5 +112,10 @@ public class BaseController {
         int size = ServletRequestUtils.getIntParameter(req, "pageSize", 10);
 
         return new Page(current, size);
+    }
+
+    public boolean validIsClose(LocalDate buyInDate) {
+        RepositoryClose close = repositoryCloseService.listLatestOne();
+        return buyInDate.isAfter(close.getCloseDate());
     }
 }

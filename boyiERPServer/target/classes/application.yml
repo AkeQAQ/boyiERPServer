@@ -22,8 +22,11 @@ boyi:
   resetPass: 888888
 
 poi:
-  repositoryBuyInDemoPath: D:/demo.xlsx
-  repositoryBuyOutDemoPath: D:/demo.xlsx
+  repositoryBuyInDemoPath: D:/buyInDemo.xlsx
+  repositoryBuyOutDemoPath: D:/buyOutDemo.xlsx
+  repositoryPickMaterialDemoPath: D:/pickMaterialDemo.xlsx
+  repositoryReturnMaterialDemoPath: D:/returnMaterialDemo.xlsx
+
   orderBuyOrderDemoPath: D:/orderDemo.xlsx
 
 orderProductPrice:
