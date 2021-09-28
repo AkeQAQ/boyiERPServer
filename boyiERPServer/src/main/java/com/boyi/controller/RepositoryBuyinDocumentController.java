@@ -173,12 +173,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         try {
 
-          /*  RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(repositoryBuyinDocument.getId());
-            boolean validIsClose = validIsClose(old.getBuyInDate());
+            boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
-*/
+
             // 分2种情况，采购订单来源的，和采购入库来源的
 
             // 采购入库来源的处理:

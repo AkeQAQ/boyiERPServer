@@ -147,12 +147,11 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdatedUser(principal.getName());
 
         try {
-           /* RepositoryPickMaterial old = repositoryPickMaterialService.getById(repositoryPickMaterial.getId());
-            boolean validIsClose = validIsClose(old.getPickDate());
+            boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
-*/
+
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容

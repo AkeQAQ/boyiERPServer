@@ -13,6 +13,8 @@
     <artifactId>boyiERPServer</artifactId>
     <version>1.0-SNAPSHOT</version>
     <properties>
+        <maven.compiler.plugin>3.6.1</maven.compiler.plugin>
+        <maven.jar.plugin>2.5</maven.jar.plugin>
         <java.version>1.8</java.version>
     </properties>
 
@@ -116,5 +118,53 @@
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven.compiler.plugin}</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>${maven.jar.plugin}</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <classpathPrefix>lib/</classpathPrefix>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>com.boyi.Application</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>default</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/makeDir.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

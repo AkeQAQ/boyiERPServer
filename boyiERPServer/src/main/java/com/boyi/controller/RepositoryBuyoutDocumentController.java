@@ -128,11 +128,10 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
 
         try {
-            /*RepositoryBuyoutDocument old = repositoryBuyoutDocumentService.getById(repositoryBuyoutDocument.getId());
-            boolean validIsClose = validIsClose(old.getBuyOutDate());
+            boolean validIsClose = validIsClose(repositoryBuyoutDocument.getBuyOutDate());
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
-            }*/
+            }
 
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
