@@ -50,9 +50,6 @@ public class OrderProductpricePreController extends BaseController {
     @Value("${orderProductPrice.pre}")
     private String orderProductPricePrePath;
 
-    @Value("${orderProductPrice.real}")
-    private String orderProductPriceRealPath;
-
 
     /**
      * 查询实际报价详情内容
@@ -112,6 +109,7 @@ public class OrderProductpricePreController extends BaseController {
     @PreAuthorize("hasAuthority('order:productPricePre:save')")
     public ResponseResult setStreadDemo(@Validated @RequestBody SpreadDemo spreadDemo) {
         try {
+            Thread.sleep(3000);
             SpreadDemo dbObj = spreadDemoService.getByType(DBConstant.TABLE_SPREAD_DEMO.TYPE_BAOJIA_FIELDVALUE_0);
             if(dbObj == null ){
                 spreadDemo.setType(DBConstant.TABLE_SPREAD_DEMO.TYPE_BAOJIA_FIELDVALUE_0);
@@ -323,7 +321,19 @@ public class OrderProductpricePreController extends BaseController {
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
         pageData = orderProductpricePreService.page(getPage(), new QueryWrapper<OrderProductpricePre>()
                 .like(StrUtil.isNotBlank(searchStr)
-                        && StrUtil.isNotBlank(searchField), queryField, searchStr));
+                        && StrUtil.isNotBlank(searchField), queryField, searchStr)
+                .select(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COSTOMER_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.PRICE_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_PRICE_LAST_UPDATE_USER_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_PRICE_LAST_UPDATE_DATE_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.PRICE_LAST_UPDATE_DATE_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.PRICE_LAST_UPDATE_USER_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_PRICE_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME
+                        )
+        );
         return ResponseResult.succ(pageData);
     }
 

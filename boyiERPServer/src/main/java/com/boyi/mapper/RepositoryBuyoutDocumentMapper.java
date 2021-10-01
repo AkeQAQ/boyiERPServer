@@ -75,5 +75,5 @@ public interface RepositoryBuyoutDocumentMapper extends BaseMapper<RepositoryBuy
             "              repository_buyout_document_detail rbdd" +
             " where rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
             " and rbdd.material_id = #{materialId}")
-    Double getSumNumBySupplierIdAndMaterialId(String supplierId, String materialId);
+    Double getSumNumBySupplierIdAndMaterialId(@Param("supplierId") String supplierId,@Param("materialId")String materialId);
 }

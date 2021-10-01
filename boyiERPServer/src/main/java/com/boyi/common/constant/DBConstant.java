@@ -485,6 +485,10 @@ public class DBConstant {
         public static final String EXCEL_JSON_FIELDNAME = "excel_json";
         public static final String REAL_JSON_FIELDNAME = "real_json";
         public static final String REAL_PRICE_FIELDNAME = "real_price";
+        public static final String PRICE_LAST_UPDATE_DATE_FIELDNAME = "price_last_update_date";
+        public static final String PRICE_LAST_UPDATE_USER_FIELDNAME = "price_last_update_user";
+        public static final String REAL_PRICE_LAST_UPDATE_DATE_FIELDNAME = "real_price_last_update_date";
+        public static final String REAL_PRICE_LAST_UPDATE_USER_FIELDNAME = "real_price_last_update_user";
 
 
 

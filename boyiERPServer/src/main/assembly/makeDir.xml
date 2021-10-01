@@ -24,6 +24,13 @@
 				<include>logback.xml</include>
 			</includes>
 		</fileSet>
+		<fileSet>
+			<directory>${project.basedir}/src/main/resources/excelDemo</directory>
+			<outputDirectory>/excelDemo</outputDirectory>
+			<includes>
+				<include>*.xlsx</include>
+			</includes>
+		</fileSet>
 		<!--<fileSet>
 			<directory>${project.basedir}/src/main/resources/mapper</directory>
 			<outputDirectory>/mapper/</outputDirectory>

@@ -39,12 +39,22 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             String materialId = entry.getKey();
             Double num = entry.getValue();
 
-            UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
-            updateWrapper
-                    .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                    .setSql(" num = num +"+num)
-                    .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
-            this.update(updateWrapper);
+            RepositoryStock stock = this.getByMaterialId(materialId);
+            if(stock == null){
+                stock = new RepositoryStock();
+                stock.setMaterialId(materialId);
+                stock.setNum(num);
+                stock.setUpdated(LocalDateTime.now());
+                this.save(stock);
+            }else{
+                UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+                updateWrapper
+                        .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
+                        .setSql(" num = num +"+num)
+                        .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
+                this.update(updateWrapper);
+            }
+
         }
     }
 

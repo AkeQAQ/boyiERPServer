@@ -22,12 +22,12 @@ boyi:
   resetPass: 888888
 
 poi:
-  repositoryBuyInDemoPath: ./excelDemo/buyInDemo.xlsx
-  repositoryBuyOutDemoPath: ./excelDemo/buyOutDemo.xlsx
-  repositoryPickMaterialDemoPath: ./excelDemo/pickMaterialDemo.xlsx
-  repositoryReturnMaterialDemoPath: ./excelDemo/returnMaterialDemo.xlsx
+  repositoryBuyInDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/buyInDemo.xlsx
+  repositoryBuyOutDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/buyOutDemo.xlsx
+  repositoryPickMaterialDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/pickMaterialDemo.xlsx
+  repositoryReturnMaterialDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/returnMaterialDemo.xlsx
 
-  orderBuyOrderDemoPath: ./excelDemo/orderDemo.xlsx
+  orderBuyOrderDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/orderDemo.xlsx
 
 orderProductPrice:
   pre: D:/pre/

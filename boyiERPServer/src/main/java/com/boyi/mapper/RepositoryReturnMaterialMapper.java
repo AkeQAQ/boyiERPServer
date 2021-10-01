@@ -69,5 +69,5 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             " and pm.department_id = bd.id" +
             " and pmd.material_id = #{materialId}" +
             " and bd.id = #{departmentId}" )
-    Double countByDepartmentAndMaterial(Long departmentId, String materialId);
+    Double countByDepartmentAndMaterial(@Param("departmentId") Long departmentId,@Param("materialId") String materialId);
 }
