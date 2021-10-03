@@ -22,7 +22,9 @@ public class InitExcelData {
     private static Map<String, String> changeMap;
 
     public static void main(String[] args) throws Exception{
-        Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
+
+        // 1. 采购价目 ( 数据库手动更新一下状态 ： update base_supplier_material set status = 0)
+       /* Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
         fieldDYMap.put("供应商","supplier_id");// 需要通过关联查询供应商ID
         fieldDYMap.put("物料编码","material_id");
         fieldDYMap.put("单价","price");
@@ -55,11 +57,9 @@ public class InitExcelData {
         entityAndDBMap.put("id","id");
         entityAndDBMap.put("comment","comment");
 
-
-
         String tableName = "base_supplier_material";
 
-        String filePath="D:\\办公软件\\wechat\\WeChat Files\\wxid_8rvb757lr83812\\FileStorage\\File\\2021-09\\采购价目表_2021092616250395_100041.xlsx";
+        String filePath="C:\\Users\\Ake\\Downloads\\采购价目表_2021100310302798_100041.xlsx";
 
 
         Class<BaseSupplierMaterial> clazz = BaseSupplierMaterial.class;
@@ -67,8 +67,110 @@ public class InitExcelData {
         Boolean isChangeFieldContent =  true;
         String fieldName="供应商"; // 修改对应的内容
 
+        HashSet<String> outZero = new HashSet<>(); // 去除编号最后有0开头的。
+        outZero.add("materialId");
+*/
+        // 2. 供应商管理
+        /*Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
+        fieldDYMap.put("编码","id");
+        fieldDYMap.put("名称","name");
+        fieldDYMap.put("供应商分组","group_name");
+
+        Boolean isGroup =  true;
+        String groupName="编码"; // excel 的哪列是编码，需要分割出分组编码.
+
+        Map<String, String> fieldDYDBMap = new HashMap<>();//数据库字段 和 entity字段和的映射关系
+        fieldDYDBMap.put("id","id");
+        fieldDYDBMap.put("name","name");
+        fieldDYDBMap.put("group_name","groupName");
+        fieldDYDBMap.put("group_code","groupCode");
+        fieldDYDBMap.put("sub_id","subId");
+
+        Map<String, String> entityAndDBMap = new HashMap<>();//entity字段 和 数据库 字段和的映射关系
+        entityAndDBMap.put("id","id");
+        entityAndDBMap.put("name","name");
+        entityAndDBMap.put("groupName","group_name");
+        entityAndDBMap.put("groupCode","group_code");
+        entityAndDBMap.put("subId","sub_id");
+
+        String tableName = "base_supplier";
+
+        String filePath="C:\\Users\\Ake\\Downloads\\供应商_2021100309382710_100044.xlsx";
+
+        Class<BaseSupplier> clazz = BaseSupplier.class;
+
+        Boolean isChangeFieldContent =  false;
+        String fieldName="供应商"; // 修改对应的内容
+
+        HashSet<String> outZero = new HashSet<>();
+        List list = getEntity(outZero,isChangeFieldContent,fieldName,isGroup,groupName,filePath, clazz, fieldDYMap, fieldDYDBMap);
+*/
+        // 3. 物料管理
+        /*Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
+        fieldDYMap.put("编码","id");
+        fieldDYMap.put("名称","name");
+        fieldDYMap.put("规格型号","specs");
+        fieldDYMap.put("基本单位","unit");
+
+        Boolean isGroup =  true;
+        String groupName="编码"; // excel 的哪列是编码，需要分割出分组编码.
+
+        Map<String, String> fieldDYDBMap = new HashMap<>();//数据库字段 和 entity字段和的映射关系
+        fieldDYDBMap.put("id","id");
+        fieldDYDBMap.put("name","name");
+        fieldDYDBMap.put("group_code","groupCode");
+        fieldDYDBMap.put("sub_id","subId");
+        fieldDYDBMap.put("specs","specs");
+        fieldDYDBMap.put("unit","unit");
+
+        Map<String, String> entityAndDBMap = new HashMap<>();//entity字段 和 数据库 字段和的映射关系
+        entityAndDBMap.put("id","id");
+        entityAndDBMap.put("name","name");
+        entityAndDBMap.put("groupCode","group_code");
+        entityAndDBMap.put("subId","sub_id");
+        entityAndDBMap.put("specs","specs");
+        entityAndDBMap.put("unit","unit");
+
+        String tableName = "base_material";
+
+        String filePath="C:\\Users\\Ake\\Downloads\\物料_2021100309592000_100044.xlsx";
+
+        Class<BaseMaterial> clazz = BaseMaterial.class;
+
+        Boolean isChangeFieldContent =  false;
+        String fieldName="供应商"; // 修改对应的内容
+
+        HashSet<String> outZero = new HashSet<>();*/
+
+
+        // 4. 库存
+        Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
+        fieldDYMap.put("物料编码","material_id");
+        fieldDYMap.put("库存量(主单位)","num");
+
+        Boolean isGroup =  false;
+        String groupName="编码"; // excel 的哪列是编码，需要分割出分组编码.
+
+        Map<String, String> fieldDYDBMap = new HashMap<>();//数据库字段 和 entity字段和的映射关系
+        fieldDYDBMap.put("material_id","materialId");
+        fieldDYDBMap.put("num","num");
+
+        Map<String, String> entityAndDBMap = new HashMap<>();//entity字段 和 数据库 字段和的映射关系
+        entityAndDBMap.put("materialId","material_id");
+        entityAndDBMap.put("num","num");
+
+        String tableName = "repository_stock";
+
+        String filePath="C:\\Users\\Ake\\Downloads\\即时库存汇总数据查询_2021100310581319_100044.xlsx";
+
+        Class<RepositoryStock> clazz = RepositoryStock.class;
+
+        Boolean isChangeFieldContent =  false;
+        String fieldName="供应商"; // 修改对应的内容
+
         HashSet<String> outZero = new HashSet<>();
         outZero.add("materialId");
+
         List list = getEntity(outZero,isChangeFieldContent,fieldName,isGroup,groupName,filePath, clazz, fieldDYMap, fieldDYDBMap);
 
         List<String> sqls = getSqls(tableName,list, clazz, entityAndDBMap);
@@ -250,7 +352,11 @@ public class InitExcelData {
                                 if(field.getName().equals("groupCode")){
                                     field.set(entity,group_code);
                                 }else if( field.getName().equals("subId")){
-                                    field.set(entity,sub_id);
+                                    if(clazz==BaseMaterial.class){
+                                        field.set(entity,sub_id);
+                                    }else{
+                                        field.set(entity,Integer.valueOf(sub_id));
+                                    }
                                 }
                             }
 

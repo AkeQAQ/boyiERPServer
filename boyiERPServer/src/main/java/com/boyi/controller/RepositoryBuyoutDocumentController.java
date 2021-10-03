@@ -136,8 +136,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 需要增加库存的内容
-            // 校验退料数目
-            validCompareReturnNum(repositoryBuyoutDocument, needSubMap,needAddMap,notUpdateMap);
+            // 校验退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
+//            validCompareReturnNum(repositoryBuyoutDocument, needSubMap,needAddMap,notUpdateMap);
 
             // 校验库存
             repositoryStockService.validStockNum(needSubMap);
@@ -302,8 +302,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             }
             subMap.put(detail.getMaterialId(),materialNum+detail.getNum());
         }
-        // 3.该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目
-
+        // 3.该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
+/*
         for (Map.Entry<String,Double> entry : subMap.entrySet()) {
             String materialId = entry.getKey();
             Double returnNum = entry.getValue();// 该单据该物料，需要入库的数目
@@ -319,7 +319,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                 throw new Exception("该供应商:"+supplierId+",该物料:" +materialId+
                         " 入库数目:"+pushCount+ " < (历史退料数目:"+returnCount+" + 当前退料数目:"+returnNum+")="+calNum );
             }
-        }
+        }*/
 
 
         try {

@@ -57,8 +57,8 @@ public class RepositoryPickMaterialController extends BaseController {
             }
             map.put(detail.getMaterialId(),materialNum+detail.getNum());
         }
-        // 2. 领料数目 要求>=退料数目
-        for (Map.Entry<String,Double> entry : map.entrySet()) {
+        // 2. 领料数目 要求>=退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
+        /*for (Map.Entry<String,Double> entry : map.entrySet()) {
             String materialId = entry.getKey();
             Double needAddNum = entry.getValue();// 该单据该物料，需要进行入库的数目
 
@@ -78,7 +78,7 @@ public class RepositoryPickMaterialController extends BaseController {
                         "(总领料数目:"+pickCount+" - 当前删除数目:"+needAddNum+")="+calNum+" < 退料审核通过的数目:"+returnCount);
             }
 
-        }
+        }*/
 
         // 新增库存
         repositoryStockService.addNumByMaterialIdFromMap(map);
@@ -155,8 +155,8 @@ public class RepositoryPickMaterialController extends BaseController {
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
-            // 校验退料数目
-            validCompareReturnNumFromUpdate(repositoryPickMaterial, needSubMap,needAddMap,notUpdateMap);
+            // 校验退料数目(金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
+//            validCompareReturnNumFromUpdate(repositoryPickMaterial, needSubMap,needAddMap,notUpdateMap);
 
             // 校验库存
             repositoryStockService.validStockNum(needSubMap);

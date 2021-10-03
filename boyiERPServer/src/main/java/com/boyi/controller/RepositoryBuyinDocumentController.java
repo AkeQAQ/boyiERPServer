@@ -59,7 +59,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
             }
             subMap.put(detail.getMaterialId(),materialNum+detail.getNum());
         }
-        // 3. 减少之后的该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目
+        // 3. 减少之后的该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
+/*
 
         for (Map.Entry<String,Double> entry : subMap.entrySet()) {
             String materialId = entry.getKey();
@@ -79,6 +80,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                         "(总入库数目:"+pushCount+" - 出库数目:"+needSubNum+")="+calNum+" < 退料的数目:"+returnCount);
             }
         }
+*/
 
         // 校验库存
         repositoryStockService.validStockNum(subMap);
@@ -193,8 +195,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 Map<String, Double> needAddMap = new HashMap<>(); //  需要增加的入库
                 Map<String, Double> notUpdateMap = new HashMap<>();  // 不需要变更的入库
 
-                // 校验退料数目
-                validCompareReturnNum(repositoryBuyinDocument, needSubMap,needAddMap,notUpdateMap);
+                // 校验退料数目(金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
+//                validCompareReturnNum(repositoryBuyinDocument, needSubMap,needAddMap,notUpdateMap);
 
                 // 校验库存能否减少
                 repositoryStockService.validStockNum(needSubMap);

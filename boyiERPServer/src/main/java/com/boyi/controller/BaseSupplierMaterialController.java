@@ -98,6 +98,10 @@ public class BaseSupplierMaterialController extends BaseController {
         if(baseSupplierMaterial.getEndDate() != null && baseSupplierMaterial.getEndDate().isBefore(baseSupplierMaterial.getStartDate()) ){
             return ResponseResult.fail("生效日期不能大于失效日期!");
         }
+        if(baseSupplierMaterial.getEndDate() == null){
+            LocalDate date = LocalDate.of(2100, 01, 01);
+            baseSupplierMaterial.setEndDate(date);
+        }
 
         // 查询表中是否已经有该数据，有的话，新增的起始日期要求> 老数据的结束日期
         int count = baseSupplierMaterialService.isRigion(baseSupplierMaterial);
@@ -137,7 +141,10 @@ public class BaseSupplierMaterialController extends BaseController {
             return ResponseResult.fail("生效日期不能大于失效日期!");
         }
         // 查询表中是否已经有同供应商，同物料的时间区间冲突
-
+        if(baseSupplierMaterial.getEndDate() == null){
+            LocalDate date = LocalDate.of(2100, 01, 01);
+            baseSupplierMaterial.setEndDate(date);
+        }
         int count = baseSupplierMaterialService.isRigionExcludeSelf(baseSupplierMaterial);
         if(count > 0){
             return ResponseResult.fail("日期区间冲突，请检查!");
