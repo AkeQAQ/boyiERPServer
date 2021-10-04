@@ -30,8 +30,11 @@ public class RepositoryPickMaterialDetailServiceImpl extends ServiceImpl<Reposit
 
     @Override
     public List<RepositoryPickMaterialDetail> listByDocumentId(Long id) {
-        return this.list(new QueryWrapper<RepositoryPickMaterialDetail>().eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL_DETAIL.DOCUMENT_ID_FIELDNAME, id)
-               );
+        return this.list(new QueryWrapper<RepositoryPickMaterialDetail>()
+                .eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL_DETAIL.DOCUMENT_ID_FIELDNAME, id)
+                .orderByAsc(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL_DETAIL.ID_FIELDNAME)
+
+        );
     }
 
     @Override

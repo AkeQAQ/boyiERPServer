@@ -32,7 +32,8 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             "        m.name material_name, " +
             "        m.unit , " +
             "        m.specs , " +
-            "        docD.num" +
+            "        docD.num," +
+            "        docD.id detail_id" +
             " from " +
             "                        repository_return_material doc , " +
             "                        repository_return_material_detail docD, " +
@@ -41,7 +42,7 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             " " +
             "            where doc.department_id = dep.id and " +
             "                  doc.id = docD.document_id and " +
-            "                  docD.material_id = m.id order by id desc";
+            "                  docD.material_id = m.id order by id desc,detail_id desc";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询

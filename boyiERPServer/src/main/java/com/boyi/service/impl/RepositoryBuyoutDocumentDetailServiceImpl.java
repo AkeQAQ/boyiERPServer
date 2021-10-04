@@ -30,7 +30,9 @@ public class RepositoryBuyoutDocumentDetailServiceImpl extends ServiceImpl<Repos
 
     @Override
     public List<RepositoryBuyoutDocumentDetail> listByDocumentId(Long id) {
-        return this.list(new QueryWrapper<RepositoryBuyoutDocumentDetail>().eq(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME, id)
+        return this.list(new QueryWrapper<RepositoryBuyoutDocumentDetail>()
+                .eq(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME, id)
+                .orderByAsc(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT_DETAIL.ID_FIELDNAME)
                );
     }
 

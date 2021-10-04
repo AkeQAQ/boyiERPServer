@@ -217,6 +217,7 @@ public class DBConstant {
     }
 
     public static class TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL{
+        public static final String ID_FIELDNAME = "id";
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String DOCUMENT_ID_FIELDNAME = "document_id";
@@ -449,6 +450,7 @@ public class DBConstant {
     }
 
     public static class TABLE_REPOSITORY_BUYOUT_DOCUMENT_DETAIL{
+        public static final String ID_FIELDNAME = "id";
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String DOCUMENT_ID_FIELDNAME = "document_id";

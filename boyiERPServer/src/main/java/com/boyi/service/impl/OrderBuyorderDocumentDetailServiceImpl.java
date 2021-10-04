@@ -31,8 +31,9 @@ public class OrderBuyorderDocumentDetailServiceImpl extends ServiceImpl<OrderBuy
 
     @Override
     public List<OrderBuyorderDocumentDetail> listByDocumentId(Long id) {
-        return this.list(new QueryWrapper<OrderBuyorderDocumentDetail>().eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME, id)
-                .orderByAsc(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME));
+        return this.list(new QueryWrapper<OrderBuyorderDocumentDetail>()
+                .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME, id)
+                .orderByAsc(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ID_FIELDNAME));
     }
 
     @Override

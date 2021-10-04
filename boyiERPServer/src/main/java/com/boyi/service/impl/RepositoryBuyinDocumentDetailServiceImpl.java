@@ -38,7 +38,8 @@ public class RepositoryBuyinDocumentDetailServiceImpl extends ServiceImpl<Reposi
     @Override
     public List<RepositoryBuyinDocumentDetail> listByDocumentId(Long id) {
         return this.list(new QueryWrapper<RepositoryBuyinDocumentDetail>().eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME, id)
-                .orderByAsc(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME));
+                .orderByAsc(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME)
+                .orderByAsc(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.ID_FIELDNAME));
     }
 
     @Override

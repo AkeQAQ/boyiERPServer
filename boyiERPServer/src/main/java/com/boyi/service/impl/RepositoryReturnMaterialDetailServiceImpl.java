@@ -30,8 +30,10 @@ public class RepositoryReturnMaterialDetailServiceImpl extends ServiceImpl<Repos
 
     @Override
     public List<RepositoryReturnMaterialDetail> listByDocumentId(Long id) {
-        return this.list(new QueryWrapper<RepositoryReturnMaterialDetail>().eq(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL_DETAIL.DOCUMENT_ID_FIELDNAME, id)
-               );
+        return this.list(new QueryWrapper<RepositoryReturnMaterialDetail>()
+                .eq(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL_DETAIL.DOCUMENT_ID_FIELDNAME, id)
+                .orderByAsc(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL_DETAIL.ID_FIELDNAME)
+        );
     }
 
     @Override

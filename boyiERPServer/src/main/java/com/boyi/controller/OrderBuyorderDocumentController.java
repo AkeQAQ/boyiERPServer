@@ -119,6 +119,12 @@ public class OrderBuyorderDocumentController extends BaseController {
 
         // 5. 修改该订单详情 状态
         orderBuyorderDocumentDetailService.statusSuccess(orderDetailIds);
+
+        // 6. 增加库存
+        for (RepositoryBuyinDocumentDetail detail : detailArrayList){
+            repositoryStockService.addNumByMaterialId(detail.getMaterialId()
+                    ,detail.getNum());
+        }
         return ResponseResult.succ("下推入库成功");
 
     }

@@ -26,6 +26,7 @@ poi:
   repositoryBuyOutDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/buyOutDemo.xlsx
   repositoryPickMaterialDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/pickMaterialDemo.xlsx
   repositoryReturnMaterialDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/returnMaterialDemo.xlsx
+  repositoryStockDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/stockDemo.xlsx
 
   orderBuyOrderDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/orderDemo.xlsx
 

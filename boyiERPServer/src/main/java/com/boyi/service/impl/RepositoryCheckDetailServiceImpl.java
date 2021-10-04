@@ -21,8 +21,10 @@ public class RepositoryCheckDetailServiceImpl extends ServiceImpl<RepositoryChec
 
     @Override
     public List<RepositoryCheckDetail> listByDocumentId(Long id) {
-        return this.list(new QueryWrapper<RepositoryCheckDetail>().eq(DBConstant.TABLE_REPOSITORY_CHECK_DETAIL.DOCUMENT_ID_FIELDNAME, id)
-               );
+        return this.list(new QueryWrapper<RepositoryCheckDetail>()
+                .eq(DBConstant.TABLE_REPOSITORY_CHECK_DETAIL.DOCUMENT_ID_FIELDNAME, id)
+                .orderByAsc(DBConstant.TABLE_REPOSITORY_CHECK_DETAIL.ID_FIELDNAME)
+        );
     }
 
     @Override

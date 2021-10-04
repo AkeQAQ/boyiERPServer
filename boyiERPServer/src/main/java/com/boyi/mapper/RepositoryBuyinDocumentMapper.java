@@ -39,8 +39,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "        docD.order_seq," +
             "        docD.num," +
             "        docD.order_id , " +
-
-
+            "        docD.id detail_id , " +
             "        docD.price_date  " +
             " from " +
             "                        repository_buyin_document doc , " +
@@ -54,7 +53,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             ") t " +
             "left join base_supplier_material sm " +
             "on sm.status=0 and t.material_id = sm.material_id and supId = sm.supplier_id" +
-            " and t.price_date between  sm.start_date and sm.end_date order by id desc,order_seq desc";
+            " and t.price_date between  sm.start_date and sm.end_date order by id desc,detail_id desc";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询
