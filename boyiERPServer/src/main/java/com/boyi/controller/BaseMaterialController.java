@@ -50,7 +50,7 @@ public class BaseMaterialController extends BaseController {
             stockNum.put(stock.getMaterialId(),stock.getNum());
         }
 
-            ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
         baseMaterials.forEach(obj ->{
             Double num = stockNum.get(obj.getId());
             Map<Object, Object> returnMap = MapUtil.builder().put(

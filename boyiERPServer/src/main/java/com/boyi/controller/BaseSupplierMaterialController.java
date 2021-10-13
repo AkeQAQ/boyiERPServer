@@ -15,6 +15,8 @@ import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.service.RepositoryBuyinDocumentService;
 import com.boyi.service.impl.BaseSupplierMaterialServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,8 +46,20 @@ import java.util.List;
 @RequestMapping("/baseData/supplierMaterial")
 public class BaseSupplierMaterialController extends BaseController {
 
-    @Autowired
-    BaseSupplierMaterialServiceImpl baseSupplierMaterialServiceImpl;
+
+    /**
+     * 查询报价
+     */
+    @GetMapping("/queryByValidPrice")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
+    public ResponseResult queryByValidPrice(String supplierId,String materialId,String date) {
+        if(date == null || StringUtils.isBlank(date) || materialId == null || StringUtils.isBlank(materialId)){
+            return ResponseResult.succ(null);
+        }
+        LocalDate d = LocalDate.parse(date);
+        BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplierId,materialId,d);
+        return ResponseResult.succ(one == null ? null : one.getPrice());
+    }
 
     /**
      * 查询报价
@@ -53,7 +67,7 @@ public class BaseSupplierMaterialController extends BaseController {
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
     public ResponseResult queryById(String id) {
-        BaseSupplierMaterial baseSupplierMaterial = baseSupplierMaterialServiceImpl.getById(id);
+        BaseSupplierMaterial baseSupplierMaterial = baseSupplierMaterialService.getById(id);
         return ResponseResult.succ(baseSupplierMaterial);
     }
 

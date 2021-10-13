@@ -195,8 +195,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 Map<String, Double> needAddMap = new HashMap<>(); //  需要增加的入库
                 Map<String, Double> notUpdateMap = new HashMap<>();  // 不需要变更的入库
 
-                // 校验退料数目(金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
-//                validCompareReturnNum(repositoryBuyinDocument, needSubMap,needAddMap,notUpdateMap);
+                // 校验退料数目
+                validCompareReturnNum(repositoryBuyinDocument, needSubMap,needAddMap,notUpdateMap);
 
                 // 校验库存能否减少
                 repositoryStockService.validStockNum(needSubMap);
@@ -241,7 +241,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     }
                 }
                 if(needSubIds.size() != 0){
-                    // 问仓库员，采购订单来的入库物料，不会再采购退料业务操作中进行退料。
+                    // (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
 /*
                     // 校验删除之后的退料数目
                     List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByIds(orderDetailIds);
@@ -279,7 +279,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
                                     "(总入库数目:"+pushCount+" - 出库数目:"+needSubNum+")="+calNum+" < 退料的数目:"+returnCount);
                         }
                     }*/
-
+                    // 减少库存
+                    List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByIds(needSubIds);
+                    for (RepositoryBuyinDocumentDetail detail :details){
+                        repositoryStockService.subNumByMaterialIdNum(detail.getMaterialId()
+                                ,detail.getNum());
+                    }
 
                     // 1. 根据document_id，删除现有ID之外的数据
                     repositoryBuyinDocumentDetailService.removeByDocIdAndInIds(repositoryBuyinDocument.getId(),needSubIds);
@@ -287,12 +292,6 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     orderBuyorderDocumentDetailService.statusNotSuccess(orderDetailIds);
                     log.info("[采购入库]-[更新],更新订单detail 的id:{},状态改未下推",orderDetailIds);
 
-                    // 减少库存
-                    List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByIds(detailIds);
-                    for (RepositoryBuyinDocumentDetail detail :details){
-                        repositoryStockService.subNumByMaterialIdNum(detail.getMaterialId()
-                                ,detail.getNum());
-                    }
                 }
 
             }
@@ -362,8 +361,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     notUpdateMap.put(materialId,newNum);
                     continue;
                 }
-                // 查询历史该供应商，该物料 总入库数目.
-                Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(newSupplierId,materialId);
+
+                // 查询历史该供应商，该物料 总入库数目. (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
+                /*Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(newSupplierId,materialId);
 
                 // 剩下的该供应商，该物料的入库数目
                 double calNum = pushCount - (oldNum-newNum); // 剩下的入库数目
@@ -375,7 +375,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 if(calNum < returnCount){
                     throw new Exception("该供应商:"+newSupplierId+",该物料:" +materialId+
                             "(修改后的入库数目 :"+calNum+"将会  < 退料的数目:"+returnCount);
-                }
+                }*/
             }
         }
         // 2. 假如供应商变更了
@@ -400,7 +400,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     continue;
                 }
 
-                Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(oldSupplierId,materialId);
+                /*Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(oldSupplierId,materialId);
 
                 double calNum = pushCount - oldNum; // 剩下的入库数目
 
@@ -411,7 +411,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 if(calNum < returnCount){
                     throw new Exception("变更前的供应商:"+oldSupplierId+",该物料:" +materialId+
                             "(变更供应商后的入库数目 :"+calNum+"将会  < 退料的数目:"+returnCount);
-                }
+                }*/
             }
         }
     }
@@ -459,7 +459,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
 
-            validExistSupplierDocNum(repositoryBuyinDocument);
+            ResponseResult responseResult = validExistSupplierDocNum(repositoryBuyinDocument);
+            if(responseResult != null){
+                return responseResult;
+            }
 
             repositoryBuyinDocumentService.save(repositoryBuyinDocument);
 

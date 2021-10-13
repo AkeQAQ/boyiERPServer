@@ -94,4 +94,5 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
     public int isRigion(BaseSupplierMaterial baseSupplierMaterial) {
         return baseSupplierMaterialMapper.isRigion(baseSupplierMaterial);
     }
+
 }

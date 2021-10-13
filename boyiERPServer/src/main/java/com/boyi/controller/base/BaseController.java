@@ -3,6 +3,7 @@ package com.boyi.controller.base;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.RepositoryClose;
 import com.boyi.service.*;
+import com.boyi.service.impl.BaseSupplierMaterialServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.ServletRequestUtils;
 

@@ -133,7 +133,7 @@ public class RepositoryReturnMaterialController extends BaseController {
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
             // 校验退料数目(金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
-//            validComparePickNum(repositoryReturnMaterial, needSubMap,needAddMap,notUpdateMap);
+            validComparePickNum(repositoryReturnMaterial, needSubMap,needAddMap,notUpdateMap);
 
             // 校验库存
             repositoryStockService.validStockNum(needSubMap);
@@ -226,7 +226,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                     // 新的物料不存在，不需要判断
                     continue;
                 }
-
+/*
                 Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(newDepartmentId, materialId);
 
                 Double returnCount = repositoryReturnMaterialService.countByDepartmentIdMaterialId(newDepartmentId,materialId);
@@ -235,7 +235,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                 if(pickCount < calReturnNum){
                     throw new Exception("该供应商:"+newDepartmentId+",该物料:" +materialId+
                             "(领料数目 :"+pickCount+"将会  < 修改后的退料的数目:"+calReturnNum);
-                }
+                }*/
             }else{
 
                 // 老退料>新退料，退料将变少，不需要校验。同时，库存要减少
@@ -248,6 +248,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                     notUpdateMap.put(materialId, newNum);
                     continue;
                 }
+                /*
                 Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(newDepartmentId, materialId);
 
 
@@ -260,7 +261,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                     throw new Exception("该供应商:" + newDepartmentId + ",该物料:" + materialId +
                             "(领料数目 :" + pickCount + "将会  < 修改后的退料的数目:" + calReturnNum);
 
-                }
+                }*/
             }
 
         }

@@ -137,7 +137,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 需要增加库存的内容
             // 校验退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
-//            validCompareReturnNum(repositoryBuyoutDocument, needSubMap,needAddMap,notUpdateMap);
+            validCompareReturnNum(repositoryBuyoutDocument, needSubMap,needAddMap,notUpdateMap);
 
             // 校验库存
             repositoryStockService.validStockNum(needSubMap);
@@ -225,7 +225,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                     notUpdateMap.put(materialId,newNum);
                     continue;
                 }
-                Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(newSupplierId,materialId);
+              /*  Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(newSupplierId,materialId);
 
                 // 查询该供应商，该物料退料数目
                 Double returnCount = repositoryBuyoutDocumentService.countBySupplierIdAndMaterialId(newSupplierId,materialId);
@@ -236,7 +236,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                     throw new Exception("该供应商:"+newSupplierId+",该物料:" +materialId+
                             "(入库数目 :"+pushCount+"将会  < 修改后的退料的数目:"+calReturnNum);
 
-                }
+                }*/
             }
         }// 2. 假如供应商变更了
         else {
@@ -256,7 +256,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                 if (newNum == 0) {
                     continue;
                 }
-
+/*
                 Double pushCount = repositoryBuyinDocumentService.countBySupplierIdAndMaterialId(newSupplierId, materialId);
 
                 // 查询该供应商，该物料退料数目
@@ -268,7 +268,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                     throw new Exception("更换供应商:" + newSupplierId + ",该物料:" + materialId +
                             "(入库数目 :" + pushCount + "将会  < 修改后的退料的数目:" + calReturnNum);
 
-                }
+                }*/
             }
         }
 

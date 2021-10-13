@@ -156,7 +156,7 @@ public class RepositoryPickMaterialController extends BaseController {
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
             // 校验退料数目(金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
-//            validCompareReturnNumFromUpdate(repositoryPickMaterial, needSubMap,needAddMap,notUpdateMap);
+            validCompareReturnNumFromUpdate(repositoryPickMaterial, needSubMap,needAddMap,notUpdateMap);
 
             // 校验库存
             repositoryStockService.validStockNum(needSubMap);
@@ -258,7 +258,7 @@ public class RepositoryPickMaterialController extends BaseController {
                 if(oldNum == 0){
                     continue;
                 }
-
+/*
                 Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(oldDepartmentId, materialId);
 
                 double calPickNum = pickCount - oldNum;
@@ -268,7 +268,7 @@ public class RepositoryPickMaterialController extends BaseController {
                 if(calPickNum < returnCount){
                     throw new Exception("该供应商:"+newDepartmentId+",该物料:" +materialId+
                             "(修改后的领料数目 :"+calPickNum+"将会  < 退料的数目:"+returnCount);
-                }
+                }*/
             }else{
                 // 老的物料里， 数目比 新的物料数目多的,就是要新增库存的，就不需要判断。
                 if(oldNum > newNum){
@@ -280,6 +280,7 @@ public class RepositoryPickMaterialController extends BaseController {
                     notUpdateMap.put(materialId,newNum);
                     continue;
                 }
+                /*
                 // 查询历史该供应商，该物料 总领料数目.
                 Double pickCount = repositoryPickMaterialService.countByDepartmentIdMaterialId(newDepartmentId, materialId);
 
@@ -292,7 +293,7 @@ public class RepositoryPickMaterialController extends BaseController {
                     throw new Exception("该供应商:"+newDepartmentId+",该物料:" +materialId+
                             "(修改后的领料数目 :"+calPickNum+"将会  < 退料的数目:"+returnCount);
 
-                }
+                }*/
             }
 
         }

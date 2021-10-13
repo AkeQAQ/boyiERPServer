@@ -37,4 +37,5 @@ public interface BaseSupplierMaterialService extends IService<BaseSupplierMateri
     Page<BaseSupplierMaterial> innerQueryBySearch(Page page, String queryField, String searchField, String searchStr);
 
     int isRigion(BaseSupplierMaterial baseSupplierMaterial);
+
 }

@@ -55,7 +55,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         }
 
         List<OrderBuyorderDocumentDetail> details = null;
-        if(id != null){
+        if(id != -1){
             details = orderBuyorderDocumentDetailService.listByDocumentId(id);
         }else {
             details = orderBuyorderDocumentDetailService.listByIds(Arrays.asList(orderDetailIds));
@@ -221,26 +221,34 @@ public class OrderBuyorderDocumentController extends BaseController {
 
         try {
             //2. 先删除老的，再插入新的
-            ArrayList<Long> removeIds = new ArrayList<>();// 存放未下推的详情。
-            ArrayList<OrderBuyorderDocumentDetail> removeDetails = new ArrayList<>();
+            ArrayList<Long> updateIds = new ArrayList<>();// 存放未下推的详情。
+            ArrayList<OrderBuyorderDocumentDetail> updateDetails = new ArrayList<>();
 
             int pushCount = 0;
-
+            ArrayList<Long> nowIds = new ArrayList<>();// 删除的IDS
             for (OrderBuyorderDocumentDetail item : orderBuyorderDocument.getRowList()) {
+                nowIds.add(item.getId());
                 // 只有状态是 1|| null（新增的），未下推的，才能编辑。
                 if(item.getStatus()==DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1)
                 {
-                    removeIds.add(item.getId());
-                    removeDetails.add(item);
+                    updateIds.add(item.getId());
+                    updateDetails.add(item);
                 }else {
                     pushCount++;
                 }
             }
+            ArrayList<Long> removeIds = new ArrayList<>();// 删除的IDS
+            List<OrderBuyorderDocumentDetail> oldDetails = orderBuyorderDocumentDetailService.listByDocumentId(orderBuyorderDocument.getId());
+            for (OrderBuyorderDocumentDetail item : oldDetails) {
+                if(!nowIds.contains(item.getId())){
+                    removeIds.add(item.getId());
+                }
+            }
 
-            if(removeIds.size() == 0){
+            if(updateIds.size() == 0 && removeIds.size() ==0){
                 return ResponseResult.succ("公共部分更新成功，但详情无更新。");
             }
-            // 没有下推过的，才能更新供应商，采购日期信息。
+            // 没有下推过的，更新供应商，采购日期信息。
             if(pushCount == 0){
                 orderBuyorderDocumentService.updateById(orderBuyorderDocument);
             }else {
@@ -248,20 +256,17 @@ public class OrderBuyorderDocumentController extends BaseController {
                 orderBuyorderDocument = orderBuyorderDocumentService.getById(orderBuyorderDocument.getId());
             }
 
-            boolean flag = orderBuyorderDocumentDetailService.removeByIds(removeIds);
-            if(flag){
-                for (OrderBuyorderDocumentDetail item : removeDetails){
-                    item.setId(null);
-                    item.setDocumentId(orderBuyorderDocument.getId());
-                    item.setSupplierId(orderBuyorderDocument.getSupplierId());
-                    item.setStatus(item.getStatus() );
-                    item.setOrderDate(orderBuyorderDocument.getOrderDate());
-                }
-                orderBuyorderDocumentDetailService.saveBatch(removeDetails);
-                log.info("采购订单模块-更新内容:{}",orderBuyorderDocument);
-            }else{
-                return ResponseResult.fail("操作失败，期间detail删除失败");
+            orderBuyorderDocumentDetailService.removeByIds(updateIds);
+            orderBuyorderDocumentDetailService.removeByIds(removeIds);
+            for (OrderBuyorderDocumentDetail item : updateDetails){
+                item.setId(null);
+                item.setDocumentId(orderBuyorderDocument.getId());
+                item.setSupplierId(orderBuyorderDocument.getSupplierId());
+                item.setStatus(item.getStatus() );
+                item.setOrderDate(orderBuyorderDocument.getOrderDate());
             }
+            orderBuyorderDocumentDetailService.saveBatch(updateDetails);
+            log.info("采购订单模块-更新内容:{}",orderBuyorderDocument);
 
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
