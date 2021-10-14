@@ -171,7 +171,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             String materialId = entry.getKey();
             RepositoryStock stock = this.getByMaterialId(materialId);
             if(stock == null){
-                throw new Exception("，该物料库存："+materialId+"不存在，不能减库存!");
+                throw new Exception("该物料库存："+materialId+"不存在，不能减库存!");
             }
             if(stock.getNum() < entry.getValue()){
                 throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于要减少的数量:"+entry.getValue()+"不能减库存!");

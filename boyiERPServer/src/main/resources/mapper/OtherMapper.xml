@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.boyi.mapper.OtherMapper">
+
+    <select id="getAutoIncrement" resultType="java.lang.Long">
+        SELECT
+            AUTO_INCREMENT
+        FROM
+            INFORMATION_SCHEMA.TABLES
+        WHERE
+            TABLE_NAME = #{tableName}
+    </select>
+
+    <select id="alertBuyInAutoIncrement" >
+        alter table repository_buyin_document AUTO_INCREMENT = #{increment}
+    </select>
+    <select id="alertBuyOutAutoIncrement" >
+        alter table repository_buyout_document AUTO_INCREMENT = #{increment}
+    </select>
+    <select id="alertPickMaterialAutoIncrement" >
+        alter table repository_pick_material AUTO_INCREMENT = #{increment}
+    </select>
+    <select id="alertReturnMaterialAutoIncrement" >
+        alter table repository_return_material AUTO_INCREMENT = #{increment}
+    </select>
+    <select id="alertBuyOrderAutoIncrement" >
+        alter table order_buyorder_document AUTO_INCREMENT = #{increment}
+    </select>
+
+    <select id="alertAutoIncrement" >
+        alter table #{dbName} AUTO_INCREMENT = #{increment}
+    </select>
+</mapper>
