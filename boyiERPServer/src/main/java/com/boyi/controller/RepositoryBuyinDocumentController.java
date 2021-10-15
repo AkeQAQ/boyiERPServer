@@ -197,6 +197,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                 // 校验退料数目
                 validCompareReturnNum(repositoryBuyinDocument, needSubMap,needAddMap,notUpdateMap);
+                log.info("需要减少的内容:{},需要添加的内容:{},需要修改的内容:{}",needSubMap,needAddMap,notUpdateMap);
 
                 // 校验库存能否减少
                 repositoryStockService.validStockNum(needSubMap);

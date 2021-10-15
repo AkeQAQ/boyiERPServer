@@ -34,7 +34,7 @@ public class SaticScheduleTask {
     }
 
     //3.添加定时任务
-    @Scheduled(cron = "0/10 * * * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     private void configureTasks() {
         System.err.println("【定时任务】执行静态定时任务时间: " + LocalDateTime.now());
 

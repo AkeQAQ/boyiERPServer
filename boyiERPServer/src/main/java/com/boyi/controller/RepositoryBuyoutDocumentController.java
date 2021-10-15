@@ -138,6 +138,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             Map<String, Double> notUpdateMap = new HashMap<>();   // 需要增加库存的内容
             // 校验退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
             validCompareReturnNum(repositoryBuyoutDocument, needSubMap,needAddMap,notUpdateMap);
+            log.info("需要减少的内容:{},需要添加的内容:{},需要修改的内容:{}",needSubMap,needAddMap,notUpdateMap);
 
             // 校验库存
             repositoryStockService.validStockNum(needSubMap);

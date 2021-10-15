@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.ExcelExportUtil;
+import com.boyi.common.utils.ExcelImportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
@@ -12,13 +13,19 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -37,6 +44,147 @@ public class RepositoryPickMaterialController extends BaseController {
 
     @Value("${poi.repositoryPickMaterialDemoPath}")
     private String poiDemoPath;
+    @Value("${poi.repositoryPickMaterialImportDemoPath}")
+    private String poiImportDemoPath;
+
+
+    @Transactional
+    @PostMapping("/down")
+    @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
+    public ResponseResult down(HttpServletResponse response, Long id)throws Exception {
+        response.setContentType("application/octet-stream");
+        response.setHeader("content-disposition", "attachment;filename=" + new String("领料导入模板".getBytes("ISO8859-1")));
+        response.setHeader("filename","领料导入模板" );
+
+        FileInputStream fis = new FileInputStream(new File(poiImportDemoPath));
+        FileCopyUtils.copy(fis,response.getOutputStream());
+        return ResponseResult.succ("下载成功");
+    }
+
+    /**
+     * 上传
+     */
+    @PostMapping("/upload")
+    @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
+    public ResponseResult upload(Principal principal, String pickUser, String departmentId, String pickDate , MultipartFile[] files) {
+        MultipartFile file = files[0];
+
+        log.info("上传内容: pickUser:{},dep:{},pickdate:{},files:{}",pickUser,departmentId,pickDate,file);
+
+        ExcelImportUtil<PickMaterialExcelVO> utils = new ExcelImportUtil<PickMaterialExcelVO>(PickMaterialExcelVO.class);
+        List<PickMaterialExcelVO> pickMaterialExcelVOS = null;
+        try (InputStream fis = file.getInputStream();){
+            pickMaterialExcelVOS = utils.readExcel(fis, 1, 0);
+            log.info("解析的excel数据:{}",pickMaterialExcelVOS);
+
+
+        if(pickMaterialExcelVOS == null || pickMaterialExcelVOS.size() == 0){
+            return ResponseResult.fail("解析内容未空");
+        }
+            LocalDate date = LocalDate.parse(pickDate);
+            boolean validIsClose = validIsClose(date);
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+
+        Map<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
+        List<RepositoryPickMaterialDetail> details = new ArrayList<>();
+
+        // 1. 遍历获取一个物料要减少的数目。
+        for (PickMaterialExcelVO detail : pickMaterialExcelVOS) {
+            Double materialNum = map.get(detail.getMaterialId());
+            if(materialNum == null){
+                materialNum= 0D;
+            }
+            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+
+            RepositoryPickMaterialDetail theDetail = new RepositoryPickMaterialDetail();
+            theDetail.setMaterialId(detail.getMaterialId());
+            theDetail.setNum(detail.getNum());
+
+            details.add(theDetail);
+        }
+        ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
+        for(Map.Entry<String,Double> entry : map.entrySet()){
+            String materialId = entry.getKey();
+            RepositoryStock stock = repositoryStockService.getByMaterialId(materialId);
+            HashMap<String, String> errorMsg = new HashMap<>();
+            if(stock == null){
+                errorMsg.put("content","该物料库存："+materialId+"库存为0!");
+                errorMsgs.add(errorMsg);
+            }else if(stock.getNum() < entry.getValue()){
+                errorMsg.put("content","该物料："+materialId+"出现负库存.明细：库存数量:"+stock.getNum()+"小于要减少的数量:"+entry.getValue()+"不能减库存!");
+                errorMsgs.add(errorMsg);
+            }
+        }
+        if(errorMsgs.size() > 0){
+            return ResponseResult.succ(errorMsgs);
+        }
+
+        // 减少库存
+        repositoryStockService.subNumByMaterialId(map);
+
+        RepositoryPickMaterial pickMaterial = new RepositoryPickMaterial();
+        pickMaterial.setDepartmentId(Long.valueOf(departmentId));
+        pickMaterial.setPickUser(pickUser);
+        pickMaterial.setPickDate(date);
+        LocalDateTime now = LocalDateTime.now();
+        pickMaterial.setCreated(now);
+        pickMaterial.setUpdated(now);
+        pickMaterial.setCreatedUser(principal.getName());
+        pickMaterial.setUpdatedUser(principal.getName());
+        pickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
+
+        repositoryPickMaterialService.save(pickMaterial);
+
+        for (RepositoryPickMaterialDetail item : details){
+            item.setDocumentId(pickMaterial.getId());
+        }
+
+        repositoryPickMaterialDetailService.saveBatch(details);
+        } catch (Exception e) {
+            log.error("发生错误:",e);
+            return ResponseResult.fail("上传失败.",e.getMessage());
+        }
+        return ResponseResult.succ("上传成功");
+        /*LocalDateTime now = LocalDateTime.now();
+        OrderProductpricePre orderProductpricePre = new OrderProductpricePre();
+        orderProductpricePre.setCreated(now);
+        orderProductpricePre.setUpdated(now);
+        orderProductpricePre.setCreatedUser(principal.getName());
+        orderProductpricePre.setUpdateUser(principal.getName());
+        orderProductpricePre.setStatus(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDVALUE_1);
+        orderProductpricePre.setCompanyNum(companyNum);
+        orderProductpricePre.setCustomer(customer);
+        orderProductpricePre.setPrice(price);
+        MultipartFile file = files[0];
+
+        orderProductpricePre.setUploadName( file.getOriginalFilename());
+        try {
+            OrderProductpricePre old = orderProductpricePreService.getByCustomerAndCompanyNum(orderProductpricePre.getCustomer(),
+                    orderProductpricePre.getCompanyNum());
+            if(old != null){
+                return ResponseResult.fail("该客户公司，该货号已存在历史记录!不允许添加");
+            }
+            orderProductpricePreService.save(orderProductpricePre);
+
+            // 1. 存储文件
+            String storePath = orderProductPricePrePath
+                    + orderProductpricePre.getCompanyNum() + "-"
+                    + orderProductpricePre.getCustomer() + "-"
+                    + file.getOriginalFilename();
+            file.transferTo(new File(storePath));
+            // 2. 根据客户公司，公司货号唯一编码，去更新文件路径
+
+            orderProductpricePreService.updateFilePathByCompanyNumAndCustomer(orderProductpricePre.getCompanyNum()
+                    , orderProductpricePre.getCustomer(),storePath);
+            return ResponseResult.succ("新增成功");
+        } catch (Exception e) {
+            log.error("插入异常", e);
+            return ResponseResult.fail(e.getMessage());
+        }*/
+    }
+
 
     @Transactional
     @PostMapping("/del")
@@ -157,6 +305,7 @@ public class RepositoryPickMaterialController extends BaseController {
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
             // 校验退料数目(金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
             validCompareReturnNumFromUpdate(repositoryPickMaterial, needSubMap,needAddMap,notUpdateMap);
+            log.info("需要减少的内容:{},需要添加的内容:{},需要修改的内容:{}",needSubMap,needAddMap,notUpdateMap);
 
             // 校验库存
             repositoryStockService.validStockNum(needSubMap);
