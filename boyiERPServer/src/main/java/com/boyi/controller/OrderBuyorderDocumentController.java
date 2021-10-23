@@ -47,32 +47,32 @@ public class OrderBuyorderDocumentController extends BaseController {
     @Transactional
     @PostMapping("/push")
     @PreAuthorize("hasAuthority('order:buyOrder:push')")
-    public ResponseResult push(Principal principal,@RequestBody RepositoryBuyinDocument repositoryBuyinDocument,Long[] orderDetailIds,Long id) {
+    public ResponseResult push(Principal principal, @RequestBody RepositoryBuyinDocument repositoryBuyinDocument, Long[] orderDetailIds, Long id) {
 
         boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
-        if(!validIsClose){
+        if (!validIsClose) {
             return ResponseResult.fail("日期请设置在关账日之后.");
         }
 
         List<OrderBuyorderDocumentDetail> details = null;
-        if(id != -1){
+        if (id != -1) {
             details = orderBuyorderDocumentDetailService.listByDocumentId(id);
-        }else {
+        } else {
             details = orderBuyorderDocumentDetailService.listByIds(Arrays.asList(orderDetailIds));
         }
         List<Long> detailIds = new ArrayList<>();
         String supplierId = details.get(0).getSupplierId();
         // 已经是下推过的，则不能执行
-        for (OrderBuyorderDocumentDetail detail: details){
-            if(detail.getStatus() == DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_0){
+        for (OrderBuyorderDocumentDetail detail : details) {
+            if (detail.getStatus() == DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_0) {
                 return ResponseResult.fail("请选择未下推的订单进行下推！！！");
             }
-            if(!detail.getSupplierId().equals(supplierId)){
+            if (!detail.getSupplierId().equals(supplierId)) {
                 return ResponseResult.fail("请选择同供应商进行下推！！！");
             }
             detailIds.add(detail.getId());
         }
-        if(id != null){
+        if (id != null) {
             orderDetailIds = detailIds.toArray(new Long[detailIds.size()]);
         }
 
@@ -85,48 +85,53 @@ public class OrderBuyorderDocumentController extends BaseController {
             return ResponseResult.fail("该供应商的单据已经存在！请确认信息!");
         }
 
-        // 2.封装入库单据表的信息
-        LocalDateTime now = LocalDateTime.now();
-        repositoryBuyinDocument.setCreated(now);
-        repositoryBuyinDocument.setUpdated(now);
-        repositoryBuyinDocument.setCreatedUser(principal.getName());
-        repositoryBuyinDocument.setUpdatedUser(principal.getName());
-        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
-        repositoryBuyinDocument.setSourceType(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SOURCE_TYPE_FIELDVALUE_1);
+        try {
 
-        repositoryBuyinDocumentService.save(repositoryBuyinDocument);
 
-        ArrayList<RepositoryBuyinDocumentDetail> detailArrayList = new ArrayList<>();
-        for (OrderBuyorderDocumentDetail item:details){
-            // 3. 存入库表
-            RepositoryBuyinDocumentDetail detail = new RepositoryBuyinDocumentDetail();
-            detail.setMaterialId(item.getMaterialId());
-            detail.setDocumentId(repositoryBuyinDocument.getId());
-            detail.setNum(item.getNum());
-            detail.setComment(item.getComment());
-            detail.setSupplierId(item.getSupplierId());
-            detail.setOrderSeq(item.getOrderSeq());
-            detail.setOrderId(item.getDocumentId());
-            detail.setPriceDate(item.getOrderDate());
-            detail.setOrderDetailId(item.getId());
+            // 2.封装入库单据表的信息
+            LocalDateTime now = LocalDateTime.now();
+            repositoryBuyinDocument.setCreated(now);
+            repositoryBuyinDocument.setUpdated(now);
+            repositoryBuyinDocument.setCreatedUser(principal.getName());
+            repositoryBuyinDocument.setUpdatedUser(principal.getName());
+            repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
+            repositoryBuyinDocument.setSourceType(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SOURCE_TYPE_FIELDVALUE_1);
 
-            detailArrayList.add(detail);
+            repositoryBuyinDocumentService.save(repositoryBuyinDocument);
 
+            ArrayList<RepositoryBuyinDocumentDetail> detailArrayList = new ArrayList<>();
+            for (OrderBuyorderDocumentDetail item : details) {
+                // 3. 存入库表
+                RepositoryBuyinDocumentDetail detail = new RepositoryBuyinDocumentDetail();
+                detail.setMaterialId(item.getMaterialId());
+                detail.setDocumentId(repositoryBuyinDocument.getId());
+                detail.setNum(item.getNum());
+                detail.setComment(item.getComment());
+                detail.setSupplierId(item.getSupplierId());
+                detail.setOrderSeq(item.getOrderSeq());
+                detail.setOrderId(item.getDocumentId());
+                detail.setPriceDate(item.getOrderDate());
+                detail.setOrderDetailId(item.getId());
+
+                detailArrayList.add(detail);
+
+            }
+
+            // 4. 存储入库详情
+            repositoryBuyinDocumentDetailService.saveBatch(detailArrayList);
+
+            // 5. 修改该订单详情 状态
+            orderBuyorderDocumentDetailService.statusSuccess(orderDetailIds);
+
+            // 6. 增加库存
+            for (RepositoryBuyinDocumentDetail detail : detailArrayList) {
+                repositoryStockService.addNumByMaterialId(detail.getMaterialId()
+                        , detail.getNum());
+            }
+            return ResponseResult.succ("下推入库成功");
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage()); // 事务默认需要RuntimeException，但是我们要求有Exception异常也要回滚
         }
-
-        // 4. 存储入库详情
-        repositoryBuyinDocumentDetailService.saveBatch(detailArrayList);
-
-        // 5. 修改该订单详情 状态
-        orderBuyorderDocumentDetailService.statusSuccess(orderDetailIds);
-
-        // 6. 增加库存
-        for (RepositoryBuyinDocumentDetail detail : detailArrayList){
-            repositoryStockService.addNumByMaterialId(detail.getMaterialId()
-                    ,detail.getNum());
-        }
-        return ResponseResult.succ("下推入库成功");
-
     }
 
     @Transactional
@@ -137,27 +142,31 @@ public class OrderBuyorderDocumentController extends BaseController {
         // 先查询，假如有状态已下推的，不能删除
         List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByDocumentId(ids[0]);
         List<Long> removeIds = new ArrayList<>();
-        for (OrderBuyorderDocumentDetail detail:details){
-            if(detail.getStatus() == DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_0){
+        for (OrderBuyorderDocumentDetail detail : details) {
+            if (detail.getStatus() == DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_0) {
                 return ResponseResult.fail("该采购订单存在已下推的记录。删除失败!");
             }
             removeIds.add(detail.getId());
         }
 
-        boolean flag = orderBuyorderDocumentService.removeByIds(Arrays.asList(ids));
+        try {
+            boolean flag = orderBuyorderDocumentService.removeByIds(Arrays.asList(ids));
 
-        log.info("删除采购订单表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");
-        if(!flag){
-            return ResponseResult.fail("采购订单删除失败");
+            log.info("删除采购订单表信息,ids:{},是否成功：{}", ids, flag ? "成功" : "失败");
+            if (!flag) {
+                return ResponseResult.fail("采购订单删除失败");
+            }
+
+            boolean flagDetail = orderBuyorderDocumentDetailService.removeByIds(removeIds);
+            log.info("删除采购订单表详情信息,document_id:{},是否成功：{}", ids, flagDetail ? "成功" : "失败");
+
+            if (!flagDetail) {
+                return ResponseResult.fail("采购订单详情表没有删除成功!");
+            }
+            return ResponseResult.succ("删除成功");
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
         }
-
-        boolean flagDetail = orderBuyorderDocumentDetailService.removeByIds(removeIds);
-        log.info("删除采购订单表详情信息,document_id:{},是否成功：{}",ids,flagDetail?"成功":"失败");
-
-        if(!flagDetail){
-            return ResponseResult.fail("采购订单详情表没有删除成功!");
-        }
-        return ResponseResult.succ("删除成功");
     }
 
     /**
@@ -175,27 +184,27 @@ public class OrderBuyorderDocumentController extends BaseController {
         Double totalNum = 0D;
         Double totalAmount = 0D;
 
-        for (OrderBuyorderDocumentDetail detail : details){
+        for (OrderBuyorderDocumentDetail detail : details) {
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
 
             // 查询对应的价目记录
-            BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),detail.getOrderDate());
+            BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(), material.getId(), detail.getOrderDate());
 
-            if(one != null){
+            if (one != null) {
                 detail.setPrice(one.getPrice());
                 double amount = detail.getPrice() * detail.getNum();
-                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+                detail.setAmount(new BigDecimal(amount).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
                 totalAmount += amount;
             }
 
             totalNum += detail.getNum();
         }
 
-        orderBuyorderDocument.setTotalNum( totalNum);
-        orderBuyorderDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+        orderBuyorderDocument.setTotalNum(totalNum);
+        orderBuyorderDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
 
         orderBuyorderDocument.setSupplierName(supplier.getName());
 
@@ -204,15 +213,15 @@ public class OrderBuyorderDocumentController extends BaseController {
     }
 
 
-
     /**
      * 修改入库
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('order:buyOrder:update')")
+    @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody OrderBuyorderDocument orderBuyorderDocument) {
 
-        if(orderBuyorderDocument.getRowList() ==null || orderBuyorderDocument.getRowList().size() ==0){
+        if (orderBuyorderDocument.getRowList() == null || orderBuyorderDocument.getRowList().size() == 0) {
             return ResponseResult.fail("物料信息不能为空");
         }
 
@@ -229,49 +238,48 @@ public class OrderBuyorderDocumentController extends BaseController {
             for (OrderBuyorderDocumentDetail item : orderBuyorderDocument.getRowList()) {
                 nowIds.add(item.getId());
                 // 只有状态是 1|| null（新增的），未下推的，才能编辑。
-                if(item.getStatus()==DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1)
-                {
+                if (item.getStatus() == DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1) {
                     updateIds.add(item.getId());
                     updateDetails.add(item);
-                }else {
+                } else {
                     pushCount++;
                 }
             }
             ArrayList<Long> removeIds = new ArrayList<>();// 删除的IDS
             List<OrderBuyorderDocumentDetail> oldDetails = orderBuyorderDocumentDetailService.listByDocumentId(orderBuyorderDocument.getId());
             for (OrderBuyorderDocumentDetail item : oldDetails) {
-                if(!nowIds.contains(item.getId())){
+                if (!nowIds.contains(item.getId())) {
                     removeIds.add(item.getId());
                 }
             }
 
-            if(updateIds.size() == 0 && removeIds.size() ==0){
+            if (updateIds.size() == 0 && removeIds.size() == 0) {
                 return ResponseResult.succ("公共部分更新成功，但详情无更新。");
             }
             // 没有下推过的，更新供应商，采购日期信息。
-            if(pushCount == 0){
+            if (pushCount == 0) {
                 orderBuyorderDocumentService.updateById(orderBuyorderDocument);
-            }else {
+            } else {
                 // 有推送过的，以之前数据库的未标准。
                 orderBuyorderDocument = orderBuyorderDocumentService.getById(orderBuyorderDocument.getId());
             }
 
             orderBuyorderDocumentDetailService.removeByIds(updateIds);
             orderBuyorderDocumentDetailService.removeByIds(removeIds);
-            for (OrderBuyorderDocumentDetail item : updateDetails){
+            for (OrderBuyorderDocumentDetail item : updateDetails) {
                 item.setId(null);
                 item.setDocumentId(orderBuyorderDocument.getId());
                 item.setSupplierId(orderBuyorderDocument.getSupplierId());
-                item.setStatus(item.getStatus() );
+                item.setStatus(item.getStatus());
                 item.setOrderDate(orderBuyorderDocument.getOrderDate());
             }
             orderBuyorderDocumentDetailService.saveBatch(updateDetails);
-            log.info("采购订单模块-更新内容:{}",orderBuyorderDocument);
+            log.info("采购订单模块-更新内容:{}", orderBuyorderDocument);
 
             return ResponseResult.succ("编辑成功");
-        } catch (DuplicateKeyException e) {
-            log.error("供应商，更新异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+        } catch (Exception e) {
+            log.error("供应商，更新异常", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -281,6 +289,7 @@ public class OrderBuyorderDocumentController extends BaseController {
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('order:buyOrder:save')")
+    @Transactional
     public ResponseResult save(Principal principal, @Validated @RequestBody OrderBuyorderDocument orderBuyorderDocument) {
         LocalDateTime now = LocalDateTime.now();
         orderBuyorderDocument.setCreated(now);
@@ -291,7 +300,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         try {
             orderBuyorderDocumentService.save(orderBuyorderDocument);
 
-            for (OrderBuyorderDocumentDetail item : orderBuyorderDocument.getRowList()){
+            for (OrderBuyorderDocumentDetail item : orderBuyorderDocument.getRowList()) {
                 item.setDocumentId(orderBuyorderDocument.getId());
                 item.setSupplierId(orderBuyorderDocument.getSupplierId());
                 item.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1);
@@ -301,9 +310,9 @@ public class OrderBuyorderDocumentController extends BaseController {
             orderBuyorderDocumentDetailService.saveBatch(orderBuyorderDocument.getRowList());
 
             return ResponseResult.succ("新增成功");
-        } catch (DuplicateKeyException e) {
-            log.error("采购订单单，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+        } catch (Exception e) {
+            log.error("采购订单单，插入异常", e);
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -319,27 +328,26 @@ public class OrderBuyorderDocumentController extends BaseController {
         if (searchField != "") {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
-            }
-            else if (searchField.equals("materialName")) {
+            } else if (searchField.equals("materialName")) {
                 queryField = "material_name";
 
-            }else if (searchField.equals("id")) {
+            } else if (searchField.equals("id")) {
                 queryField = "id";
 
             } else {
             }
-        }else {
+        } else {
 
         }
 
-        log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = orderBuyorderDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        log.info("搜索字段:{},对应ID:{}", searchField, ids);
+        pageData = orderBuyorderDocumentService.innerQueryBySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate);
 
         //加载模板流数据
-        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
-            new ExcelExportUtil(OrderBuyorderDocument.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.statusMap);
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);) {
+            new ExcelExportUtil(OrderBuyorderDocument.class, 1, 0).export(response, fis, pageData.getRecords(), "报表.xlsx", DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.statusMap);
         } catch (Exception e) {
-            log.error("导出模块报错.",e);
+            log.error("导出模块报错.", e);
         }
     }
 
@@ -355,19 +363,18 @@ public class OrderBuyorderDocumentController extends BaseController {
         if (searchField != "") {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
-            }
-            else if (searchField.equals("materialName")) {
+            } else if (searchField.equals("materialName")) {
                 queryField = "material_name";
 
-            }else if (searchField.equals("id")) {
+            } else if (searchField.equals("id")) {
                 queryField = "id";
 
             } else {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
-        log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = orderBuyorderDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        log.info("搜索字段:{},对应ID:{}", searchField, ids);
+        pageData = orderBuyorderDocumentService.innerQueryBySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate);
         return ResponseResult.succ(pageData);
     }
 
@@ -377,7 +384,7 @@ public class OrderBuyorderDocumentController extends BaseController {
      */
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('order:buyOrder:valid')")
-    public ResponseResult statusPass(Principal principal,Long id) {
+    public ResponseResult statusPass(Principal principal, Long id) {
 
         OrderBuyorderDocument orderBuyorderDocument = new OrderBuyorderDocument();
         orderBuyorderDocument.setUpdated(LocalDateTime.now());
@@ -385,23 +392,13 @@ public class OrderBuyorderDocumentController extends BaseController {
         orderBuyorderDocument.setId(id);
         orderBuyorderDocument.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDVALUE_0);
         orderBuyorderDocumentService.updateById(orderBuyorderDocument);
-        log.info("仓库模块-审核通过内容:{}",orderBuyorderDocument);
-
-        // 采购订单审核通过之后，要把数量更新
-
-        // 1. 根据单据ID 获取该单据的全部详情信息，
-        List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByDocumentId(id);
-        // 2. 遍历更新 一个物料对应的库存数量
-        for (OrderBuyorderDocumentDetail detail : details){
-            repositoryStockService.addNumByMaterialId(detail.getMaterialId()
-                    ,detail.getNum());
-        }
+        log.info("仓库模块-审核通过内容:{}", orderBuyorderDocument);
 
         return ResponseResult.succ("审核通过");
     }
 
 
-   /* *//**
+    /* *//**
      * 反审核
      *//*
     @GetMapping("/statusReturn")

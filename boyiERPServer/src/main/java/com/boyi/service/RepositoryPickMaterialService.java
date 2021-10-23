@@ -24,7 +24,7 @@ public interface RepositoryPickMaterialService extends IService<RepositoryPickMa
 
     RepositoryPickMaterial one(QueryWrapper<RepositoryPickMaterial> id);
 
-    Page<RepositoryPickMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
+    Page<RepositoryPickMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus);
 
     Double countByDepartmentIdMaterialId(Long departmentId, String materialId);
 

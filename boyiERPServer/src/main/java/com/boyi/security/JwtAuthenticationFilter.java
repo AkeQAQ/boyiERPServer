@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             throw new JwtException("token已过期");
         }
         String username = claim.getSubject();
-        log.info("用户-{}，正在登陆！", username);
+        log.info("用户-{}，发起请求！", username);
 
         SysUser sysUser = sysUserService.getByUsername(username);
         List<GrantedAuthority> grantedAuthorities = userDetailsService.getUserAuthority(sysUser);

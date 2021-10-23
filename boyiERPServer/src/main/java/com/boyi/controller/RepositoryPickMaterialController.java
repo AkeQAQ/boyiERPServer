@@ -1,6 +1,7 @@
 package com.boyi.controller;
 
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.ExcelExportUtil;
@@ -48,7 +49,6 @@ public class RepositoryPickMaterialController extends BaseController {
     private String poiImportDemoPath;
 
 
-    @Transactional
     @PostMapping("/down")
     @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
     public ResponseResult down(HttpServletResponse response, Long id)throws Exception {
@@ -89,7 +89,6 @@ public class RepositoryPickMaterialController extends BaseController {
 
         Map<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
         List<RepositoryPickMaterialDetail> details = new ArrayList<>();
-
         // 1. 遍历获取一个物料要减少的数目。
         for (PickMaterialExcelVO detail : pickMaterialExcelVOS) {
             Double materialNum = map.get(detail.getMaterialId());
@@ -144,7 +143,7 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterialDetailService.saveBatch(details);
         } catch (Exception e) {
             log.error("发生错误:",e);
-            return ResponseResult.fail("上传失败.",e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
         return ResponseResult.succ("上传成功");
         /*LocalDateTime now = LocalDateTime.now();
@@ -228,6 +227,9 @@ public class RepositoryPickMaterialController extends BaseController {
 
         }*/
 
+        try {
+
+
         // 新增库存
         repositoryStockService.addNumByMaterialIdFromMap(map);
 
@@ -245,6 +247,9 @@ public class RepositoryPickMaterialController extends BaseController {
             return ResponseResult.fail("领料详情表没有删除成功!");
         }
         return ResponseResult.succ("删除成功");
+        }catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -285,6 +290,7 @@ public class RepositoryPickMaterialController extends BaseController {
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('repository:pickMaterial:update')")
+    @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryPickMaterial repositoryPickMaterial)throws Exception {
 
         if(repositoryPickMaterial.getRowList() ==null || repositoryPickMaterial.getRowList().size() ==0){
@@ -332,9 +338,9 @@ public class RepositoryPickMaterialController extends BaseController {
             }
 
             return ResponseResult.succ("编辑成功");
-        } catch (DuplicateKeyException e) {
+        } catch (Exception e) {
             log.error("供应商，更新异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -453,6 +459,7 @@ public class RepositoryPickMaterialController extends BaseController {
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
+    @Transactional
     public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryPickMaterial repositoryPickMaterial)throws Exception {
         LocalDateTime now = LocalDateTime.now();
         repositoryPickMaterial.setCreated(now);
@@ -490,10 +497,10 @@ public class RepositoryPickMaterialController extends BaseController {
 
             repositoryPickMaterialDetailService.saveBatch(repositoryPickMaterial.getRowList());
 
-            return ResponseResult.succ("新增成功");
-        } catch (DuplicateKeyException e) {
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",repositoryPickMaterial.getId());
+        } catch (Exception e) {
             log.error("领料单，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -502,7 +509,8 @@ public class RepositoryPickMaterialController extends BaseController {
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('repository:pickMaterial:export')")
-    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public void export(HttpServletResponse response, String searchStr, String searchField
+            , String searchStartDate, String searchEndDate,String searchStatus) {
         Page<RepositoryPickMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -519,9 +527,15 @@ public class RepositoryPickMaterialController extends BaseController {
             } else {
             }
         }
-
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryPickMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        pageData = repositoryPickMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
@@ -536,7 +550,7 @@ public class RepositoryPickMaterialController extends BaseController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('repository:pickMaterial:list')")
-    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
         Page<RepositoryPickMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -558,10 +572,56 @@ public class RepositoryPickMaterialController extends BaseController {
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryPickMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ResponseResult.fail("状态不能为空");
+        }
+        pageData = repositoryPickMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
         return ResponseResult.succ(pageData);
     }
 
+
+    /**
+     * 提交
+     */
+    @GetMapping("/statusSubmit")
+    @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
+    public ResponseResult statusSubmit(Principal principal,Long id)throws Exception {
+
+        RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
+        repositoryPickMaterial.setUpdated(LocalDateTime.now());
+        repositoryPickMaterial.setUpdatedUser(principal.getName());
+        repositoryPickMaterial.setId(id);
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_2);
+        repositoryPickMaterialService.updateById(repositoryPickMaterial);
+        log.info("仓库模块-领料模块-审核通过内容:{}",repositoryPickMaterial);
+
+        return ResponseResult.succ("审核通过");
+    }
+
+    /**
+     * 撤销
+     */
+    @GetMapping("/statusSubReturn")
+    @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
+    public ResponseResult statusSubReturn(Principal principal,Long id)throws Exception {
+
+        RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
+        repositoryPickMaterial.setUpdated(LocalDateTime.now());
+        repositoryPickMaterial.setUpdatedUser(principal.getName());
+        repositoryPickMaterial.setId(id);
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
+        repositoryPickMaterialService.updateById(repositoryPickMaterial);
+        log.info("仓库模块-领料模块-审核通过内容:{}",repositoryPickMaterial);
+
+        return ResponseResult.succ("审核通过");
+    }
 
     /**
      * 审核通过
@@ -598,7 +658,7 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
         repositoryPickMaterial.setUpdatedUser(principal.getName());
         repositoryPickMaterial.setId(id);
-        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_3);
         repositoryPickMaterialService.updateById(repositoryPickMaterial);
         log.info("仓库模块-反审核通过内容:{}",repositoryPickMaterial);
 

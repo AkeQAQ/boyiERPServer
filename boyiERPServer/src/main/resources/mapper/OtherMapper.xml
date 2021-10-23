@@ -30,4 +30,6 @@
     <select id="alertAutoIncrement" >
         alter table #{dbName} AUTO_INCREMENT = #{increment}
     </select>
+
+
 </mapper>

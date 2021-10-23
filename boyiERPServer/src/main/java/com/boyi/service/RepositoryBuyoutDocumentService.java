@@ -22,7 +22,7 @@ public interface RepositoryBuyoutDocumentService extends IService<RepositoryBuyo
 
     RepositoryBuyoutDocument one(QueryWrapper<RepositoryBuyoutDocument> id);
 
-    Page<RepositoryBuyoutDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
+    Page<RepositoryBuyoutDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus);
 
     Double countBySupplierIdAndMaterialId(String supplierId, String materialId);
 

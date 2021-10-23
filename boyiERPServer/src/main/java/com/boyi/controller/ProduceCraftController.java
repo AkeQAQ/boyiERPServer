@@ -174,7 +174,6 @@ public class ProduceCraftController extends BaseController {
     }
 
 
-    @Transactional
     @PostMapping("/returnValid")
     @PreAuthorize("hasAuthority('produce:craft:returnValid')")
     public ResponseResult returnValid(Principal principal,@RequestBody Long id) {
@@ -183,7 +182,6 @@ public class ProduceCraftController extends BaseController {
         return ResponseResult.succ("反审核成功");
     }
 
-    @Transactional
     @PostMapping("/returnRealValid")
     @PreAuthorize("hasAuthority('produce:craft:returnRealValid')")
     public ResponseResult returnRealValid(Principal principal,@RequestBody Long id) {
@@ -192,7 +190,6 @@ public class ProduceCraftController extends BaseController {
         return ResponseResult.succ("反审核成功");
     }
 
-    @Transactional
     @PostMapping("/valid")
     @PreAuthorize("hasAuthority('produce:craft:valid')")
     public ResponseResult valid(Principal principal,@RequestBody Long id) {
@@ -201,7 +198,6 @@ public class ProduceCraftController extends BaseController {
         return ResponseResult.succ("审核成功");
     }
 
-    @Transactional
     @PostMapping("/realValid")
     @PreAuthorize("hasAuthority('produce:craft:realValid')")
     public ResponseResult realValid(Principal principal,@RequestBody Long id) {
@@ -209,7 +205,6 @@ public class ProduceCraftController extends BaseController {
         return ResponseResult.succ("审核成功");
     }
 
-    @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('produce:craft:del')")
     public ResponseResult delete(@RequestBody Long id) {

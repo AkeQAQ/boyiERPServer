@@ -1,6 +1,7 @@
 package com.boyi.controller;
 
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.ExcelExportUtil;
@@ -42,6 +43,8 @@ public class RepositoryReturnMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('repository:returnMaterial:del')")
     public ResponseResult delete(@RequestBody Long[] ids) throws Exception{
 
+        try {
+
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryReturnMaterialDetail> details = repositoryReturnMaterialDetailService.listByDocumentId(ids[0]);
 
@@ -74,6 +77,9 @@ public class RepositoryReturnMaterialController extends BaseController {
             return ResponseResult.fail("退料详情表没有删除成功!");
         }
         return ResponseResult.succ("删除成功");
+        }catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -113,6 +119,7 @@ public class RepositoryReturnMaterialController extends BaseController {
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('repository:returnMaterial:update')")
+    @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryReturnMaterial repositoryReturnMaterial)
         throws Exception{
 
@@ -161,9 +168,9 @@ public class RepositoryReturnMaterialController extends BaseController {
             }
 
             return ResponseResult.succ("编辑成功");
-        } catch (DuplicateKeyException e) {
+        } catch (Exception e) {
             log.error("供应商，更新异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -274,6 +281,7 @@ public class RepositoryReturnMaterialController extends BaseController {
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:returnMaterial:save')")
+    @Transactional
     public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryReturnMaterial repositoryReturnMaterial)throws Exception {
         LocalDateTime now = LocalDateTime.now();
         repositoryReturnMaterial.setCreated(now);
@@ -327,10 +335,10 @@ public class RepositoryReturnMaterialController extends BaseController {
 
             repositoryReturnMaterialDetailService.saveBatch(repositoryReturnMaterial.getRowList());
 
-            return ResponseResult.succ("新增成功");
-        } catch (DuplicateKeyException e) {
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",repositoryReturnMaterial.getId());
+        } catch (Exception e) {
             log.error("退料单，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -339,7 +347,7 @@ public class RepositoryReturnMaterialController extends BaseController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('repository:returnMaterial:list')")
-    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
         Page<RepositoryReturnMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -361,8 +369,54 @@ public class RepositoryReturnMaterialController extends BaseController {
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryReturnMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ResponseResult.fail("状态不能为空");
+        }
+        pageData = repositoryReturnMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
         return ResponseResult.succ(pageData);
+    }
+
+    /**
+     * 提交
+     */
+    @GetMapping("/statusSubmit")
+    @PreAuthorize("hasAuthority('repository:returnMaterial:save')")
+    public ResponseResult statusSubmit(Principal principal,Long id)throws Exception {
+
+        RepositoryReturnMaterial repositoryReturnMaterial = new RepositoryReturnMaterial();
+        repositoryReturnMaterial.setUpdated(LocalDateTime.now());
+        repositoryReturnMaterial.setUpdatedUser(principal.getName());
+        repositoryReturnMaterial.setId(id);
+        repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_2);
+        repositoryReturnMaterialService.updateById(repositoryReturnMaterial);
+        log.info("仓库模块-退料模块-审核通过内容:{}",repositoryReturnMaterial);
+
+        return ResponseResult.succ("审核通过");
+    }
+
+    /**
+     * 撤销
+     */
+    @GetMapping("/statusSubReturn")
+    @PreAuthorize("hasAuthority('repository:returnMaterial:save')")
+    public ResponseResult statusSubReturn(Principal principal,Long id)throws Exception {
+
+        RepositoryReturnMaterial repositoryReturnMaterial = new RepositoryReturnMaterial();
+        repositoryReturnMaterial.setUpdated(LocalDateTime.now());
+        repositoryReturnMaterial.setUpdatedUser(principal.getName());
+        repositoryReturnMaterial.setId(id);
+        repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_1);
+        repositoryReturnMaterialService.updateById(repositoryReturnMaterial);
+        log.info("仓库模块-退料模块-审核通过内容:{}",repositoryReturnMaterial);
+
+        return ResponseResult.succ("审核通过");
     }
 
     /**
@@ -383,7 +437,6 @@ public class RepositoryReturnMaterialController extends BaseController {
         return ResponseResult.succ("审核通过");
     }
 
-
     /**
      * 反审核
      */
@@ -403,7 +456,7 @@ public class RepositoryReturnMaterialController extends BaseController {
         repositoryReturnMaterial.setUpdated(LocalDateTime.now());
         repositoryReturnMaterial.setUpdatedUser(principal.getName());
         repositoryReturnMaterial.setId(id);
-        repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_1);
+        repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_3);
         repositoryReturnMaterialService.updateById(repositoryReturnMaterial);
         log.info("仓库模块-反审核通过内容:{}",repositoryReturnMaterial);
 
@@ -411,13 +464,13 @@ public class RepositoryReturnMaterialController extends BaseController {
         return ResponseResult.succ("反审核成功");
     }
 
-
     /**
      * 获取领料 分页导出
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('repository:returnMaterial:export')")
-    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public void export(HttpServletResponse response, String searchStr
+            , String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
         Page<RepositoryReturnMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -433,9 +486,15 @@ public class RepositoryReturnMaterialController extends BaseController {
 
             }
         }
-
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryReturnMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        pageData = repositoryReturnMaterialService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){

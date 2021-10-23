@@ -2,13 +2,24 @@ package com.boyi.controller;
 
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.poi.excel.style.Align;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.LuckeySheetPOIUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.binary.Hex;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.util.Units;
+import org.apache.poi.xssf.usermodel.*;
 import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
@@ -20,19 +31,18 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import sun.misc.BASE64Decoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.math.BigDecimal;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -49,6 +59,15 @@ public class OrderProductpricePreController extends BaseController {
 
     @Value("${orderProductPrice.pre}")
     private String orderProductPricePrePath;
+
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('order:productPricePre:list')")
+    public void export(HttpServletResponse response, @RequestBody String exceldatas) {
+        exceldatas = exceldatas.replace("&#xA;", "\\r\\n");//去除luckysheet中 &#xA 的换行
+        JSONObject jobj = (JSONObject) JSONObject.parse(exceldatas);
+
+        LuckeySheetPOIUtils.exportLuckySheetXlsx(jobj.getString("exceldatas"),response,"");
+    }
 
 
     /**
@@ -179,7 +198,6 @@ public class OrderProductpricePreController extends BaseController {
     }
 
 
-    @Transactional
     @PostMapping("/returnValid")
     @PreAuthorize("hasAuthority('order:productPricePre:returnValid')")
     public ResponseResult returnValid(Principal principal,@RequestBody Long id) {
@@ -188,7 +206,6 @@ public class OrderProductpricePreController extends BaseController {
         return ResponseResult.succ("反审核成功");
     }
 
-    @Transactional
     @PostMapping("/returnRealValid")
     @PreAuthorize("hasAuthority('order:productPricePre:returnRealValid')")
     public ResponseResult returnRealValid(Principal principal,@RequestBody Long id) {
@@ -197,7 +214,6 @@ public class OrderProductpricePreController extends BaseController {
         return ResponseResult.succ("反审核成功");
     }
 
-    @Transactional
     @PostMapping("/valid")
     @PreAuthorize("hasAuthority('order:productPricePre:valid')")
     public ResponseResult valid(Principal principal,@RequestBody Long id) {
@@ -207,7 +223,6 @@ public class OrderProductpricePreController extends BaseController {
     }
 
 
-    @Transactional
     @PostMapping("/realValid")
     @PreAuthorize("hasAuthority('order:productPricePre:realValid')")
     public ResponseResult realValid(Principal principal,@RequestBody Long id) {
@@ -215,7 +230,6 @@ public class OrderProductpricePreController extends BaseController {
         return ResponseResult.succ("审核成功");
     }
 
-    @Transactional
     @PostMapping("/down")
     @PreAuthorize("hasAuthority('order:productPricePre:down')")
     public ResponseResult down(HttpServletResponse response, Long id)throws Exception {
@@ -230,7 +244,6 @@ public class OrderProductpricePreController extends BaseController {
         return ResponseResult.succ("删除成功");
     }
 
-    @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('order:productPricePre:del')")
     public ResponseResult delete(@RequestBody Long id) {

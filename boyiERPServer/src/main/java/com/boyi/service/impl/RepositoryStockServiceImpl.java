@@ -11,6 +11,7 @@ import com.boyi.service.RepositoryStockService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -30,8 +31,6 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
 
     @Autowired
     RepositoryStockMapper repositoryStockMapper;
-
-
 
     @Override
     public void addNumByMaterialIdFromMap(Map<String, Double> needAddMap) {

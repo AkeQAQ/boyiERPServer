@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
 
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ExceptionHandler(value = Exception.class)
-    public ResponseResult handler(Exception e) {
+    public ResponseResult handler(Exception e) throws Exception{
         log.error("系统内部其他异常：----------------{}", e);
         return ResponseResult.fail(e.getMessage());
     }

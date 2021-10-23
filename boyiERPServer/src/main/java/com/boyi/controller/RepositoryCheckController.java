@@ -30,6 +30,8 @@ public class RepositoryCheckController extends BaseController {
     @PreAuthorize("hasAuthority('repository:check:del')")
     public ResponseResult delete(@RequestBody Long[] ids)throws Exception {
 
+        try {
+
         boolean flag = repositoryCheckService.removeByIds(Arrays.asList(ids));
 
         log.info("删除盘点表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");
@@ -44,6 +46,9 @@ public class RepositoryCheckController extends BaseController {
             return ResponseResult.fail("盘点详情表没有删除成功!");
         }
         return ResponseResult.succ("删除成功");
+        }catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -72,6 +77,7 @@ public class RepositoryCheckController extends BaseController {
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('repository:check:update')")
+    @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryCheck repositoryCheck)throws Exception {
 
         if(repositoryCheck.getRowList() ==null || repositoryCheck.getRowList().size() ==0){
@@ -101,14 +107,15 @@ public class RepositoryCheckController extends BaseController {
             }
 
             return ResponseResult.succ("编辑成功");
-        } catch (DuplicateKeyException e) {
+        } catch (Exception e) {
             log.error("供应商，更新异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:check:save')")
+    @Transactional
     public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryCheck repositoryCheck)throws Exception {
         LocalDateTime now = LocalDateTime.now();
         repositoryCheck.setCreated(now);
@@ -130,9 +137,9 @@ public class RepositoryCheckController extends BaseController {
             repositoryCheckDetailService.saveBatch(repositoryCheck.getRowList());
 
             return ResponseResult.succ("新增成功");
-        } catch (DuplicateKeyException e) {
+        } catch (Exception e) {
             log.error("盘点单，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 

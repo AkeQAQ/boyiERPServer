@@ -22,7 +22,7 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
 
     RepositoryReturnMaterial one(QueryWrapper<RepositoryReturnMaterial> id);
 
-    Page<RepositoryReturnMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
+    Page<RepositoryReturnMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus);
 
     Double countByDepartmentIdMaterialId(Long departmentId, String materialId);
 

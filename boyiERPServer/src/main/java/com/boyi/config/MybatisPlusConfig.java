@@ -6,12 +6,31 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.BlockAttackInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.mybatis.spring.annotation.MapperScan;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+
+import javax.sql.DataSource;
 
 @Configuration
 @MapperScan("com.boyi.mapper")
+@EnableTransactionManagement
 public class MybatisPlusConfig {
+/*
+    @Autowired
+    private DataSource dataSource;
+
+    @Bean
+    @Primary
+    public DataSourceTransactionManager dataSourceTransactionManager() {
+        DataSourceTransactionManager dataSourceTransactionManager = new DataSourceTransactionManager();
+        dataSourceTransactionManager.setDataSource(dataSource);
+        return dataSourceTransactionManager;
+
+    }*/
     /**
      * PaginationInnerInterceptor:新的分页插件,一缓和二缓遵循mybatis的规则,
      * 需要设置 MybatisConfiguration#useDeprecatedExecutor = false

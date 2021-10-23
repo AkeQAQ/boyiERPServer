@@ -39,7 +39,7 @@ public class CaptchaFilter  extends OncePerRequestFilter {
                 loginFailureHandler.onAuthenticationFailure(request, response, e);
             }
         }*/
-        log.info("CaptchaFilter...starting...");
+//        log.info("CaptchaFilter...starting...");
         Map<String, String[]> parameterMap = request.getParameterMap();
         filterChain.doFilter(request, response);
     }

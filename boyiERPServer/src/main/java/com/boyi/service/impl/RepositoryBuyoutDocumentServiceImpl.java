@@ -39,13 +39,16 @@ public class RepositoryBuyoutDocumentServiceImpl extends ServiceImpl<RepositoryB
     }
 
     @Override
-    public Page<RepositoryBuyoutDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate) {
+    public Page<RepositoryBuyoutDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus) {
         return this.innerQuery(page,
                 new QueryWrapper<RepositoryBuyoutDocument>().
                         like(StrUtil.isNotBlank(searchStr)
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate),DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.BUY_OUT_DATE_FIELDNAME,searchStartDate)
-                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.BUY_OUT_DATE_FIELDNAME,searchEndDate));
+                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.BUY_OUT_DATE_FIELDNAME,searchEndDate)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDNAME,searchStatus)
+        );
+
     }
 
     @Override
@@ -59,8 +62,8 @@ public class RepositoryBuyoutDocumentServiceImpl extends ServiceImpl<RepositoryB
     public List<RepositoryBuyoutDocument> countLTByCloseDate(LocalDate closeDate) {
         return this.list(new QueryWrapper<RepositoryBuyoutDocument>()
                 .le(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.BUY_OUT_DATE_FIELDNAME, closeDate)
-                .eq(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDNAME,
-                        DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1));
+                .ne(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDNAME,
+                        DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_0));
     }
 
 }

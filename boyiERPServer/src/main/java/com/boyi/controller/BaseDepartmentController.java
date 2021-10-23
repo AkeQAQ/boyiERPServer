@@ -102,7 +102,6 @@ public class BaseDepartmentController extends BaseController {
         }
     }
 
-    @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('baseData:department:del')")
     public ResponseResult delete(@RequestBody Long[] ids) {

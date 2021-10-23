@@ -3,6 +3,7 @@ package com.boyi.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.SysUser;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 

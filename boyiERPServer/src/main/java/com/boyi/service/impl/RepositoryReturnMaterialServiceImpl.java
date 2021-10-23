@@ -37,13 +37,16 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
     }
 
     @Override
-    public Page<RepositoryReturnMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate) {
+    public Page<RepositoryReturnMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus) {
         return this.innerQuery(page,
                 new QueryWrapper<RepositoryReturnMaterial>().
                         like(StrUtil.isNotBlank(searchStr)
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate),DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.RETURN_DATE_FIELDNAME,searchStartDate)
-                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.RETURN_DATE_FIELDNAME,searchEndDate));
+                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.RETURN_DATE_FIELDNAME,searchEndDate)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDNAME,searchStatus)
+
+        );
     }
 
     @Override
@@ -58,8 +61,8 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
     public List<RepositoryReturnMaterial> countLTByCloseDate(LocalDate closeDate) {
         return this.list(new QueryWrapper<RepositoryReturnMaterial>()
                 .le(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.RETURN_DATE_FIELDNAME, closeDate)
-                .eq(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDNAME,
-                        DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_1));
+                .ne(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDNAME,
+                        DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_0));
     }
 
 }

@@ -30,7 +30,7 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     // 该单据编号 该供应商
     int countSupplierOneDocNum(String supplierDocumentNum, String supplierId);
 
-    Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
+    Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus);
 
     int countBySupplierId(String ids[]);
 

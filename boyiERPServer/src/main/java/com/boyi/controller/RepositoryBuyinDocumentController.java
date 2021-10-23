@@ -4,6 +4,7 @@ package com.boyi.controller;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.ExcelExportUtil;
@@ -85,6 +86,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
         // 校验库存
         repositoryStockService.validStockNum(subMap);
 
+        try {
+
+
         // 4. 减少库存
         repositoryStockService.subNumByMaterialId(subMap);
 
@@ -112,6 +116,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
             return ResponseResult.fail("采购入库详情表没有删除成功!");
         }
         return ResponseResult.succ("删除成功");
+        }catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -164,6 +171,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('repository:buyIn:update')")
+    @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryBuyinDocument repositoryBuyinDocument)throws Exception {
 
         if(repositoryBuyinDocument.getRowList() ==null || repositoryBuyinDocument.getRowList().size() ==0){
@@ -203,27 +211,23 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 repositoryStockService.validStockNum(needSubMap);
 
                 //2. 先删除老的，再插入新的
-                boolean flag = repositoryBuyinDocumentDetailService.removeByDocId(repositoryBuyinDocument.getId());
-                if(flag){
-                    repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
+                repositoryBuyinDocumentDetailService.removeByDocId(repositoryBuyinDocument.getId());
+                repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
 
-                    for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
-                        item.setId(null);
-                        item.setDocumentId(repositoryBuyinDocument.getId());
-                        item.setSupplierId(repositoryBuyinDocument.getSupplierId());
-                        item.setPriceDate(repositoryBuyinDocument.getBuyInDate());
-                    }
-
-                    repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
-
-                    // 4. 减少,添加库存
-                    repositoryStockService.subNumByMaterialId(needSubMap);
-                    repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
-
-                    log.info("采购入库模块-更新内容:{}",repositoryBuyinDocument);
-                }else{
-                    return ResponseResult.fail("操作失败，期间detail删除失败");
+                for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
+                    item.setId(null);
+                    item.setDocumentId(repositoryBuyinDocument.getId());
+                    item.setSupplierId(repositoryBuyinDocument.getSupplierId());
+                    item.setPriceDate(repositoryBuyinDocument.getBuyInDate());
                 }
+
+                repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
+
+                // 4. 减少,添加库存
+                repositoryStockService.subNumByMaterialId(needSubMap);
+                repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
+
+                log.info("采购入库模块-更新内容:{}",repositoryBuyinDocument);
             }else{
                 // 假如是采购订单来源的，需要删除对应记录
 
@@ -298,9 +302,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
             }
 
             return ResponseResult.succ("编辑成功");
-        } catch (DuplicateKeyException e) {
+        } catch (Exception e) {
             log.error("供应商，更新异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -445,6 +449,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:buyIn:save')")
+    @Transactional
     public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryBuyinDocument repositoryBuyinDocument) {
 
         LocalDateTime now = LocalDateTime.now();
@@ -482,22 +487,19 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 repositoryStockService.addNumByMaterialId(detail.getMaterialId()
                         ,detail.getNum());
             }
-            return ResponseResult.succ("新增成功");
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",repositoryBuyinDocument.getId());
         } catch (DuplicateKeyException e) {
             log.error("采购入库单，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
-
-
-
 
     /**
      * 获取采购入库 分页导出
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('repository:buyIn:export')")
-    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
         Page<RepositoryBuyinDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -513,12 +515,19 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
             } else {
             }
-        }else {
-
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryBuyinDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+        pageData = repositoryBuyinDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
@@ -533,7 +542,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('repository:buyIn:list')")
-    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate,
+                               String searchStatus) {
         Page<RepositoryBuyinDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -555,10 +565,54 @@ public class RepositoryBuyinDocumentController extends BaseController {
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryBuyinDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ResponseResult.fail("状态不能为空");
+        }
+        pageData = repositoryBuyinDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
         return ResponseResult.succ(pageData);
     }
 
+
+    /**
+     * 提交
+     */
+    @GetMapping("/statusSubmit")
+    @PreAuthorize("hasAuthority('repository:buyIn:save')")
+    public ResponseResult statusSubmit(Principal principal,Long id) {
+
+        RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
+        repositoryBuyinDocument.setUpdated(LocalDateTime.now());
+        repositoryBuyinDocument.setUpdatedUser(principal.getName());
+        repositoryBuyinDocument.setId(id);
+        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
+        repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
+        log.info("仓库模块-审核中内容:{}",repositoryBuyinDocument);
+        return ResponseResult.succ("已提交");
+    }
+
+    /**
+     * 撤销
+     */
+    @GetMapping("/statusSubReturn")
+    @PreAuthorize("hasAuthority('repository:buyIn:save')")
+    public ResponseResult statusSubReturn(Principal principal,Long id) {
+
+        RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
+        repositoryBuyinDocument.setUpdated(LocalDateTime.now());
+        repositoryBuyinDocument.setUpdatedUser(principal.getName());
+        repositoryBuyinDocument.setId(id);
+        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
+        log.info("仓库模块-撤销内容:{}",repositoryBuyinDocument);
+        return ResponseResult.succ("已撤销");
+    }
 
     /**
      * 审核通过
@@ -596,7 +650,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
         repositoryBuyinDocument.setId(id);
-        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_3);
 
         repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
         log.info("仓库模块-反审核通过内容:{}",repositoryBuyinDocument);

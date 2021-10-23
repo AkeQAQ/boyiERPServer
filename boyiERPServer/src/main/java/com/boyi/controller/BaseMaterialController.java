@@ -12,6 +12,7 @@ import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import com.boyi.service.BaseMaterialService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,24 +41,24 @@ public class BaseMaterialController extends BaseController {
     public ResponseResult loadTableSearchMaterialDetailAllWithStock() {
         List<BaseMaterial> baseMaterials = baseMaterialService.list();
         List<String> ids = new ArrayList<>();
-        for (BaseMaterial baseMaterial : baseMaterials){
+        for (BaseMaterial baseMaterial : baseMaterials) {
             ids.add(baseMaterial.getId());
         }
         List<RepositoryStock> stocks = repositoryStockService.listByMaterialIds(ids);
 
         HashMap<String, Double> stockNum = new HashMap<>();
         for (RepositoryStock stock : stocks) {
-            stockNum.put(stock.getMaterialId(),stock.getNum());
+            stockNum.put(stock.getMaterialId(), stock.getNum());
         }
 
-        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
-        baseMaterials.forEach(obj ->{
+        ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
+        baseMaterials.forEach(obj -> {
             Double num = stockNum.get(obj.getId());
             Map<Object, Object> returnMap = MapUtil.builder().put(
-                            "value",obj.getId()+" : "+obj.getName() )
+                            "value", obj.getId() + " : " + obj.getName())
                     .put("id", obj.getId())
                     .put("obj", obj)
-                    .put("stockNum",num == null ? 0D : num)
+                    .put("stockNum", num == null ? 0D : num)
                     .map();
             returnList.add(returnMap);
         });
@@ -72,10 +73,10 @@ public class BaseMaterialController extends BaseController {
     public ResponseResult loadTableSearchMaterialDetailAll() {
         List<BaseMaterial> baseMaterials = baseMaterialService.list();
 
-        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
-        baseMaterials.forEach(obj ->{
+        ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
+        baseMaterials.forEach(obj -> {
             Map<Object, Object> returnMap = MapUtil.builder().put(
-                    "value",obj.getId()+" : "+obj.getName() )
+                            "value", obj.getId() + " : " + obj.getName())
                     .put("id", obj.getId())
                     .put("obj", obj)
                     .map();
@@ -92,10 +93,10 @@ public class BaseMaterialController extends BaseController {
     public ResponseResult getSearchAllData() {
         List<BaseMaterial> baseSuppliers = baseMaterialService.list();
 
-        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
-        baseSuppliers.forEach(obj ->{
-            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+obj.getName() ).put("id", obj.getId()).put("name", obj.getName())
-                    .put("unit",obj.getUnit()).map();
+        ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
+        baseSuppliers.forEach(obj -> {
+            Map<Object, Object> returnMap = MapUtil.builder().put("value", obj.getId() + " : " + obj.getName()).put("id", obj.getId()).put("name", obj.getName())
+                    .put("unit", obj.getUnit()).map();
             returnList.add(returnMap);
         });
         return ResponseResult.succ(returnList);
@@ -109,10 +110,10 @@ public class BaseMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:material:list')")
     public ResponseResult listByGroupCode(String searchStr) {
         Page<BaseMaterial> pageData = null;
-        if(searchStr.equals("全部")){
-            pageData = baseMaterialService.page(getPage(),new QueryWrapper<BaseMaterial>());
-        }else {
-            pageData = baseMaterialService.pageByGroupCode(getPage(),searchStr);
+        if (searchStr.equals("全部")) {
+            pageData = baseMaterialService.page(getPage(), new QueryWrapper<BaseMaterial>());
+        } else {
+            pageData = baseMaterialService.pageByGroupCode(getPage(), searchStr);
         }
         return ResponseResult.succ(pageData);
     }
@@ -131,8 +132,7 @@ public class BaseMaterialController extends BaseController {
             String queryField = "";
             if (searchField.equals("id")) {
                 queryField = "id";
-            }
-            else if (searchField.equals("groupCode")) {
+            } else if (searchField.equals("groupCode")) {
                 queryField = "group_code";
             } else if (searchField.equals("subId")) {
                 queryField = "sub_id";
@@ -142,7 +142,7 @@ public class BaseMaterialController extends BaseController {
                 return ResponseResult.fail("搜索字段不存在");
             }
             log.info("搜索字段:{},查询内容:{}", searchField, searchStr);
-            pageData = baseMaterialService.pageBySearch(getPage(),queryField,searchStr);
+            pageData = baseMaterialService.pageBySearch(getPage(), queryField, searchStr);
         }
         return ResponseResult.succ(pageData);
     }
@@ -160,9 +160,10 @@ public class BaseMaterialController extends BaseController {
     /**
      * 新增物料
      */
+    @Transactional
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('baseData:material:save')")
-    public ResponseResult save(Principal principal, @Validated @RequestBody BaseMaterial baseMaterial) {
+    public ResponseResult save(Principal principal, @Validated @RequestBody BaseMaterial baseMaterial) throws Exception {
         LocalDateTime now = LocalDateTime.now();
         baseMaterial.setCreated(now);
         baseMaterial.setUpdated(now);
@@ -176,17 +177,17 @@ public class BaseMaterialController extends BaseController {
                 baseMaterial.getSpecs(),
                 baseMaterial.getGroupCode());
 
-        if(list != null && list.size() > 0){
+        if (list != null && list.size() > 0) {
             return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
         }
 
         BaseMaterialGroup group = baseMaterialGroupService.getByCode(baseMaterial.getGroupCode());
 
-        if(baseMaterial.getSubId()==null || baseMaterial.getSubId().isEmpty()){
-            baseMaterial.setSubId(group.getAutoSubId()+"");
-            baseMaterial.setId(group.getCode()+"."+group.getAutoSubId());
+        if (baseMaterial.getSubId() == null || baseMaterial.getSubId().isEmpty()) {
+            baseMaterial.setSubId(group.getAutoSubId() + "");
+            baseMaterial.setId(group.getCode() + "." + group.getAutoSubId());
             // 先自增该分组的ID
-            group.setAutoSubId(group.getAutoSubId()+1);
+            group.setAutoSubId(group.getAutoSubId() + 1);
             baseMaterialGroupService.updateById(group);
         }
 
@@ -197,8 +198,8 @@ public class BaseMaterialController extends BaseController {
 
             return ResponseResult.succ("新增成功");
         } catch (DuplicateKeyException e) {
-            log.error("物料，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            log.error("物料，插入异常", e);
+            throw new Exception("唯一编码重复!");
         }
     }
 
@@ -219,40 +220,40 @@ public class BaseMaterialController extends BaseController {
                 baseMaterial.getGroupCode(),
                 baseMaterial.getId());
 
-        if(list != null && list.size() > 0){
+        if (list != null && list.size() > 0) {
             return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
         }
         try {
             // 1. 查询以前的信息
             BaseMaterial oldOne = baseMaterialService.getById(baseMaterial.getId());
-            if(!oldOne.getName().equals(baseMaterial.getName()) ||
-                !oldOne.getUnit().equals(baseMaterial.getUnit())||
-                !oldOne.getSpecs().equals(baseMaterial.getSpecs())){
+            if (!oldOne.getName().equals(baseMaterial.getName()) ||
+                    !oldOne.getUnit().equals(baseMaterial.getUnit()) ||
+                    !oldOne.getSpecs().equals(baseMaterial.getSpecs())) {
 
                 // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
                 int count = baseSupplierMaterialService.countSuccessByMaterialId(baseMaterial.getId());
 
-                if(count>0){
-                    log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录",baseMaterial.getId(),count);
-                    return ResponseResult.fail("物料ID["+baseMaterial.getId()+"]不能修改，存在"+count+"个 审核完成的 采购价目记录");
+                if (count > 0) {
+                    log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录", baseMaterial.getId(), count);
+                    return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + count + "个 审核完成的 采购价目记录");
                 }
 
                 baseMaterialService.updateById(baseMaterial);
-                log.info("物料ID[{}]更新成功，old{},new:{}.",baseMaterial.getId(),oldOne,baseMaterial);
-            }else {
+                log.info("物料ID[{}]更新成功，old{},new:{}.", baseMaterial.getId(), oldOne, baseMaterial);
+            } else {
                 return ResponseResult.fail("没有信息更改!");
             }
 
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
-            log.error("物料，更新异常",e);
+            log.error("物料，更新异常", e);
             return ResponseResult.fail("唯一编码重复!");
         }
     }
 
-    @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('baseData:material:del')")
+    @Transactional
     public ResponseResult delete(@RequestBody String[] ids) {
 
         int count = repositoryBuyinDocumentDetailService.countByMaterialId(ids);

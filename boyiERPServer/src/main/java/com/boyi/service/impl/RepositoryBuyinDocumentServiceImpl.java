@@ -59,13 +59,18 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     }
 
     @Override
-    public Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate) {
+    public Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField,
+                                                            String searchStr, String searchStartDate, String searchEndDate
+    ,List<Long> searchStatus
+                                                            ) {
         return this.innerQuery(page,
                 new QueryWrapper<RepositoryBuyinDocument>().
                         like(StrUtil.isNotBlank(searchStr)
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate),DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME,searchStartDate)
-                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME,searchEndDate));
+                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME,searchEndDate)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDNAME,searchStatus)
+        );
     }
 
     @Override
@@ -91,8 +96,8 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     public List<RepositoryBuyinDocument> countLTByCloseDate(LocalDate closeDate) {
         return this.list(new QueryWrapper<RepositoryBuyinDocument>()
                 .le(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME, closeDate)
-                .eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDNAME,
-                        DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1));
+                .ne(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDNAME,
+                        DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_0));
     }
 
 }

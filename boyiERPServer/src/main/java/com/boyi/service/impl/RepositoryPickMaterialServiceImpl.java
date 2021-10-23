@@ -40,13 +40,16 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
     }
 
     @Override
-    public Page<RepositoryPickMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate) {
+    public Page<RepositoryPickMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus) {
         return this.innerQuery(page,
                 new QueryWrapper<RepositoryPickMaterial>().
                         like(StrUtil.isNotBlank(searchStr)
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate),DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME,searchStartDate)
-                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME,searchEndDate));
+                        .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME,searchEndDate)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDNAME,searchStatus)
+
+        );
     }
 
     @Override
@@ -60,8 +63,8 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
     public List<RepositoryPickMaterial> countLTByCloseDate(LocalDate closeDate) {
         return this.list(new QueryWrapper<RepositoryPickMaterial>()
                 .le(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME, closeDate)
-                .eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDNAME,
-                        DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1));
+                .ne(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDNAME,
+                        DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_0));
     }
 
 }

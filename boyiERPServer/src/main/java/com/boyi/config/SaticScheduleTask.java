@@ -1,19 +1,26 @@
 package com.boyi.config;
 
+import com.boyi.controller.HeartController;
+import com.boyi.entity.RepositoryStock;
+import com.boyi.entity.RepositoryStockHistory;
 import com.boyi.mapper.OtherMapper;
+import com.boyi.mapper.RepositoryStockHistoryMapper;
+import com.boyi.mapper.RepositoryStockMapper;
 import com.boyi.mapper.SysUserMapper;
 import com.boyi.service.BaseDepartmentService;
+import com.boyi.service.RepositoryStockHistoryService;
+import com.boyi.service.RepositoryStockService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 @Configuration      //1.主要用于标记配置类，兼备Component的效果。
 @EnableScheduling   // 2.开启定时任务
@@ -22,6 +29,15 @@ public class SaticScheduleTask {
 
     @Autowired
     private OtherMapper otherMapper;
+
+    @Autowired
+    private RepositoryStockService repositoryStockService;
+
+    @Autowired
+    private RepositoryStockHistoryService repositoryStockHistoryService;
+
+    private Long heartInterval = 20000L;
+
     private SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
     private Set<String> tables = new HashSet<>();
     {
@@ -31,6 +47,51 @@ public class SaticScheduleTask {
         tables.add("repository_return_material");
         tables.add("order_buyorder_document");
 
+    }
+
+    // 心跳检测
+    @Scheduled(cron = "0/5 * * * * ?")
+    private void validOnline() {
+        Set<String> removeSets = new HashSet<>();
+        for(Map.Entry<String,Long> entry:HeartController.onlineMap.entrySet()){
+            String key = entry.getKey();
+            String[] split = key.split(HeartController.KEY_SPERATOR);
+            String userName = split[0];
+            String userJwt = split[1];
+
+            Long value = entry.getValue();
+            long now = System.currentTimeMillis();
+
+
+            if((now - value) > heartInterval){
+                // 超过5秒阈值，用户心跳丢失。变成不在线
+                log.info("【心跳检测】用户:{},jwt:{},上次心跳时间:{}，当前时间:{}, 间隔超出阈值:{},改成下线状态.",
+                        userName,userJwt,new Date(value),new Date(now),heartInterval);
+                removeSets.add(key);
+            }
+        }
+        for (String key : removeSets){
+            HeartController.onlineMap.remove(key);
+        }
+    }
+
+    // 每日库存保存
+    @Scheduled(cron = "0 0 0 * * ?")
+    private void everyDayStock() {
+        List<RepositoryStock> stockList = repositoryStockService.list();
+        LocalDate yestoday = LocalDate.now().plusDays(-1);
+        ArrayList<RepositoryStockHistory> saveList = new ArrayList<>();
+        for (RepositoryStock repositoryStock : stockList){
+            RepositoryStockHistory history = new RepositoryStockHistory();
+            history.setMaterialId(repositoryStock.getMaterialId());
+            history.setNum(repositoryStock.getNum());
+            history.setDate(yestoday);
+            saveList.add(history);
+        }
+        long start = System.currentTimeMillis();
+        repositoryStockHistoryService.saveBatch(saveList);
+        long end = System.currentTimeMillis();
+        log.info("成功复制日期:{}的及时库存，条数:{} 到历史表.复制耗时:{}ms",yestoday,stockList.size(),(end-start));
     }
 
     //3.添加定时任务
@@ -70,7 +131,5 @@ public class SaticScheduleTask {
                 log.info("【定时任务】dbName[{}] ,todayStr[{}],dbDayStr[{}]相等",dbName,todayStr,dbDayStr);
             }
         }
-
-
     }
 }

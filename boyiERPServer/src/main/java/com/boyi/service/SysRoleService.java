@@ -3,6 +3,7 @@ package com.boyi.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.SysRole;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -17,7 +18,6 @@ import java.util.List;
 public interface SysRoleService extends IService<SysRole> {
 
     List<SysRole> listRolesByUserId(Long id);
-
 
     List<SysRole> listValid();
 

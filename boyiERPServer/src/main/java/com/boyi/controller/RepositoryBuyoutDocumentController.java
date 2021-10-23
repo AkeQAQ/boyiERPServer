@@ -1,6 +1,7 @@
 package com.boyi.controller;
 
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.ExcelExportUtil;
@@ -50,6 +51,9 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                     ,detail.getNum());
         }
 
+        try {
+
+
         boolean flag = repositoryBuyoutDocumentService.removeByIds(Arrays.asList(ids));
 
         log.info("删除采购退料表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");
@@ -63,9 +67,10 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         if(!flagDetail){
             return ResponseResult.fail("采购退料详情表没有删除成功!");
         }
-
-
         return ResponseResult.succ("删除成功");
+        }catch (Exception e){
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -118,6 +123,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('repository:buyOut:update')")
+    @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody RepositoryBuyoutDocument repositoryBuyoutDocument)throws Exception {
 
         if(repositoryBuyoutDocument.getRowList() ==null || repositoryBuyoutDocument.getRowList().size() ==0){
@@ -167,9 +173,9 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
 
             return ResponseResult.succ("编辑成功");
-        } catch (DuplicateKeyException e) {
+        } catch (Exception e) {
             log.error("供应商，更新异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -280,6 +286,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('repository:buyOut:save')")
+    @Transactional
     public ResponseResult save(Principal principal, @Validated @RequestBody RepositoryBuyoutDocument repositoryBuyoutDocument)throws Exception {
         LocalDateTime now = LocalDateTime.now();
         repositoryBuyoutDocument.setCreated(now);
@@ -339,10 +346,10 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
             repositoryStockService.subNumByMaterialId(subMap);
 
-            return ResponseResult.succ("新增成功");
-        } catch (DuplicateKeyException e) {
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",repositoryBuyoutDocument.getId());
+        } catch (Exception e) {
             log.error("采购退料单，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -351,7 +358,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('repository:buyOut:export')")
-    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
         Page<RepositoryBuyoutDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -369,8 +376,15 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             }
         }
 
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryBuyoutDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        pageData = repositoryBuyoutDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
@@ -385,7 +399,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('repository:buyOut:list')")
-    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
         Page<RepositoryBuyoutDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -407,10 +421,53 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryBuyoutDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate);
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ResponseResult.fail("状态不能为空");
+        }
+        pageData = repositoryBuyoutDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
         return ResponseResult.succ(pageData);
     }
 
+    /**
+     * 提交
+     */
+    @GetMapping("/statusSubmit")
+    @PreAuthorize("hasAuthority('repository:buyOut:save')")
+    public ResponseResult statusSubmit(Principal principal,Long id) {
+
+        RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();
+        repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
+        repositoryBuyoutDocument.setUpdatedUser(principal.getName());
+        repositoryBuyoutDocument.setId(id);
+        repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_2);
+        repositoryBuyoutDocumentService.updateById(repositoryBuyoutDocument);
+        log.info("仓库模块-撤销内容:{}",repositoryBuyoutDocument);
+        return ResponseResult.succ("已撤销");
+    }
+
+    /**
+     * 撤销
+     */
+    @GetMapping("/statusSubReturn")
+    @PreAuthorize("hasAuthority('repository:buyOut:save')")
+    public ResponseResult statusSubReturn(Principal principal,Long id) {
+
+        RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();
+        repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
+        repositoryBuyoutDocument.setUpdatedUser(principal.getName());
+        repositoryBuyoutDocument.setId(id);
+        repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryBuyoutDocumentService.updateById(repositoryBuyoutDocument);
+        log.info("仓库模块-撤销内容:{}",repositoryBuyoutDocument);
+        return ResponseResult.succ("已撤销");
+    }
 
     /**
      * 审核通过
@@ -430,7 +487,6 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         return ResponseResult.succ("审核通过");
     }
 
-
     /**
      * 反审核
      */
@@ -447,7 +503,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
         repositoryBuyoutDocument.setId(id);
-        repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_3);
         repositoryBuyoutDocumentService.updateById(repositoryBuyoutDocument);
         log.info("仓库模块-反审核通过内容:{}",repositoryBuyoutDocument);
 
