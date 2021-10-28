@@ -76,6 +76,9 @@ public class RepositoryReturnMaterial extends BaseEntity {
     private Double num;
 
     @TableField(exist = false)  // 字段数据库忽略
+    private Double totalNum; // 该单据总数量
+
+    @TableField(exist = false)  // 字段数据库忽略
     @ExcelAttribute(sort = 3)
     private String departmentName; // 部门名称
 

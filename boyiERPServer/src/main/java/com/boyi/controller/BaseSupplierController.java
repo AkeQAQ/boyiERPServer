@@ -41,7 +41,7 @@ public class BaseSupplierController extends BaseController {
      * 获取全部
      */
     @PostMapping("/getSearchAllData")
-    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    @PreAuthorize("hasAuthority('baseData:supplier:list')")
     public ResponseResult getSearchAllData() {
         List<BaseSupplier> baseSuppliers = baseSupplierService.list();
 

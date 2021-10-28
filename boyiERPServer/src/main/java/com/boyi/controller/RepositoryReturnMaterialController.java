@@ -94,8 +94,7 @@ public class RepositoryReturnMaterialController extends BaseController {
 
         BaseDepartment department = baseDepartmentService.getById(repositoryReturnMaterial.getDepartmentId());
 
-        Double totalNum = 0D;
-        Double totalAmount = 0D;
+//        Double totalNum = 0D;
 
         for (RepositoryReturnMaterialDetail detail : details){
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
@@ -103,8 +102,9 @@ public class RepositoryReturnMaterialController extends BaseController {
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
 
-            totalNum += detail.getNum();
+//            totalNum += detail.getNum();
         }
+//        repositoryReturnMaterial.setTotalNum( totalNum);
 
         repositoryReturnMaterial.setDepartmentName(department.getName());
 
@@ -129,7 +129,7 @@ public class RepositoryReturnMaterialController extends BaseController {
 
         repositoryReturnMaterial.setUpdated(LocalDateTime.now());
         repositoryReturnMaterial.setUpdatedUser(principal.getName());
-
+        repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
         try {
             boolean validIsClose = validIsClose(repositoryReturnMaterial.getReturnDate());
             if(!validIsClose){
@@ -288,7 +288,7 @@ public class RepositoryReturnMaterialController extends BaseController {
         repositoryReturnMaterial.setUpdated(now);
         repositoryReturnMaterial.setCreatedUser(principal.getName());
         repositoryReturnMaterial.setUpdatedUser(principal.getName());
-        repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_1);
+        repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_2);
         try {
 
             boolean validIsClose = validIsClose(repositoryReturnMaterial.getReturnDate());
@@ -389,6 +389,10 @@ public class RepositoryReturnMaterialController extends BaseController {
     @GetMapping("/statusSubmit")
     @PreAuthorize("hasAuthority('repository:returnMaterial:save')")
     public ResponseResult statusSubmit(Principal principal,Long id)throws Exception {
+        RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_1){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryReturnMaterial repositoryReturnMaterial = new RepositoryReturnMaterial();
         repositoryReturnMaterial.setUpdated(LocalDateTime.now());
@@ -407,6 +411,13 @@ public class RepositoryReturnMaterialController extends BaseController {
     @GetMapping("/statusSubReturn")
     @PreAuthorize("hasAuthority('repository:returnMaterial:save')")
     public ResponseResult statusSubReturn(Principal principal,Long id)throws Exception {
+        RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_2
+                &&
+                old.getStatus()!=DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_3
+        ){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryReturnMaterial repositoryReturnMaterial = new RepositoryReturnMaterial();
         repositoryReturnMaterial.setUpdated(LocalDateTime.now());
@@ -425,7 +436,12 @@ public class RepositoryReturnMaterialController extends BaseController {
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('repository:returnMaterial:valid')")
     public ResponseResult statusPass(Principal principal,Long id)throws Exception {
-
+        RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(id);
+        if(old.getStatus() != DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_2 &&
+                old.getStatus() != DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_3
+        ){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
         RepositoryReturnMaterial repositoryReturnMaterial = new RepositoryReturnMaterial();
         repositoryReturnMaterial.setUpdated(LocalDateTime.now());
         repositoryReturnMaterial.setUpdatedUser(principal.getName());
@@ -447,6 +463,9 @@ public class RepositoryReturnMaterialController extends BaseController {
         boolean validIsClose = validIsClose(old.getReturnDate());
         if(!validIsClose){
             return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_0){
+            return ResponseResult.fail("状态已被修改.请刷新");
         }
 
         List<RepositoryReturnMaterialDetail> details = repositoryReturnMaterialDetailService.listByDocumentId(id);

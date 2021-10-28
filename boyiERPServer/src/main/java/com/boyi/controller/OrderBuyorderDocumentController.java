@@ -86,8 +86,6 @@ public class OrderBuyorderDocumentController extends BaseController {
         }
 
         try {
-
-
             // 2.封装入库单据表的信息
             LocalDateTime now = LocalDateTime.now();
             repositoryBuyinDocument.setCreated(now);

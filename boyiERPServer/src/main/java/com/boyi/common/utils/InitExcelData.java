@@ -39,9 +39,7 @@ public class InitExcelData {
 
         Map<String, String> fieldDYDBMap = new HashMap<>();//数据库字段 和 entity字段和的映射关系
         fieldDYDBMap.put("supplier_id","supplierId");
-
         fieldDYDBMap.put("material_id","materialId");
-
         fieldDYDBMap.put("price","price");
         fieldDYDBMap.put("start_date","startDate");
         fieldDYDBMap.put("end_date","endDate");

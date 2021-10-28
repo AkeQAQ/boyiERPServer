@@ -253,6 +253,41 @@ public class RepositoryPickMaterialController extends BaseController {
     }
 
     /**
+     * 查询BuyinId
+     */
+    @GetMapping("/queryByBuyInId")
+    @PreAuthorize("hasAuthority('repository:buyIn:list')")
+    public ResponseResult queryByBuyInId(Long buyInId) {
+        RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getById(buyInId);
+        List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(buyInId);
+
+        Double totalNum = 0D;
+        RepositoryPickMaterial pick = new RepositoryPickMaterial();
+        pick.setStatus(1);
+        ArrayList<RepositoryPickMaterialDetail> pickDetails = new ArrayList<>();
+
+
+        for (RepositoryBuyinDocumentDetail detail : details){
+            BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
+
+            RepositoryPickMaterialDetail pickDetail = new RepositoryPickMaterialDetail();
+            pickDetail.setMaterialName(material.getName());
+            pickDetail.setMaterialId(material.getId());
+            pickDetail.setUnit(material.getUnit());
+            pickDetail.setSpecs(material.getSpecs());
+            pickDetail.setNum(detail.getNum());
+            totalNum += detail.getNum();
+            pickDetails.add(pickDetail);
+        }
+
+
+        pick.setTotalNum(totalNum);
+
+        pick.setRowList(pickDetails);
+        return ResponseResult.succ(pick);
+    }
+
+    /**
      * 查询入库
      */
     @GetMapping("/queryById")
@@ -264,8 +299,8 @@ public class RepositoryPickMaterialController extends BaseController {
 
         BaseDepartment department = baseDepartmentService.getById(repositoryPickMaterial.getDepartmentId());
 
-        Double totalNum = 0D;
-        Double totalAmount = 0D;
+//        Double totalNum = 0D;
+//        Double totalAmount = 0D;
 
         for (RepositoryPickMaterialDetail detail : details){
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
@@ -273,11 +308,11 @@ public class RepositoryPickMaterialController extends BaseController {
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
 
-            totalNum += detail.getNum();
+//            totalNum += detail.getNum();
         }
 
 
-        repositoryPickMaterial.setTotalNum( totalNum);
+//        repositoryPickMaterial.setTotalNum( totalNum);
 
         repositoryPickMaterial.setDepartmentName(department.getName());
 
@@ -299,6 +334,7 @@ public class RepositoryPickMaterialController extends BaseController {
 
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
         repositoryPickMaterial.setUpdatedUser(principal.getName());
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
 
         try {
             boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
@@ -466,7 +502,8 @@ public class RepositoryPickMaterialController extends BaseController {
         repositoryPickMaterial.setUpdated(now);
         repositoryPickMaterial.setCreatedUser(principal.getName());
         repositoryPickMaterial.setUpdatedUser(principal.getName());
-        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
+        repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_2);
+
         try {
 
             boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
@@ -593,7 +630,10 @@ public class RepositoryPickMaterialController extends BaseController {
     @GetMapping("/statusSubmit")
     @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
     public ResponseResult statusSubmit(Principal principal,Long id)throws Exception {
-
+        RepositoryPickMaterial old = repositoryPickMaterialService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
         repositoryPickMaterial.setUpdatedUser(principal.getName());
@@ -611,6 +651,13 @@ public class RepositoryPickMaterialController extends BaseController {
     @GetMapping("/statusSubReturn")
     @PreAuthorize("hasAuthority('repository:pickMaterial:save')")
     public ResponseResult statusSubReturn(Principal principal,Long id)throws Exception {
+        RepositoryPickMaterial old = repositoryPickMaterialService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_2
+                &&
+                old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_3
+        ){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
@@ -629,6 +676,13 @@ public class RepositoryPickMaterialController extends BaseController {
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
     public ResponseResult statusPass(Principal principal,Long id)throws Exception {
+
+        RepositoryPickMaterial old = repositoryPickMaterialService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_2 &&
+                old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_3
+        ){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
         repositoryPickMaterial.setUpdated(LocalDateTime.now());
@@ -652,6 +706,9 @@ public class RepositoryPickMaterialController extends BaseController {
         boolean validIsClose = validIsClose(old.getPickDate());
         if(!validIsClose){
             return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_0){
+            return ResponseResult.fail("状态已被修改.请刷新");
         }
 
         RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();

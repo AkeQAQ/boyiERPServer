@@ -85,8 +85,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
         BaseSupplier supplier = baseSupplierService.getById(repositoryBuyoutDocument.getSupplierId());
 
-        Double totalNum = 0D;
-        Double totalAmount = 0D;
+//        Double totalNum = 0D;
+//        Double totalAmount = 0D;
 
         for (RepositoryBuyoutDocumentDetail detail : details){
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
@@ -99,16 +99,16 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
             if(one != null){
                 detail.setPrice(one.getPrice());
-                double amount = detail.getPrice() * detail.getNum();
-                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
-                totalAmount += amount;
+//                double amount = detail.getPrice() * detail.getNum();
+//                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+//                totalAmount += amount;
             }
-            totalNum += detail.getNum();
+//            totalNum += detail.getNum();
         }
 
 
-        repositoryBuyoutDocument.setTotalNum( totalNum);
-        repositoryBuyoutDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+//        repositoryBuyoutDocument.setTotalNum( totalNum);
+//        repositoryBuyoutDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 
         repositoryBuyoutDocument.setSupplierName(supplier.getName());
 
@@ -132,6 +132,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
         repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
+        repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
 
         try {
             boolean validIsClose = validIsClose(repositoryBuyoutDocument.getBuyOutDate());
@@ -293,7 +294,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocument.setUpdated(now);
         repositoryBuyoutDocument.setCreatedUser(principal.getName());
         repositoryBuyoutDocument.setUpdatedUser(principal.getName());
-        repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_2);
 
         boolean validIsClose = validIsClose(repositoryBuyoutDocument.getBuyOutDate());
         if(!validIsClose){
@@ -441,6 +442,10 @@ public class RepositoryBuyoutDocumentController extends BaseController {
     @GetMapping("/statusSubmit")
     @PreAuthorize("hasAuthority('repository:buyOut:save')")
     public ResponseResult statusSubmit(Principal principal,Long id) {
+        RepositoryBuyoutDocument old = repositoryBuyoutDocumentService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_1){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();
         repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
@@ -458,6 +463,13 @@ public class RepositoryBuyoutDocumentController extends BaseController {
     @GetMapping("/statusSubReturn")
     @PreAuthorize("hasAuthority('repository:buyOut:save')")
     public ResponseResult statusSubReturn(Principal principal,Long id) {
+        RepositoryBuyoutDocument old = repositoryBuyoutDocumentService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_2
+                &&
+                old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_3
+        ){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();
         repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
@@ -475,6 +487,11 @@ public class RepositoryBuyoutDocumentController extends BaseController {
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('repository:buyOut:valid')")
     public ResponseResult statusPass(Principal principal,Long id) throws Exception{
+        RepositoryBuyoutDocument old = repositoryBuyoutDocumentService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_2
+                && old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_3){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();
         repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
@@ -497,6 +514,9 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         boolean validIsClose = validIsClose(old.getBuyOutDate());
         if(!validIsClose){
             return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_0){
+            return ResponseResult.fail("状态已被修改.请刷新");
         }
 
         RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();

@@ -37,7 +37,7 @@ import java.util.*;
 public class BaseMaterialController extends BaseController {
 
     @PostMapping("/loadTableSearchMaterialDetailAllWithStock")
-    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    @PreAuthorize("hasAuthority('baseData:material:list')")
     public ResponseResult loadTableSearchMaterialDetailAllWithStock() {
         List<BaseMaterial> baseMaterials = baseMaterialService.list();
         List<String> ids = new ArrayList<>();
@@ -69,7 +69,7 @@ public class BaseMaterialController extends BaseController {
      * 用于增量表格搜索输入建议框的数据
      */
     @PostMapping("/loadTableSearchMaterialDetailAll")
-    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    @PreAuthorize("hasAuthority('baseData:material:list')")
     public ResponseResult loadTableSearchMaterialDetailAll() {
         List<BaseMaterial> baseMaterials = baseMaterialService.list();
 
@@ -89,7 +89,7 @@ public class BaseMaterialController extends BaseController {
      * 获取全部数据
      */
     @PostMapping("/getSearchAllData")
-    @PreAuthorize("hasAuthority('baseData:unit:list')")
+    @PreAuthorize("hasAuthority('baseData:material:list')")
     public ResponseResult getSearchAllData() {
         List<BaseMaterial> baseSuppliers = baseMaterialService.list();
 

@@ -94,7 +94,7 @@ public class SaticScheduleTask {
         log.info("成功复制日期:{}的及时库存，条数:{} 到历史表.复制耗时:{}ms",yestoday,stockList.size(),(end-start));
     }
 
-    //3.添加定时任务
+    //3.每日修改单据的ID前缀为当日日期
     @Scheduled(cron = "0 * * * * ?")
     private void configureTasks() {
         System.err.println("【定时任务】执行静态定时任务时间: " + LocalDateTime.now());

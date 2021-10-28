@@ -133,8 +133,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         BaseSupplier supplier = baseSupplierService.getById(repositoryBuyinDocument.getSupplierId());
 
-        Double totalNum = 0D;
-        Double totalAmount = 0D;
+
+//        Double totalNum = 0D;
+//        Double totalAmount = 0D;
 
         for (RepositoryBuyinDocumentDetail detail : details){
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
@@ -142,23 +143,22 @@ public class RepositoryBuyinDocumentController extends BaseController {
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
 
-
             // 查询对应的价目记录
             BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),repositoryBuyinDocument.getBuyInDate());
 
             if(one != null){
                 detail.setPrice(one.getPrice());
-                double amount = detail.getPrice() * detail.getNum();
-                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
-                totalAmount += amount;
+//                double amount = detail.getPrice() * detail.getNum();
+//                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+//                totalAmount += amount;
             }
 
-            totalNum += detail.getNum();
+//            totalNum += detail.getNum();
         }
 
+//        repositoryBuyinDocument.setTotalNum( totalNum);
+//        repositoryBuyinDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 
-        repositoryBuyinDocument.setTotalNum( totalNum);
-        repositoryBuyinDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 
         repositoryBuyinDocument.setSupplierName(supplier.getName());
 
@@ -180,7 +180,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
-
+        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
         try {
 
             boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
@@ -245,6 +245,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                         orderDetailIds.add(item.getOrderDetailId());
                     }
                 }
+                repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
                 if(needSubIds.size() != 0){
                     // (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
 /*
@@ -290,7 +291,6 @@ public class RepositoryBuyinDocumentController extends BaseController {
                         repositoryStockService.subNumByMaterialIdNum(detail.getMaterialId()
                                 ,detail.getNum());
                     }
-
                     // 1. 根据document_id，删除现有ID之外的数据
                     repositoryBuyinDocumentDetailService.removeByDocIdAndInIds(repositoryBuyinDocument.getId(),needSubIds);
                     // 2. 修改，采购订单，该详情的状态
@@ -457,7 +457,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocument.setUpdated(now);
         repositoryBuyinDocument.setCreatedUser(principal.getName());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
-        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
+        repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
         repositoryBuyinDocument.setSourceType(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SOURCE_TYPE_FIELDVALUE_0);
         try {
             boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
@@ -487,6 +487,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 repositoryStockService.addNumByMaterialId(detail.getMaterialId()
                         ,detail.getNum());
             }
+            HashMap<String, Object> returnMap = new HashMap<>();
+            returnMap.put("id",repositoryBuyinDocument.getId());
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",repositoryBuyinDocument.getId());
         } catch (DuplicateKeyException e) {
             log.error("采购入库单，插入异常",e);
@@ -587,6 +589,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @PreAuthorize("hasAuthority('repository:buyIn:save')")
     public ResponseResult statusSubmit(Principal principal,Long id) {
 
+        RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
         RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
@@ -603,7 +609,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @GetMapping("/statusSubReturn")
     @PreAuthorize("hasAuthority('repository:buyIn:save')")
     public ResponseResult statusSubReturn(Principal principal,Long id) {
-
+        RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2 &&
+                old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_3
+        ){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
         RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
         repositoryBuyinDocument.setUpdatedUser(principal.getName());
@@ -620,6 +631,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('repository:buyIn:valid')")
     public ResponseResult statusPass(Principal principal,Long id) {
+        RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(id);
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2
+                && old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_3){
+            return ResponseResult.fail("状态已被修改.请刷新");
+        }
 
         RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
         repositoryBuyinDocument.setUpdated(LocalDateTime.now());
@@ -644,6 +660,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
         boolean validIsClose = validIsClose(old.getBuyInDate());
         if(!validIsClose){
             return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_0){
+            return ResponseResult.fail("状态已被修改.请刷新");
         }
 
         RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
