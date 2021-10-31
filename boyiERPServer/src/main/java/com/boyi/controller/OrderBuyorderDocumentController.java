@@ -1,6 +1,7 @@
 package com.boyi.controller;
 
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.ExcelExportUtil;
@@ -23,9 +24,8 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.sql.Array;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>
@@ -43,11 +43,39 @@ public class OrderBuyorderDocumentController extends BaseController {
     @Value("${poi.orderBuyOrderDemoPath}")
     private String poiDemoPath;
 
+    public static final Map<Long,String> locks = new ConcurrentHashMap<>();
+
+    /**
+     * 锁单据
+     */
+    @GetMapping("/lockById")
+    @PreAuthorize("hasAuthority('order:buyOrder:list')")
+    public ResponseResult lockById(Principal principal,Long id) {
+        locks.put(id,principal.getName());
+        log.info("锁单据:{}",id);
+        return ResponseResult.succ("");
+    }
+    /**
+     * 解锁单据
+     */
+    @GetMapping("/lockOpenById")
+    @PreAuthorize("hasAuthority('order:buyOrder:list')")
+    public ResponseResult lockOpenById(Long id) {
+        locks.remove(id);
+        log.info("解锁单据:{}",id);
+        return ResponseResult.succ("");
+    }
 
     @Transactional
     @PostMapping("/push")
     @PreAuthorize("hasAuthority('order:buyOrder:push')")
     public ResponseResult push(Principal principal, @RequestBody RepositoryBuyinDocument repositoryBuyinDocument, Long[] orderDetailIds, Long id) {
+        if (id != -1) {
+
+        }else{
+
+        }
+
 
         boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
         if (!validIsClose) {
@@ -56,9 +84,19 @@ public class OrderBuyorderDocumentController extends BaseController {
 
         List<OrderBuyorderDocumentDetail> details = null;
         if (id != -1) {
+            String user = locks.get(id);
+            if(StringUtils.isNotBlank(user)){
+                return ResponseResult.fail("单据被["+user+"]占用");
+            }
             details = orderBuyorderDocumentDetailService.listByDocumentId(id);
         } else {
             details = orderBuyorderDocumentDetailService.listByIds(Arrays.asList(orderDetailIds));
+            for (OrderBuyorderDocumentDetail detail : details){
+                String user = locks.get(detail.getDocumentId());
+                if(StringUtils.isNotBlank(user)){
+                    return ResponseResult.fail("单据"+detail.getDocumentId()+"被["+user+"]占用");
+                }
+            }
         }
         List<Long> detailIds = new ArrayList<>();
         String supplierId = details.get(0).getSupplierId();
@@ -136,7 +174,10 @@ public class OrderBuyorderDocumentController extends BaseController {
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('order:buyOrder:del')")
     public ResponseResult delete(@RequestBody Long[] ids) {
-
+        String user = locks.get(ids[0]);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         // 先查询，假如有状态已下推的，不能删除
         List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByDocumentId(ids[0]);
         List<Long> removeIds = new ArrayList<>();
@@ -173,6 +214,10 @@ public class OrderBuyorderDocumentController extends BaseController {
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('order:buyOrder:list')")
     public ResponseResult queryById(Long id) {
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         OrderBuyorderDocument orderBuyorderDocument = orderBuyorderDocumentService.getById(id);
 
         List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listByDocumentId(id);
@@ -383,7 +428,10 @@ public class OrderBuyorderDocumentController extends BaseController {
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('order:buyOrder:valid')")
     public ResponseResult statusPass(Principal principal, Long id) {
-
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         OrderBuyorderDocument orderBuyorderDocument = new OrderBuyorderDocument();
         orderBuyorderDocument.setUpdated(LocalDateTime.now());
         orderBuyorderDocument.setUpdatedUser(principal.getName());

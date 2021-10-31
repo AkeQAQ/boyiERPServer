@@ -104,6 +104,8 @@ public class BaseController {
     @Autowired
     public RepositoryCloseService repositoryCloseService;
 
+    @Autowired
+    public AnalysisRequestService analysisRequestService;
     /**
      * 获取页面
      * @return

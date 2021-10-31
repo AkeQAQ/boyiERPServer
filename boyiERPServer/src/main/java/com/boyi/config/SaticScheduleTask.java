@@ -1,6 +1,8 @@
 package com.boyi.config;
 
-import com.boyi.controller.HeartController;
+import com.boyi.controller.*;
+import com.boyi.entity.RepositoryBuyinDocument;
+import com.boyi.entity.RepositoryPickMaterialDetail;
 import com.boyi.entity.RepositoryStock;
 import com.boyi.entity.RepositoryStockHistory;
 import com.boyi.mapper.OtherMapper;
@@ -56,22 +58,46 @@ public class SaticScheduleTask {
         for(Map.Entry<String,Long> entry:HeartController.onlineMap.entrySet()){
             String key = entry.getKey();
             String[] split = key.split(HeartController.KEY_SPERATOR);
-            String userName = split[0];
+            String ipAndUserName = split[0];
             String userJwt = split[1];
 
+            String[] ipUserName = ipAndUserName.split(":");
+            String name = ipUserName[1];
             Long value = entry.getValue();
             long now = System.currentTimeMillis();
 
 
             if((now - value) > heartInterval){
-                // 超过5秒阈值，用户心跳丢失。变成不在线
+                // 超过阈值，用户心跳丢失。变成不在线
                 log.info("【心跳检测】用户:{},jwt:{},上次心跳时间:{}，当前时间:{}, 间隔超出阈值:{},改成下线状态.",
-                        userName,userJwt,new Date(value),new Date(now),heartInterval);
+                        ipAndUserName,userJwt,new Date(value),new Date(now),heartInterval);
                 removeSets.add(key);
+
+                // 同时移除 该用户占用的锁
+                log.info("【心跳检测】用户:{},移除锁",name);
+                removeLock(name,RepositoryBuyinDocumentController.locks);
+                removeLock(name, RepositoryBuyoutDocumentController.locks);
+                removeLock(name, RepositoryPickMaterialController.locks);
+                removeLock(name,RepositoryReturnMaterialController.locks);
+                removeLock(name,OrderBuyorderDocumentController.locks);
+
             }
         }
         for (String key : removeSets){
             HeartController.onlineMap.remove(key);
+        }
+    }
+    private void removeLock(String name,Map<Long,String> locks){
+        HashSet<Long> removeDocSets = new HashSet<>();
+        for(Map.Entry<Long,String> docId_userName: locks.entrySet()){
+            Long docId = docId_userName.getKey();
+            String username = docId_userName.getValue();
+            if(name.equals(username)){
+                removeDocSets.add(docId);
+            }
+        }
+        for (Long docId : removeDocSets){
+            locks.remove(docId);
         }
     }
 

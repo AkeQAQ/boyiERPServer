@@ -29,7 +29,7 @@ public class AnalysisOnlineController extends BaseController {
      */
     @GetMapping("/onlineNum")
     @PreAuthorize("hasAuthority('dataAnalysis:online:list')")
-    public ResponseResult onlineNum(Principal principal) {
+    public ResponseResult onlineNum(HttpServletRequest request,Principal principal) {
         int size = HeartController.onlineMap.size();
         JSONObject json = new JSONObject();
         ArrayList<String> onlineUserName = new ArrayList<>();

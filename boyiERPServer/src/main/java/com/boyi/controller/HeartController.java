@@ -39,7 +39,8 @@ public class HeartController extends BaseController {
     public ResponseResult sendHeart(Principal principal, HttpServletRequest request) {
         String jwt = request.getHeader(jwtUtils.getHeader());
         long now = System.currentTimeMillis();
-        onlineMap.put(principal.getName()+KEY_SPERATOR+jwt,now);
+        String remoteIp = request.getRemoteAddr();
+        onlineMap.put(remoteIp+":"+principal.getName()+KEY_SPERATOR+jwt,now);
         log.info("【心跳】:key:{},now time:{}",principal.getName()+"_"+jwt, new Date(now));
         return ResponseResult.succ("");
     }

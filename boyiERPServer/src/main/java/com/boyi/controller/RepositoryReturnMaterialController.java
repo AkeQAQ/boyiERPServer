@@ -21,6 +21,7 @@ import java.io.FileInputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>
@@ -38,11 +39,38 @@ public class RepositoryReturnMaterialController extends BaseController {
     @Value("${poi.repositoryReturnMaterialDemoPath}")
     private String poiDemoPath;
 
+    public static final Map<Long,String> locks = new ConcurrentHashMap<>();
+
+    /**
+     * 锁单据
+     */
+    @GetMapping("/lockById")
+    @PreAuthorize("hasAuthority('repository:returnMaterial:list')")
+    public ResponseResult lockById(Principal principal,Long id) {
+        locks.put(id,principal.getName());
+        log.info("锁单据:{}",id);
+        return ResponseResult.succ("");
+    }
+    /**
+     * 解锁单据
+     */
+    @GetMapping("/lockOpenById")
+    @PreAuthorize("hasAuthority('repository:returnMaterial:list')")
+    public ResponseResult lockOpenById(Long id) {
+        locks.remove(id);
+        log.info("解锁单据:{}",id);
+        return ResponseResult.succ("");
+    }
+
+
     @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('repository:returnMaterial:del')")
     public ResponseResult delete(@RequestBody Long[] ids) throws Exception{
-
+        String user = locks.get(ids[0]);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         try {
 
         // 1. 根据单据ID 获取该单据的全部详情信息，
@@ -88,6 +116,10 @@ public class RepositoryReturnMaterialController extends BaseController {
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('repository:returnMaterial:list')")
     public ResponseResult queryById(Long id) {
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         RepositoryReturnMaterial repositoryReturnMaterial = repositoryReturnMaterialService.getById(id);
 
         List<RepositoryReturnMaterialDetail> details = repositoryReturnMaterialDetailService.listByDocumentId(id);
@@ -436,6 +468,11 @@ public class RepositoryReturnMaterialController extends BaseController {
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('repository:returnMaterial:valid')")
     public ResponseResult statusPass(Principal principal,Long id)throws Exception {
+
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(id);
         if(old.getStatus() != DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_2 &&
                 old.getStatus() != DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_3
@@ -459,6 +496,11 @@ public class RepositoryReturnMaterialController extends BaseController {
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('repository:returnMaterial:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
+
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(id);
         boolean validIsClose = validIsClose(old.getReturnDate());
         if(!validIsClose){

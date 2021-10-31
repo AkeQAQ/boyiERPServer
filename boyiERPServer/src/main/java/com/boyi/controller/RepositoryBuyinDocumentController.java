@@ -26,6 +26,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>
@@ -43,10 +44,37 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @Value("${poi.repositoryBuyInDemoPath}")
     private String poiDemoPath;
 
+    public static final Map<Long,String> locks = new ConcurrentHashMap<Long,String>();
+
+    /**
+     * 锁单据
+     */
+    @GetMapping("/lockById")
+    @PreAuthorize("hasAuthority('repository:buyIn:list')")
+    public ResponseResult lockById(Principal principal,Long id) {
+        locks.put(id,principal.getName());
+        log.info("锁单据:{}",id);
+        return ResponseResult.succ("");
+    }
+    /**
+     * 解锁单据
+     */
+    @GetMapping("/lockOpenById")
+    @PreAuthorize("hasAuthority('repository:buyIn:list')")
+    public ResponseResult lockOpenById(Long id) {
+        locks.remove(id);
+        log.info("解锁单据:{}",id);
+        return ResponseResult.succ("");
+    }
+
     @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('repository:buyIn:del')")
     public ResponseResult delete(@RequestBody Long[] ids)throws Exception {
+        String user = locks.get(ids[0]);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
 
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(ids[0]);
         // 1. 根据单据ID 获取该单据的全部详情信息，
@@ -127,6 +155,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('repository:buyIn:list')")
     public ResponseResult queryById(Long id) {
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getById(id);
 
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(id);
@@ -631,6 +663,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('repository:buyIn:valid')")
     public ResponseResult statusPass(Principal principal,Long id) {
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
+
         RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(id);
         if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2
                 && old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_3){
@@ -655,7 +692,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('repository:buyIn:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
-
+        String user = locks.get(id);
+        if(StringUtils.isNotBlank(user)){
+            return ResponseResult.fail("单据被["+user+"]占用");
+        }
         RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(id);
         boolean validIsClose = validIsClose(old.getBuyInDate());
         if(!validIsClose){
