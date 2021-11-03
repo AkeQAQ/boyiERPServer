@@ -51,7 +51,7 @@ public class BaseSupplierMaterialController extends BaseController {
      * 查询报价
      */
     @GetMapping("/queryByValidPrice")
-    @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:queryByValidPrice')")
     public ResponseResult queryByValidPrice(String supplierId,String materialId,String date) {
         if(date == null || StringUtils.isBlank(date) || materialId == null || StringUtils.isBlank(materialId)){
             return ResponseResult.succ(null);

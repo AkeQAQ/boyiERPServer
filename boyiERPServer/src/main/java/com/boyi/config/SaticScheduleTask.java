@@ -1,5 +1,6 @@
 package com.boyi.config;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boyi.controller.*;
 import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.entity.RepositoryPickMaterialDetail;
@@ -22,6 +23,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Configuration      //1.主要用于标记配置类，兼备Component的效果。
@@ -102,7 +104,6 @@ public class SaticScheduleTask {
     }
 
     // 每日库存保存
-    @Scheduled(cron = "0 0 0 * * ?")
     private void everyDayStock() {
         List<RepositoryStock> stockList = repositoryStockService.list();
         LocalDate yestoday = LocalDate.now().plusDays(-1);
@@ -120,10 +121,17 @@ public class SaticScheduleTask {
         log.info("成功复制日期:{}的及时库存，条数:{} 到历史表.复制耗时:{}ms",yestoday,stockList.size(),(end-start));
     }
 
-    //3.每日修改单据的ID前缀为当日日期
+    //3.每日修改单据的ID前缀为当日日期,每日 新增昨日的历史库存
     @Scheduled(cron = "0 * * * * ?")
     private void configureTasks() {
         System.err.println("【定时任务】执行静态定时任务时间: " + LocalDateTime.now());
+
+        LocalDate yestoday = LocalDate.now().plusDays(-1);
+        String yestodayStr = yestoday.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        int count = repositoryStockHistoryService.count(new QueryWrapper<RepositoryStockHistory>().eq("date", yestodayStr));
+        if(count == 0){
+            this.everyDayStock();
+        }
 
         for (String dbName : tables){
             // 1. 获取数据库的 自增ID 的时间段

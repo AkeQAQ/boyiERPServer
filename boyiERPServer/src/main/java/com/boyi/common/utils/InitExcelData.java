@@ -2,8 +2,10 @@ package com.boyi.common.utils;
 
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.*;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.core.parameters.P;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -24,7 +26,7 @@ public class InitExcelData {
     public static void main(String[] args) throws Exception{
 
         // 1. 采购价目 ( 数据库手动更新一下状态 ： update base_supplier_material set status = 0)
-       /* Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
+        /*Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
         fieldDYMap.put("供应商","supplier_id");// 需要通过关联查询供应商ID
         fieldDYMap.put("物料编码","material_id");
         fieldDYMap.put("单价","price");
@@ -57,7 +59,7 @@ public class InitExcelData {
 
         String tableName = "base_supplier_material";
 
-        String filePath="C:\\Users\\Ake\\Downloads\\采购价目表_2021100310302798_100041.xlsx";
+        String filePath="C:\\Users\\Ake\\Downloads\\采购价目表_2021103115314670_100041.xlsx";
 
 
         Class<BaseSupplierMaterial> clazz = BaseSupplierMaterial.class;
@@ -66,8 +68,7 @@ public class InitExcelData {
         String fieldName="供应商"; // 修改对应的内容
 
         HashSet<String> outZero = new HashSet<>(); // 去除编号最后有0开头的。
-        outZero.add("materialId");
-*/
+        outZero.add("materialId");*/
         // 2. 供应商管理
         /*Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
         fieldDYMap.put("编码","id");
@@ -93,7 +94,7 @@ public class InitExcelData {
 
         String tableName = "base_supplier";
 
-        String filePath="C:\\Users\\Ake\\Downloads\\供应商_2021100309382710_100044.xlsx";
+        String filePath="C:\\Users\\Ake\\Downloads\\供应商_2021103115202111_100044.xlsx";
 
         Class<BaseSupplier> clazz = BaseSupplier.class;
 
@@ -131,18 +132,18 @@ public class InitExcelData {
 
         String tableName = "base_material";
 
-        String filePath="C:\\Users\\Ake\\Downloads\\物料_2021100309592000_100044.xlsx";
+        String filePath="C:\\Users\\Ake\\Downloads\\物料_2021103115234639_100044.xlsx";
 
         Class<BaseMaterial> clazz = BaseMaterial.class;
 
         Boolean isChangeFieldContent =  false;
         String fieldName="供应商"; // 修改对应的内容
 
-        HashSet<String> outZero = new HashSet<>();*/
-
+        HashSet<String> outZero = new HashSet<>();
+*/
 
         // 4. 库存
-        Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
+        /*Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
         fieldDYMap.put("物料编码","material_id");
         fieldDYMap.put("库存量(主单位)","num");
 
@@ -159,7 +160,7 @@ public class InitExcelData {
 
         String tableName = "repository_stock";
 
-        String filePath="C:\\Users\\Ake\\Downloads\\即时库存汇总数据查询_2021100310581319_100044.xlsx";
+        String filePath="C:\\Users\\Ake\\Downloads\\即时库存汇总数据查询_2021103116122909_100044.xlsx";
 
         Class<RepositoryStock> clazz = RepositoryStock.class;
 
@@ -170,14 +171,140 @@ public class InitExcelData {
         outZero.add("materialId");
 
         List list = getEntity(outZero,isChangeFieldContent,fieldName,isGroup,groupName,filePath, clazz, fieldDYMap, fieldDYDBMap);
+*/
+       /* List<String> sqls = getSqls(tableName,list, clazz, entityAndDBMap);*/
 
-        List<String> sqls = getSqls(tableName,list, clazz, entityAndDBMap);
-
-        long start = System.currentTimeMillis();
-        toDB(sqls);
-        long end = System.currentTimeMillis();
-        System.out.println("插入数据库耗时:"+(end-start)+"ms");
+     initOrder();
     }
+
+    private static void initOrder()throws Exception {
+        String  filePath = "C:\\Users\\Ake\\Downloads\\采购订单_2021103115524656_100044.xlsx";
+        Map<String, String> supplierNameAndId = getChangeMap();
+        Connection con = getConn();
+        con.setAutoCommit(false);
+
+
+        try(FileInputStream fis = new FileInputStream(filePath);) {
+            XSSFWorkbook workbook = new XSSFWorkbook(fis);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            OrderBuyorderDocument orderBuyorderDocument = null;
+
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+
+            for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                Row row = sheet.getRow(rowNum);
+
+                Cell bianhao = row.getCell(0);
+                Cell buyDateCell = row.getCell(1);
+                Cell supplierNameCell = row.getCell(2);
+                Cell materialIdCell = row.getCell(5);
+                Cell materialNameCell = row.getCell(6);
+                Cell buyNumCell = row.getCell(8);
+                Cell doneDateCell = row.getCell(9);
+                Cell orderSeqCell = row.getCell(14);
+
+                if(materialIdCell == null ){
+                    continue;
+                }
+                String materialIdStr = materialIdCell.getStringCellValue();
+                String[] split = materialIdStr.split("\\.");
+                StringBuilder materialId = new StringBuilder();
+                for (int i = 0; i < split.length; i++) {
+                    if(i == split.length -1){
+
+
+                        char[] chars = split[i].toCharArray();
+                        boolean needComapre = true;
+                        for (int x = 0; x < chars.length; x++) {
+                            if(chars[x]=='0' && needComapre){
+                                continue ;
+                            }
+                            needComapre = false;
+                            materialId.append(chars[x]);
+                        }
+                        materialId.append(".");
+                    }else{
+                        materialId.append(split[i]).append(".");
+                    }
+                }
+                String materialIdReplaced = materialId.deleteCharAt(materialId.length() - 1).toString();
+
+                double buyNum = buyNumCell.getNumericCellValue();
+                String doneDateStr = doneDateCell.getStringCellValue().split(" ")[0];
+                if(doneDateStr.length() == 9){
+                    doneDateStr=doneDateStr.substring(0,8)+"0"+doneDateStr.substring(8);
+                }
+                String orderSeqStr = orderSeqCell.getStringCellValue();
+
+                if(bianhao!= null && bianhao.getStringCellValue().equals("合计")){
+
+                    break;
+                }
+
+                if(bianhao != null){
+                    String bianhaoStr = bianhao.getStringCellValue();
+                    String buyDateStr = null;
+                    if(buyDateCell.getCellType().equals(CellType.NUMERIC)) {
+                        buyDateStr = sdf.format(DateUtil.getJavaDate(buyDateCell.getNumericCellValue()));
+                    }else if(buyDateCell.getCellType().equals(CellType.STRING)){
+                        buyDateStr = buyDateCell.getStringCellValue();
+                    }
+                    if(buyDateStr.length() == 9){
+                        buyDateStr=buyDateStr.substring(0,8)+"0"+buyDateStr.substring(8);
+                    }
+                    String supplierNameStr = supplierNameCell.getStringCellValue();
+                    orderBuyorderDocument = new OrderBuyorderDocument();
+                    String theId = bianhaoStr.substring(bianhaoStr.length() - 5);
+                    orderBuyorderDocument.setId(Long.valueOf(theId));
+
+                    orderBuyorderDocument.setOrderDate(LocalDate.parse(buyDateStr,DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+                    orderBuyorderDocument.setSupplierId(supplierNameAndId.get(supplierNameStr));
+                    orderBuyorderDocument.setStatus(1);
+                    // 插入数据库
+
+
+                    String sql = "insert into order_buyorder_document (id,status,supplier_id,order_date)values("
+                            +orderBuyorderDocument.getId()+","
+                            +orderBuyorderDocument.getStatus()+","
+                            +"'"+orderBuyorderDocument.getSupplierId()+"',"
+                            +"str_to_date('"+orderBuyorderDocument.getOrderDate()+"','%Y-%m-%d')"
+                            +")";
+
+                    Statement stmt = con.createStatement();
+                    stmt.execute(sql);
+                    con.commit();
+                }
+                OrderBuyorderDocumentDetail detail = new OrderBuyorderDocumentDetail();
+                detail.setMaterialId(materialIdReplaced);
+                detail.setDocumentId(orderBuyorderDocument.getId());
+                detail.setNum(buyNum);
+                detail.setSupplierId(orderBuyorderDocument.getSupplierId());
+                detail.setDoneDate(LocalDate.parse(doneDateStr,DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+                detail.setOrderSeq(orderSeqStr);
+                detail.setStatus(1);
+                detail.setOrderDate(orderBuyorderDocument.getOrderDate());
+                // 插入数据库
+
+                String sql = "insert into order_buyorder_document_detail (material_id,document_id,num,supplier_id,done_date,order_seq,status,order_date)values("
+                        +"'"+detail.getMaterialId()+"',"
+                        +detail.getDocumentId()+","
+                        +detail.getNum()+","
+                        +"'"+detail.getSupplierId()+"',"
+                        +"str_to_date('"+detail.getDoneDate()+"','%Y-%m-%d'),"
+                        +"'"+detail.getOrderSeq()+"',"
+                        +detail.getStatus()+","
+                        +"str_to_date('"+detail.getOrderDate()+"','%Y-%m-%d')"
+                        +")";
+                Statement stmt = con.createStatement();
+                System.out.println("输出sql "+sql);
+                stmt.execute(sql);
+                con.commit();
+            }
+            con.close();
+        }
+    }
+
 
     private static Connection getConn() {
         String driver = "com.mysql.jdbc.Driver";
@@ -192,6 +319,14 @@ public class InitExcelData {
             e.printStackTrace();
         }
         return conn;
+    }
+    private static void toOneDB(String sql)throws Exception{
+
+        Connection con = getConn();
+        con.setAutoCommit(false);
+        Statement stmt = con.createStatement();
+        stmt.executeBatch();
+        con.commit();
     }
 
     private static void toDB(List<String> sqls)throws Exception{

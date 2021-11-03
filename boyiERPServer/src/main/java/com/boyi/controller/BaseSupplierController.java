@@ -19,10 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -132,7 +129,11 @@ public class BaseSupplierController extends BaseController {
             baseSupplierGroupService.updateById(group);
 
             baseSupplierService.save(baseSupplier);
-            return ResponseResult.succ("新增成功");
+
+            HashMap<String, Object> returnMap = new HashMap<>();
+            returnMap.put("subId",baseSupplier.getSubId());
+            returnMap.put("id",baseSupplier.getId());
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",returnMap);
         } catch (DuplicateKeyException e) {
             log.error("供应商，插入异常",e);
             return ResponseResult.fail("唯一编码重复!");

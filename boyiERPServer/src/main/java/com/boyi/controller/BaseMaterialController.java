@@ -196,7 +196,10 @@ public class BaseMaterialController extends BaseController {
             // 再保存
             baseMaterialService.save(baseMaterial);
 
-            return ResponseResult.succ("新增成功");
+            HashMap<String, Object> returnMap = new HashMap<>();
+            returnMap.put("subId",baseMaterial.getSubId());
+            returnMap.put("id",baseMaterial.getId());
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",returnMap);
         } catch (DuplicateKeyException e) {
             log.error("物料，插入异常", e);
             throw new Exception("唯一编码重复!");

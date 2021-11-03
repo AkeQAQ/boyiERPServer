@@ -1,13 +1,3 @@
-2021-10-31 09:45:10,787 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-10-31 09:45:10,797 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-10-31 09:45:13,847 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-10-31 10:16:02,459 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-10-31 10:16:02,469 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-10-31 10:16:05,349 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-10-31 10:39:58,476 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-10-31 10:39:58,487 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-10-31 10:40:01,322 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-10-31 10:42:26,418 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-10-31 10:42:26,430 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-10-31 10:42:29,241 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-10-31 10:46:47,019 WARN [HikariPool-1 housekeeper] c.z.h.p.HikariPool   - HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1m15s249ms814µs400ns).
+2021-11-03 09:01:05,488 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-03 09:01:05,508 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-03 09:01:08,752 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".

@@ -352,7 +352,7 @@ public class OrderBuyorderDocumentController extends BaseController {
 
             orderBuyorderDocumentDetailService.saveBatch(orderBuyorderDocument.getRowList());
 
-            return ResponseResult.succ("新增成功");
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",orderBuyorderDocument.getId());
         } catch (Exception e) {
             log.error("采购订单单，插入异常", e);
             throw new RuntimeException(e.getMessage());
