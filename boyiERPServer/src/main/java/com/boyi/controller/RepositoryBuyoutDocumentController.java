@@ -421,7 +421,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
-            new ExcelExportUtil(RepositoryBuyoutDocument.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.statusMap);
+            new ExcelExportUtil(RepositoryBuyoutDocument.class,1,0).export("id","CGTL",response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.statusMap);
         } catch (Exception e) {
             log.error("导出模块报错.",e);
         }

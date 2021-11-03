@@ -610,7 +610,7 @@ public class RepositoryPickMaterialController extends BaseController {
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
-            new ExcelExportUtil(RepositoryPickMaterial.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.statusMap);
+            new ExcelExportUtil(RepositoryPickMaterial.class,1,0).export("id","SCLL",response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.statusMap);
         } catch (Exception e) {
             log.error("导出模块报错.",e);
         }

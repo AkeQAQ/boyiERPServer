@@ -1,5 +1,6 @@
 package com.boyi.common.utils;
 
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.boyi.entity.RepositoryBuyinDocument;
 import lombok.Data;
 import org.apache.commons.lang3.ArrayUtils;
@@ -42,7 +43,7 @@ public class ExcelExportUtil<T> {
     /**
      * 基于注解导出
      */
-    public void export(HttpServletResponse response, InputStream is, List<T> objs, String fileName, Map<Integer,String> statusMap) throws Exception {
+    public void export(String addPrefixField,String addPreContent,HttpServletResponse response, InputStream is, List<T> objs, String fileName, Map<Integer,String> statusMap) throws Exception {
 
         XSSFWorkbook workbook = new XSSFWorkbook(is);
         Sheet sheet = workbook.getSheetAt(0);
@@ -64,8 +65,12 @@ public class ExcelExportUtil<T> {
                                 Object f = field.get(t);
                                 if("status".equals(field.getName())){
                                     cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
-                                }else{
+                                }
+                                else{
                                     cell.setCellValue(f ==null ? "":field.get(t).toString());
+                                }
+                                if(StringUtils.isNotBlank(addPrefixField) && field.getName().equals(addPrefixField)){
+                                    cell.setCellValue(addPreContent+cell.getStringCellValue());
                                 }
                             }catch (Exception e){
                                 e.printStackTrace();

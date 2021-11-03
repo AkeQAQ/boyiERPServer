@@ -559,7 +559,7 @@ public class RepositoryReturnMaterialController extends BaseController {
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
-            new ExcelExportUtil(RepositoryReturnMaterial.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.statusMap);
+            new ExcelExportUtil(RepositoryReturnMaterial.class,1,0).export("id","SCTL",response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.statusMap);
         } catch (Exception e) {
             log.error("导出模块报错.",e);
         }

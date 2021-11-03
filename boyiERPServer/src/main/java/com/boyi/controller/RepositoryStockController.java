@@ -58,7 +58,7 @@ public class RepositoryStockController extends BaseController {
         pageData = repositoryStockService.pageBySearch(getPage(),queryField,searchField,searchStr);
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
-            new ExcelExportUtil(RepositoryStock.class,1,0).export(response,fis,pageData.getRecords(),"报表.xlsx", new HashMap<>());
+            new ExcelExportUtil(RepositoryStock.class,1,0).export(null,null,response,fis,pageData.getRecords(),"报表.xlsx", new HashMap<>());
         } catch (Exception e) {
             log.error("导出模块报错.",e);
         }
