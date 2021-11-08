@@ -513,6 +513,36 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         return ResponseResult.succ("已撤销");
     }
 
+    @PostMapping("/statusPassBatch")
+    @PreAuthorize("hasAuthority('repository:buyOut:valid')")
+    public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<RepositoryBuyoutDocument> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            String user = locks.get(id);
+            if(StringUtils.isNotBlank(user)){
+                return ResponseResult.fail("单据被["+user+"]占用");
+            }
+            RepositoryBuyoutDocument old = repositoryBuyoutDocumentService.getById(id);
+            if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_2
+                    && old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_3){
+                return ResponseResult.fail("单据编号:"+id+"状态不正确，无法审核通过");
+            }
+
+            RepositoryBuyoutDocument repositoryBuyoutDocument = new RepositoryBuyoutDocument();
+            repositoryBuyoutDocument.setUpdated(LocalDateTime.now());
+            repositoryBuyoutDocument.setUpdatedUser(principal.getName());
+            repositoryBuyoutDocument.setId(id);
+            repositoryBuyoutDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_0);
+
+            lists.add(repositoryBuyoutDocument);
+
+        }
+        repositoryBuyoutDocumentService.updateBatchById(lists);
+
+        return ResponseResult.succ("审核通过");
+    }
+
     /**
      * 审核通过
      */

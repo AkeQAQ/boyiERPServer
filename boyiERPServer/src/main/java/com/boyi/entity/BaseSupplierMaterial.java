@@ -28,6 +28,8 @@ public class BaseSupplierMaterial extends BaseEntity {
     @TableField(exist = false)
     private String unit;
     @TableField(exist = false)
+    private String specs;
+    @TableField(exist = false)
     private String materialName;
 
     private Integer status;

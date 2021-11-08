@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -655,6 +656,35 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryBuyinDocumentService.updateById(repositoryBuyinDocument);
         log.info("仓库模块-撤销内容:{}",repositoryBuyinDocument);
         return ResponseResult.succ("已撤销");
+    }
+
+    @PostMapping("/statusPassBatch")
+    @PreAuthorize("hasAuthority('repository:buyIn:valid')")
+    public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<RepositoryBuyinDocument> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            String user = locks.get(id);
+            if(StringUtils.isNotBlank(user)){
+                return ResponseResult.fail("单据被["+user+"]占用");
+            }
+
+            RepositoryBuyinDocument old = repositoryBuyinDocumentService.getById(id);
+            if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2
+                    && old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_3){
+                return ResponseResult.fail("单据编号:"+id+"状态不正确，无法审核通过");
+            }
+
+            RepositoryBuyinDocument repositoryBuyinDocument = new RepositoryBuyinDocument();
+            repositoryBuyinDocument.setUpdated(LocalDateTime.now());
+            repositoryBuyinDocument.setUpdatedUser(principal.getName());
+            repositoryBuyinDocument.setId(id);
+            repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_0);
+            lists.add(repositoryBuyinDocument);
+
+        }
+        repositoryBuyinDocumentService.updateBatchById(lists);
+        return ResponseResult.succ("审核通过");
     }
 
     /**

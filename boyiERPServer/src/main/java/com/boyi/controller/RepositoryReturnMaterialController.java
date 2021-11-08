@@ -462,6 +462,34 @@ public class RepositoryReturnMaterialController extends BaseController {
         return ResponseResult.succ("审核通过");
     }
 
+    @PostMapping("/statusPassBatch")
+    @PreAuthorize("hasAuthority('repository:returnMaterial:valid')")
+    public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<RepositoryReturnMaterial> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            String user = locks.get(id);
+            if(StringUtils.isNotBlank(user)){
+                return ResponseResult.fail("单据被["+user+"]占用");
+            }
+            RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(id);
+            if(old.getStatus() != DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_2 &&
+                    old.getStatus() != DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_3
+            ){
+                return ResponseResult.fail("单据编号:"+id+"状态不正确，无法审核通过");
+            }
+            RepositoryReturnMaterial repositoryReturnMaterial = new RepositoryReturnMaterial();
+            repositoryReturnMaterial.setUpdated(LocalDateTime.now());
+            repositoryReturnMaterial.setUpdatedUser(principal.getName());
+            repositoryReturnMaterial.setId(id);
+            repositoryReturnMaterial.setStatus(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_0);
+            lists.add(repositoryReturnMaterial);
+
+        }
+        repositoryReturnMaterialService.updateBatchById(lists);
+        return ResponseResult.succ("审核通过");
+    }
+
     /**
      * 审核通过
      */

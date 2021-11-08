@@ -21,7 +21,7 @@ import java.util.List;
  */
 @Repository
 public interface BaseSupplierMaterialMapper extends BaseMapper<BaseSupplierMaterial> {
-    String querySql = "select bm.name as material_name ,bm.unit as unit,bs.name as supplier_name,bsm.* from base_material bm,base_supplier bs,base_supplier_material bsm" +
+    String querySql = "select bm.name as material_name ,bm.unit as unit,bm.specs as specs,bs.name as supplier_name,bsm.* from base_material bm,base_supplier bs,base_supplier_material bsm" +
             " where bm.id = bsm.material_id and bs.id = bsm.supplier_id order by bsm.created desc";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**

@@ -704,6 +704,37 @@ public class RepositoryPickMaterialController extends BaseController {
         return ResponseResult.succ("审核通过");
     }
 
+    @PostMapping("/statusPassBatch")
+    @PreAuthorize("hasAuthority('repository:pickMaterial:valid')")
+    public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<RepositoryPickMaterial> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            String user = locks.get(id);
+            if(StringUtils.isNotBlank(user)){
+                return ResponseResult.fail("单据被["+user+"]占用");
+            }
+            RepositoryPickMaterial old = repositoryPickMaterialService.getById(id);
+            if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_2 &&
+                    old.getStatus()!=DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_3
+            ){
+                return ResponseResult.fail("单据编号:"+id+"状态不正确，无法审核通过");
+            }
+
+            RepositoryPickMaterial repositoryPickMaterial = new RepositoryPickMaterial();
+            repositoryPickMaterial.setUpdated(LocalDateTime.now());
+            repositoryPickMaterial.setUpdatedUser(principal.getName());
+            repositoryPickMaterial.setId(id);
+            repositoryPickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_0);
+            lists.add(repositoryPickMaterial);
+
+        }
+        repositoryPickMaterialService.updateBatchById(lists);
+
+        return ResponseResult.succ("审核通过");
+    }
+
+
     /**
      * 审核通过
      */

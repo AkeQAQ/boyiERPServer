@@ -106,6 +106,10 @@ public class BaseController {
 
     @Autowired
     public AnalysisRequestService analysisRequestService;
+
+    @Autowired
+    public TagService tagService;
+
     /**
      * 获取页面
      * @return

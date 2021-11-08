@@ -8,10 +8,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
-import com.boyi.entity.BaseMaterial;
-import com.boyi.entity.BaseSupplier;
-import com.boyi.entity.BaseSupplierMaterial;
-import com.boyi.entity.RepositoryBuyinDocument;
+import com.boyi.entity.*;
 import com.boyi.service.RepositoryBuyinDocumentService;
 import com.boyi.service.impl.BaseSupplierMaterialServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -187,6 +184,35 @@ public class BaseSupplierMaterialController extends BaseController {
         return ResponseResult.succ("删除成功");
     }
 
+    @PostMapping("/statusPassBatch")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:valid')")
+    @Transactional
+    public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<BaseSupplierMaterial> lists = new ArrayList<>();
+        for (Long id : ids){
+            // 1. 采购价目审核，先查询是否有采购入库审核完成的引用，有则不能修改
+            BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
+            Integer count= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(one);
+            if(count > 0){
+                return ResponseResult.fail("ID:"+one.getId()+"已有"+count+"条审核通过的采购入库记录");
+            }
+            if(one.getStatus() == 0){
+                return ResponseResult.fail("ID:"+id+"的状态已是审核通过，无法再次审核");
+            }
+
+            BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();
+            baseSupplierMaterial.setUpdated(LocalDateTime.now());
+            baseSupplierMaterial.setUpdateUser(principal.getName());
+            baseSupplierMaterial.setId(id);
+            baseSupplierMaterial.setStatus(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0);
+            lists.add(baseSupplierMaterial);
+
+        }
+        baseSupplierMaterialService.updateBatchById(lists);
+        return ResponseResult.succ("审核通过");
+    }
+
+
     /**
      * 审核通过
      */
@@ -198,7 +224,10 @@ public class BaseSupplierMaterialController extends BaseController {
         BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
         Integer count= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(one);
         if(count > 0){
-            return ResponseResult.fail("该供应商，该物料，该时间区已有"+count+"条审核通过的采购入库记录");
+            return ResponseResult.fail("该供应商:"+one.getSupplierId()+"，该物料:"+one.getMaterialId()+"，该时间区已有"+count+"条审核通过的采购入库记录");
+        }
+        if(one.getStatus() != 1){
+            return ResponseResult.fail("ID:"+id+"状态不对，审核失败");
         }
 
         BaseSupplierMaterial baseSupplierMaterial = new BaseSupplierMaterial();

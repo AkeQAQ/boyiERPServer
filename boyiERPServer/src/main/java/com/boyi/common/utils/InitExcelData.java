@@ -26,7 +26,7 @@ public class InitExcelData {
     public static void main(String[] args) throws Exception{
 
         // 1. 采购价目 ( 数据库手动更新一下状态 ： update base_supplier_material set status = 0)
-        /*Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
+        Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
         fieldDYMap.put("供应商","supplier_id");// 需要通过关联查询供应商ID
         fieldDYMap.put("物料编码","material_id");
         fieldDYMap.put("单价","price");
@@ -59,7 +59,7 @@ public class InitExcelData {
 
         String tableName = "base_supplier_material";
 
-        String filePath="C:\\Users\\Ake\\Downloads\\采购价目表_2021103115314670_100041.xlsx";
+        String filePath="C:\\Users\\Ake\\Downloads\\采购价目表_2021110813554727_100041.xlsx";
 
 
         Class<BaseSupplierMaterial> clazz = BaseSupplierMaterial.class;
@@ -68,7 +68,7 @@ public class InitExcelData {
         String fieldName="供应商"; // 修改对应的内容
 
         HashSet<String> outZero = new HashSet<>(); // 去除编号最后有0开头的。
-        outZero.add("materialId");*/
+        outZero.add("materialId");
         // 2. 供应商管理
         /*Map<String, String> fieldDYMap = new HashMap<>();//excel 字段和数据库字段的映射关系
         fieldDYMap.put("编码","id");
@@ -169,12 +169,12 @@ public class InitExcelData {
 
         HashSet<String> outZero = new HashSet<>();
         outZero.add("materialId");
-
-        List list = getEntity(outZero,isChangeFieldContent,fieldName,isGroup,groupName,filePath, clazz, fieldDYMap, fieldDYDBMap);
 */
-       /* List<String> sqls = getSqls(tableName,list, clazz, entityAndDBMap);*/
+        List list = getEntity(outZero,isChangeFieldContent,fieldName,isGroup,groupName,filePath, clazz, fieldDYMap, fieldDYDBMap);
 
-     initOrder();
+        List<String> sqls = getSqls(tableName,list, clazz, entityAndDBMap);
+        toDB(sqls);
+//     initOrder();
     }
 
     private static void initOrder()throws Exception {

@@ -23,6 +23,13 @@ public class DBConstant {
 
 
     }
+    public static class TABLE_TAG{
+        public static final String TAG_NAME_FIELDNAME = "tag_name";
+        public static final String TYPE_FIELDNAME = "type";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String CREATED_TIME_FIELDNAME = "created_time";
+
+    }
      public static class TABLE_ROLE_MENU{
          public static final String ID_FIELDNAME = "id";
          public static final String MENU_ID_FIELDNAME = "menu_id";
