@@ -23,7 +23,6 @@ public class OrderBuyorderDocument extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @ExcelAttribute(sort = 3)
     private Integer status;
 
     /**
@@ -89,12 +88,14 @@ public class OrderBuyorderDocument extends BaseEntity {
     private LocalDate doneDate; // 该单据总金额
 
     @TableField(exist = false)  // 字段数据库忽略
-    private String orderSeq; // 该单据总金额
+    @ExcelAttribute(sort = 11)
+    private String orderSeq; //
 
     @TableField(exist = false)  // 字段数据库忽略
     private Long detailId; // 详情ID
 
     @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 3)
     private Integer detailStatus; // 详情的状态
 
 }

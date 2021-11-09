@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.RepositoryBuyinDocument;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 /**
  * <p>
@@ -25,6 +26,7 @@ public interface OrderBuyorderDocumentService extends IService<OrderBuyorderDocu
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
 
     Page<OrderBuyorderDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
+    Page<OrderBuyorderDocument> innerQueryByManySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String,String> otherSearch);
 
     int countBySupplierId(String ids[]);
 

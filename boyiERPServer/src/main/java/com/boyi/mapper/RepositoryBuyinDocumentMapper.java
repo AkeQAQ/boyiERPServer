@@ -27,6 +27,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "select t.*,(sm.price * num) amount ,sm.price price from (" +
             "select  doc.id id, " +
             "        doc.buy_in_date , " +
+            "        doc.supplier_document_num , " +
             "        doc.status, " +
             "        doc.source_type, " +
             "        doc.updated , " +

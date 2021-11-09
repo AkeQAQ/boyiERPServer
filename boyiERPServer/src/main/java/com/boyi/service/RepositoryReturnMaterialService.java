@@ -7,6 +7,7 @@ import com.boyi.entity.RepositoryReturnMaterial;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -23,6 +24,7 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
     RepositoryReturnMaterial one(QueryWrapper<RepositoryReturnMaterial> id);
 
     Page<RepositoryReturnMaterial> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus);
+    Page<RepositoryReturnMaterial> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String,String> otherSearch);
 
     Double countByDepartmentIdMaterialId(Long departmentId, String materialId);
 

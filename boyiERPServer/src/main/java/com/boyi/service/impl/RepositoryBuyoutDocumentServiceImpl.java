@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -49,6 +50,24 @@ public class RepositoryBuyoutDocumentServiceImpl extends ServiceImpl<RepositoryB
                         .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDNAME,searchStatus)
         );
 
+    }
+
+    @Override
+    public Page<RepositoryBuyoutDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String, String> otherSearch) {
+        QueryWrapper<RepositoryBuyoutDocument> queryWrapper = new QueryWrapper<>();
+        for (String key : otherSearch.keySet()){
+            String val = otherSearch.get(key);
+            queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                    && StrUtil.isNotBlank(key),key,val);
+        }
+        return this.innerQuery(page,
+                queryWrapper
+                        .like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                        .ge(StrUtil.isNotBlank(searchStartDate)&& !searchStartDate.equals("null"),DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.BUY_OUT_DATE_FIELDNAME,searchStartDate)
+                        .le(StrUtil.isNotBlank(searchEndDate)&& !searchEndDate.equals("null"),DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.BUY_OUT_DATE_FIELDNAME,searchEndDate)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDNAME,searchStatus)
+        );
     }
 
     @Override

@@ -66,6 +66,9 @@ public class ExcelExportUtil<T> {
                                 if("status".equals(field.getName())){
                                     cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
                                 }
+                                else if("detailStatus".equals(field.getName())){
+                                    cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }
                                 else{
                                     cell.setCellValue(f ==null ? "":field.get(t).toString());
                                 }

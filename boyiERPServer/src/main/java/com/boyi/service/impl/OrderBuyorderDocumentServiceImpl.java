@@ -8,6 +8,7 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.OrderBuyorderDocument;
 import com.boyi.entity.OrderBuyorderDocument;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.OrderBuyorderDocumentMapper;
 import com.boyi.mapper.OrderBuyorderDocumentMapper;
 import com.boyi.service.OrderBuyorderDocumentService;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 /**
  * <p>
@@ -51,6 +53,22 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchEndDate));
+    }
+
+    @Override
+    public Page<OrderBuyorderDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String, String> otherSearch) {
+        QueryWrapper<OrderBuyorderDocument> queryWrapper = new QueryWrapper<>();
+        for (String key : otherSearch.keySet()){
+            String val = otherSearch.get(key);
+            queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                    && StrUtil.isNotBlank(key),key,val);
+        }
+        return this.innerQuery(page,
+                queryWrapper.
+                        like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                        .ge(StrUtil.isNotBlank(searchStartDate)  &&!searchStartDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchStartDate)
+                        .le(StrUtil.isNotBlank(searchEndDate)  &&!searchEndDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchEndDate));
     }
 
     @Override

@@ -364,7 +364,12 @@ public class OrderBuyorderDocumentController extends BaseController {
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('order:buyOrder:export')")
-    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public void export(HttpServletResponse response,  String searchField, String searchStartDate, String searchEndDate,
+                       @RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
         Page<OrderBuyorderDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -383,12 +388,36 @@ public class OrderBuyorderDocumentController extends BaseController {
 
         }
 
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
+
+                    }else if (oneField.equals("id")) {
+                        theQueryField = "id";
+                    } else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
         log.info("搜索字段:{},对应ID:{}", searchField, ids);
-        pageData = orderBuyorderDocumentService.innerQueryBySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate);
+        pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);) {
-            new ExcelExportUtil(OrderBuyorderDocument.class, 1, 0).export(null,null,response, fis, pageData.getRecords(), "报表.xlsx", DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.statusMap);
+            new ExcelExportUtil(OrderBuyorderDocument.class, 1, 0).export(null,null,response, fis, pageData.getRecords(), "报表.xlsx", DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.statusMap);
         } catch (Exception e) {
             log.error("导出模块报错.", e);
         }
@@ -397,9 +426,14 @@ public class OrderBuyorderDocumentController extends BaseController {
     /**
      * 获取采购订单 分页全部数据
      */
-    @GetMapping("/list")
+    @PostMapping("/list")
     @PreAuthorize("hasAuthority('order:buyOrder:list')")
-    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate) {
+    public ResponseResult list( String searchField, String searchStartDate, String searchEndDate
+                               ,@RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
         Page<OrderBuyorderDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -416,8 +450,33 @@ public class OrderBuyorderDocumentController extends BaseController {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
+
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
+
+                    }else if (oneField.equals("id")) {
+                        theQueryField = "id";
+                    } else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
         log.info("搜索字段:{},对应ID:{}", searchField, ids);
-        pageData = orderBuyorderDocumentService.innerQueryBySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate);
+        pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap);
         return ResponseResult.succ(pageData);
     }
 

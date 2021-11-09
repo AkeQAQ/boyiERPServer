@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -31,6 +32,7 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     int countSupplierOneDocNum(String supplierDocumentNum, String supplierId);
 
     Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus);
+    Page<RepositoryBuyinDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String,String> otherSearch);
 
     int countBySupplierId(String ids[]);
 

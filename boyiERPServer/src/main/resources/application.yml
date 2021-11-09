@@ -1,5 +1,6 @@
 server:
   port: 8081
+  maxHttpHeaderSize: 102400
 # DataSource Config
 spring:
   datasource:

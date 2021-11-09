@@ -391,7 +391,13 @@ public class RepositoryBuyoutDocumentController extends BaseController {
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('repository:buyOut:export')")
-    public void export(HttpServletResponse response, String searchStr, String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
+    public void export(HttpServletResponse response,  String searchField, String searchStartDate, String searchEndDate,String searchStatus
+    ,  @RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+
         Page<RepositoryBuyoutDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -409,6 +415,32 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             }
         }
 
+
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
+
+                    }else if (oneField.equals("id")) {
+                        theQueryField = "id";
+                    } else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
+
         List<Long> searchStatusList = new ArrayList<Long>();
         if(StringUtils.isNotBlank(searchStatus)){
             String[] split = searchStatus.split(",");
@@ -417,7 +449,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             }
         }
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryBuyoutDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
+        pageData = repositoryBuyoutDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
@@ -430,9 +462,14 @@ public class RepositoryBuyoutDocumentController extends BaseController {
     /**
      * 获取采购退料 分页全部数据
      */
-    @GetMapping("/list")
+    @PostMapping("/list")
     @PreAuthorize("hasAuthority('repository:buyOut:list')")
-    public ResponseResult list(String searchStr, String searchField, String searchStartDate, String searchEndDate,String searchStatus) {
+    public ResponseResult list( String searchField, String searchStartDate, String searchEndDate
+            ,String searchStatus,@RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
         Page<RepositoryBuyoutDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -449,8 +486,29 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             } else {
                 return ResponseResult.fail("搜索字段不存在");
             }
-        }else {
+        }
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
 
+                    }else if (oneField.equals("id")) {
+                        theQueryField = "id";
+                    } else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
@@ -464,7 +522,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         if(searchStatusList.size() == 0){
             return ResponseResult.fail("状态不能为空");
         }
-        pageData = repositoryBuyoutDocumentService.innerQueryBySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList);
+        pageData = repositoryBuyoutDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate
+                ,searchStatusList,queryMap);
         return ResponseResult.succ(pageData);
     }
 
