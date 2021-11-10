@@ -637,8 +637,12 @@ public class RepositoryReturnMaterialController extends BaseController {
                 searchStatusList.add(Long.valueOf(statusVal));
             }
         }
+        Page page = getPage();
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = repositoryReturnMaterialService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        pageData = repositoryReturnMaterialService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){

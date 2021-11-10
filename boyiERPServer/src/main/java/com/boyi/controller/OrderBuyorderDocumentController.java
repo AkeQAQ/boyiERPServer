@@ -413,7 +413,11 @@ public class OrderBuyorderDocumentController extends BaseController {
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField, ids);
-        pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap);
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        pageData = orderBuyorderDocumentService.innerQueryByManySearch(page, searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);) {
