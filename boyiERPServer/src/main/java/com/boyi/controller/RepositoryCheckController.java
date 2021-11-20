@@ -1,14 +1,12 @@
 package com.boyi.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
-import com.boyi.entity.BaseDepartment;
-import com.boyi.entity.BaseMaterial;
-import com.boyi.entity.RepositoryCheck;
-import com.boyi.entity.RepositoryCheckDetail;
+import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -190,7 +188,17 @@ public class RepositoryCheckController extends BaseController {
         // 把库存设置成盘点数目
         List<RepositoryCheckDetail> details = repositoryCheckDetailService.listByDocumentId(id);
         for (RepositoryCheckDetail item : details) {
-            repositoryStockService.updateNum(item.getMaterialId(),item.getCheckNum());
+            // 修复BUG： 及时库存不存在该物料，则新增,存在则修改
+            RepositoryStock one = repositoryStockService.getOne(new QueryWrapper<RepositoryStock>().eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME, item.getMaterialId()));
+            if(one == null){
+                RepositoryStock stock = new RepositoryStock();
+                stock.setMaterialId(item.getMaterialId());
+                stock.setNum(item.getCheckNum());
+                stock.setUpdated(LocalDateTime.now());
+                repositoryStockService.save(stock);
+            }else{
+                repositoryStockService.updateNum(item.getMaterialId(),item.getCheckNum());
+            }
         }
 
         log.info("仓库模块-盘点模块-审核通过内容:{}",repositoryCheck);

@@ -161,6 +161,16 @@ public class BaseSupplierMaterialController extends BaseController {
             return ResponseResult.fail("日期区间冲突，请检查!");
         }
 
+        // 假如状态是0的编辑，则是修改失效日期。查看是否存在，改为新的日期区间之后，是否有审核通过的单据价目变成空
+        if(baseSupplierMaterial.getStatus() == 0 && baseSupplierMaterial.getId()!=0){
+            BaseSupplierMaterial old = baseSupplierMaterialService.getById(baseSupplierMaterial.getId());
+            Integer oldCount= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(old);
+            Integer newCount= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(baseSupplierMaterial);
+            if(oldCount != newCount){
+                return ResponseResult.fail("该供应商:"+old.getSupplierId()+"，该物料:"+old.getMaterialId()+"，调整时间区将会导致"+(oldCount-newCount)+"条审核通过的采购入库记录，价格变成空");
+            }
+        }
+
         baseSupplierMaterial.setUpdated(LocalDateTime.now());
         baseSupplierMaterial.setUpdateUser(principal.getName());
         try {

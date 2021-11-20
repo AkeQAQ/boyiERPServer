@@ -46,6 +46,11 @@ public class BaseSupplier {
     private String mobile;
 
     /**
+     * 含税
+     */
+    private String tax;
+
+    /**
      * 创建人
      */
     @TableField("created_user")

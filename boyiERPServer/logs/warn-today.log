@@ -1,73 +1,21 @@
-2021-11-10 08:41:41,894 WARN [HikariPool-2 housekeeper] c.z.h.p.HikariPool   - HikariPool-2 - Thread starvation or clock leap detected (housekeeper delta=8h47m13s82ms390µs600ns).
-2021-11-10 10:55:49,108 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 10:55:49,126 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 10:55:49,223 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 10:55:54,256 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 10:55:55,163 WARN [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - Unable to start LiveReload server
-2021-11-10 10:55:55,203 WARN [restartedMain] o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 8081 is already in use
-2021-11-10 10:55:55,230 WARN [restartedMain] o.a.c.l.WebappClassLoaderBase - The web application [ROOT] appears to have started a thread named [logback-1] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
- sun.misc.Unsafe.park(Native Method)
- java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
- java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
- java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1081)
- java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
- java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
- java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
- java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
- java.lang.Thread.run(Thread.java:748)
-2021-11-10 10:55:55,230 WARN [restartedMain] o.a.c.l.WebappClassLoaderBase - The web application [ROOT] appears to have started a thread named [logback-2] but has failed to stop it. This is very likely to create a memory leak. Stack trace of thread:
- sun.misc.Unsafe.park(Native Method)
- java.util.concurrent.locks.LockSupport.park(LockSupport.java:175)
- java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2039)
- java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1081)
- java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:809)
- java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1074)
- java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1134)
- java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
- java.lang.Thread.run(Thread.java:748)
-2021-11-10 11:09:55,658 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:09:55,668 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:09:55,759 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:09:57,877 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:10:00,247 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:10:00,259 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:10:00,342 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:10:02,859 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:10:03,631 WARN [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - Unable to start LiveReload server
-2021-11-10 11:10:03,672 WARN [restartedMain] o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 8081 is already in use
-2021-11-10 11:11:48,341 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:11:48,353 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:11:48,439 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:11:51,140 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:11:51,887 WARN [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - Unable to start LiveReload server
-2021-11-10 11:11:51,929 WARN [restartedMain] o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 8081 is already in use
-2021-11-10 11:18:44,848 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:18:44,859 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:18:44,927 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:18:47,969 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:18:50,056 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:18:50,069 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:18:50,152 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:18:53,398 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:18:54,141 WARN [restartedMain] o.s.b.d.a.OptionalLiveReloadServer - Unable to start LiveReload server
-2021-11-10 11:18:54,179 WARN [restartedMain] o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.context.ApplicationContextException: Failed to start bean 'webServerStartStop'; nested exception is org.springframework.boot.web.server.PortInUseException: Port 8081 is already in use
-2021-11-10 11:19:45,242 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:19:45,254 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:19:45,335 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:19:47,939 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:19:55,576 WARN [http-nio-8081-exec-6] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.NullPointerException]
-2021-11-10 11:20:54,427 WARN [http-nio-8081-exec-2] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.NullPointerException]
-2021-11-10 11:21:26,131 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:21:26,145 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:21:26,223 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:21:28,903 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:21:32,164 WARN [http-nio-8081-exec-4] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.NullPointerException]
-2021-11-10 11:22:40,044 WARN [http-nio-8081-exec-7] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.NullPointerException]
-2021-11-10 11:52:42,452 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:52:42,466 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:52:42,564 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:52:45,956 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-10 11:57:54,092 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-10 11:57:54,105 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-10 11:57:54,193 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-10 11:57:56,751 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-20 09:51:14,729 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-20 09:51:14,746 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-20 09:51:14,832 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-20 09:51:17,472 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-20 10:20:39,104 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-20 10:20:39,118 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-20 10:20:39,210 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-20 10:20:41,847 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-20 10:30:33,658 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-20 10:30:33,671 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-20 10:30:33,753 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-20 10:30:36,291 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-20 10:31:21,903 WARN [http-nio-8081-exec-3] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.NullPointerException]
+2021-11-20 10:33:34,994 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-20 10:33:35,006 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-20 10:33:35,089 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-20 10:33:37,687 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-20 10:37:06,031 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-20 10:37:06,044 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-20 10:37:06,124 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-20 10:37:08,645 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".

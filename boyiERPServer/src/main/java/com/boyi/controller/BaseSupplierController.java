@@ -4,6 +4,7 @@ package com.boyi.controller;
 import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
@@ -153,22 +154,17 @@ public class BaseSupplierController extends BaseController {
 
             // 1. 查询以前的信息
             BaseSupplier oldOne = baseSupplierService.getById(baseSupplier.getId());
-            if(!oldOne.getName().equals(baseSupplier.getName()) ||
-                    !oldOne.getMobile().equals(baseSupplier.getMobile())||
-                    !oldOne.getAddress().equals(baseSupplier.getAddress())){
-
+            if( !oldOne.getName().equals(baseSupplier.getName())){
                 // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
                 int count = baseSupplierMaterialService.countSuccessBySupplierId(baseSupplier.getId());
-                if(count>0){
-                    log.info("供应商ID[{}]不能修改，存在{}个 审核完成的 采购价目记录",baseSupplier.getId(),count);
-                    return ResponseResult.fail("供应商ID["+baseSupplier.getId()+"]不能修改，存在"+count+"个 审核完成的 采购价目记录");
+                if (count > 0) {
+                    log.info("供应商ID[{}]不能修改，存在{}个 审核完成的 采购价目记录", baseSupplier.getId(), count);
+                    return ResponseResult.fail("供应商ID[" + baseSupplier.getId() + "]不能修改，存在" + count + "个 审核完成的 采购价目记录");
                 }
-
-                baseSupplierService.updateById(baseSupplier);
-                log.info("供应商ID[{}]更新成功，old{},new:{}.",baseSupplier.getId(),oldOne,baseSupplier);
-            }else {
-                return ResponseResult.fail("没有信息更改!");
             }
+
+            baseSupplierService.updateById(baseSupplier);
+            log.info("供应商ID[{}]更新成功，old{},new:{}.",baseSupplier.getId(),oldOne,baseSupplier);
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
             log.error("供应商，更新异常",e);
