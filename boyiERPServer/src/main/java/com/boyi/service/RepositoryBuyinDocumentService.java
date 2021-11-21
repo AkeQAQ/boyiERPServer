@@ -7,6 +7,7 @@ import com.boyi.entity.RepositoryBuyinDocument;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -41,4 +42,6 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     Double countBySupplierIdAndMaterialId(String supplierId, String materialId);
 
     List<RepositoryBuyinDocument> countLTByCloseDate(LocalDate closeDate);
+
+    List<RepositoryBuyinDocument> getListFromOrderBetweenDate(LocalDate startDate, LocalDate endDate);
 }

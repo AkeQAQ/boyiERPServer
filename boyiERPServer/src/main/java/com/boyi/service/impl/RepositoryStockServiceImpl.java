@@ -176,7 +176,24 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
                 throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于要减少的数量:"+entry.getValue()+"不能减库存!");
             }
         }
+    }
 
+    @Override
+    public void validStockNumWithErrorMsg(Map<String, Double> needSubMap, List<Map<String, String>> strList)  {
+        for(Map.Entry<String,Double> entry : needSubMap.entrySet()){
+            String materialId = entry.getKey();
+            RepositoryStock stock = this.getByMaterialId(materialId);
+            if(stock == null){
+                HashMap<String, String> map = new HashMap<>();
+                map.put("content","该物料库存："+materialId+"不存在，不能减库存!");
+                strList.add(map);
+            }
+            if(stock.getNum() < entry.getValue()){
+                HashMap<String, String> map = new HashMap<>();
+                map.put("content","该物料："+materialId+",库存数量:"+stock.getNum()+"小于要减少的数量:"+entry.getValue()+"不能减库存!");
+                strList.add(map);
+            }
+        }
     }
 
     @Override

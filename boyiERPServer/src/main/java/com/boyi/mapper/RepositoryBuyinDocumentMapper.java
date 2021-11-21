@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -86,4 +88,10 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " where  rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
             " and rbdd.material_id = #{materialId}")
     Double getSumNumBySupplierIdAndMaterialId(@Param("supplierId") String supplierId,@Param("materialId")String materialId);
+
+    @Select("select rbd.id id, rbd.status status,rbdd.material_id material_id,rbdd.num num from repository_buyin_document rbd," +
+            "              repository_buyin_document_detail rbdd" +
+            " where rbd.source_type = 1 and rbd.id = rbdd.document_id " +
+            " and rbd.buy_in_date between #{startDate} and #{endDate}")
+    List<RepositoryBuyinDocument> getListFromOrderBetweenDate(LocalDate startDate, LocalDate endDate);
 }

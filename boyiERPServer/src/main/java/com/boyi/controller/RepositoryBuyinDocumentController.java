@@ -26,8 +26,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -48,6 +50,149 @@ public class RepositoryBuyinDocumentController extends BaseController {
     private String poiDemoPath;
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<Long,String>();
+
+
+    /**
+     * 一键采购订单领料
+     */
+    @GetMapping("/batchPick")
+    @PreAuthorize("hasAuthority('repository:buyIn:save')")
+    @Transactional
+    public ResponseResult batchPick(Principal principal,String startDateStr,String endDateStr,String pickDateStr)throws Exception {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        LocalDate startDate = LocalDate.parse(startDateStr, dateTimeFormatter);
+        LocalDate endDate = LocalDate.parse(endDateStr, dateTimeFormatter);
+        LocalDate pickDate = LocalDate.parse(pickDateStr, dateTimeFormatter);
+
+        // 0. 校验关账日
+        boolean validIsClose = validIsClose(pickDate);
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+
+        // 1. 根据时间区间，找到采购入库单据中的，是采购入库的 全部信息。
+        List<RepositoryBuyinDocument> lists = repositoryBuyinDocumentService.getListFromOrderBetweenDate(startDate,endDate);
+        if(lists.size() ==0){
+            return ResponseResult.fail("不存在符合条件的记录.");
+        }
+        // 2. 判断是否有存在审核未通过的，存在则取消
+        List<Map<String,String>> strList = new ArrayList<Map<String,String>>();
+
+        HashSet<Long> errorIds = new HashSet<>();
+        Map<String, Double> materialMap = new HashMap<>();
+        for (RepositoryBuyinDocument obj: lists){
+            if(obj.getStatus() != 0){
+                if(!errorIds.contains(obj.getId())){
+                    errorIds.add(obj.getId());
+                    HashMap<String, String> map = new HashMap<>();
+                    map.put("content","存在未审核通过的单据。单据编号:"+"["+obj.getId()+"]");
+                    strList.add(map);
+
+                }
+            }
+            String materialId = obj.getMaterialId();
+            if(!materialId.startsWith("01.03") && !materialId.startsWith("05.04") && !materialId.startsWith("06.01")
+                    && !materialId.startsWith("05.02")&& !materialId.startsWith("05.03")){
+                HashMap<String, String> map = new HashMap<>();
+                map.put("content","存在物料编码不能归类部门。单据编号:"+"["+obj.getId()+"]"+"，物料编码:"+materialId);
+                strList.add(map);
+            }
+            Double oldNum = materialMap.get(materialId);
+            if(oldNum == null || oldNum == 0D){
+                oldNum = 0D;
+            }
+            materialMap.put(materialId,oldNum+obj.getNum());
+        }
+        if(strList.size() > 0){
+            return ResponseResult.succ(200,"存在未审核通过的",strList);
+        }
+
+        // 3. 去重物料ID，求和入库数量
+
+        // 4. 判断物料 剩余库存，是否够领，出现负库存则取消
+        repositoryStockService.validStockNumWithErrorMsg(materialMap,strList);
+        if(strList.size() > 0){
+            return ResponseResult.succ(200,"存在负库存！",strList);
+        }
+        // 5. 根据物料编码 领料部门规则 进行分类，一个部门生成一个领料单据
+        /***
+         * 01.03, 05.04, 06.01 裁断
+         * 05.02,     复底线
+         * 05.03     夹包线
+         * 05.04     整理线
+         */
+        RepositoryPickMaterial caiduan = new RepositoryPickMaterial();
+        RepositoryPickMaterial fudixian = new RepositoryPickMaterial();
+        RepositoryPickMaterial jiabaoxian = new RepositoryPickMaterial();
+        RepositoryPickMaterial zhenglixian = new RepositoryPickMaterial();
+
+        boolean caiduanSave = false;
+        boolean fudiSave = false;
+        boolean jiabaoSave = false;
+        boolean zhenglixianSave = false;
+
+        LocalDateTime now = LocalDateTime.now();
+
+        for(Map.Entry<String,Double> entry : materialMap.entrySet()){
+            String materialId = entry.getKey();
+            Double num = entry.getValue();
+            if(materialId.startsWith("01.03") || materialId.startsWith("06.01")){
+                // 该部门的领料单，要先插入一条主记录，记下ID
+                addDetail(3L,caiduanSave,caiduan,pickDate,now, principal.getName(),num,materialId);
+                caiduanSave = true;
+
+            }else if(materialId.startsWith("05.02")){
+                addDetail(7L,fudiSave,fudixian,pickDate,now, principal.getName(),num,materialId);
+                fudiSave = true;
+            }else if(materialId.startsWith("05.03")){
+                addDetail(5L,jiabaoSave,jiabaoxian,pickDate,now, principal.getName(),num,materialId);
+                jiabaoSave = true;
+            }else if(materialId.startsWith("05.04")){
+                addDetail(8L,zhenglixianSave,zhenglixian,pickDate,now, principal.getName(),num,materialId);
+                zhenglixianSave = true;
+            }
+        }
+
+        // 插入详情
+        if(caiduan.getRowList()!=null && caiduan.getRowList().size() > 0){
+            repositoryPickMaterialDetailService.saveBatch(caiduan.getRowList());
+        }
+        if(fudixian.getRowList()!=null && fudixian.getRowList().size() > 0){
+            repositoryPickMaterialDetailService.saveBatch(fudixian.getRowList());
+        }if(jiabaoxian.getRowList()!=null && jiabaoxian.getRowList().size() > 0){
+            repositoryPickMaterialDetailService.saveBatch(jiabaoxian.getRowList());
+        }if(zhenglixian.getRowList()!=null && zhenglixian.getRowList().size() > 0){
+            repositoryPickMaterialDetailService.saveBatch(zhenglixian.getRowList());
+        }
+        // 减少库存
+        repositoryStockService.subNumByMaterialId(materialMap);
+
+        return ResponseResult.succ("采购订单一键领料完成");
+    }
+    private void addDetail(Long departmentId,boolean saveFlag,RepositoryPickMaterial pickMaterial,LocalDate pickDate,LocalDateTime now,
+                           String userName,Double num,String materialId){
+        if(!saveFlag){
+            pickMaterial.setDepartmentId(departmentId); //裁断部门ID 3，这里写死
+            pickMaterial.setPickDate(pickDate);
+            pickMaterial.setCreated(now);
+            pickMaterial.setUpdated(now);
+            pickMaterial.setCreatedUser(userName);
+            pickMaterial.setUpdatedUser(userName);
+            pickMaterial.setStatus(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_1);
+            repositoryPickMaterialService.save(pickMaterial);
+        }
+        List<RepositoryPickMaterialDetail> rowList = pickMaterial.getRowList();
+        if(rowList == null){
+            rowList = new ArrayList<>();
+            pickMaterial.setRowList(rowList);
+        }
+        RepositoryPickMaterialDetail detail = new RepositoryPickMaterialDetail();
+        detail.setDocumentId(pickMaterial.getId());
+        detail.setNum(num);
+        detail.setMaterialId(materialId);
+        rowList.add(detail);
+    }
 
     /**
      * 锁单据
