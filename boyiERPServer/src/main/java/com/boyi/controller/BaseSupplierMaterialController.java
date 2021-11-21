@@ -26,9 +26,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -71,9 +69,14 @@ public class BaseSupplierMaterialController extends BaseController {
     /**
      * 获取报价 分页全部数据
      */
-    @GetMapping("/list")
+    @PostMapping("/list")
     @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
-    public ResponseResult list(String searchStr, String searchField) {
+    public ResponseResult list(String searchField, String searchStatus,@RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+
         long start = System.currentTimeMillis();
         Page<BaseSupplierMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
@@ -88,13 +91,45 @@ public class BaseSupplierMaterialController extends BaseController {
             } else {
                 return ResponseResult.fail("搜索字段不存在");
             }
-        }else {
+        }
 
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
+
+                    } else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = baseSupplierMaterialService.innerQueryBySearch(getPage(),
-                queryField,searchField,searchStr);
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ResponseResult.fail("状态不能为空");
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+        pageData = baseSupplierMaterialService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
+
         long end = System.currentTimeMillis();
         log.info("查询list耗时:{}ms",(end-start));
         return ResponseResult.succ(pageData);

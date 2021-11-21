@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseSupplierMaterial;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.BaseSupplierMaterialMapper;
 import com.boyi.service.BaseSupplierMaterialService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -88,6 +90,21 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
         return this.innerQuery(page
                 ,new QueryWrapper<BaseSupplierMaterial>()
                         .like(StrUtil.isNotBlank(searchStr) && StrUtil.isNotBlank(searchField),queryField,searchStr));
+    }
+
+    @Override
+    public Page<BaseSupplierMaterial> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, Map<String, String> otherSearch) {
+        QueryWrapper<BaseSupplierMaterial> queryWrapper = new QueryWrapper<>();
+        for (String key : otherSearch.keySet()){
+            String val = otherSearch.get(key);
+            queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                    && StrUtil.isNotBlank(key),key,val);
+        }
+
+        return this.innerQuery(page,queryWrapper
+                .like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
+                        && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,searchStatus));
     }
 
     @Override

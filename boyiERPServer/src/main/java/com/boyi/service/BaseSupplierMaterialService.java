@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.boyi.entity.RepositoryBuyinDocument;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -35,6 +37,7 @@ public interface BaseSupplierMaterialService extends IService<BaseSupplierMateri
     int countBySupplierId(String[] ids);
 
     Page<BaseSupplierMaterial> innerQueryBySearch(Page page, String queryField, String searchField, String searchStr);
+    Page<BaseSupplierMaterial> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr,  List<Long> searchStatus, Map<String,String> otherSearch);
 
     int isRigion(BaseSupplierMaterial baseSupplierMaterial);
 

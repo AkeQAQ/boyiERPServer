@@ -346,6 +346,7 @@ public class OrderProductpricePreController extends BaseController {
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_PRICE_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME
                         )
+                .orderByDesc(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.CREATED_FIELDNAME)
         );
         return ResponseResult.succ(pageData);
     }

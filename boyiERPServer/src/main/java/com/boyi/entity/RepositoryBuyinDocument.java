@@ -63,27 +63,27 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private String supplierName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 7)
+    @ExcelAttribute(sort = 6)
     private String materialId;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 8)
+    @ExcelAttribute(sort = 7)
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 9)
+    @ExcelAttribute(sort = 8)
     private String unit;
 
-    @ExcelAttribute(sort = 11)
+    @ExcelAttribute(sort = 10)
     @TableField(exist = false)  // 字段数据库忽略
     private Double price;
 
-    @ExcelAttribute(sort = 10)
+    @ExcelAttribute(sort = 9)
     @TableField(exist = false)  // 字段数据库忽略
     private Double num;
 
 
-    @ExcelAttribute(sort = 12)
+    @ExcelAttribute(sort = 11)
     @TableField(exist = false)  // 字段数据库忽略
     private Double amount; // =price*num
 
@@ -94,11 +94,11 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private Double totalAmount; // 该单据总金额
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 6)
+    @ExcelAttribute(sort = 13)
     private String orderSeq; // 采购订单的单号
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 13)
+    @ExcelAttribute(sort = 12)
     private LocalDate priceDate; // 采购订单详情的采购价
 
     @TableField(exist = false)  // 字段数据库忽略
