@@ -1,31 +1,22 @@
-2021-11-21 10:47:47,143 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-21 10:47:47,159 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-21 10:47:47,249 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-21 10:47:50,022 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-21 15:10:26,867 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-21 15:10:26,881 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-21 15:10:26,964 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-21 15:10:29,837 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-21 15:12:42,817 WARN [http-nio-8081-exec-1] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [org.springframework.web.method.annotation.MethodArgumentTypeMismatchException: Failed to convert value of type 'java.lang.String' to required type 'java.time.LocalDate'; nested exception is org.springframework.core.convert.ConversionFailedException: Failed to convert from type [java.lang.String] to type [java.time.LocalDate] for value '2021-10-01'; nested exception is java.lang.IllegalArgumentException: Parse attempt failed for value [2021-10-01]]
-2021-11-21 15:14:57,433 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-21 15:14:57,456 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-21 15:14:57,604 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-21 15:15:01,830 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-21 15:16:13,870 WARN [http-nio-8081-exec-10] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.NullPointerException: text]
-2021-11-21 15:16:48,316 WARN [http-nio-8081-exec-1] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.NullPointerException: text]
-2021-11-21 15:28:36,971 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-21 15:28:36,983 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-21 15:28:37,072 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-21 15:28:40,424 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-21 15:28:53,735 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-21 15:28:53,747 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-21 15:28:53,829 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-21 15:28:56,331 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-21 15:31:20,238 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-21 15:31:20,251 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-21 15:31:20,334 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-21 15:31:22,889 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-11-21 16:20:56,657 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-11-21 16:20:56,669 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-11-21 16:20:56,750 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-11-21 16:20:59,274 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-26 13:08:53,839 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-26 13:08:53,859 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-26 13:08:53,979 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-26 13:08:58,709 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-26 13:37:22,787 WARN [http-nio-8081-exec-10] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.RuntimeException: 该物料：05.01.24,库存数量:0.0小于要减少的数量:1.0不能减库存!]
+2021-11-26 14:22:14,935 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-26 14:22:14,948 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-26 14:22:15,036 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-26 14:22:17,867 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-26 14:28:43,183 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-26 14:28:43,197 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-26 14:28:43,289 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-26 14:28:46,029 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-26 14:29:34,562 WARN [http-nio-8081-exec-9] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [java.lang.Exception: 该物料：01.02.24,库存数量:1958.15小于要减少的数量:2290.7不能减库存!]
+2021-11-26 16:32:23,473 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-26 16:32:23,486 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-26 16:32:23,577 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-26 16:32:26,331 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-11-26 16:54:42,857 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-11-26 16:54:42,870 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-11-26 16:54:42,956 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-11-26 16:54:45,768 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".

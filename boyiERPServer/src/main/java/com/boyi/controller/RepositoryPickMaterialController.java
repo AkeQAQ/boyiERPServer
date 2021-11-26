@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.utils.ExcelImportUtil;
 import com.boyi.controller.base.BaseController;
@@ -119,7 +120,7 @@ public class RepositoryPickMaterialController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+            map.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
 
             RepositoryPickMaterialDetail theDetail = new RepositoryPickMaterialDetail();
             theDetail.setMaterialId(detail.getMaterialId());
@@ -222,8 +223,6 @@ public class RepositoryPickMaterialController extends BaseController {
         // 1. 根据单据ID 获取该单据的全部详情信息，
         List<RepositoryPickMaterialDetail> details = repositoryPickMaterialDetailService.listByDocumentId(ids[0]);
 
-        RepositoryPickMaterial repositoryPickMaterial1 = repositoryPickMaterialService.getById(ids[0]);
-
         Map<String, Double> map = new HashMap<>();// 一个物料，需要添加的数目
         // 1. 遍历获取一个物料要添加的数目。
         for (RepositoryPickMaterialDetail detail : details) {
@@ -231,7 +230,7 @@ public class RepositoryPickMaterialController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+            map.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
         // 2. 领料数目 要求>=退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
         /*for (Map.Entry<String,Double> entry : map.entrySet()) {
@@ -443,7 +442,7 @@ public class RepositoryPickMaterialController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            newMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+            newMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
 
         // 2.  老的物料数目
@@ -453,7 +452,7 @@ public class RepositoryPickMaterialController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            oldMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+            oldMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
 
         // 全部的物料
@@ -473,9 +472,9 @@ public class RepositoryPickMaterialController extends BaseController {
             if(!oldDepartmentId.equals(newDepartmentId)){
                 // 老的物料里， 数目比 新的物料数目多的,就是要新增库存的，就不需要判断。
                 if(oldNum > newNum){
-                    needAddMap.put(materialId,oldNum - newNum );//库存新增的数目
+                    needAddMap.put(materialId,BigDecimalUtil.sub(oldNum,newNum).doubleValue() );//库存新增的数目
                 }else if(oldNum < newNum){
-                    needSubMap.put(materialId,newNum - oldNum ); // 库存减少的数目
+                    needSubMap.put(materialId,BigDecimalUtil.sub(newNum,oldNum).doubleValue() ); // 库存减少的数目
                 }else {
                     notUpdateMap.put(materialId,newNum);
                 }
@@ -497,9 +496,9 @@ public class RepositoryPickMaterialController extends BaseController {
             }else{
                 // 老的物料里， 数目比 新的物料数目多的,就是要新增库存的，就不需要判断。
                 if(oldNum > newNum){
-                    needAddMap.put(materialId,oldNum - newNum );//库存新增的数目
+                    needAddMap.put(materialId,BigDecimalUtil.sub(oldNum,newNum).doubleValue() );//库存新增的数目
                 }else if(oldNum < newNum){
-                    needSubMap.put(materialId,newNum - oldNum ); // 库存减少的数目
+                    needSubMap.put(materialId,BigDecimalUtil.sub(newNum,oldNum).doubleValue() ); // 库存减少的数目
                     continue;
                 }else {
                     notUpdateMap.put(materialId,newNum);
@@ -552,7 +551,7 @@ public class RepositoryPickMaterialController extends BaseController {
                 if(materialNum == null){
                     materialNum= 0D;
                 }
-                map.put(detail.getMaterialId(),materialNum+detail.getNum());
+                map.put(detail.getMaterialId(), BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
             }
             // 校验库存
             repositoryStockService.validStockNum(map);

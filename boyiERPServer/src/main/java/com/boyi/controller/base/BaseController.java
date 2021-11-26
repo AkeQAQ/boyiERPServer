@@ -110,6 +110,9 @@ public class BaseController {
     @Autowired
     public TagService tagService;
 
+    @Autowired
+    public ProduceReturnShoesService produceReturnShoesService;
+
     /**
      * 获取页面
      * @return

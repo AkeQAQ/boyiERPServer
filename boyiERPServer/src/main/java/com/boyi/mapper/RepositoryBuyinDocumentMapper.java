@@ -93,5 +93,5 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "              repository_buyin_document_detail rbdd" +
             " where rbd.source_type = 1 and rbd.id = rbdd.document_id " +
             " and rbd.buy_in_date between #{startDate} and #{endDate}")
-    List<RepositoryBuyinDocument> getListFromOrderBetweenDate(LocalDate startDate, LocalDate endDate);
+    List<RepositoryBuyinDocument> getListFromOrderBetweenDate(@Param("startDate")LocalDate startDate, @Param("endDate")LocalDate endDate);
 }

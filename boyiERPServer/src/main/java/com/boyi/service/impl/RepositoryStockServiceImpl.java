@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.entity.*;
 import com.boyi.mapper.RepositoryStockMapper;
 import com.boyi.service.RepositoryStockService;
@@ -115,7 +116,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             if(materialNum == null){
                 materialNum= 0D;
             }
-            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+            map.put(detail.getMaterialId(), BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
 
 

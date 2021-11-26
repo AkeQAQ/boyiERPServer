@@ -678,5 +678,9 @@ public class DBConstant {
 
     }
 
+    public static class TABLE_PRODUCE_RETURN_SHOES{
+        public static final String USER_NAME_FIELDNAME = "user_name";
+    }
+
 
 }

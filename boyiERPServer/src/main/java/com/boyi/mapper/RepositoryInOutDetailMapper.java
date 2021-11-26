@@ -20,13 +20,95 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
     String querySql = "" +
             "select * from (" +
             "" +
-            " select 1 as type_order,-1 as status,bm.id as material_id,bm.name as material_name,null as date,null as doc_name,null as doc_num," +
-            " null as unit,rsh.num as start_num ,null as add_num,null as sub_num" +
+            " select 1 as type_order,-1 as status,qichu.material_id as material_id,qichu.material_name as material_name,null as date,null as doc_name,null as doc_num," +
+            " null as unit,qichu.qichunum as start_num ,null as add_num,null as sub_num" +
             " from " +
+
+            /*
             " base_material bm " +
             " left join repository_stock_history rsh" +
-            " on bm.id = rsh.material_id and rsh.date = DATE_SUB(#{startDate},INTERVAL 1 DAY) " +
-            "" +
+            " on bm.id = rsh.material_id and rsh.date = DATE_SUB(#{startDate},INTERVAL 1 DAY) " +*/
+            "("+
+            "select material_id,material_name,(IFNULL(t.initnum,0)+  IFNULL(t.csum,0) + IFNULL(t.isum,0)+IFNULL(t.rsum,0)-IFNULL(t.osum,0)-IFNULL(t.psum,0)) as qichunum " +
+            "from  " +
+            " " +
+            "( " +
+            "select mat.id material_id,mat.material_name ,initS.num initnum, buyin.sum isum,buyOut.sum osum,pick.sum psum,ret.sum rsum,clos.sum csum from  " +
+            " " +
+            "( " +
+            "select id,name material_name " +
+            "  from  " +
+            "  base_material " +
+            "   " +
+            ") mat " +
+            "left join " +
+            " " +
+            "( " +
+            "select sum(rbdd.num) sum,rbdd.material_id " +
+            "  from  " +
+            "  repository_buyin_document rbd,repository_buyin_document_detail rbdd  " +
+            "  where rbd.id = rbdd.document_id " +
+            "  and rbd.buy_in_date <   #{startDate} " +
+            "group by rbdd.material_id " +
+            ") buyin " +
+            "on mat.id = buyin.material_id " +
+            "left join " +
+            " " +
+            "( " +
+            "select sum(rbdd.num) sum,rbdd.material_id " +
+            "  from  " +
+            "  repository_buyout_document rbd,repository_buyout_document_detail rbdd  " +
+            "  where rbd.id = rbdd.document_id " +
+            "  and rbd.buy_out_date <   #{startDate} " +
+            "group by rbdd.material_id " +
+            ") buyOut " +
+            "on mat.id = buyOut.material_id " +
+            " " +
+            "left join " +
+            "( " +
+            "select sum(rbdd.num) sum,rbdd.material_id " +
+            "  from  " +
+            "  repository_pick_material rbd,repository_pick_material_detail rbdd  " +
+            "  where rbd.id = rbdd.document_id " +
+            "  and rbd.pick_date <   #{startDate} " +
+            "group by rbdd.material_id " +
+            ") pick " +
+            "on mat.id = pick.material_id " +
+            " " +
+            "left join " +
+            "( " +
+            "select sum(rbdd.num) sum,rbdd.material_id " +
+            "  from  " +
+            "  repository_return_material rbd,repository_return_material_detail rbdd  " +
+            "  where rbd.id = rbdd.document_id " +
+            "  and rbd.return_date <   #{startDate} " +
+            "group by rbdd.material_id " +
+            ") ret " +
+            "on mat.id = ret.material_id " +
+            " " +
+            "left join " +
+            "( " +
+            "select  num,material_id " +
+            "  from  " +
+            "  sys_init_stock " +
+            " " +
+            ") initS " +
+            "on mat.id = initS.material_id " +
+            " " +
+            "left join " +
+            "( " +
+            "select sum(rbdd.change_num) sum,rbdd.material_id " +
+            "  from  " +
+            "  repository_check rbd,repository_check_detail rbdd  " +
+            "  where rbd.id = rbdd.document_id " +
+            "  and rbd.check_date <   #{startDate} " +
+            "group by rbdd.material_id " +
+            ") clos " +
+            "on mat.id = clos.material_id " +
+            " " +
+            ")t order by t.material_id"+
+            " )qichu"+
+
             " UNION ALL" +
             "" +
             " (select 2 as type_order,rbd.status as status,bm.id as material_id,bm.name as material_name,rbd.buy_in_date as date,'采购入库' as doc_name,rbdd.document_id as doc_num," +

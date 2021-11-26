@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -83,7 +84,7 @@ public class RepositoryReturnMaterialController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            map.put(detail.getMaterialId(),materialNum+detail.getNum());
+            map.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
 
         // 校验库存
@@ -231,7 +232,7 @@ public class RepositoryReturnMaterialController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            newMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+            newMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
 
         // 2.  老的物料数目
@@ -241,7 +242,7 @@ public class RepositoryReturnMaterialController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            oldMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+            oldMap.put(detail.getMaterialId(), BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
         Set<String> set = new HashSet<>();
         set.addAll(oldMap.keySet());
@@ -255,9 +256,9 @@ public class RepositoryReturnMaterialController extends BaseController {
             if(!oldDepartmentId.equals(newDepartmentId)){
                 // 老退料>新退料，退料将变少，不需要校验。同时，库存要减少
                 if (oldNum > newNum) {
-                    needSubMap.put(materialId, oldNum - newNum);//需要减少库存的数目
+                    needSubMap.put(materialId, BigDecimalUtil.sub(oldNum,newNum).doubleValue());//需要减少库存的数目
                 } else if (oldNum < newNum) {
-                    needAddMap.put(materialId, newNum - oldNum); // 需要新增库存的数目
+                    needAddMap.put(materialId, BigDecimalUtil.sub(newNum,oldNum).doubleValue()); // 需要新增库存的数目
                 } else {
                     notUpdateMap.put(materialId, newNum);
                 }
@@ -280,10 +281,10 @@ public class RepositoryReturnMaterialController extends BaseController {
 
                 // 老退料>新退料，退料将变少，不需要校验。同时，库存要减少
                 if (oldNum > newNum) {
-                    needSubMap.put(materialId, oldNum - newNum);//需要减少库存的数目
+                    needSubMap.put(materialId, BigDecimalUtil.sub(oldNum,newNum).doubleValue());//需要减少库存的数目
                     continue;
                 } else if (oldNum < newNum) {
-                    needAddMap.put(materialId, newNum - oldNum); // 需要新增库存的数目
+                    needAddMap.put(materialId, BigDecimalUtil.sub(newNum,oldNum).doubleValue()); // 需要新增库存的数目
                 } else {
                     notUpdateMap.put(materialId, newNum);
                     continue;
@@ -295,7 +296,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                 // 查询该供应商，该物料退料数目
                 Double returnCount = repositoryReturnMaterialService.countByDepartmentIdMaterialId(newDepartmentId, materialId);
 
-                double calReturnNum = returnCount + (newNum - oldNum);
+                double calReturnNum = returnCount + (BigDecimalUtil.sub(newNum,oldNum).doubleValue());
 
                 if (pickCount < calReturnNum) {
                     throw new Exception("该供应商:" + newDepartmentId + ",该物料:" + materialId +
@@ -337,7 +338,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                 if(materialNum == null){
                     materialNum= 0D;
                 }
-                map.put(detail.getMaterialId(),materialNum+detail.getNum());
+                map.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
             }
 
             // 2. 该部门，该物料 退料不能 > 该部门，该物料领料通过的 总和 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)

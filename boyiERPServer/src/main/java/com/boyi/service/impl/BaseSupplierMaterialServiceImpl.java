@@ -104,7 +104,9 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
         return this.innerQuery(page,queryWrapper
                 .like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
                         && StrUtil.isNotBlank(searchField),queryField,searchStr)
-                .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,searchStatus));
+                .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,searchStatus)
+                        .orderByDesc(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.END_DATE_FIELDNAME)
+                );
     }
 
     @Override

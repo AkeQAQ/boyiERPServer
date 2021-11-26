@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -234,7 +235,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            subMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+            subMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
         // 3. 减少之后的该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
 /*
@@ -439,7 +440,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                         if(materialNum == null){
                             materialNum= 0D;
                         }
-                        subMap.put(key,materialNum+detail.getNum());
+                        subMap.put(key,BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
                     }
                     // 3. 减少之后的该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目
 
@@ -508,7 +509,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            newMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+            newMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
 
         // 2.  老的物料数目
@@ -518,7 +519,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            oldMap.put(detail.getMaterialId(),materialNum+detail.getNum());
+            oldMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
         }
 
         Set<String> set = new HashSet<>();
@@ -538,10 +539,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 Double newNum = newMap.get(materialId) == null? 0D: newMap.get(materialId);
 
                 if(oldNum < newNum){
-                    needAddMap.put(materialId,newNum - oldNum);//需要新增的数目
+                    ;
+                    needAddMap.put(materialId,BigDecimalUtil.sub(newNum,oldNum).doubleValue());//需要新增的数目
                     continue;
                 }else if(oldNum > newNum){
-                    needSubMap.put(materialId,oldNum - newNum); // 需要减少的数目
+                    needSubMap.put(materialId,BigDecimalUtil.sub(oldNum,newNum).doubleValue()); // 需要减少的数目
                 }else {
                     notUpdateMap.put(materialId,newNum);
                     continue;
@@ -574,9 +576,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                 // 老的物料里， 数目比 新的物料数目少的,就是要新增库存的，就不需要判断。
                 if(oldNum < newNum){
-                    needAddMap.put(materialId,newNum - oldNum);//需要新增的数目
+                    needAddMap.put(materialId,BigDecimalUtil.sub(newNum,oldNum).doubleValue());//需要新增的数目
                 }else if(oldNum > newNum){
-                    needSubMap.put(materialId,oldNum - newNum); // 需要减少的数目
+                    needSubMap.put(materialId,BigDecimalUtil.sub(oldNum,newNum).doubleValue()); // 需要减少的数目
                 }else {
                     notUpdateMap.put(materialId,newNum);
                 }
