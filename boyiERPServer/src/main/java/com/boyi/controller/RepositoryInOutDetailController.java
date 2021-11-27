@@ -84,7 +84,7 @@ public class RepositoryInOutDetailController extends BaseController {
                 current.setAfterNum(current.getStartNum());
                 continue;
             }
-            RepositoryInOutDetail lastOne = records.get(i - 1);
+            RepositoryInOutDetail lastOne = records.get(i - 1); //TODO 分页情况下，点击其他页存在BUG：该分页第一个不是期初，该行报错
             if(typeOrder == 2 || typeOrder == 5 || typeOrder == 6){
                 Double afterNum = lastOne.getAfterNum();
                 if(afterNum == null){

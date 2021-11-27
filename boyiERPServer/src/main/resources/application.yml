@@ -32,6 +32,7 @@ poi:
   repositoryStockDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/stockDemo.xlsx
 
   orderBuyOrderDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/orderDemo.xlsx
+  produceReturnShoesDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/returnShoesDemo.xlsx
 
 orderProductPrice:
   pre: D:/pre/

@@ -680,6 +680,12 @@ public class DBConstant {
 
     public static class TABLE_PRODUCE_RETURN_SHOES{
         public static final String USER_NAME_FIELDNAME = "user_name";
+        public static final String PACKAGE_NO_FIELDNAME = "package_no";
+        public static final String USER_ART_NO_FIELDNAME = "user_art_no";
+        public static final String USER_REQUEST_FIELDNAME = "user_request";
+        public static final String DEAL_SITUATION_FIELDNAME = "deal_situation";
+        public static final String RETURN_DATE_FIELDNAME = "return_date";
+        public static final String CREATED_FIELDNAME = "created";
     }
 
 

@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>
- * 仓库模块-采购入库单据表 前端控制器
+ * 仓库模块-采购入库单据表 前端控制器f
  * </p>
  *
  * @author sunke
