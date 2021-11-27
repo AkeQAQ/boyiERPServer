@@ -539,7 +539,6 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 Double newNum = newMap.get(materialId) == null? 0D: newMap.get(materialId);
 
                 if(oldNum < newNum){
-                    ;
                     needAddMap.put(materialId,BigDecimalUtil.sub(newNum,oldNum).doubleValue());//需要新增的数目
                     continue;
                 }else if(oldNum > newNum){

@@ -47,10 +47,17 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
                 stock.setUpdated(LocalDateTime.now());
                 this.save(stock);
             }else{
+                // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
+                RepositoryStock queryStock = this.getByMaterialId(materialId);
+                Double dbNum = queryStock.getNum() ;
+                dbNum = dbNum == null ? 0D : dbNum;
+                double finalNum = BigDecimalUtil.add(dbNum, num).doubleValue();
                 UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+
                 updateWrapper
                         .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                        .setSql(" num = num +"+num)
+                        .set(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,finalNum)
+//                        .setSql(" num = num +"+num)
                         .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
                 this.update(updateWrapper);
             }
@@ -69,10 +76,18 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             stock.setUpdated(LocalDateTime.now());
             this.save(stock);
         }else{
+            // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
+            RepositoryStock queryStock = this.getByMaterialId(materialId);
+            Double dbNum = queryStock.getNum() ;
+            dbNum = dbNum == null ? 0D : dbNum;
+            double finalNum = BigDecimalUtil.add(dbNum, num).doubleValue();
+
             UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
             updateWrapper
                     .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                    .setSql(" num = num +"+num)
+                    .set(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,finalNum)
+
+//                    .setSql(" num = num +"+num)
                     .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
             this.update(updateWrapper);
         }
@@ -80,11 +95,17 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
 
     @Override
     public void subNumByMaterialIdNum(String materialId, Double num) {
+        // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
+        RepositoryStock queryStock = this.getByMaterialId(materialId);
+        Double dbNum = queryStock.getNum() ;
+        dbNum = dbNum == null ? 0D : dbNum;
+        double finalNum = BigDecimalUtil.sub(dbNum, num).doubleValue();
 
         UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
         updateWrapper
                 .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                .setSql(" num = num -"+num)
+                .set(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,finalNum)
+//                .setSql(" num = num -"+num)
                 .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
         this.update(updateWrapper);
 
@@ -96,10 +117,18 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             String materialId = entry.getKey();
             Double num = entry.getValue();
 
+            // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
+            RepositoryStock queryStock = this.getByMaterialId(materialId);
+            Double dbNum = queryStock.getNum() ;
+            dbNum = dbNum == null ? 0D : dbNum;
+            double finalNum = BigDecimalUtil.sub(dbNum, num).doubleValue();
+
             UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
             updateWrapper
                     .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                    .setSql(" num = num -"+num)
+                    .set(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,finalNum)
+
+//                    .setSql(" num = num -"+num)
                     .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
             this.update(updateWrapper);
         }
@@ -137,10 +166,18 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             String materialId = entry.getKey();
             Double num = entry.getValue();
 
+            // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
+            RepositoryStock queryStock = this.getByMaterialId(materialId);
+            Double dbNum = queryStock.getNum() ;
+            dbNum = dbNum == null ? 0D : dbNum;
+            double finalNum = BigDecimalUtil.sub(dbNum, num).doubleValue();
+
             UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
             updateWrapper
                     .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
-                    .setSql(" num = num -"+num)
+                    .set(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,finalNum)
+
+//                    .setSql(" num = num -"+num)
                     .set(DBConstant.TABLE_REPOSITORY_STOCK.UPDATED_FIELDNAME,LocalDateTime.now());
             this.update(updateWrapper);
         }
