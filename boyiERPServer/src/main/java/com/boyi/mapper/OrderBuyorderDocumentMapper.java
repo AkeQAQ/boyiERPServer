@@ -33,6 +33,8 @@ public interface OrderBuyorderDocumentMapper extends BaseMapper<OrderBuyorderDoc
             "        m.id material_id, " +
             "        m.name material_name, " +
             "        m.unit , " +
+            "        m.big_unit , " +
+
             "        docD.done_date , " +
             "        docD.order_seq , " +
             "        docD.id detail_id, " +

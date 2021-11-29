@@ -76,7 +76,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         List<RepositoryBuyoutDocumentDetail> details = repositoryBuyoutDocumentDetailService.listByDocumentId(ids[0]);
         for (RepositoryBuyoutDocumentDetail detail : details){
             repositoryStockService.addNumByMaterialId(detail.getMaterialId()
-                    ,detail.getNum());
+                    ,detail.getRadioNum());
         }
 
         try {
@@ -126,7 +126,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
-
+            detail.setBigUnit(material.getBigUnit());
+            detail.setUnitRadio(material.getUnitRadio());
             // 查询对应的价目记录
             BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),repositoryBuyoutDocument.getBuyOutDate());
 
@@ -193,6 +194,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                     item.setDocumentId(repositoryBuyoutDocument.getId());
                     item.setSupplierId(repositoryBuyoutDocument.getSupplierId());
                     item.setPriceDate(repositoryBuyoutDocument.getBuyOutDate());
+                    item.setRadioNum(item.getNum() * item.getUnitRadio());
+
                 }
 
                 repositoryBuyoutDocumentDetailService.saveBatch(repositoryBuyoutDocument.getRowList());
@@ -228,7 +231,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            newMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
+            newMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum() * detail.getUnitRadio()).doubleValue());
         }
 
         // 2.  老的物料数目
@@ -238,7 +241,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            oldMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
+            oldMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getRadioNum()).doubleValue());
         }
         Set<String> set = new HashSet<>();
         set.addAll(oldMap.keySet());
@@ -343,7 +346,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            subMap.put(detail.getMaterialId(), BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
+            subMap.put(detail.getMaterialId(), BigDecimalUtil.add(materialNum,detail.getNum()*detail.getUnitRadio()).doubleValue());
         }
         // 3.该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
 /*
@@ -376,6 +379,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                 item.setPriceDate(repositoryBuyoutDocument.getPriceDate());
 
                 item.setPriceDate(repositoryBuyoutDocument.getBuyOutDate());
+                item.setRadioNum(item.getNum() * item.getUnitRadio());// 系数换算
             }
 
             repositoryBuyoutDocumentDetailService.saveBatch(repositoryBuyoutDocument.getRowList());

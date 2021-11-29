@@ -44,6 +44,15 @@ public class BaseMaterial  {
     private String unit;
 
     /**
+     * 入库大单位
+     */
+    private String bigUnit;
+    /**
+     * 换算系数
+     */
+    private Integer unitRadio;
+
+    /**
      * 创建人
      */
     @TableField("created_user")

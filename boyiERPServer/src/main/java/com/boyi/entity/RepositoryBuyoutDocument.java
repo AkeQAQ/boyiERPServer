@@ -64,8 +64,11 @@ public class RepositoryBuyoutDocument extends BaseEntity {
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 8)
     private String unit;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    @ExcelAttribute(sort = 8)
+    private String bigUnit;
 
     @ExcelAttribute(sort = 9)
     @TableField(exist = false)  // 字段数据库忽略

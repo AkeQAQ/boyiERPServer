@@ -39,6 +39,10 @@ public class RepositoryBuyoutDocumentDetail {
     private Double num;
 
     /**
+     * 采购退料换算数量
+     */
+    private Double radioNum;
+    /**
      *  备注信息
      */
     private String comment;
@@ -57,6 +61,11 @@ public class RepositoryBuyoutDocumentDetail {
     private String materialName;
     @TableField(exist = false)  // 字段数据库忽略
     private String unit;
+    @TableField(exist = false)  // 字段数据库忽略
+    private String bigUnit;
+    @TableField(exist = false)  // 字段数据库忽略
+    private Integer unitRadio;
+
     @TableField(exist = false)  // 字段数据库忽略
     private String specs;
 

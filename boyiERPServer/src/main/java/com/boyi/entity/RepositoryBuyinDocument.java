@@ -71,8 +71,11 @@ public class RepositoryBuyinDocument extends BaseEntity {
     private String materialName;
 
     @TableField(exist = false)  // 字段数据库忽略
-    @ExcelAttribute(sort = 8)
     private String unit;
+
+    @ExcelAttribute(sort = 8)
+    @TableField(exist = false)  // 字段数据库忽略
+    private String bigUnit;
 
     @ExcelAttribute(sort = 10)
     @TableField(exist = false)  // 字段数据库忽略

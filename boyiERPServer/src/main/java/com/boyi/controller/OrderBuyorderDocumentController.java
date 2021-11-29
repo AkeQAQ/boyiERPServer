@@ -142,6 +142,8 @@ public class OrderBuyorderDocumentController extends BaseController {
                 detail.setMaterialId(item.getMaterialId());
                 detail.setDocumentId(repositoryBuyinDocument.getId());
                 detail.setNum(item.getNum());
+                detail.setRadioNum(item.getRadioNum());
+
                 detail.setComment(item.getComment());
                 detail.setSupplierId(item.getSupplierId());
                 detail.setOrderSeq(item.getOrderSeq());
@@ -162,7 +164,7 @@ public class OrderBuyorderDocumentController extends BaseController {
             // 6. 增加库存
             for (RepositoryBuyinDocumentDetail detail : detailArrayList) {
                 repositoryStockService.addNumByMaterialId(detail.getMaterialId()
-                        , detail.getNum());
+                        , detail.getRadioNum());
             }
             return ResponseResult.succ("下推入库成功");
         } catch (Exception e) {
@@ -231,6 +233,8 @@ public class OrderBuyorderDocumentController extends BaseController {
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
+            detail.setBigUnit(material.getBigUnit());
+            detail.setUnitRadio(material.getUnitRadio());
             detail.setSpecs(material.getSpecs());
 
             // 查询对应的价目记录
@@ -315,6 +319,7 @@ public class OrderBuyorderDocumentController extends BaseController {
                 item.setSupplierId(orderBuyorderDocument.getSupplierId());
                 item.setStatus(item.getStatus());
                 item.setOrderDate(orderBuyorderDocument.getOrderDate());
+                item.setRadioNum(item.getNum() * item.getUnitRadio());
             }
             orderBuyorderDocumentDetailService.saveBatch(updateDetails);
             log.info("采购订单模块-更新内容:{}", orderBuyorderDocument);
@@ -348,6 +353,7 @@ public class OrderBuyorderDocumentController extends BaseController {
                 item.setSupplierId(orderBuyorderDocument.getSupplierId());
                 item.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1);
                 item.setOrderDate(orderBuyorderDocument.getOrderDate());
+                item.setRadioNum(item.getNum() * item.getUnitRadio());
             }
 
             orderBuyorderDocumentDetailService.saveBatch(orderBuyorderDocument.getRowList());

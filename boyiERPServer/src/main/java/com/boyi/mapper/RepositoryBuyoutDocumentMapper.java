@@ -36,6 +36,7 @@ public interface RepositoryBuyoutDocumentMapper extends BaseMapper<RepositoryBuy
             "        m.id material_id, " +
             "        m.name material_name, " +
             "        m.unit , " +
+            "        m.big_unit , " +
             "        docD.num, " +
             "        docD.id detail_id, " +
             "        docD.price_date  " +

@@ -286,7 +286,6 @@ public class RepositoryPickMaterialController extends BaseController {
     @GetMapping("/queryByBuyInId")
     @PreAuthorize("hasAuthority('repository:buyIn:list')")
     public ResponseResult queryByBuyInId(Long buyInId) {
-        RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getById(buyInId);
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(buyInId);
 
         Double totalNum = 0D;
@@ -303,8 +302,9 @@ public class RepositoryPickMaterialController extends BaseController {
             pickDetail.setMaterialId(material.getId());
             pickDetail.setUnit(material.getUnit());
             pickDetail.setSpecs(material.getSpecs());
-            pickDetail.setNum(detail.getNum());
-            totalNum += detail.getNum();
+            Double detailNum = detail.getRadioNum();
+            pickDetail.setNum(detailNum);
+            totalNum += detailNum;
             pickDetails.add(pickDetail);
         }
 

@@ -39,6 +39,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             "        m.id material_id, " +
             "        m.name material_name, " +
             "        m.unit , " +
+            "        m.big_unit , " +
             "        docD.order_seq," +
             "        docD.num," +
             "        docD.order_id , " +
@@ -89,7 +90,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " and rbdd.material_id = #{materialId}")
     Double getSumNumBySupplierIdAndMaterialId(@Param("supplierId") String supplierId,@Param("materialId")String materialId);
 
-    @Select("select rbd.id id, rbd.status status,rbdd.material_id material_id,rbdd.num num from repository_buyin_document rbd," +
+    @Select("select rbd.id id, rbd.status status,rbdd.material_id material_id,rbdd.radio_num num from repository_buyin_document rbd," +
             "              repository_buyin_document_detail rbdd" +
             " where rbd.source_type = 1 and rbd.id = rbdd.document_id " +
             " and rbd.buy_in_date between #{startDate} and #{endDate}")

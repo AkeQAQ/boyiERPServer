@@ -96,7 +96,7 @@ public class BaseMaterialController extends BaseController {
         ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
         baseSuppliers.forEach(obj -> {
             Map<Object, Object> returnMap = MapUtil.builder().put("value", obj.getId() + " : " + obj.getName()).put("id", obj.getId()).put("name", obj.getName())
-                    .put("unit", obj.getUnit()).map();
+                    .put("unit", obj.getUnit()).put("bigUnit", obj.getBigUnit()).map();
             returnList.add(returnMap);
         });
         return ResponseResult.succ(returnList);
@@ -229,23 +229,17 @@ public class BaseMaterialController extends BaseController {
         try {
             // 1. 查询以前的信息
             BaseMaterial oldOne = baseMaterialService.getById(baseMaterial.getId());
-            if (!oldOne.getName().equals(baseMaterial.getName()) ||
-                    !oldOne.getUnit().equals(baseMaterial.getUnit()) ||
-                    !oldOne.getSpecs().equals(baseMaterial.getSpecs())) {
 
-                // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
-                int count = baseSupplierMaterialService.countSuccessByMaterialId(baseMaterial.getId());
+            // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
+            int count = baseSupplierMaterialService.countSuccessByMaterialId(baseMaterial.getId());
 
-                if (count > 0) {
-                    log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录", baseMaterial.getId(), count);
-                    return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + count + "个 审核完成的 采购价目记录");
-                }
-
-                baseMaterialService.updateById(baseMaterial);
-                log.info("物料ID[{}]更新成功，old{},new:{}.", baseMaterial.getId(), oldOne, baseMaterial);
-            } else {
-                return ResponseResult.fail("没有信息更改!");
+            if (count > 0) {
+                log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录", baseMaterial.getId(), count);
+                return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + count + "个 审核完成的 采购价目记录");
             }
+
+            baseMaterialService.updateById(baseMaterial);
+            log.info("物料ID[{}]更新成功，old{},new:{}.", baseMaterial.getId(), oldOne, baseMaterial);
 
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {

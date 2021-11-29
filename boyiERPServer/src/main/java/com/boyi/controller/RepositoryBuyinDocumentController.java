@@ -103,7 +103,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(oldNum == null || oldNum == 0D){
                 oldNum = 0D;
             }
-            materialMap.put(materialId,oldNum+obj.getNum());
+            materialMap.put(materialId,BigDecimalUtil.add(oldNum, obj.getNum()).doubleValue());
         }
         if(strList.size() > 0){
             return ResponseResult.succ(200,"存在未审核通过的",strList);
@@ -235,7 +235,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            subMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
+            subMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getRadioNum()).doubleValue());
         }
         // 3. 减少之后的该供应商，该物料的入库数目 >= 该供应商，该物料 退料数目 (金蝶目前没有判断，因为导入比较麻烦，目前暂时先取消该功能)
 /*
@@ -322,7 +322,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
+            detail.setBigUnit(material.getBigUnit());
+            detail.setUnitRadio(material.getUnitRadio());
             detail.setSpecs(material.getSpecs());
+
 
             // 查询对应的价目记录
             BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),repositoryBuyinDocument.getBuyInDate());
@@ -400,6 +403,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     item.setDocumentId(repositoryBuyinDocument.getId());
                     item.setSupplierId(repositoryBuyinDocument.getSupplierId());
                     item.setPriceDate(repositoryBuyinDocument.getBuyInDate());
+                    item.setRadioNum(item.getNum() * item.getUnitRadio());
                 }
 
                 repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
@@ -470,7 +474,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByIds(needSubIds);
                     for (RepositoryBuyinDocumentDetail detail :details){
                         repositoryStockService.subNumByMaterialIdNum(detail.getMaterialId()
-                                ,detail.getNum());
+                                ,detail.getRadioNum());
                     }
                     // 1. 根据document_id，删除现有ID之外的数据
                     repositoryBuyinDocumentDetailService.removeByDocIdAndInIds(repositoryBuyinDocument.getId(),needSubIds);
@@ -509,7 +513,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            newMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
+            newMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum() * detail.getUnitRadio()).doubleValue());
         }
 
         // 2.  老的物料数目
@@ -519,7 +523,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(materialNum == null){
                 materialNum= 0D;
             }
-            oldMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getNum()).doubleValue());
+            oldMap.put(detail.getMaterialId(),BigDecimalUtil.add(materialNum,detail.getRadioNum()).doubleValue());
         }
 
         Set<String> set = new HashSet<>();
@@ -659,6 +663,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                 // 普通采购入库，priceDate = buyInDate
                 item.setPriceDate(repositoryBuyinDocument.getBuyInDate());
+
+                item.setRadioNum(item.getUnitRadio() * item.getNum());// 系数换算
             }
 
             repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
@@ -666,7 +672,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             //  遍历更新 ，一个物料对应的库存数量
             for (RepositoryBuyinDocumentDetail detail : repositoryBuyinDocument.getRowList()){
                 repositoryStockService.addNumByMaterialId(detail.getMaterialId()
-                        ,detail.getNum());
+                        ,detail.getRadioNum());
             }
             HashMap<String, Object> returnMap = new HashMap<>();
             returnMap.put("id",repositoryBuyinDocument.getId());

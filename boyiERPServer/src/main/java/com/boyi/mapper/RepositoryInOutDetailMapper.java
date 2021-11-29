@@ -44,7 +44,7 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             "left join " +
             " " +
             "( " +
-            "select sum(rbdd.num) sum,rbdd.material_id " +
+            "select sum(rbdd.radio_num) sum,rbdd.material_id " +
             "  from  " +
             "  repository_buyin_document rbd,repository_buyin_document_detail rbdd  " +
             "  where rbd.id = rbdd.document_id " +
@@ -55,7 +55,7 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             "left join " +
             " " +
             "( " +
-            "select sum(rbdd.num) sum,rbdd.material_id " +
+            "select sum(rbdd.radio_num) sum,rbdd.material_id " +
             "  from  " +
             "  repository_buyout_document rbd,repository_buyout_document_detail rbdd  " +
             "  where rbd.id = rbdd.document_id " +
@@ -112,7 +112,7 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " UNION ALL" +
             "" +
             " (select 2 as type_order,rbd.status as status,bm.id as material_id,bm.name as material_name,rbd.buy_in_date as date,'采购入库' as doc_name,rbdd.document_id as doc_num," +
-            " bm.unit as unit,null as start_num ,rbdd.num as add_num,null as sub_num" +
+            " bm.unit as unit,null as start_num ,rbdd.radio_num as add_num,null as sub_num" +
             " from " +
             " base_material bm, repository_buyin_document_detail rbdd,repository_buyin_document rbd" +
             " where rbd.id = rbdd.document_id and bm.id = rbdd.material_id and rbd.buy_in_date >= #{startDate} and rbd.buy_in_date <= #{endDate} " +
@@ -135,7 +135,7 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " UNION ALL" +
             "" +
             " (select 4 as type_order,rbd.status as status,bm.id as material_id,bm.name as material_name,rbd.buy_out_date as date,'采购退料' as doc_name,rbdd2.document_id as doc_num," +
-            " bm.unit as unit,null as start_num ,null as add_num,rbdd2.num as sub_num" +
+            " bm.unit as unit,null as start_num ,null as add_num,rbdd2.radio_num as sub_num" +
             " from " +
             " base_material bm, repository_buyout_document_detail rbdd2,repository_buyout_document rbd" +
             " where rbd.id=rbdd2.document_id and bm.id = rbdd2.material_id and rbd.buy_out_date >= #{startDate} and rbd.buy_out_date <= #{endDate} " +
