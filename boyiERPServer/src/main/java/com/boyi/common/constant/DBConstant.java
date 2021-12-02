@@ -530,6 +530,8 @@ public class DBConstant {
         public static final String COSTOMER_FIELDNAME = "customer";
         public static final String SAVE_PATH_FIELDNAME = "save_path";
         public static final String PRICE_FIELDNAME = "price";
+        public static final String DEAL_PRICE_FIELDNAME = "deal_price";
+
         public static final String UPLOAD_NAME_FIELDNAME = "upload_name";
 
         public static final String EXCEL_JSON_FIELDNAME = "excel_json";

@@ -42,6 +42,7 @@ public class OrderProductpricePre extends BaseEntity {
     private Integer status;
 
     private Double price;
+    private Double dealPrice;
 
     private String uploadName;
 
