@@ -238,6 +238,17 @@ public class BaseMaterialController extends BaseController {
                 return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + count + "个 审核完成的 采购价目记录");
             }
 
+            // 3. 有入库,退料，领料记录的，不能修改系数
+            int buyInCount = repositoryBuyinDocumentDetailService.count(new QueryWrapper<RepositoryBuyinDocumentDetail>().eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
+            int buyOutCount = repositoryBuyoutDocumentDetailService.count(new QueryWrapper<RepositoryBuyoutDocumentDetail>().eq(DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
+            int pickCount = repositoryPickMaterialDetailService.count(new QueryWrapper<RepositoryPickMaterialDetail>().eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
+            int returnCount = repositoryReturnMaterialDetailService.count(new QueryWrapper<RepositoryReturnMaterialDetail>().eq(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
+            int orderCount = orderBuyorderDocumentDetailService.count(new QueryWrapper<OrderBuyorderDocumentDetail>().eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
+
+            if(oldOne.getUnitRadio() != baseMaterial.getUnitRadio() && (buyInCount>0 ||buyOutCount>0||pickCount>0||returnCount>0||orderCount>0)){
+                return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改系数，存在:" + buyInCount + "个采购入库记录,"+ buyOutCount + "个采购退料记录,"+ pickCount + "个生产领料记录,"+ returnCount + "个生产退料记录,"+ orderCount + "个采购订单记录");
+            }
+
             baseMaterialService.updateById(baseMaterial);
             log.info("物料ID[{}]更新成功，old{},new:{}.", baseMaterial.getId(), oldOne, baseMaterial);
 

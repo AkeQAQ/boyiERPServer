@@ -59,6 +59,17 @@ public class RepositoryStockController extends BaseController {
             page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
         }
         pageData = repositoryStockService.pageBySearch(page,queryField,searchField,searchStr);
+
+        // 库存数量为0的过滤.
+        List<RepositoryStock> records = pageData.getRecords();
+        ArrayList<RepositoryStock> newRecords = new ArrayList<>();
+        for (RepositoryStock stock : records){
+            if(stock.getNum() != 0){
+                newRecords.add(stock);
+            }
+        }
+        pageData.setRecords(newRecords);
+
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
             new ExcelExportUtil(RepositoryStock.class,1,0).export(null,null,response,fis,pageData.getRecords(),"报表.xlsx", new HashMap<>());
