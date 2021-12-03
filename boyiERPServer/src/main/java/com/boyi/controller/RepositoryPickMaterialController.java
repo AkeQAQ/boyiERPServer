@@ -598,7 +598,15 @@ public class RepositoryPickMaterialController extends BaseController {
             }else if (searchField.equals("id")) {
                 queryField = "id";
 
-            } else {
+            }
+
+            else if (searchField.equals("pickUser")) {
+                queryField = "pick_user";
+
+            }
+            else if (searchField.equals("comment")) {
+                queryField = "comment";
+
             }
         }
 
@@ -619,7 +627,14 @@ public class RepositoryPickMaterialController extends BaseController {
 
                     }else if (oneField.equals("id")) {
                         theQueryField = "id";
-                    } else {
+                    }
+                    else if (oneField.equals("pickUser")) {
+                        theQueryField = "pick_user";
+                    }
+                    else if (oneField.equals("comment")) {
+                        theQueryField = "comment";
+                    }
+                    else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);
@@ -673,7 +688,16 @@ public class RepositoryPickMaterialController extends BaseController {
             }else if (searchField.equals("id")) {
                 queryField = "id";
 
-            } else {
+            }
+            else if (searchField.equals("pickUser")) {
+                queryField = "pick_user";
+
+            }
+            else if (searchField.equals("comment")) {
+                queryField = "comment";
+
+            }
+            else {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
@@ -694,7 +718,14 @@ public class RepositoryPickMaterialController extends BaseController {
 
                     }else if (oneField.equals("id")) {
                         theQueryField = "id";
-                    } else {
+                    }
+                    else if (oneField.equals("pickUser")) {
+                        theQueryField = "pick_user";
+                    }
+                    else if (oneField.equals("comment")) {
+                        theQueryField = "comment";
+                    }
+                    else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);

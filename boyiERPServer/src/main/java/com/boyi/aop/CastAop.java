@@ -4,6 +4,7 @@ import com.boyi.entity.AnalysisRequest;
 import com.boyi.service.AnalysisRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.Map;
 
 @Component
 @Aspect
@@ -38,13 +41,13 @@ public class CastAop {
         if(url.endsWith("sendHeart")){
             return proceed;
         }
+
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String requestMethod = request.getMethod();
         String remoteIp = request.getRemoteAddr();
-
         long cast = end - start;
-        log.info("【AOP 日志】请求用户:{},请求url:{},请求方式:{},来源ip:{},执行class方法:{} ,耗时:{}ms",
-                principal,url,requestMethod,remoteIp,
+        log.info("【AOP 日志】请求用户:{},请求url:{},请求方式:{},来源ip:{},请求参数:{},执行class方法:{} ,耗时:{}ms",
+                principal,url,requestMethod,remoteIp,url.contains("/order/productPricePre") ? "":joinPoint.getArgs(),
                 joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName()
         , cast);
         AnalysisRequest pojo = new AnalysisRequest();
@@ -53,6 +56,7 @@ public class CastAop {
         pojo.setIp(remoteIp);
         pojo.setClassMethod(joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
         pojo.setCast(cast);
+        pojo.setCreatedTime(LocalDateTime.now());
         try {
             analysisRequestService.save(pojo);
         }catch (Exception e){
@@ -60,4 +64,5 @@ public class CastAop {
         }
         return proceed;
     }
+
 }
