@@ -78,7 +78,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
         }else{
             // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
             RepositoryStock queryStock = this.getByMaterialId(materialId);
-            Double dbNum = queryStock.getNum() ;
+            Double dbNum = queryStock == null ? 0D: queryStock.getNum() ;
             dbNum = dbNum == null ? 0D : dbNum;
             double finalNum = BigDecimalUtil.add(dbNum, num).doubleValue();
 

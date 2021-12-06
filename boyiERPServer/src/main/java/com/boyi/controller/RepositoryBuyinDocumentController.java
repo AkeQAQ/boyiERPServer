@@ -704,7 +704,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
             else if (searchField.equals("materialName")) {
                 queryField = "material_name";
 
-            }else if (searchField.equals("id")) {
+            }
+            else if (searchField.equals("supplierDocNum")) {
+                queryField = "supplier_document_num";
+
+            }
+            else if (searchField.equals("id")) {
                 queryField = "id";
 
             }
@@ -726,7 +731,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                     }else if (oneField.equals("id")) {
                         theQueryField = "id";
-                    } else {
+                    }
+                    else if (searchField.equals("supplierDocNum")) {
+                        queryField = "supplier_document_num";
+
+                    }
+                    else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);
@@ -782,7 +792,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
             }else if (searchField.equals("id")) {
                 queryField = "id";
 
-            } else {
+            }
+            else if (searchField.equals("supplierDocNum")) {
+                queryField = "supplier_document_num";
+
+            }
+            else {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
@@ -803,7 +818,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                     }else if (oneField.equals("id")) {
                         theQueryField = "id";
-                    } else {
+                    }
+                    else if (searchField.equals("supplierDocNum")) {
+                        queryField = "supplier_document_num";
+
+                    }
+                    else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);

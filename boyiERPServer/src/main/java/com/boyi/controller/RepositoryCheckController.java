@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
@@ -14,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -29,6 +31,25 @@ public class RepositoryCheckController extends BaseController {
     public ResponseResult delete(@RequestBody Long[] ids)throws Exception {
 
         try {
+
+            for(Long id : ids){
+
+                List<RepositoryCheckDetail> oldDetails = repositoryCheckDetailService.listByDocumentId(id);
+
+                Map<String, Double> needSubMap = new HashMap<>();
+
+                // 把库存 进行调整，进行+-
+                for (RepositoryCheckDetail item : oldDetails) {
+                    Double materialNum = needSubMap.get(item.getMaterialId());
+                    if(materialNum == null){
+                        materialNum= 0D;
+                    }
+                    BigDecimal mul = BigDecimalUtil.mul(-1.0D, item.getChangeNum()); // 取反：+1 其实就是要变成-1
+                    needSubMap.put(item.getMaterialId(), BigDecimalUtil.add(materialNum,mul.doubleValue()).doubleValue());
+                }
+                repositoryStockService.addNumByMaterialIdFromMap(needSubMap); //  带了+- 号，所以还是用加法
+            }
+
 
         boolean flag = repositoryCheckService.removeByIds(Arrays.asList(ids));
 
@@ -87,6 +108,23 @@ public class RepositoryCheckController extends BaseController {
 
         try {
 
+            List<RepositoryCheckDetail> oldDetails = repositoryCheckDetailService.listByDocumentId(repositoryCheck.getId());
+
+            Map<String, Double> needSubMap = new HashMap<>();
+
+            // 把库存 进行调整，进行+-
+            for (RepositoryCheckDetail item : oldDetails) {
+                Double materialNum = needSubMap.get(item.getMaterialId());
+                if(materialNum == null){
+                    materialNum= 0D;
+                }
+                BigDecimal mul = BigDecimalUtil.mul(-1.0D, item.getChangeNum()); // 取反：+1 其实就是要变成-1
+                needSubMap.put(item.getMaterialId(), BigDecimalUtil.add(materialNum,mul.doubleValue()).doubleValue());
+            }
+            repositoryStockService.addNumByMaterialIdFromMap(needSubMap); //  带了+- 号，所以还是用加法
+
+            Map<String, Double> needAddMap = new HashMap<>();
+
             //1. 先删除老的，再插入新的
             boolean flag = repositoryCheckDetailService.removeByDocId(repositoryCheck.getId());
             if(flag){
@@ -95,9 +133,16 @@ public class RepositoryCheckController extends BaseController {
                 for (RepositoryCheckDetail item : repositoryCheck.getRowList()){
                     item.setId(null);
                     item.setDocumentId(repositoryCheck.getId());
+
+                    Double materialNum = needAddMap.get(item.getMaterialId());
+                    if(materialNum == null){
+                        materialNum= 0D;
+                    }
+                    needAddMap.put(item.getMaterialId(), BigDecimalUtil.add(materialNum,item.getChangeNum()).doubleValue());
                 }
 
                 repositoryCheckDetailService.saveBatch(repositoryCheck.getRowList());
+                repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
 
                 log.info("盘点模块-更新内容:{}",repositoryCheck);
             }else{
@@ -133,6 +178,18 @@ public class RepositoryCheckController extends BaseController {
             }
 
             repositoryCheckDetailService.saveBatch(repositoryCheck.getRowList());
+
+            Map<String, Double> needAddMap = new HashMap<>();
+
+            // 把库存 进行调整，进行+-
+            for (RepositoryCheckDetail item : repositoryCheck.getRowList()) {
+                Double materialNum = needAddMap.get(item.getMaterialId());
+                if(materialNum == null){
+                    materialNum= 0D;
+                }
+                needAddMap.put(item.getMaterialId(), BigDecimalUtil.add(materialNum,item.getChangeNum()).doubleValue());
+            }
+            repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
 
             return ResponseResult.succ("新增成功");
         } catch (Exception e) {
@@ -185,21 +242,6 @@ public class RepositoryCheckController extends BaseController {
         repositoryCheck.setStatus(DBConstant.TABLE_REPOSITORY_CHECK.STATUS_FIELDVALUE_0);
         repositoryCheckService.updateById(repositoryCheck);
 
-        // 把库存设置成盘点数目
-        List<RepositoryCheckDetail> details = repositoryCheckDetailService.listByDocumentId(id);
-        for (RepositoryCheckDetail item : details) {
-            // 修复BUG： 及时库存不存在该物料，则新增,存在则修改
-            RepositoryStock one = repositoryStockService.getOne(new QueryWrapper<RepositoryStock>().eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME, item.getMaterialId()));
-            if(one == null){
-                RepositoryStock stock = new RepositoryStock();
-                stock.setMaterialId(item.getMaterialId());
-                stock.setNum(item.getCheckNum());
-                stock.setUpdated(LocalDateTime.now());
-                repositoryStockService.save(stock);
-            }else{
-                repositoryStockService.updateNum(item.getMaterialId(),item.getCheckNum());
-            }
-        }
 
         log.info("仓库模块-盘点模块-审核通过内容:{}",repositoryCheck);
 

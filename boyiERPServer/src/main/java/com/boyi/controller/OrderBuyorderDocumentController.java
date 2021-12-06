@@ -168,6 +168,7 @@ public class OrderBuyorderDocumentController extends BaseController {
             }
             return ResponseResult.succ("下推入库成功");
         } catch (Exception e) {
+            log.error("发生error:",e);
             throw new RuntimeException(e.getMessage()); // 事务默认需要RuntimeException，但是我们要求有Exception异常也要回滚
         }
     }
