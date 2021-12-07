@@ -90,8 +90,6 @@ public class RepositoryStockController extends BaseController {
         if (searchField != "") {
              if (searchField.equals("materialName")) {
                 queryField = "material_name";
-            }else if (searchField.equals("materialId")) {
-                queryField = "material_id";
             }
              else {
                 return ResponseResult.fail("搜索字段不存在");

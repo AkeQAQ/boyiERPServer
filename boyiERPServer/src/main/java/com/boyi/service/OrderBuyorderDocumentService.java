@@ -26,7 +26,7 @@ public interface OrderBuyorderDocumentService extends IService<OrderBuyorderDocu
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
 
     Page<OrderBuyorderDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
-    Page<OrderBuyorderDocument> innerQueryByManySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String,String> otherSearch);
+    Page<OrderBuyorderDocument> innerQueryByManySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String,String> otherSearch,Object[] searchDocNum);
 
     int countBySupplierId(String ids[]);
 

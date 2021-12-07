@@ -56,7 +56,7 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
     }
 
     @Override
-    public Page<OrderBuyorderDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String, String> otherSearch) {
+    public Page<OrderBuyorderDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String, String> otherSearch,Object[] searchDocNum) {
         QueryWrapper<OrderBuyorderDocument> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
             String val = otherSearch.get(key);
@@ -68,7 +68,9 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
                         like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate)  &&!searchStartDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchStartDate)
-                        .le(StrUtil.isNotBlank(searchEndDate)  &&!searchEndDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchEndDate));
+                        .le(StrUtil.isNotBlank(searchEndDate)  &&!searchEndDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchEndDate)
+                        .in(searchDocNum!=null && searchDocNum.length != 0,DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,searchDocNum)
+        );
     }
 
     @Override

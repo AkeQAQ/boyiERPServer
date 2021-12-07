@@ -371,7 +371,7 @@ public class OrderBuyorderDocumentController extends BaseController {
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('order:buyOrder:export')")
-    public void export(HttpServletResponse response,  String searchField, String searchStartDate, String searchEndDate,
+    public void export(HttpServletResponse response,String searchDocNum,  String searchField, String searchStartDate, String searchEndDate,
                        @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -424,7 +424,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         if(page.getSize()==10 && page.getCurrent() == 1){
             page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
         }
-        pageData = orderBuyorderDocumentService.innerQueryByManySearch(page, searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap);
+        pageData = orderBuyorderDocumentService.innerQueryByManySearch(page, searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);) {
@@ -439,8 +439,10 @@ public class OrderBuyorderDocumentController extends BaseController {
      */
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('order:buyOrder:list')")
-    public ResponseResult list( String searchField, String searchStartDate, String searchEndDate
+    public ResponseResult list(String searchDocNum, String searchField, String searchStartDate, String searchEndDate
                                ,@RequestBody Map<String,Object> params) {
+
+
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
         String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
@@ -487,7 +489,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         }
 
         log.info("搜索字段:{},对应ID:{}", searchField, ids);
-        pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap);
+        pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
         return ResponseResult.succ(pageData);
     }
 
