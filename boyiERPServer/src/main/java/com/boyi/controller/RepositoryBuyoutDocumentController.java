@@ -129,7 +129,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             detail.setBigUnit(material.getBigUnit());
             detail.setUnitRadio(material.getUnitRadio());
             // 查询对应的价目记录
-            BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),repositoryBuyoutDocument.getBuyOutDate());
+            BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),detail.getPriceDate());
 
             if(one != null){
                 detail.setPrice(one.getPrice());

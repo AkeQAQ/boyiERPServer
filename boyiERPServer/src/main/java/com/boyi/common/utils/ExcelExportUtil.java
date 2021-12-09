@@ -15,6 +15,7 @@ import org.springframework.core.io.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -68,6 +69,16 @@ public class ExcelExportUtil<T> {
                                 }
                                 else if("detailStatus".equals(field.getName())){
                                     cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }
+                                else if("amount".equals(field.getName())){
+                                    if(f != null){
+                                        BigDecimal bd = new BigDecimal(field.get(t).toString());
+                                        bd = bd.setScale(2, BigDecimal.ROUND_HALF_UP);
+                                        cell.setCellValue(bd.doubleValue());
+
+                                    }else {
+                                        cell.setCellValue("");
+                                    }
                                 }
                                 else{
                                     cell.setCellValue(f ==null ? "":field.get(t).toString());

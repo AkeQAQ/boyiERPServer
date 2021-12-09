@@ -328,7 +328,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
 
             // 查询对应的价目记录
-            BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),repositoryBuyinDocument.getBuyInDate());
+            BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),detail.getPriceDate());
 
             if(one != null){
                 detail.setPrice(one.getPrice());
@@ -759,6 +759,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
             page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
         }
         pageData = repositoryBuyinDocumentService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
+
+
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
