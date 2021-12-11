@@ -2,6 +2,7 @@ package com.boyi.entity;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
@@ -100,5 +101,8 @@ public class OrderBuyorderDocument extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     @ExcelAttribute(sort = 3)
     private Integer detailStatus; // 详情的状态
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private List<Map<String,Integer>> mergeCell;
 
 }

@@ -165,6 +165,9 @@ public class BaseMaterialController extends BaseController {
     @PreAuthorize("hasAuthority('baseData:material:save')")
     public ResponseResult save(Principal principal, @Validated @RequestBody BaseMaterial baseMaterial) throws Exception {
         LocalDateTime now = LocalDateTime.now();
+        if(baseMaterial.getSpecs()==null){
+            baseMaterial.setSpecs("");
+        }
         baseMaterial.setCreated(now);
         baseMaterial.setUpdated(now);
         baseMaterial.setCreatedUser(principal.getName());

@@ -59,14 +59,37 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
     public Page<OrderBuyorderDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String, String> otherSearch,Object[] searchDocNum) {
         QueryWrapper<OrderBuyorderDocument> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
-            String val = otherSearch.get(key);
-            queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
-                    && StrUtil.isNotBlank(key),key,val);
+            if(key.equals("price")){
+                String val = otherSearch.get(key);
+                if(val.isEmpty()){
+                    queryWrapper.isNull("price");
+                }else{
+                    queryWrapper.eq( !val.equals("null"),key,val);
+                }
+            }else{
+                String val = otherSearch.get(key);
+                queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }
+
         }
-        return this.innerQuery(page,
+        if(queryField.equals("price")){
+            if(searchStr.isEmpty()){
+                queryWrapper.isNull("price");
+            }else{
                 queryWrapper.
-                        like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
-                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                        eq(!searchStr.equals("null")
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr);
+            }
+
+        }else{
+            queryWrapper.
+                    like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }
+
+        return this.innerQuery(page,
+                queryWrapper
                         .ge(StrUtil.isNotBlank(searchStartDate)  &&!searchStartDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate)  &&!searchEndDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchEndDate)
                         .in(searchDocNum!=null && searchDocNum.length != 0,DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,searchDocNum)

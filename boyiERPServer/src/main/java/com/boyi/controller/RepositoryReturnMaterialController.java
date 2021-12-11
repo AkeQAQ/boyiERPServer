@@ -107,7 +107,8 @@ public class RepositoryReturnMaterialController extends BaseController {
         }
         return ResponseResult.succ("删除成功");
         }catch (Exception e){
-            throw new RuntimeException(e.getMessage());
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
         }
     }
 

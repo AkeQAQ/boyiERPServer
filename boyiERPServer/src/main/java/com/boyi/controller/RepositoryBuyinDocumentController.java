@@ -294,7 +294,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
         }
         return ResponseResult.succ("删除成功");
         }catch (Exception e){
-            throw new RuntimeException(e.getMessage());
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
         }
     }
 
@@ -799,6 +800,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 queryField = "supplier_document_num";
 
             }
+            else if (searchField.equals("price")) {
+                queryField = "price";
+
+            }
             else {
                 return ResponseResult.fail("搜索字段不存在");
             }
@@ -823,6 +828,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     }
                     else if (searchField.equals("supplierDocNum")) {
                         queryField = "supplier_document_num";
+
+                    }
+                    else if (searchField.equals("price")) {
+                        queryField = "price";
 
                     }
                     else {

@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.sql.Array;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -70,12 +71,6 @@ public class OrderBuyorderDocumentController extends BaseController {
     @PostMapping("/push")
     @PreAuthorize("hasAuthority('order:buyOrder:push')")
     public ResponseResult push(Principal principal, @RequestBody RepositoryBuyinDocument repositoryBuyinDocument, Long[] orderDetailIds, Long id) {
-        if (id != -1) {
-
-        }else{
-
-        }
-
 
         boolean validIsClose = validIsClose(repositoryBuyinDocument.getBuyInDate());
         if (!validIsClose) {
@@ -207,7 +202,8 @@ public class OrderBuyorderDocumentController extends BaseController {
             }
             return ResponseResult.succ("删除成功");
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
         }
     }
 
@@ -459,6 +455,9 @@ public class OrderBuyorderDocumentController extends BaseController {
             } else if (searchField.equals("id")) {
                 queryField = "id";
 
+            }else if (searchField.equals("price")) {
+                queryField = "price";
+
             } else {
                 return ResponseResult.fail("搜索字段不存在");
             }
@@ -480,6 +479,8 @@ public class OrderBuyorderDocumentController extends BaseController {
 
                     }else if (oneField.equals("id")) {
                         theQueryField = "id";
+                    }else if (oneField.equals("price")) {
+                        theQueryField = "price";
                     } else {
                         continue;
                     }
