@@ -10,6 +10,7 @@ import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.entity.RepositoryStock;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.exceptions.PersistenceException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +52,9 @@ public class RepositoryStockController extends BaseController {
         if (searchField != "") {
              if (searchField.equals("materialName")) {
                 queryField = "material_name";
-            }
+            }else if (searchField.equals("materialId")) {
+                 queryField = "material_id";
+             }
         }
         Page page = getPage();
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
@@ -90,13 +93,20 @@ public class RepositoryStockController extends BaseController {
         if (searchField != "") {
              if (searchField.equals("materialName")) {
                 queryField = "material_name";
-            }
+            }else if (searchField.equals("materialId")) {
+                 queryField = "material_id";
+             }
              else {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
+        try {
+            pageData = repositoryStockService.pageBySearch(getPage(),queryField,searchField,searchStr);
 
-        pageData = repositoryStockService.pageBySearch(getPage(),queryField,searchField,searchStr);
+        }catch (PersistenceException e){
+            return ResponseResult.fail("物料编码请不要输入中文");
+        }
+
 
         // 库存数量为0的过滤.
         List<RepositoryStock> records = pageData.getRecords();
