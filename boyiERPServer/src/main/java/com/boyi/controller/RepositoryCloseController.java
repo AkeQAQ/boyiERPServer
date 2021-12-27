@@ -93,7 +93,7 @@ public class RepositoryCloseController extends BaseController {
 
 
         // 不能出现根据时间顺序排序，有日期当天有负库存的现象
-        LocalDate closeDate = repositoryClose.getCloseDate();
+        /*LocalDate closeDate = repositoryClose.getCloseDate();
         LocalDate startDate = closeDate.plusDays(1L);
         LocalDate endDate = LocalDate.of(2100, 01, 01);
         Page page1 = getPage();
@@ -142,7 +142,7 @@ public class RepositoryCloseController extends BaseController {
             }
 
             return ResponseResult.succ(200,"历史库存负数的物料",strList);
-        }
+        }*/
 
 
         repositoryCloseService.save(repositoryClose);

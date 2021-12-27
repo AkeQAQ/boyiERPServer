@@ -1,19 +1,16 @@
-2021-12-11 16:02:04,914 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:02:04,934 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:02:05,030 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:02:08,005 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:09:27,588 WARN [http-nio-8081-exec-3] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [org.apache.ibatis.exceptions.PersistenceException: 
-### Error querying database.  Cause: java.sql.SQLException: Illegal mix of collations (latin1_swedish_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation 'like'
-### The error may exist in com/boyi/mapper/RepositoryStockMapper.java (best guess)
-### The error may involve com.boyi.mapper.RepositoryStockMapper.page-Inline
-### The error occurred while setting parameters
-### SQL: SELECT COUNT(*) FROM (SELECT m.id material_id, m.name material_name, m.unit unit, m.specs specs, s.num num FROM base_material m, repository_stock s WHERE m.id = s.material_id) AS q WHERE (material_id LIKE ?)
-### Cause: java.sql.SQLException: Illegal mix of collations (latin1_swedish_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation 'like']
-2021-12-11 16:11:34,315 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:11:34,325 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:11:34,415 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:11:37,088 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:11:41,822 WARN [http-nio-8081-exec-6] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.boyi.common.exception.GlobalExceptionHandler#handler(Exception)
+2021-12-25 14:59:40,921 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-12-25 14:59:40,938 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-12-25 14:59:41,016 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-12-25 14:59:43,744 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-12-25 15:01:53,625 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-12-25 15:01:53,639 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-12-25 15:01:53,723 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-12-25 15:01:56,376 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-12-25 15:10:22,346 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
+2021-12-25 15:10:22,360 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
+2021-12-25 15:10:22,444 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
+2021-12-25 15:10:25,060 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-12-25 15:18:32,191 WARN [http-nio-8081-exec-4] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.boyi.common.exception.GlobalExceptionHandler#handler(Exception)
 org.apache.catalina.connector.ClientAbortException: java.io.IOException: 你的主机中的软件中止了一个已建立的连接。
 	at org.apache.catalina.connector.OutputBuffer.realWriteBytes(OutputBuffer.java:351)
 	at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:776)
@@ -41,8 +38,8 @@ org.apache.catalina.connector.ClientAbortException: java.io.IOException: 你的�
 	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1078)
 	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:961)
 	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
-	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:898)
-	at javax.servlet.http.HttpServlet.service(HttpServlet.java:626)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:652)
 	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
 	at javax.servlet.http.HttpServlet.service(HttpServlet.java:733)
 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:231)
@@ -153,42 +150,283 @@ Caused by: java.io.IOException: 你的主机中的软件中止了一个已建立
 	at org.apache.coyote.Response.doWrite(Response.java:601)
 	at org.apache.catalina.connector.OutputBuffer.realWriteBytes(OutputBuffer.java:339)
 	... 118 common frames omitted
-2021-12-11 16:12:04,220 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:12:04,229 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:12:04,319 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:12:07,245 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:12:42,296 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:12:42,316 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:12:42,396 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:12:45,109 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:13:43,552 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:13:43,562 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:13:43,652 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:13:46,459 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:14:43,038 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:14:43,048 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:14:43,138 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:14:45,773 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:15:18,536 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:15:18,556 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:15:18,636 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:15:21,721 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:16:19,566 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:16:19,586 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:16:19,676 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:16:22,306 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:16:40,195 WARN [http-nio-8081-exec-9] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Resolved [org.apache.ibatis.exceptions.PersistenceException: 
-### Error querying database.  Cause: java.sql.SQLException: Illegal mix of collations (latin1_swedish_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation 'like'
-### The error may exist in com/boyi/mapper/RepositoryStockMapper.java (best guess)
-### The error may involve com.boyi.mapper.RepositoryStockMapper.page-Inline
-### The error occurred while setting parameters
-### SQL: SELECT COUNT(*) FROM (SELECT m.id material_id, m.name material_name, m.unit unit, m.specs specs, s.num num FROM base_material m, repository_stock s WHERE m.id = s.material_id) AS q WHERE (material_id LIKE ?)
-### Cause: java.sql.SQLException: Illegal mix of collations (latin1_swedish_ci,IMPLICIT) and (utf8mb4_general_ci,COERCIBLE) for operation 'like']
-2021-12-11 16:17:07,463 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:17:07,473 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:17:07,554 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:17:10,124 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
-2021-12-11 16:17:36,386 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStockHistory".
-2021-12-11 16:17:36,406 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryStock".
-2021-12-11 16:17:36,476 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.Tag".
-2021-12-11 16:17:39,042 WARN [restartedMain] c.b.m.c.m.TableInfoHelper - Can not find table primary key in Class: "com.boyi.entity.RepositoryInOutDetail".
+2021-12-25 15:25:47,121 WARN [http-nio-8081-exec-8] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.boyi.common.exception.GlobalExceptionHandler#handler(Exception)
+org.apache.catalina.connector.ClientAbortException: java.io.IOException: 你的主机中的软件中止了一个已建立的连接。
+	at org.apache.catalina.connector.OutputBuffer.realWriteBytes(OutputBuffer.java:351)
+	at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:776)
+	at org.apache.catalina.connector.OutputBuffer.append(OutputBuffer.java:681)
+	at org.apache.catalina.connector.OutputBuffer.writeBytes(OutputBuffer.java:386)
+	at org.apache.catalina.connector.OutputBuffer.write(OutputBuffer.java:364)
+	at org.apache.catalina.connector.CoyoteOutputStream.write(CoyoteOutputStream.java:96)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.write(OnCommittedResponseWrapper.java:638)
+	at org.springframework.util.StreamUtils$NonClosingOutputStream.write(StreamUtils.java:287)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator._flushBuffer(UTF8JsonGenerator.java:2159)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1173)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1008)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:345)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.write(AbstractGenericHttpMessageConverter.java:104)
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor.writeWithMessageConverters(AbstractMessageConverterMethodProcessor.java:277)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.handleReturnValue(RequestResponseBodyMethodProcessor.java:181)
+	at org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite.handleReturnValue(HandlerMethodReturnValueHandlerComposite.java:78)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:124)
+	at org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver.doResolveHandlerMethodException(ExceptionHandlerExceptionResolver.java:417)
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver.doResolveException(AbstractHandlerMethodExceptionResolver.java:75)
+	at org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver.resolveException(AbstractHandlerExceptionResolver.java:141)
+	at org.springframework.web.servlet.handler.HandlerExceptionResolverComposite.resolveException(HandlerExceptionResolverComposite.java:80)
+	at org.springframework.web.servlet.DispatcherServlet.processHandlerException(DispatcherServlet.java:1321)
+	at org.springframework.web.servlet.DispatcherServlet.processDispatchResult(DispatcherServlet.java:1132)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1078)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:961)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:652)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:733)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:231)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:113)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:113)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:113)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:327)
+	at org.springframework.security.web.access.intercept.FilterSecurityInterceptor.invoke(FilterSecurityInterceptor.java:115)
+	at org.springframework.security.web.access.intercept.FilterSecurityInterceptor.doFilter(FilterSecurityInterceptor.java:81)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:119)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:113)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:126)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:81)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:105)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:149)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at com.boyi.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:218)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:212)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at com.boyi.security.CaptchaFilter.doFilterInternal(CaptchaFilter.java:44)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:103)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:89)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.context.SecurityContextPersistenceFilter.doFilter(SecurityContextPersistenceFilter.java:110)
+	at org.springframework.security.web.context.SecurityContextPersistenceFilter.doFilter(SecurityContextPersistenceFilter.java:80)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:55)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:211)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:183)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:358)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:271)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:202)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:97)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:542)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:143)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:92)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:78)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:343)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:374)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:65)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:868)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1590)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.lang.Thread.run(Thread.java:748)
+Caused by: java.io.IOException: 你的主机中的软件中止了一个已建立的连接。
+	at sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:51)
+	at sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:93)
+	at sun.nio.ch.IOUtil.write(IOUtil.java:65)
+	at sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:469)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:138)
+	at org.apache.tomcat.util.net.NioBlockingSelector.write(NioBlockingSelector.java:101)
+	at org.apache.tomcat.util.net.NioSelectorPool.write(NioSelectorPool.java:152)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1253)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:764)
+	at org.apache.tomcat.util.net.SocketWrapperBase.writeBlocking(SocketWrapperBase.java:584)
+	at org.apache.tomcat.util.net.SocketWrapperBase.write(SocketWrapperBase.java:528)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.doWrite(Http11OutputBuffer.java:546)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.doWrite(ChunkedOutputFilter.java:110)
+	at org.apache.coyote.http11.Http11OutputBuffer.doWrite(Http11OutputBuffer.java:193)
+	at org.apache.coyote.Response.doWrite(Response.java:601)
+	at org.apache.catalina.connector.OutputBuffer.realWriteBytes(OutputBuffer.java:339)
+	... 118 common frames omitted
+2021-12-25 15:26:46,970 WARN [http-nio-8081-exec-7] o.s.w.s.m.m.a.ExceptionHandlerExceptionResolver - Failure in @ExceptionHandler com.boyi.common.exception.GlobalExceptionHandler#handler(Exception)
+org.apache.catalina.connector.ClientAbortException: java.io.IOException: 你的主机中的软件中止了一个已建立的连接。
+	at org.apache.catalina.connector.OutputBuffer.realWriteBytes(OutputBuffer.java:351)
+	at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:776)
+	at org.apache.catalina.connector.OutputBuffer.append(OutputBuffer.java:681)
+	at org.apache.catalina.connector.OutputBuffer.writeBytes(OutputBuffer.java:386)
+	at org.apache.catalina.connector.OutputBuffer.write(OutputBuffer.java:364)
+	at org.apache.catalina.connector.CoyoteOutputStream.write(CoyoteOutputStream.java:96)
+	at org.springframework.security.web.util.OnCommittedResponseWrapper$SaveContextServletOutputStream.write(OnCommittedResponseWrapper.java:638)
+	at org.springframework.util.StreamUtils$NonClosingOutputStream.write(StreamUtils.java:287)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator._flushBuffer(UTF8JsonGenerator.java:2159)
+	at com.fasterxml.jackson.core.json.UTF8JsonGenerator.flush(UTF8JsonGenerator.java:1173)
+	at com.fasterxml.jackson.databind.ObjectWriter.writeValue(ObjectWriter.java:1008)
+	at org.springframework.http.converter.json.AbstractJackson2HttpMessageConverter.writeInternal(AbstractJackson2HttpMessageConverter.java:345)
+	at org.springframework.http.converter.AbstractGenericHttpMessageConverter.write(AbstractGenericHttpMessageConverter.java:104)
+	at org.springframework.web.servlet.mvc.method.annotation.AbstractMessageConverterMethodProcessor.writeWithMessageConverters(AbstractMessageConverterMethodProcessor.java:277)
+	at org.springframework.web.servlet.mvc.method.annotation.RequestResponseBodyMethodProcessor.handleReturnValue(RequestResponseBodyMethodProcessor.java:181)
+	at org.springframework.web.method.support.HandlerMethodReturnValueHandlerComposite.handleReturnValue(HandlerMethodReturnValueHandlerComposite.java:78)
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:124)
+	at org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver.doResolveHandlerMethodException(ExceptionHandlerExceptionResolver.java:417)
+	at org.springframework.web.servlet.handler.AbstractHandlerMethodExceptionResolver.doResolveException(AbstractHandlerMethodExceptionResolver.java:75)
+	at org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver.resolveException(AbstractHandlerExceptionResolver.java:141)
+	at org.springframework.web.servlet.handler.HandlerExceptionResolverComposite.resolveException(HandlerExceptionResolverComposite.java:80)
+	at org.springframework.web.servlet.DispatcherServlet.processHandlerException(DispatcherServlet.java:1321)
+	at org.springframework.web.servlet.DispatcherServlet.processDispatchResult(DispatcherServlet.java:1132)
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1078)
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:961)
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1006)
+	at org.springframework.web.servlet.FrameworkServlet.doPost(FrameworkServlet.java:909)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:652)
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:883)
+	at javax.servlet.http.HttpServlet.service(HttpServlet.java:733)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:231)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:53)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:113)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:113)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:113)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:327)
+	at org.springframework.security.web.access.intercept.FilterSecurityInterceptor.invoke(FilterSecurityInterceptor.java:115)
+	at org.springframework.security.web.access.intercept.FilterSecurityInterceptor.doFilter(FilterSecurityInterceptor.java:81)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:119)
+	at org.springframework.security.web.access.ExceptionTranslationFilter.doFilter(ExceptionTranslationFilter.java:113)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:126)
+	at org.springframework.security.web.session.SessionManagementFilter.doFilter(SessionManagementFilter.java:81)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.authentication.AnonymousAuthenticationFilter.doFilter(AnonymousAuthenticationFilter.java:105)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter.doFilter(SecurityContextHolderAwareRequestFilter.java:149)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.savedrequest.RequestCacheAwareFilter.doFilter(RequestCacheAwareFilter.java:63)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at com.boyi.security.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:62)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:218)
+	at org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter.doFilter(AbstractAuthenticationProcessingFilter.java:212)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at com.boyi.security.CaptchaFilter.doFilterInternal(CaptchaFilter.java:44)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:103)
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:89)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90)
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.context.SecurityContextPersistenceFilter.doFilter(SecurityContextPersistenceFilter.java:110)
+	at org.springframework.security.web.context.SecurityContextPersistenceFilter.doFilter(SecurityContextPersistenceFilter.java:80)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:55)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.springframework.security.web.FilterChainProxy$VirtualFilterChain.doFilter(FilterChainProxy.java:336)
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:211)
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:183)
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:358)
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:271)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:119)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:193)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:166)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:202)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:97)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:542)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:143)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:92)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:78)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:343)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:374)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:65)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:868)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1590)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:49)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)
+	at java.lang.Thread.run(Thread.java:748)
+Caused by: java.io.IOException: 你的主机中的软件中止了一个已建立的连接。
+	at sun.nio.ch.SocketDispatcher.write0(Native Method)
+	at sun.nio.ch.SocketDispatcher.write(SocketDispatcher.java:51)
+	at sun.nio.ch.IOUtil.writeFromNativeBuffer(IOUtil.java:93)
+	at sun.nio.ch.IOUtil.write(IOUtil.java:65)
+	at sun.nio.ch.SocketChannelImpl.write(SocketChannelImpl.java:469)
+	at org.apache.tomcat.util.net.NioChannel.write(NioChannel.java:138)
+	at org.apache.tomcat.util.net.NioBlockingSelector.write(NioBlockingSelector.java:101)
+	at org.apache.tomcat.util.net.NioSelectorPool.write(NioSelectorPool.java:152)
+	at org.apache.tomcat.util.net.NioEndpoint$NioSocketWrapper.doWrite(NioEndpoint.java:1253)
+	at org.apache.tomcat.util.net.SocketWrapperBase.doWrite(SocketWrapperBase.java:764)
+	at org.apache.tomcat.util.net.SocketWrapperBase.writeBlocking(SocketWrapperBase.java:584)
+	at org.apache.tomcat.util.net.SocketWrapperBase.write(SocketWrapperBase.java:528)
+	at org.apache.coyote.http11.Http11OutputBuffer$SocketOutputBuffer.doWrite(Http11OutputBuffer.java:546)
+	at org.apache.coyote.http11.filters.ChunkedOutputFilter.doWrite(ChunkedOutputFilter.java:110)
+	at org.apache.coyote.http11.Http11OutputBuffer.doWrite(Http11OutputBuffer.java:193)
+	at org.apache.coyote.Response.doWrite(Response.java:601)
+	at org.apache.catalina.connector.OutputBuffer.realWriteBytes(OutputBuffer.java:339)
+	... 118 common frames omitted

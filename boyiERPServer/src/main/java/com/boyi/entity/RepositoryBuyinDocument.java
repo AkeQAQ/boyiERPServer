@@ -34,6 +34,7 @@ public class RepositoryBuyinDocument extends BaseEntity {
     /**
      * 供应商单据编号
      */
+    @ExcelAttribute(sort = 3)
     private String supplierDocumentNum;
 
     /**
@@ -44,7 +45,6 @@ public class RepositoryBuyinDocument extends BaseEntity {
 
     private String createdUser;
 
-    @ExcelAttribute(sort = 3)
     private String updatedUser;
 
     private Integer sourceType;
