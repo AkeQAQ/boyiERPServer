@@ -44,4 +44,6 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     List<RepositoryBuyinDocument> countLTByCloseDate(LocalDate closeDate);
 
     List<RepositoryBuyinDocument> getListFromOrderBetweenDate(LocalDate startDate, LocalDate endDate);
+
+    Double getAllPageTotalAmount(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatusList, Map<String, String> queryMap);
 }

@@ -855,7 +855,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
             return ResponseResult.fail("状态不能为空");
         }
         pageData = repositoryBuyinDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
-        return ResponseResult.succ(pageData);
+        Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmount(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
+        return ResponseResult.succ(ResponseResult.SUCCESS_CODE,allPageTotalAmount+"",pageData);
+
+//        return ResponseResult.succ(pageData);
     }
 
 
