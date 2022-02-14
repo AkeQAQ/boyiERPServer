@@ -64,14 +64,14 @@ public class RepositoryStockController extends BaseController {
         pageData = repositoryStockService.pageBySearch(page,queryField,searchField,searchStr);
 
         // 库存数量为0的过滤.
-        List<RepositoryStock> records = pageData.getRecords();
+        /*List<RepositoryStock> records = pageData.getRecords();
         ArrayList<RepositoryStock> newRecords = new ArrayList<>();
         for (RepositoryStock stock : records){
             if(stock.getNum() != 0){
                 newRecords.add(stock);
             }
         }
-        pageData.setRecords(newRecords);
+        pageData.setRecords(newRecords);*/
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
@@ -109,7 +109,7 @@ public class RepositoryStockController extends BaseController {
 
 
         // 库存数量为0的过滤.
-        List<RepositoryStock> records = pageData.getRecords();
+        /*List<RepositoryStock> records = pageData.getRecords();
         ArrayList<RepositoryStock> newRecords = new ArrayList<>();
         for (RepositoryStock stock : records){
             if(stock.getNum() != 0){
@@ -117,7 +117,7 @@ public class RepositoryStockController extends BaseController {
             }
         }
 
-        pageData.setRecords(newRecords);
+        pageData.setRecords(newRecords);*/
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
 
         return ResponseResult.succ(pageData);

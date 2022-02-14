@@ -23,7 +23,7 @@ public interface RepositoryStockMapper extends BaseMapper<RepositoryStock> {
     String querySql = "select m.id material_id,m.name material_name,m.unit unit,m.specs specs," +
             "s.num num from" +
             " base_material m ,repository_stock s " +
-            " where m.id = s.material_id ";
+            " where m.id = s.material_id and s.num != 0 ";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询

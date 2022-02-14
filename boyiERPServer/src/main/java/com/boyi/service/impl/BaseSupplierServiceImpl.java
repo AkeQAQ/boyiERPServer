@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseMaterial;
 import com.boyi.entity.BaseSupplier;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.BaseMaterialMapper;
 import com.boyi.mapper.BaseSupplierMapper;
 import com.boyi.service.BaseMaterialService;
@@ -41,5 +42,6 @@ public class BaseSupplierServiceImpl extends ServiceImpl<BaseSupplierMapper, Bas
         return this.page(page, new QueryWrapper<BaseSupplier>()
                 .like(StrUtil.isNotBlank(searchStr), queryField, searchStr));
     }
+
 
 }

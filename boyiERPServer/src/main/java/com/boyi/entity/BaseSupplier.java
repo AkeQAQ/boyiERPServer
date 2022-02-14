@@ -1,6 +1,7 @@
 package com.boyi.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ public class BaseSupplier {
     private LocalDateTime created;
     private LocalDateTime updated;
 
+    @ExcelAttribute(sort = 0)
     private String id;
     /**
      * 分组ID
@@ -31,23 +33,27 @@ public class BaseSupplier {
      */
     private Integer subId;
 
-
+    @ExcelAttribute(sort = 1)
     private String name;
+    @ExcelAttribute(sort = 2)
     private String groupName;
 
     /**
      * 地址
      */
+    @ExcelAttribute(sort = 4)
     private String address;
 
     /**
      * 联系电话
      */
+    @ExcelAttribute(sort = 3)
     private String mobile;
 
     /**
      * 含税
      */
+    @ExcelAttribute(sort = 5)
     private String tax;
 
     /**
@@ -61,5 +67,13 @@ public class BaseSupplier {
      */
     @TableField("update_user")
     private String updateUser;
+
+    @ExcelAttribute(sort = 7)
+    @TableField("comment")
+    private String comment;
+
+    @ExcelAttribute(sort = 6)
+    @TableField("zq")
+    private String zq;
 
 }

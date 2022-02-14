@@ -7,17 +7,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import com.boyi.service.BaseSupplierService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -34,6 +38,48 @@ import java.util.*;
 @RestController
 @RequestMapping("/baseData/supplier")
 public class BaseSupplierController extends BaseController {
+
+    @Value("${poi.baseDataSupplierDemoPath}")
+    private String poiDemoPath;
+
+    /**
+     * 分页导出
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('baseData:supplier:list')")
+    public void export(HttpServletResponse response, String searchField, String searchStr) {
+
+        Page<BaseSupplier> pageData = null;
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        if (searchField == "") {
+            log.info("未选择搜索字段，全查询");
+            pageData = baseSupplierService.page(page);
+        } else {
+            String queryField = "";
+            if (searchField.equals("id")) {
+                queryField = "id";
+            }
+            else if (searchField.equals("groupCode")) {
+                queryField = "group_code";
+            } else if (searchField.equals("subId")) {
+                queryField = "sub_id";
+            } else if (searchField.equals("name")) {
+                queryField = "name";
+            }
+            log.info("搜索字段:{},查询内容:{}", searchField, searchStr);
+            pageData = baseSupplierService.pageBySearch(page, queryField, searchStr);
+        }
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(BaseSupplier.class,1,0).export("null","null",response,fis,pageData.getRecords(),"报表.xlsx",new HashMap<String,String>());
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
 
     /**
      * 获取全部

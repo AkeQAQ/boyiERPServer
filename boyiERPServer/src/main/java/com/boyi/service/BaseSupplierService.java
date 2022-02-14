@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.BaseMaterial;
 import com.boyi.entity.BaseSupplier;
+import com.boyi.entity.RepositoryBuyinDocument;
 
 import java.util.List;
 
