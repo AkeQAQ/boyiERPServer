@@ -76,4 +76,7 @@ public class BaseSupplier {
     @TableField("zq")
     private String zq;
 
+    @ExcelAttribute(sort = 8)
+    @TableField("fax")
+    private String fax;
 }
