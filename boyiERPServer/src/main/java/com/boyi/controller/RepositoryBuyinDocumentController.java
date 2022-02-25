@@ -856,7 +856,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
         }
         pageData = repositoryBuyinDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
         Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmount(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
-        return ResponseResult.succ(ResponseResult.SUCCESS_CODE,allPageTotalAmount+"",pageData);
+        BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
+        return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
 
 //        return ResponseResult.succ(pageData);
     }

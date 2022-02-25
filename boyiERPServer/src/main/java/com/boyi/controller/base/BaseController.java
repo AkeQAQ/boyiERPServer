@@ -113,6 +113,9 @@ public class BaseController {
     @Autowired
     public ProduceReturnShoesService produceReturnShoesService;
 
+    @Autowired
+    public BuyMaterialSupplierService buyMaterialSupplierService;
+
     /**
      * 获取页面
      * @return
