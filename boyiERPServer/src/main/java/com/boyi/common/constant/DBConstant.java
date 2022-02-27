@@ -519,8 +519,17 @@ public class DBConstant {
             statusMap2.put(2,"报价确认");
             statusMap2.put(3,"实际价确认");
             statusMap = statusMap2;
+
+            Map<Integer,String> statusMap3 = new HashMap<Integer,String>();
+            statusMap3.put(0,"正常");
+            statusMap3.put(1,"无法计算");
+
+            statusMap3.put(2,"盈利");
+            statusMap3.put(3,"亏损");
+            statusMa3 = statusMap3;
         }
         public static final Map<Integer,String> statusMap;
+        public static final Map<Integer,String> statusMa3;
 
         public static final String ID_FIELDNAME = "id";
         public static final String STATUS_FIELDNAME = "status";
@@ -543,6 +552,7 @@ public class DBConstant {
         public static final String PRICE_LAST_UPDATE_USER_FIELDNAME = "price_last_update_user";
         public static final String REAL_PRICE_LAST_UPDATE_DATE_FIELDNAME = "real_price_last_update_date";
         public static final String REAL_PRICE_LAST_UPDATE_USER_FIELDNAME = "real_price_last_update_user";
+        public static final String YK_STATUS_FIELDNAME = "yk_status";
 
 
 
@@ -559,6 +569,25 @@ public class DBConstant {
          *  2:代表 报价确认
          */
         public static final Integer STATUS_FIELDVALUE_2 = 2;
+
+        /**
+         *  0:代表 正常
+         */
+        public static final Integer YK_STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 无法计算
+         */
+        public static final Integer YK_STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 盈利
+         */
+        public static final Integer YK_STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 亏损
+         */
+        public static final Integer YK_STATUS_FIELDVALUE_3 = 3;
+
     }
 
 

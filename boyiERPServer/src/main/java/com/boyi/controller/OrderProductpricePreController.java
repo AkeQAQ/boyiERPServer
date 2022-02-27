@@ -6,6 +6,7 @@ import cn.hutool.poi.excel.style.Align;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.LuckeySheetPOIUtils;
@@ -98,6 +99,9 @@ public class OrderProductpricePreController extends BaseController {
 
 
         try {
+            OrderProductpricePre old = orderProductpricePreService.getById(orderProductpricePre.getId());
+            Integer ykStatus = calYKStatus(old.getPrice(),orderProductpricePre.getRealPrice());
+            orderProductpricePre.setYkStatus(ykStatus);
             orderProductpricePreService.updateById(orderProductpricePre);
             return ResponseResult.succ("保存实际价格成功");
         } catch (Exception e) {
@@ -158,7 +162,10 @@ public class OrderProductpricePreController extends BaseController {
         orderProductpricePre.setPriceLastUpdateUser(principal.getName());
 
         try {
+            Integer ykStatus = calYKStatus(orderProductpricePre.getPrice(),orderProductpricePre.getRealPrice());
+            orderProductpricePre.setYkStatus(ykStatus);
             orderProductpricePreService.updateById(orderProductpricePre);
+
             return ResponseResult.succ("编辑成功");
         } catch (Exception e) {
             log.error("修改异常", e);
@@ -189,11 +196,28 @@ public class OrderProductpricePreController extends BaseController {
             if(old != null){
                 return ResponseResult.fail("该客户公司，该货号已存在历史记录!不允许添加");
             }
+            Integer ykStatus = calYKStatus(orderProductpricePre.getPrice(),orderProductpricePre.getRealPrice());
+            orderProductpricePre.setYkStatus(ykStatus);
             orderProductpricePreService.save(orderProductpricePre);
             return ResponseResult.succ("新增成功");
         } catch (Exception e) {
             log.error("插入异常", e);
             return ResponseResult.fail(e.getMessage());
+        }
+    }
+
+    // 计算盈亏方式
+    private Integer calYKStatus(Double price, Double realPrice) {
+        if(price ==null || realPrice == null ){
+            return DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.YK_STATUS_FIELDVALUE_1;
+        }else if(price.doubleValue() == realPrice.doubleValue()){
+            return DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.YK_STATUS_FIELDVALUE_0;
+        }else if(price > realPrice){
+            return DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.YK_STATUS_FIELDVALUE_2;
+        }else if(price < realPrice){
+            return DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.YK_STATUS_FIELDVALUE_3;
+        }else {
+            throw new RuntimeException("存在没考虑的情况");
         }
     }
 
@@ -317,7 +341,7 @@ public class OrderProductpricePreController extends BaseController {
      */
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('order:productPricePre:list')")
-    public ResponseResult list(String searchStr, String searchField) {
+    public ResponseResult list(String searchStr, String searchField,String ykStatus) {
         Page<OrderProductpricePre> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
@@ -330,11 +354,23 @@ public class OrderProductpricePreController extends BaseController {
 
             }
         }
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(ykStatus)){
+            String[] split = ykStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ResponseResult.fail("盈亏状态不能为空");
+        }
 
-        log.info("搜索字段:{},对应ID:{}", searchField,ids);
-        pageData = orderProductpricePreService.page(getPage(), new QueryWrapper<OrderProductpricePre>()
+        QueryWrapper<OrderProductpricePre> queryWrapper = new QueryWrapper<>();
+        pageData = orderProductpricePreService.page(getPage(), queryWrapper
                 .like(StrUtil.isNotBlank(searchStr)
                         && StrUtil.isNotBlank(searchField), queryField, searchStr)
+                .in(searchStatusList != null && searchStatusList.size() > 0,DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.YK_STATUS_FIELDNAME,searchStatusList)
+
                 .select(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COSTOMER_FIELDNAME,
@@ -345,7 +381,8 @@ public class OrderProductpricePreController extends BaseController {
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.PRICE_LAST_UPDATE_DATE_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.PRICE_LAST_UPDATE_USER_FIELDNAME,
                         DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.REAL_PRICE_FIELDNAME,
-                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.STATUS_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.YK_STATUS_FIELDNAME
                         )
                 .orderByDesc(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.CREATED_FIELDNAME)
         );

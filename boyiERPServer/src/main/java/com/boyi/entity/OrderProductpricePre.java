@@ -56,5 +56,7 @@ public class OrderProductpricePre extends BaseEntity {
     private String priceLastUpdateUser;
     private String realPriceLastUpdateUser;
 
+    private Integer ykStatus;
+
 
 }
