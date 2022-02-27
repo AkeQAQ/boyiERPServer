@@ -99,6 +99,11 @@ public class BuyMaterialSupplierController extends BaseController {
             buyMaterialSupplier.setUpdated(now);
             buyMaterialSupplier.setCreatedUser(principal.getName());
 
+            // 判断是否已经存在该供应商，该供应商物料编码的记录，已经存在则代表已经有关联，不能插入
+            BuyMaterialSupplier exist = buyMaterialSupplierService.isExist(buyMaterialSupplier.getSupplierId(),buyMaterialSupplier.getSupplierMaterialId());
+            if(exist!=null){
+                return ResponseResult.fail("该供应商，该供应商物料编码已经有对应的内部物料["+exist.getInnerMaterialId()+"]关联");
+            }
             buyMaterialSupplierService.save(buyMaterialSupplier);
 
         }catch (DuplicateKeyException e){
@@ -119,6 +124,13 @@ public class BuyMaterialSupplierController extends BaseController {
     public ResponseResult update(Principal principal,@Validated @RequestBody BuyMaterialSupplier buyMaterialSupplier) {
         buyMaterialSupplier.setUpdated(LocalDateTime.now());
         buyMaterialSupplier.setUpdatedUser(principal.getName());
+
+
+        // 判断是否已经存在该供应商，该供应商物料编码的记录，已经存在则代表已经有关联，不能插入
+        BuyMaterialSupplier exist = buyMaterialSupplierService.isExist(buyMaterialSupplier.getSupplierId(),buyMaterialSupplier.getSupplierMaterialId());
+        if(exist!=null){
+            return ResponseResult.fail("该供应商，该供应商物料编码已经有对应的内部物料["+exist.getInnerMaterialId()+"]关联");
+        }
         buyMaterialSupplierService.updateById(buyMaterialSupplier);
         return ResponseResult.succ("编辑成功");
     }

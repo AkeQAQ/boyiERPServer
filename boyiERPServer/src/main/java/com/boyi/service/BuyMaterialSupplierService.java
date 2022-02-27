@@ -20,4 +20,5 @@ public interface BuyMaterialSupplierService extends IService<BuyMaterialSupplier
 
     Page<BuyMaterialSupplier> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, Map<String, String> queryMap);
 
+    BuyMaterialSupplier isExist(String supplierId, String supplierMaterialId);
 }

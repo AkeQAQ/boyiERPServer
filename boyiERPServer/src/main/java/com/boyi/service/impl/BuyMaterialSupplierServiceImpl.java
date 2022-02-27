@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,6 +41,18 @@ public class BuyMaterialSupplierServiceImpl extends ServiceImpl<BuyMaterialSuppl
                         .like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr));
     }
+
+    @Override
+    public BuyMaterialSupplier isExist(String supplierId, String supplierMaterialId) {
+        List<BuyMaterialSupplier> list = this.list(new QueryWrapper<BuyMaterialSupplier>().eq(DBConstant.TABLE_BUY_MATERIAL_SUPPLIER.SUPPLIER_ID_FIELDNAME, supplierId)
+                .eq(DBConstant.TABLE_BUY_MATERIAL_SUPPLIER.SUPPLIER_MATERIAL_ID_FIELDNAME, supplierMaterialId));
+        if(list==null || list.size() ==0){
+            return null;
+        }else {
+            return list.get(0);
+        }
+    }
+
     @Autowired
     BuyMaterialSupplierMapper buyMaterialSupplierMapper;
     public Page<BuyMaterialSupplier> innerQuery(Page page, QueryWrapper<BuyMaterialSupplier> eq) {

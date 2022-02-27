@@ -52,7 +52,7 @@ public class BaseUnitController extends BaseController {
     @PostMapping("/getSearchAllData")
     @PreAuthorize("hasAuthority('baseData:unit:list')")
     public ResponseResult getSearchAllData() {
-        List<BaseUnit> baseUnits = baseUnitService.list();
+        List<BaseUnit> baseUnits = baseUnitService.list(new QueryWrapper<BaseUnit>().orderByDesc(DBConstant.TABLE_BASE_UNIT.PRIORITY_FIELDNAME));
 
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
         baseUnits.forEach(obj ->{
@@ -68,7 +68,7 @@ public class BaseUnitController extends BaseController {
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('baseData:unit:list')")
     public ResponseResult list() {
-        List<BaseUnit> baseUnits = baseUnitService.list();
+        List<BaseUnit> baseUnits = baseUnitService.list(new QueryWrapper<BaseUnit>().orderByDesc(DBConstant.TABLE_BASE_UNIT.PRIORITY_FIELDNAME));
         return ResponseResult.succ(baseUnits);
     }
 

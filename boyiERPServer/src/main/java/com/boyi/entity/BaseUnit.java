@@ -28,5 +28,7 @@ public class BaseUnit extends BaseEntity {
      */
     private String name;
 
+    private int priority;
+
 
 }

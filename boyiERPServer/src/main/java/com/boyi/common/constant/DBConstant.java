@@ -114,6 +114,8 @@ public class DBConstant {
         public static final String CODE_FIELDNAME ="code";
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
+        public static final String PRIORITY_FIELDNAME = "priority";
+
     }
 
     public static class TABLE_BASE_MATERIAL_GROUP{
@@ -688,6 +690,22 @@ public class DBConstant {
         public static final String DEAL_SITUATION_FIELDNAME = "deal_situation";
         public static final String RETURN_DATE_FIELDNAME = "return_date";
         public static final String CREATED_FIELDNAME = "created";
+    }
+
+    public static class TABLE_BUY_MATERIAL_SUPPLIER{
+        public static final String INNERT_MATERIAL_ID_FIELDNAME = "innert_material_id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String SUPPLIER_NAME_FIELDNAME = "supplier_name";
+        public static final String SUPPLIER_MATERIAL_ID_FIELDNAME = "supplier_material_id";
+        public static final String SUPPLIER_MATERIAL_NAME_FIELDNAME = "supplier_material_name";
+        public static final String SUPPLIER_MATERIAL_PRICE_FIELDNAME = "supplier_material_price";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+
     }
 
 
