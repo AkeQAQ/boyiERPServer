@@ -8,6 +8,11 @@ spring:
     url: jdbc:mysql://127.0.0.1:3306/boyi?useUnicode=true&useSSL=false&characterEncoding=utf8
     username: root
     password: root
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 10MB
+
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**Mapper.xml
@@ -35,7 +40,11 @@ poi:
   produceReturnShoesDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/returnShoesDemo.xlsx
   baseDataSupplierDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/baseDataSupplierDemo.xlsx
 
+picture:
+  craftPath: D:/鞋业/互联网相关/ERP/boyiERPServer/target/classes/public
+
 
 orderProductPrice:
   pre: D:/pre/
   real: D:/real/
+

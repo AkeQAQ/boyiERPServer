@@ -35,7 +35,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     UserDetailsServiceImpl userDetailService;
 
-    public static final String[] URL_WHITELIST = {"/webjars/**", "/favicon.ico", "/captcha", "/login", "/logout","/test/**"};
+    public static final String[] URL_WHITELIST = {"/webjars/**", "/favicon.ico", "/captcha", "/login", "/logout","/test/**"
+            ,"/*.png","/*.jpg"
+
+            };
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {

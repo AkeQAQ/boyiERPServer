@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.ProduceCraft;
@@ -14,18 +15,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileFilter;
+import java.io.InputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -39,7 +38,73 @@ import java.util.List;
 @RestController
 @RequestMapping("/produce/craft")
 public class ProduceCraftController extends BaseController {
+    @Value("${picture.craftPath}")
+    private String pictureCraftPath;
 
+    public static void main(String[] args) {
+        int a = "16_1".compareTo("16_2");
+        log.info("{}",a);
+    }
+
+    @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)
+    public ResponseResult getPicturesById( String id) {
+        // 根据ID 查询照片的路径和名字
+        File directory = new File(pictureCraftPath);
+        File[] files = directory.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                String craftId_timestamp = file.getName();
+                String[] split = craftId_timestamp.split("_");
+                return split[0].equals(id);
+            }
+        });
+        ArrayList<File> files1 = new ArrayList<>();
+        for (int i = 0; i < files.length; i++) {
+            files1.add(files[i]);
+        }
+        Collections.sort(files1, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        ArrayList<String> names = new ArrayList<>();
+        for (int i = 0; i < files1.size(); i++) {
+            File oneFile = files1.get(i);
+            String name = oneFile.getName();
+            names.add(name);
+        }
+        return ResponseResult.succ(names);
+    }
+
+    @RequestMapping(value = "/delPic", method = RequestMethod.GET)
+    public ResponseResult delPic(String fileName) {
+        File delFile = new File(pictureCraftPath, fileName);
+        if(delFile.exists()){
+            delFile.delete();
+        }else{
+            return ResponseResult.fail("文件["+fileName+"] 不存在,无法删除");
+        }
+        return ResponseResult.succ("删除成功");
+    }
+
+    @RequestMapping(value = "/uploadPic", method = RequestMethod.POST)
+    public ResponseResult uploadFile(String id,MultipartFile[] files) {
+        for (int i = 0; i < files.length; i++) {
+            log.info("文件内容:{}",files[i]);
+            MultipartFile file = files[i];
+            try (InputStream fis = file.getInputStream();){
+                String originalFilename = file.getOriginalFilename();
+                String[] split = originalFilename.split("\\.");
+                String suffix = split[split.length - 1];// 获取后缀
+
+                FileUtils.writeFile(fis,pictureCraftPath,id+"_"+System.currentTimeMillis()+"."+suffix);
+            }catch (Exception e){
+
+            }
+        }
+        return ResponseResult.succ("");
+    }
 
     /**
      *
