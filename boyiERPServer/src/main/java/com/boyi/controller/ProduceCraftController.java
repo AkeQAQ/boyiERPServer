@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.fileFilter.CraftPicFileFilter;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -41,27 +42,21 @@ public class ProduceCraftController extends BaseController {
     @Value("${picture.craftPath}")
     private String pictureCraftPath;
 
-    public static void main(String[] args) {
-        int a = "16_1".compareTo("16_2");
-        log.info("{}",a);
-    }
 
     @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)
     public ResponseResult getPicturesById( String id) {
         // 根据ID 查询照片的路径和名字
         File directory = new File(pictureCraftPath);
-        File[] files = directory.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                String craftId_timestamp = file.getName();
-                String[] split = craftId_timestamp.split("_");
-                return split[0].equals(id);
-            }
-        });
+        CraftPicFileFilter craftPicFileFilter = new CraftPicFileFilter(id);
+        File[] files = directory.listFiles(craftPicFileFilter);
+
         ArrayList<File> files1 = new ArrayList<>();
-        for (int i = 0; i < files.length; i++) {
-            files1.add(files[i]);
+        if(files!=null && files.length != 0){
+            for (int i = 0; i < files.length; i++) {
+                files1.add(files[i]);
+            }
         }
+
         Collections.sort(files1, new Comparator<File>() {
             @Override
             public int compare(File o1, File o2) {
@@ -278,6 +273,17 @@ public class ProduceCraftController extends BaseController {
         log.info("删除工艺单信息,id:{},是否成功：{}",id,flag?"成功":"失败");
         if(!flag){
             return ResponseResult.fail("工艺单删除失败");
+        }
+        // 删除对应图片
+        File delFile = new File(pictureCraftPath);
+        if(delFile.exists()&& delFile.isDirectory()){
+            CraftPicFileFilter craftPicFileFilter = new CraftPicFileFilter(id+"");
+            File[] files = delFile.listFiles(craftPicFileFilter);
+            for (File file : files){
+                file.delete();
+            }
+        }else{
+            return ResponseResult.fail("搜索目录["+pictureCraftPath+"] 不存在,无法搜索ID：["+id+"]进行删除图片");
         }
         return ResponseResult.succ("删除成功");
     }

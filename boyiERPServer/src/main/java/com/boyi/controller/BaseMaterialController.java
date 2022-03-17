@@ -7,18 +7,25 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.fileFilter.CraftPicFileFilter;
+import com.boyi.common.fileFilter.MaterialPicFileFilter;
+import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import com.boyi.service.BaseMaterialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.InputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -35,11 +42,80 @@ import java.util.*;
 @RestController
 @RequestMapping("/baseData/material")
 public class BaseMaterialController extends BaseController {
+    @Value("${picture.craftPath}")
+    private String pictureCraftPath;
+    private final String  picPrefix = "baseDataMaterial-";
 
+    @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)
+    public ResponseResult getPicturesById( String id) {
+        // 根据ID 查询照片的路径和名字
+        File directory = new File(pictureCraftPath);
+        MaterialPicFileFilter craftPicFileFilter = new MaterialPicFileFilter(picPrefix+id);
+        File[] files = directory.listFiles(craftPicFileFilter);
+
+        ArrayList<File> files1 = new ArrayList<>();
+        if(files!=null && files.length != 0){
+            for (int i = 0; i < files.length; i++) {
+                files1.add(files[i]);
+            }
+        }
+
+        Collections.sort(files1, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        ArrayList<String> names = new ArrayList<>();
+        for (int i = 0; i < files1.size(); i++) {
+            File oneFile = files1.get(i);
+            String name = oneFile.getName();
+            names.add(name);
+        }
+        return ResponseResult.succ(names);
+    }
+
+    @RequestMapping(value = "/delPic", method = RequestMethod.GET)
+    public ResponseResult delPic(String fileName) {
+        File delFile = new File(pictureCraftPath, fileName);
+        if(delFile.exists()){
+            delFile.delete();
+        }else{
+            return ResponseResult.fail("文件["+fileName+"] 不存在,无法删除");
+        }
+        return ResponseResult.succ("删除成功");
+    }
+
+    @RequestMapping(value = "/uploadPic", method = RequestMethod.POST)
+    public ResponseResult uploadFile(String id, MultipartFile[] files) {
+        for (int i = 0; i < files.length; i++) {
+            log.info("文件内容:{}",files[i]);
+            MultipartFile file = files[i];
+            try (InputStream fis = file.getInputStream();){
+                String originalFilename = file.getOriginalFilename();
+                String[] split = originalFilename.split("\\.");
+                String suffix = split[split.length - 1];// 获取后缀
+
+                FileUtils.writeFile(fis,pictureCraftPath,picPrefix+id+"_"+System.currentTimeMillis()+"."+suffix);
+            }catch (Exception e){
+
+            }
+        }
+        return ResponseResult.succ("");
+    }
+
+
+
+    /**
+     *  // 用于盘点的物料信息加库存信息
+     * @return
+     */
     @PostMapping("/loadTableSearchMaterialDetailAllWithStock")
     @PreAuthorize("hasAuthority('baseData:material:list')")
     public ResponseResult loadTableSearchMaterialDetailAllWithStock() {
-        List<BaseMaterial> baseMaterials = baseMaterialService.list();
+        QueryWrapper<BaseMaterial> validStatus = new QueryWrapper<BaseMaterial>().isNull(DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDNAME);
+
+        List<BaseMaterial> baseMaterials = baseMaterialService.list(validStatus);
         List<String> ids = new ArrayList<>();
         for (BaseMaterial baseMaterial : baseMaterials) {
             ids.add(baseMaterial.getId());
@@ -71,7 +147,9 @@ public class BaseMaterialController extends BaseController {
     @PostMapping("/loadTableSearchMaterialDetailAll")
     @PreAuthorize("hasAuthority('baseData:material:list')")
     public ResponseResult loadTableSearchMaterialDetailAll() {
-        List<BaseMaterial> baseMaterials = baseMaterialService.list();
+        QueryWrapper<BaseMaterial> validStatus = new QueryWrapper<BaseMaterial>().isNull(DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDNAME);
+
+        List<BaseMaterial> baseMaterials = baseMaterialService.list(validStatus);
 
         ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
         baseMaterials.forEach(obj -> {
@@ -91,10 +169,11 @@ public class BaseMaterialController extends BaseController {
     @PostMapping("/getSearchAllData")
     @PreAuthorize("hasAuthority('baseData:material:list')")
     public ResponseResult getSearchAllData() {
-        List<BaseMaterial> baseSuppliers = baseMaterialService.list();
+        QueryWrapper<BaseMaterial> validStatus = new QueryWrapper<BaseMaterial>().isNull(DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDNAME);
+        List<BaseMaterial> baseMaterials = baseMaterialService.list(validStatus);
 
         ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
-        baseSuppliers.forEach(obj -> {
+        baseMaterials.forEach(obj -> {
             Map<Object, Object> returnMap = MapUtil.builder().put("value", obj.getId() + " : " + obj.getName()).put("id", obj.getId()).put("name", obj.getName())
                     .put("unit", obj.getUnit()).put("bigUnit", obj.getBigUnit()).map();
             returnList.add(returnMap);
@@ -284,6 +363,46 @@ public class BaseMaterialController extends BaseController {
         // 删除物料之后，要删除该物料的库存记录
         repositoryStockService.removeByMaterialId(ids);
 
+        // 删除对应的图片
+        File delFile = new File(pictureCraftPath);
+        List<String> delIds = Arrays.asList(ids);
+
+        if(delFile.exists()&& delFile.isDirectory()){
+            for (String id : delIds){
+                MaterialPicFileFilter craftPicFileFilter = new MaterialPicFileFilter(picPrefix+id);
+                File[] files = delFile.listFiles(craftPicFileFilter);
+                for (File file : files){
+                    file.delete();
+                }
+            }
+
+        }else{
+            return ResponseResult.fail("搜索目录["+pictureCraftPath+"] 不存在,无法搜索IDS：["+picPrefix+delIds.toString()+"]进行删除图片");
+        }
+
         return ResponseResult.succ("删除成功");
+    }
+
+    @PostMapping("/stop")
+    @PreAuthorize("hasAuthority('baseData:material:del')")
+    @Transactional
+    public ResponseResult stop(@RequestBody String id) {
+
+        UpdateWrapper<BaseMaterial> set = new UpdateWrapper<BaseMaterial>().set(
+                DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDNAME,  DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDVALUE_F1)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.ID,id);
+        baseMaterialService.update(set);
+        return ResponseResult.succ("禁用成功");
+    }
+
+    @PostMapping("/startBM")
+    @PreAuthorize("hasAuthority('baseData:material:del')")
+    @Transactional
+    public ResponseResult startBM(@RequestBody String id) {
+        UpdateWrapper<BaseMaterial> set = new UpdateWrapper<BaseMaterial>().set(
+                DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDNAME, DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDVALUE_NULL)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.ID,id);
+        baseMaterialService.update(set);
+        return ResponseResult.succ("启用成功");
     }
 }

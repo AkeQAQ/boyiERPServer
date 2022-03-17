@@ -65,6 +65,12 @@ public class BaseMaterial  {
     private String updateUser;
 
     /**
+     * 修改人
+     */
+    @TableField("status")
+    private Integer status;
+
+    /**
      * 规格型号
      */
     private String specs;

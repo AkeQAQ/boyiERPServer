@@ -152,6 +152,19 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "update_user";
+        public static final String STATUS_FIELDNAME = "status";
+
+
+        /**
+         *  null:代表 启用
+         */
+        public static final Integer STATUS_FIELDVALUE_NULL = null;
+
+        /**
+         *  -1:代表 禁用
+         */
+        public static final Integer STATUS_FIELDVALUE_F1 = -1;
+
 
     }
     public static class TABLE_BASE_SUPPLIER_MATERIAL{
