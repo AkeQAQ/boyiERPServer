@@ -116,6 +116,12 @@ public class BaseController {
     @Autowired
     public BuyMaterialSupplierService buyMaterialSupplierService;
 
+    @Autowired
+    public ProduceProductConstituentService produceProductConstituentService;
+
+    @Autowired
+    public ProduceProductConstituentDetailService produceProductConstituentDetailService;
+
     /**
      * 获取页面
      * @return
