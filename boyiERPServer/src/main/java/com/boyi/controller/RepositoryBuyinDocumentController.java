@@ -304,7 +304,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
      */
     @GetMapping("/queryById")
     @PreAuthorize("hasAuthority('repository:buyIn:list')")
-    public ResponseResult queryById(Long id) {
+    public ResponseResult queryById(Principal principal,Long id) {
         String user = locks.get(id);
         if(StringUtils.isNotBlank(user)){
             return ResponseResult.fail("单据被["+user+"]占用");
@@ -327,12 +327,27 @@ public class RepositoryBuyinDocumentController extends BaseController {
             detail.setUnitRadio(material.getUnitRadio());
             detail.setSpecs(material.getSpecs());
 
+            // 蜘蛛王核算用户，特殊判断
+            BaseSupplierMaterial one = null;
+            BaseSupplierMaterialCopy oneCopy = null;
+            if(principal.getName().equals("林长生.")){
+                // 查询对应的价目记录
+                oneCopy = baseSupplierMaterialCopyService.getSuccessPrice(supplier.getId(),material.getId(),detail.getPriceDate());
+            }else{
+                // 查询对应的价目记录
+                one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),detail.getPriceDate());
 
-            // 查询对应的价目记录
-            BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),detail.getPriceDate());
+            }
 
+            // 蜘蛛王核算用户，特殊判断
             if(one != null){
                 detail.setPrice(one.getPrice());
+//                double amount = detail.getPrice() * detail.getNum();
+//                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+//                totalAmount += amount;
+            }
+            if(oneCopy != null){
+                detail.setPrice(oneCopy.getPrice());
 //                double amount = detail.getPrice() * detail.getNum();
 //                detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 //                totalAmount += amount;
@@ -776,7 +791,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
      */
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('repository:buyIn:list')")
-    public ResponseResult list(String searchField, String searchStartDate, String searchEndDate,
+    public ResponseResult list(Principal principal,String searchField, String searchStartDate, String searchEndDate,
                                String searchStatus,@RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
@@ -854,10 +869,21 @@ public class RepositoryBuyinDocumentController extends BaseController {
         if(searchStatusList.size() == 0){
             return ResponseResult.fail("状态不能为空");
         }
-        pageData = repositoryBuyinDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
-        Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmount(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
-        BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
-        return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
+
+        // 蜘蛛王核算用户，特殊判断
+        // 假如是ZZW核算用户，则查询另外个价目表数据
+        if(principal.getName().equals("林长生.")){
+            pageData = repositoryBuyinDocumentService.innerQueryZZWByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
+            Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmountZZW(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
+            BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
+        }else{
+            pageData = repositoryBuyinDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
+            Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmount(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
+            BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
+        }
+
 
 //        return ResponseResult.succ(pageData);
     }

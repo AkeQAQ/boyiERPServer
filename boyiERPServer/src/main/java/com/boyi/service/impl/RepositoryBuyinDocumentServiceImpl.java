@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseSupplierMaterial;
+import com.boyi.entity.BaseSupplierMaterialCopy;
 import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.RepositoryBuyinDocumentMapper;
 import com.boyi.service.RepositoryBuyinDocumentService;
@@ -32,6 +33,9 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     public Page<RepositoryBuyinDocument> innerQuery(Page page, QueryWrapper<RepositoryBuyinDocument> eq) {
         return repositoryBuyinDocumentMapper.page(page,eq);
     }
+    public Page<RepositoryBuyinDocument> innerQueryZZW(Page page, QueryWrapper<RepositoryBuyinDocument> eq) {
+        return repositoryBuyinDocumentMapper.pageZZW(page,eq);
+    }
 
     @Override
     public RepositoryBuyinDocument one(QueryWrapper<RepositoryBuyinDocument> id) {
@@ -41,6 +45,11 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     @Override
     public Integer getSupplierMaterialPassBetweenDate(BaseSupplierMaterial baseSupplierMaterial){
         return repositoryBuyinDocumentMapper.getSupplierMaterialPassBetweenDate(baseSupplierMaterial);
+    }
+
+    @Override
+    public Integer getSupplierMaterialCopyPassBetweenDate(BaseSupplierMaterialCopy baseSupplierMaterial) {
+        return repositoryBuyinDocumentMapper.getSupplierMaterialCopyPassBetweenDate(baseSupplierMaterial);
     }
 
     @Override
@@ -117,6 +126,47 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     }
 
     @Override
+    public Page<RepositoryBuyinDocument> innerQueryZZWByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String, String> otherSearch) {
+        QueryWrapper<RepositoryBuyinDocument> queryWrapper = new QueryWrapper<>();
+        for (String key : otherSearch.keySet()){
+            if(key.equals("price")){
+                String val = otherSearch.get(key);
+                if(val.isEmpty()){
+                    queryWrapper.isNull("price");
+                }else{
+                    queryWrapper.eq( !val.equals("null"),key,val);
+                }
+            }else{
+                String val = otherSearch.get(key);
+                queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }
+
+        }
+        if(queryField.equals("price")){
+            if(searchStr.isEmpty()){
+                queryWrapper.isNull("price");
+            }else{
+                queryWrapper.
+                        eq(!searchStr.equals("null")
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr);
+            }
+
+        }else{
+            queryWrapper.
+                    like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }
+        return this.innerQueryZZW(page,
+                queryWrapper
+
+                        .ge(StrUtil.isNotBlank(searchStartDate)&& !searchStartDate.equals("null"),DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME,searchStartDate)
+                        .le(StrUtil.isNotBlank(searchEndDate)&& !searchEndDate.equals("null"),DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME,searchEndDate)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDNAME,searchStatus)
+        );
+    }
+
+    @Override
     public Double getAllPageTotalAmount(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String, String> otherSearch) {
         QueryWrapper<RepositoryBuyinDocument> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
@@ -156,6 +206,56 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
         Double sumAmount = 0.0D;
         for (RepositoryBuyinDocument one: list
              ) {
+            if(one.getAmount()==null || one.getAmount() ==0.0D){
+                continue;
+            }
+            sumAmount+=one.getAmount();
+        }
+        return sumAmount;
+    }
+
+
+
+    @Override
+    public Double getAllPageTotalAmountZZW(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String, String> otherSearch) {
+        QueryWrapper<RepositoryBuyinDocument> queryWrapper = new QueryWrapper<>();
+        for (String key : otherSearch.keySet()){
+            if(key.equals("price")){
+                String val = otherSearch.get(key);
+                if(val.isEmpty()){
+                    queryWrapper.isNull("price");
+                }else{
+                    queryWrapper.eq( !val.equals("null"),key,val);
+                }
+            }else{
+                String val = otherSearch.get(key);
+                queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }
+
+        }
+        if(queryField.equals("price")){
+            if(searchStr.isEmpty()){
+                queryWrapper.isNull("price");
+            }else{
+                queryWrapper.
+                        eq(!searchStr.equals("null")
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr);
+            }
+
+        }else{
+            queryWrapper.
+                    like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }
+        queryWrapper
+                .ge(StrUtil.isNotBlank(searchStartDate)&& !searchStartDate.equals("null"),DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME,searchStartDate)
+                .le(StrUtil.isNotBlank(searchEndDate)&& !searchEndDate.equals("null"),DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.BUY_IN_DATE_FIELDNAME,searchEndDate)
+                .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDNAME,searchStatus);
+        List<RepositoryBuyinDocument> list = this.repositoryBuyinDocumentMapper.listZZW(queryWrapper);
+        Double sumAmount = 0.0D;
+        for (RepositoryBuyinDocument one: list
+        ) {
             if(one.getAmount()==null || one.getAmount() ==0.0D){
                 continue;
             }

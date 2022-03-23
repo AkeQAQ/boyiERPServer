@@ -122,6 +122,9 @@ public class BaseController {
     @Autowired
     public ProduceProductConstituentDetailService produceProductConstituentDetailService;
 
+    @Autowired
+    public BaseSupplierMaterialCopyService baseSupplierMaterialCopyService;
+
     /**
      * 获取页面
      * @return
