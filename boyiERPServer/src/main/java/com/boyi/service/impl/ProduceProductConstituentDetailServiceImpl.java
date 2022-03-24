@@ -2,6 +2,7 @@ package com.boyi.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.OrderBuyorderDocumentDetail;
 import com.boyi.entity.ProduceProductConstituentDetail;
 import com.boyi.entity.RepositoryReturnMaterialDetail;
 import com.boyi.mapper.ProduceProductConstituentDetailMapper;
@@ -42,5 +43,11 @@ public class ProduceProductConstituentDetailServiceImpl extends ServiceImpl<Prod
                 new QueryWrapper<ProduceProductConstituentDetail>()
                         .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.CONSTITUENT_ID_FIELDNAME, id));
 
+    }
+
+    @Override
+    public int countByMaterialId(String[] ids) {
+        return this.count(new QueryWrapper<ProduceProductConstituentDetail>()
+                .in(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.MATERIAL_ID_FIELDNAME, ids));
     }
 }

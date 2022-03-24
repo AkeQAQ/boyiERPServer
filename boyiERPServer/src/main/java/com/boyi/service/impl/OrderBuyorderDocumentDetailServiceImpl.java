@@ -6,6 +6,7 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.OrderBuyorderDocument;
 import com.boyi.entity.OrderBuyorderDocumentDetail;
 import com.boyi.entity.OrderBuyorderDocumentDetail;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.OrderBuyorderDocumentDetailMapper;
 import com.boyi.service.OrderBuyorderDocumentDetailService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -45,6 +46,12 @@ public class OrderBuyorderDocumentDetailServiceImpl extends ServiceImpl<OrderBuy
     public int countByMaterialId(String[] ids) {
         return this.count(new QueryWrapper<OrderBuyorderDocumentDetail>()
                 .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public int countBySupplierId(String[] ids) {
+        return this.count(new QueryWrapper<OrderBuyorderDocumentDetail>()
+                .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.SUPPLIER_ID_FIELDNAME, ids));
     }
 
     @Override

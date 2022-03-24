@@ -21,4 +21,7 @@ public interface ProduceProductConstituentDetailService extends IService<Produce
 
     // 根据入库单ID 删除
     boolean removeByDocId(Long id);
+
+    int countByMaterialId(String[] ids);
+
 }

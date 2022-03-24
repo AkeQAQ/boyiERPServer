@@ -235,6 +235,12 @@ public class BaseSupplierController extends BaseController {
             return ResponseResult.fail("请先删除"+count2+"条对应价目记录!");
         }
 
+        //判断采购订单，是否有该物料
+        int orderBuyorderCount = orderBuyorderDocumentDetailService.countBySupplierId(ids);
+        if(orderBuyorderCount > 0){
+            return ResponseResult.fail("请先删除"+orderBuyorderCount+"条对应采购订单信息!");
+        }
+
         baseSupplierService.removeByIds(Arrays.asList(ids));
 
         return ResponseResult.succ("删除成功");

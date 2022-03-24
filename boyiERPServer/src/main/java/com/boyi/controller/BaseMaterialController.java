@@ -358,6 +358,16 @@ public class BaseMaterialController extends BaseController {
             return ResponseResult.fail("请先删除"+count2+"条对应价目记录!");
         }
 
+        //判断采购订单，是否有该物料
+        int orderBuyorderCount = orderBuyorderDocumentDetailService.countByMaterialId(ids);
+        if(orderBuyorderCount > 0){
+            return ResponseResult.fail("请先删除"+orderBuyorderCount+"条对应采购订单信息!");
+        }
+
+        //判断产品组成结构，是否有该物料
+        int produceProductCount = produceProductConstituentDetailService.countByMaterialId(ids);
+
+
         baseMaterialService.removeByIds(Arrays.asList(ids));
 
         // 删除物料之后，要删除该物料的库存记录

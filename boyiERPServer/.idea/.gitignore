@@ -3,4 +3,7 @@
 /workspace.xml
 *.log
 /logs/
+/logs/*
 /target/
+
+*.log.gz
