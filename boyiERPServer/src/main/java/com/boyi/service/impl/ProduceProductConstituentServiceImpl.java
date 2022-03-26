@@ -50,4 +50,15 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
     public Page<ProduceProductConstituent> innerQuery(Page page, QueryWrapper<ProduceProductConstituent> eq) {
         return produceProductConstituentMapper.page(page,eq);
     }
+
+    @Override
+    public ProduceProductConstituent getByNumBrandColor(String productNum, String productBrand, String productColor) {
+        QueryWrapper<ProduceProductConstituent> queryWrapper = new QueryWrapper<>();
+        queryWrapper
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_NUM_FIELDNAME,productNum)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_BRAND_FIELDNAME,productBrand)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_COLOR_FIELDNAME,productColor);
+
+        return this.getOne(queryWrapper);
+    }
 }

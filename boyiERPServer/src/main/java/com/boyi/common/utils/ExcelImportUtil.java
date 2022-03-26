@@ -13,6 +13,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class ExcelImportUtil<T> {
 
@@ -22,6 +23,49 @@ public class ExcelImportUtil<T> {
     public ExcelImportUtil(Class clazz) {
         this.clazz = clazz;
         fields = clazz.getDeclaredFields();
+    }
+
+    /**
+     * 基于注解读取excel
+     */
+    public List<T> readExcel(InputStream is, int rowIndex, int cellIndex, int replaceIndex, Map<Object,Object> replaceMap) {
+        List<T> list = new ArrayList<T>();
+        T entity = null;
+        try {
+            XSSFWorkbook workbook = new XSSFWorkbook(is);
+            Sheet sheet = workbook.getSheetAt(0);
+            // 不准确
+            int rowLength = sheet.getLastRowNum();
+
+            System.out.println(sheet.getLastRowNum());
+            for (int rowNum = rowIndex; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                Row row = sheet.getRow(rowNum);
+                entity = (T) clazz.newInstance();
+                for (int j = cellIndex; j < row.getLastCellNum(); j++) {
+                    Cell cell = row.getCell(j);
+                    for (Field field : fields) {
+                        if(field.isAnnotationPresent(ExcelAttribute.class)){
+                            field.setAccessible(true);
+                            ExcelAttribute ea = field.getAnnotation(ExcelAttribute.class);
+                                if(j == ea.sort()) {
+                                    if(j==replaceIndex) {
+                                        // 该下标要进行内容替换
+                                        String oldVal = getValue(cell);
+                                        Object replaceVal = replaceMap.get(oldVal);
+                                        field.set(entity, replaceVal);
+                                    }else{
+                                        field.set(entity, covertAttrType(field, cell));
+                                    }
+                                }
+                        }
+                    }
+                }
+                list.add(entity);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
     /**

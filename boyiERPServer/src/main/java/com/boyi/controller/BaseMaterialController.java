@@ -262,6 +262,9 @@ public class BaseMaterialController extends BaseController {
         if (list != null && list.size() > 0) {
             return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
         }
+        if(!baseMaterial.getGroupCode().contains(".")){
+            return ResponseResult.fail("一级分组不允许建物料,只允许在二级分组中建立");
+        }
 
         BaseMaterialGroup group = baseMaterialGroupService.getByCode(baseMaterial.getGroupCode());
 

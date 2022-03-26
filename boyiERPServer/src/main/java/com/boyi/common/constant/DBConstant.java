@@ -804,5 +804,69 @@ public class DBConstant {
 
     }
 
+    public static class TABLE_ORDER_PRODUCT_ORDER{
+        public static final Map<Integer,String> statusMap;
+        public static final Map<Integer,String> orderTypeMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+
+            Map<Integer,String> orderTypeMap2 = new HashMap<Integer,String>();
+            orderTypeMap2.put(0,"订单");
+            orderTypeMap2.put(1,"回单");
+            orderTypeMap = orderTypeMap2;
+        }
+        public static final String ORDER_NUM_FIELDNAME = "order_num";
+        public static final String CUSTOMER_NUM_FIELDNAME = "customer_num";
+        public static final String PRODUCT_REGION_FIELDNAME = "product_region";
+        public static final String ORDER_TYPE_FIELDNAME = "order_type";
+        public static final String COMMENT_FIELDNAME = "comment";
+
+
+        public static final String PRODUCT_NUM_FIELDNAME = "product_num";
+        public static final String PRODUCT_BRAND_FIELDNAME = "product_brand";
+        public static final String PRODUCT_COLOR_FIELDNAME = "product_color";
+        public static final String STATUS_FIELDNAME = "status";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+        /**
+         *  0:代表 订单
+         */
+        public static final Integer ORDER_TYPE_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 回单
+         */
+        public static final Integer ORDER_TYPE_FIELDVALUE_1 = 1;
+
+    }
 
 }

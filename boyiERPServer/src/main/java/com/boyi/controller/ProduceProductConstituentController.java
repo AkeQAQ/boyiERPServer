@@ -39,6 +39,65 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ProduceProductConstituentController extends BaseController {
 
+
+
+    /**
+     * 计算用料
+     */
+    @GetMapping("/calNumByBrandNumColor")
+    @PreAuthorize("hasAuthority('produce:productConstituent:list')")
+    @Transactional
+    public ResponseResult calNumById(Principal principal,String productNum,String productBrand,String productColor, Long orderNumber)throws Exception {
+        if(StringUtils.isBlank(productNum) || StringUtils.isBlank(productBrand) ||StringUtils.isBlank(productColor) ){
+            return ResponseResult.fail("公司货号，品牌，颜色不能有空");
+        }
+        try {
+
+            ProduceProductConstituent byNumBrandColor = produceProductConstituentService.getByNumBrandColor(productNum, productBrand, productColor);
+            if(byNumBrandColor == null){
+                return ResponseResult.fail("产品组成结构没有公司货号["+productNum+"],品牌["+productBrand+"],颜色["+productColor+"] 对应的信息");
+            }
+            List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(byNumBrandColor.getId());
+
+            ArrayList<Map<String, Object>> result = new ArrayList<>();
+            // 计算数目 * 每个物料的用量
+            for (ProduceProductConstituentDetail item : details){
+                HashMap<String, Object> calTheMap = new HashMap<>();
+                BaseMaterial material = baseMaterialService.getById(item.getMaterialId());
+                // 查看该物料，最近的供应商价目，
+                List<BaseSupplierMaterial> theSupplierPrices = baseSupplierMaterialService.myList(new QueryWrapper<BaseSupplierMaterial>()
+                        .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, item.getMaterialId())
+                        .gt(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.END_DATE_FIELDNAME, LocalDate.now())
+                );
+                ArrayList<Map<String, Object>> supplierPrices = new ArrayList<>();
+                calTheMap.put("suppliers",supplierPrices);
+                for (BaseSupplierMaterial obj:theSupplierPrices){
+                    HashMap<String, Object> supplierPrice = new HashMap<>();
+                    supplierPrice.put("supplierName",obj.getSupplierName());
+                    supplierPrice.put("price",obj.getPrice());
+                    supplierPrice.put("startDate",obj.getStartDate());
+                    supplierPrice.put("endDate",obj.getEndDate());
+                    supplierPrices.add(supplierPrice);
+                }
+
+                calTheMap.put("materialName",material.getName());
+                double theOneCalNum = Double.valueOf(item.getDosage()) * orderNumber;
+                calTheMap.put("calNum",theOneCalNum);
+                calTheMap.put("materialUnit",material.getUnit());
+
+                result.add(calTheMap);
+            }
+
+            return ResponseResult.succ(result);
+        }
+
+        catch (Exception e) {
+            log.error("产品组成结构单，计算异常",e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
     /**
      * 计算用料
      */
