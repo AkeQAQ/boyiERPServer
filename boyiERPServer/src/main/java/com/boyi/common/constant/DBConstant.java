@@ -839,6 +839,9 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String ID_FIELDNAME = "id";
 
+        public static final String PREPARED_FIELDNAME = "prepared";
+
+
         /**
          *  0:代表 审核通过
          */
@@ -866,6 +869,28 @@ public class DBConstant {
          *  1:代表 回单
          */
         public static final Integer ORDER_TYPE_FIELDVALUE_1 = 1;
+
+        public static final Integer PREPARED_FIELDVALUE_0 = 0;
+        public static final Integer PREPARED_FIELDVALUE_1 = 1;
+
+    }
+
+    public static class TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS{
+        public static final String ORDER_ID_FIELDNAME = "order_id";
+
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String PREPARED_NUM_FIELDNAME = "prepared_num";
+        public static final String IN_NUM_FIELDNAME = "in_num";
+        public static final String CAL_NUM_FIELDNAME = "cal_num";
+        public static final String PROGRESS_PERCENT_NUM_FIELDNAME = "progress_percent";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+        public static final String COMMENT_FIELDNAME = "comment";
 
     }
 

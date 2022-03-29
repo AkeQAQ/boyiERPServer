@@ -79,6 +79,7 @@ public class ProduceProductConstituentController extends BaseController {
                     supplierPrice.put("endDate",obj.getEndDate());
                     supplierPrices.add(supplierPrice);
                 }
+                calTheMap.put("materialId",material.getId());
 
                 calTheMap.put("materialName",material.getName());
                 double theOneCalNum = Double.valueOf(item.getDosage()) * orderNumber;
@@ -199,7 +200,7 @@ public class ProduceProductConstituentController extends BaseController {
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('produce:productConstituent:update')")
     @Transactional
-    public ResponseResult update(Principal principal, @Validated @RequestBody ProduceProductConstituent productConstituent)
+    public ResponseResult update(Principal principal,boolean specialAddFlag, @Validated @RequestBody ProduceProductConstituent productConstituent)
             throws Exception{
 
         if(productConstituent.getRowList() ==null || productConstituent.getRowList().size() ==0){
@@ -208,7 +209,9 @@ public class ProduceProductConstituentController extends BaseController {
 
         productConstituent.setUpdated(LocalDateTime.now());
         productConstituent.setUpdatedUser(principal.getName());
-        productConstituent.setStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDVALUE_2);
+        if(!specialAddFlag){
+            productConstituent.setStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDVALUE_2);
+        }
         try {
 
             //1. 先删除老的，再插入新的
@@ -415,6 +418,23 @@ public class ProduceProductConstituentController extends BaseController {
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
+        // 假如有进度表关联了，不能反审核了。
+        ProduceProductConstituent old = produceProductConstituentService.getById(id);
+        List<OrderProductOrder> orders = orderProductOrderService.getByNumBrandColor(old.getProductNum(),old.getProductBrand(),old.getProductColor());
+        if(orders != null && orders.size() > 0){
+            HashSet<Long> orderIds = new HashSet<>();
+            // 去查询是否有该订单号的进度表
+            for (OrderProductOrder order : orders){
+                orderIds.add(order.getId());
+            }
+            List<ProduceOrderMaterialProgress> processes = produceOrderMaterialProgressService.listByOrderIds(orderIds);
+            if(processes!=null && processes.size() > 0){
+                return ResponseResult.fail("已有物料报备，无法反审核!");
+
+            }
+        }
+
+
         ProduceProductConstituent produceProductConstituent = new ProduceProductConstituent();
         produceProductConstituent.setUpdated(LocalDateTime.now());
         produceProductConstituent.setUpdatedUser(principal.getName());

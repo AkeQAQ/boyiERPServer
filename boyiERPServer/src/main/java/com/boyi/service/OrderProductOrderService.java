@@ -18,6 +18,12 @@ import java.util.Map;
  * @since 2022-03-25
  */
 public interface OrderProductOrderService extends IService<OrderProductOrder> {
-    Page<OrderProductOrder> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, Map<String,String> otherSearch);
+    Page<OrderProductOrder> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String,String> otherSearch);
+
+
+    void updatePrepared(Long orderId, Integer preparedFieldvalue1);
+
+    List<OrderProductOrder> getByNumBrandColor(String productNum, String productBrand, String productColor);
+
 
 }

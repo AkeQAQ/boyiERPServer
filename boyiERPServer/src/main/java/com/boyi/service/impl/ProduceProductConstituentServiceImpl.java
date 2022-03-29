@@ -61,4 +61,18 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
 
         return this.getOne(queryWrapper);
     }
+
+    @Override
+    public ProduceProductConstituent getValidByNumBrandColor(String productNum, String productBrand, String productColor) {
+        QueryWrapper<ProduceProductConstituent> queryWrapper = new QueryWrapper<>();
+        queryWrapper
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_NUM_FIELDNAME,productNum)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_BRAND_FIELDNAME,productBrand)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_COLOR_FIELDNAME,productColor)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDNAME,
+                        DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDVALUE_0)
+        ;
+
+        return this.getOne(queryWrapper);
+    }
 }

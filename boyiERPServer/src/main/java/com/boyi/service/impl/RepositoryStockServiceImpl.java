@@ -33,6 +33,10 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
     @Autowired
     RepositoryStockMapper repositoryStockMapper;
 
+    /**
+     *  采购入库修改时调用
+     * @param needAddMap
+     */
     @Override
     public void addNumByMaterialIdFromMap(Map<String, Double> needAddMap) {
         for(Map.Entry<String,Double> entry : needAddMap.entrySet()){
@@ -65,6 +69,12 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
         }
     }
 
+    /**
+     *  采购订单下推入库调用方法
+     *  采购入库save方法调用
+     * @param materialId
+     * @param num
+     */
     @Override
     public void addNumByMaterialId(String materialId, Double num) {
 
@@ -93,6 +103,11 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
         }
     }
 
+    /**
+     *  采购入库-采购订单来源时，被删除时调用
+     * @param materialId
+     * @param num
+     */
     @Override
     public void subNumByMaterialIdNum(String materialId, Double num) {
         // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
@@ -111,6 +126,12 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
 
     }
 
+    /**
+     *  采购入库，修改时调用
+     *  采购入库，删除时调用
+     * @param needSubMap
+     * @throws Exception
+     */
     @Override
     public void subNumByMaterialId(Map<String, Double> needSubMap)throws Exception {
         for(Map.Entry<String,Double> entry : needSubMap.entrySet()){

@@ -77,6 +77,8 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         for (RepositoryBuyoutDocumentDetail detail : details){
             repositoryStockService.addNumByMaterialId(detail.getMaterialId()
                     ,detail.getRadioNum());
+            // 进度表消单
+//            produceOrderMaterialProgressService.addInNum(detail.getRadioNum(),detail.getMaterialId());
         }
 
         try {
@@ -208,7 +210,18 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             // 4. 减少,添加库存
             repositoryStockService.subNumByMaterialId(needSubMap);
             repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
-
+            // 进度表消单
+            /*for (Map.Entry<String, Double> entries :needSubMap.entrySet()){
+                String materialId = entries.getKey();
+                Double subNum = entries.getValue();
+                produceOrderMaterialProgressService.subInNum(subNum,materialId);
+            }
+            repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
+            for (Map.Entry<String, Double> entries :needAddMap.entrySet()){
+                String materialId = entries.getKey();
+                Double addNum = entries.getValue();
+                produceOrderMaterialProgressService.addInNum(addNum,materialId);
+            }*/
 
             return ResponseResult.succ("编辑成功");
         } catch (Exception e) {
@@ -386,7 +399,13 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             repositoryBuyoutDocumentDetailService.saveBatch(repositoryBuyoutDocument.getRowList());
 
             repositoryStockService.subNumByMaterialId(subMap);
-
+            // 进度表消单
+           /* for (Map.Entry<String, Double> entries :subMap.entrySet()){
+                String materialId = entries.getKey();
+                Double subNum = entries.getValue();
+                produceOrderMaterialProgressService.subInNum(subNum,materialId);
+            }
+*/
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",repositoryBuyoutDocument.getId());
         } catch (Exception e) {
             log.error("采购退料单，插入异常",e);

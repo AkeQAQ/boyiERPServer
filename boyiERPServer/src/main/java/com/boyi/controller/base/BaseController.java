@@ -128,6 +128,9 @@ public class BaseController {
     @Autowired
     public OrderProductOrderService orderProductOrderService;
 
+    @Autowired
+    public ProduceOrderMaterialProgressService produceOrderMaterialProgressService;
+
     /**
      * 获取页面
      * @return

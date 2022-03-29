@@ -21,5 +21,7 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
     Page<ProduceProductConstituent> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr,  List<Long> searchStatus, Map<String,String> otherSearch);
     Page<ProduceProductConstituent> innerQuery(Page page, QueryWrapper<ProduceProductConstituent> like);
     ProduceProductConstituent getByNumBrandColor(String productNum,String productBrand,String productColor);
+    ProduceProductConstituent getValidByNumBrandColor(String productNum,String productBrand,String productColor);
+
 
 }

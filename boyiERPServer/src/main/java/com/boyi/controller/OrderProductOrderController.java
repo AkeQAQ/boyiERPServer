@@ -51,6 +51,104 @@ public class OrderProductOrderController extends BaseController {
         replaceMap.put("回单",1);
     }
 
+    @Transactional
+    @PostMapping("preparedSuccess")
+    @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    public ResponseResult preparedSuccess(Long id) throws Exception{
+        try {
+
+            orderProductOrderService.updatePrepared(id,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_0);
+            return ResponseResult.succ("备料完成!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+    @Transactional
+    @PostMapping("preparedNotSuccess")
+    @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    public ResponseResult preparedNotSuccess(Long id) throws Exception{
+        try {
+
+            orderProductOrderService.updatePrepared(id,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
+            return ResponseResult.succ("备料解除完成!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+    /***
+     * 根据订单，获取订单，产品组成，用料，进度表信息
+     * @param principal
+     * @param orderId
+     * @return
+     * @throws Exception
+     */
+
+    @GetMapping("/listOrderConstituentProgress")
+    public ResponseResult getByOrderId(Principal principal, Long orderId)throws Exception {
+        OrderProductOrder order = orderProductOrderService.getById(orderId);
+        ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(order.getProductNum(), order.getProductBrand(), order.getProductColor());
+        if(theConstituent==null){
+            return ResponseResult.fail("没有审核通过的产品组成结构信息，请确认!");
+        }
+        List<ProduceProductConstituentDetail> theConsitituentDetails = produceProductConstituentDetailService.listByForeignId(theConstituent.getId());
+
+        List<ProduceOrderMaterialProgress> theProgress = produceOrderMaterialProgressService.listByOrderId(order.getId());
+        HashMap<String, ProduceOrderMaterialProgress> theMaterialIdAndProgress = new HashMap<>();
+
+        if(theProgress!=null && theProgress.size()>0){
+            for (ProduceOrderMaterialProgress progress : theProgress){
+                theMaterialIdAndProgress.put(progress.getMaterialId(),progress);
+            }
+        }
+
+        String orderNumber = order.getOrderNumber();
+        ArrayList<Map<String, Object>> result = new ArrayList<>();
+        // 计算数目 * 每个物料的用量
+        for (ProduceProductConstituentDetail item : theConsitituentDetails){
+            HashMap<String, Object> calTheMap = new HashMap<>();
+            BaseMaterial material = baseMaterialService.getById(item.getMaterialId());
+           /* // 查看该物料，最近的供应商价目，
+            List<BaseSupplierMaterial> theSupplierPrices = baseSupplierMaterialService.myList(new QueryWrapper<BaseSupplierMaterial>()
+                    .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, item.getMaterialId())
+                    .gt(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.END_DATE_FIELDNAME, LocalDate.now())
+            );
+            ArrayList<Map<String, Object>> supplierPrices = new ArrayList<>();
+            calTheMap.put("suppliers",supplierPrices);
+            for (BaseSupplierMaterial obj:theSupplierPrices){
+                HashMap<String, Object> supplierPrice = new HashMap<>();
+                supplierPrice.put("supplierName",obj.getSupplierName());
+                supplierPrice.put("price",obj.getPrice());
+                supplierPrice.put("startDate",obj.getStartDate());
+                supplierPrice.put("endDate",obj.getEndDate());
+                supplierPrices.add(supplierPrice);
+            }*/
+            calTheMap.put("orderNumber",orderNumber);
+            calTheMap.put("dosage",item.getDosage());
+            calTheMap.put("materialId",material.getId());
+            calTheMap.put("materialName",material.getName());
+            ProduceOrderMaterialProgress dbProgress = theMaterialIdAndProgress.get(material.getId());
+
+            calTheMap.put("calNum",dbProgress == null|| dbProgress.getCalNum()==null || dbProgress.getCalNum().isEmpty() ?Double.valueOf(item.getDosage()) * Double.valueOf(orderNumber) : dbProgress.getCalNum());
+            calTheMap.put("materialUnit",material.getUnit());
+            calTheMap.put("preparedNum",dbProgress==null?0:dbProgress.getPreparedNum());
+            calTheMap.put("comment",dbProgress==null?"":dbProgress.getComment());
+            calTheMap.put("addNum",0);
+            calTheMap.put("prepared",order.getPrepared());
+            double thePercent = Double.valueOf(calTheMap.get("preparedNum").toString())*100 / Double.valueOf(calTheMap.get("calNum").toString());
+            if(thePercent > 100){
+                thePercent = 100;
+            }
+            calTheMap.put("progressPercent",(int)thePercent);
+
+            result.add(calTheMap);
+        }
+
+        return ResponseResult.succ(result);
+    }
+
     /**
      * 上传
      */
@@ -79,6 +177,7 @@ public class OrderProductOrderController extends BaseController {
                 order.setCreatedUser(principal.getName());
                 order.setUpdatedUser(principal.getName());
                 order.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_1);
+                order.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
                 ids.add(order.getOrderNum());
             }
             List<OrderProductOrder> exist = orderProductOrderService.list(new QueryWrapper<OrderProductOrder>()
@@ -186,6 +285,7 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrder.setCreatedUser(principal.getName());
         orderProductOrder.setUpdatedUser(principal.getName());
         orderProductOrder.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_2);
+        orderProductOrder.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
         try {
 
             orderProductOrderService.save(orderProductOrder);
@@ -205,7 +305,7 @@ public class OrderProductOrderController extends BaseController {
      */
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('order:productOrder:list')")
-    public ResponseResult list( String searchField, String searchStatus,
+    public ResponseResult list( String searchField, String searchStatus, String searchStatus2,
                                 @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -258,7 +358,18 @@ public class OrderProductOrderController extends BaseController {
         if(searchStatusList.size() == 0){
             return ResponseResult.fail("状态不能为空");
         }
-        pageData = orderProductOrderService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
+        List<Long> searchStatusList2 = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus2)){
+            String[] split = searchStatus2.split(",");
+            for (String statusVal : split){
+                searchStatusList2.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList2.size() == 0){
+            return ResponseResult.fail("备料状态不能为空");
+        }
+
+        pageData = orderProductOrderService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap);
 
         return ResponseResult.succ(pageData);
     }
@@ -338,6 +449,11 @@ public class OrderProductOrderController extends BaseController {
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('order:productOrder:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
+        // 假如有进度表关联了，不能反审核了。
+        List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderId(id);
+        if(progresses!=null && progresses.size() > 0){
+            return ResponseResult.fail("已有物料报备，无法反审核!");
+        }
         OrderProductOrder orderProductOrder = new OrderProductOrder();
         orderProductOrder.setUpdated(LocalDateTime.now());
         orderProductOrder.setUpdatedUser(principal.getName());

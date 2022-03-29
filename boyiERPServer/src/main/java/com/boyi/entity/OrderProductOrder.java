@@ -80,5 +80,8 @@ public class OrderProductOrder extends BaseEntity {
 
     private String updatedUser;
 
+    private Integer prepared;
+
+
 
 }
