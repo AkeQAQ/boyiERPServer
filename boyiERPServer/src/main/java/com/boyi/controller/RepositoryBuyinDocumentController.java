@@ -435,13 +435,13 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                 // 4. 减少,添加库存
                 repositoryStockService.subNumByMaterialId(needSubMap);
+                repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
                 // 进度表消单
                /* for (Map.Entry<String, Double> entries :needSubMap.entrySet()){
                     String materialId = entries.getKey();
                     Double subNum = entries.getValue();
                     produceOrderMaterialProgressService.subInNum(subNum,materialId);
                 }
-                repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
                 for (Map.Entry<String, Double> entries :needAddMap.entrySet()){
                     String materialId = entries.getKey();
                     Double addNum = entries.getValue();

@@ -216,7 +216,6 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                 Double subNum = entries.getValue();
                 produceOrderMaterialProgressService.subInNum(subNum,materialId);
             }
-            repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
             for (Map.Entry<String, Double> entries :needAddMap.entrySet()){
                 String materialId = entries.getKey();
                 Double addNum = entries.getValue();
@@ -689,14 +688,6 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         repositoryBuyoutDocumentService.updateById(repositoryBuyoutDocument);
         log.info("仓库模块-反审核通过内容:{}",repositoryBuyoutDocument);
 
-      /*  // 采购退料反审核之后，要把数量更新
-
-        // 1. 根据单据ID 获取该单据的全部详情信息，
-        List<RepositoryBuyoutDocumentDetail> details = repositoryBuyoutDocumentDetailService.listByDocumentId(id);
-        // 2. 遍历更新 一个物料对应的库存数量
-        for (RepositoryBuyoutDocumentDetail detail: details){
-            repositoryStockService.addNumByMaterialId(detail.getMaterialId(),detail.getNum());
-        }*/
 
         return ResponseResult.succ("反审核成功");
     }
