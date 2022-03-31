@@ -43,6 +43,9 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
 
+    @Value("${boyi.isStartMaterialProgress}")
+    private boolean isStartMaterialProgress;
+
     /**
      * 锁单据
      */
@@ -78,7 +81,9 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             repositoryStockService.addNumByMaterialId(detail.getMaterialId()
                     ,detail.getRadioNum());
             // 进度表消单
-//            produceOrderMaterialProgressService.addInNum(detail.getRadioNum(),detail.getMaterialId());
+            if(isStartMaterialProgress){
+                produceOrderMaterialProgressService.addInNum(detail.getRadioNum(),detail.getMaterialId());
+            }
         }
 
         try {
@@ -211,16 +216,19 @@ public class RepositoryBuyoutDocumentController extends BaseController {
             repositoryStockService.subNumByMaterialId(needSubMap);
             repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
             // 进度表消单
-            /*for (Map.Entry<String, Double> entries :needSubMap.entrySet()){
-                String materialId = entries.getKey();
-                Double subNum = entries.getValue();
-                produceOrderMaterialProgressService.subInNum(subNum,materialId);
+            if(isStartMaterialProgress){
+                for (Map.Entry<String, Double> entries :needSubMap.entrySet()){
+                    String materialId = entries.getKey();
+                    Double subNum = entries.getValue();
+                    produceOrderMaterialProgressService.subInNum(subNum,materialId);
+                }
+                for (Map.Entry<String, Double> entries :needAddMap.entrySet()){
+                    String materialId = entries.getKey();
+                    Double addNum = entries.getValue();
+                    produceOrderMaterialProgressService.addInNum(addNum,materialId);
+                }
             }
-            for (Map.Entry<String, Double> entries :needAddMap.entrySet()){
-                String materialId = entries.getKey();
-                Double addNum = entries.getValue();
-                produceOrderMaterialProgressService.addInNum(addNum,materialId);
-            }*/
+
 
             return ResponseResult.succ("编辑成功");
         } catch (Exception e) {
@@ -399,12 +407,16 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
             repositoryStockService.subNumByMaterialId(subMap);
             // 进度表消单
-           /* for (Map.Entry<String, Double> entries :subMap.entrySet()){
-                String materialId = entries.getKey();
-                Double subNum = entries.getValue();
-                produceOrderMaterialProgressService.subInNum(subNum,materialId);
+            if(isStartMaterialProgress){
+                for (Map.Entry<String, Double> entries :subMap.entrySet()){
+                    String materialId = entries.getKey();
+                    Double subNum = entries.getValue();
+                    produceOrderMaterialProgressService.subInNum(subNum,materialId);
+
+                }
             }
-*/
+
+
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",repositoryBuyoutDocument.getId());
         } catch (Exception e) {
             log.error("采购退料单，插入异常",e);

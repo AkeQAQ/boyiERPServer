@@ -15,7 +15,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -29,6 +31,8 @@ import java.util.Map;
  */
 @Service
 public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPickMaterialMapper, RepositoryPickMaterial> implements RepositoryPickMaterialService {
+    private SimpleDateFormat sdf_yy = new SimpleDateFormat("yy");
+
     @Autowired
     RepositoryPickMaterialMapper repositoryPickMaterialMapper;
     public Page<RepositoryPickMaterial> innerQuery(Page page, QueryWrapper<RepositoryPickMaterial> eq) {
@@ -85,6 +89,19 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
                 .le(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME, closeDate)
                 .ne(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDNAME,
                         DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_0));
+    }
+
+    // 查看备注的内容，ID!=自己的，ID> 当年年份+月份+日+0000，并且comment!=''并且comment =当前comment内容，存在则不允许创建
+    @Override
+    public List<RepositoryPickMaterial> getSameComment(Long id ,String comment) {
+        Date today = new Date();
+        String year = sdf_yy.format(today);
+
+        return this.list(new QueryWrapper<RepositoryPickMaterial>()
+                        .ne(id!=null,DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.ID_FIELDNAME,id)
+                .gt(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.ID_FIELDNAME,Long.valueOf(year+"01010000"))
+                .ne(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.COMMENT_FIELDNAME,"")
+                .eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.COMMENT_FIELDNAME,comment));
     }
 
 }

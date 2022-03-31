@@ -1,0 +1,51 @@
+package com.boyi.service;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.OrderProductOrder;
+import com.boyi.entity.ProduceOrderMaterialProgress;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.boyi.entity.RepositoryBuyinDocument;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * <p>
+ *  服务类
+ * </p>
+ *
+ * @author sunke
+ * @since 2022-03-26
+ */
+@Repository
+public interface ProduceOrderMaterialProgressService extends IService<ProduceOrderMaterialProgress> {
+
+    Page<ProduceOrderMaterialProgress> complementInnerQueryByManySearch(Page page, String searchField, String queryField, String searchStr,  Map<String,String> otherSearch);
+
+    List<ProduceOrderMaterialProgress> listByOrderId(Long orderId);
+    List<ProduceOrderMaterialProgress> listByOrderIds(Set<Long> orderIds);
+
+    ProduceOrderMaterialProgress getByOrderIdAndMaterialId(Long orderId, String materialId);
+
+    boolean isPreparedByOrderId(Long orderId);
+
+    Page<ProduceOrderMaterialProgress> innerQuery(Page page, QueryWrapper<ProduceOrderMaterialProgress> like);
+
+    Page<ProduceOrderMaterialProgress> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String,String> otherSearch);
+
+
+    List<ProduceOrderMaterialProgress> listByMaterialIdCreatedAscNotOver(String materialId);
+
+    void updateInNum(Long id, String afterNum);
+
+    // 查询进度表的该物料信息，从创建时间从远到近，报备数量>已入库数量的。
+
+    void addInNum(Double xiaodanNum, String materialId);
+
+    void subInNum(Double subNum, String materialId);
+
+    List<ProduceOrderMaterialProgress> listByMaterialIdCreatedDescHasInNum(String materialId);
+}

@@ -382,6 +382,8 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String COMMENT_FIELDNAME = "comment";
+
 
         /**
          *  0:代表 审核通过

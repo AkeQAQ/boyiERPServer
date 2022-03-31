@@ -310,8 +310,8 @@ public class ProduceProductConstituentController extends BaseController {
                 String oneStr = theOneSearch.get("searchStr");
                 String theQueryField = null;
                 if (StringUtils.isNotBlank(oneField)) {
-                    if (searchField.equals("productNum")) {
-                        queryField = "product_num";
+                    if (oneField.equals("productNum")) {
+                        theQueryField = "product_num";
                     }
                     else if (oneField.equals("productBrand")) {
                         theQueryField = "product_brand";

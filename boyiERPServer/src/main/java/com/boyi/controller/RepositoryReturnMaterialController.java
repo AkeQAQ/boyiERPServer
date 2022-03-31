@@ -412,8 +412,8 @@ public class RepositoryReturnMaterialController extends BaseController {
                 String oneStr = theOneSearch.get("searchStr");
                 String theQueryField = null;
                 if (StringUtils.isNotBlank(oneField)) {
-                    if (searchField.equals("departmentName")) {
-                        queryField = "department_name";
+                    if (oneField.equals("departmentName")) {
+                        theQueryField = "department_name";
                     }
                     else if (oneField.equals("materialName")) {
                         theQueryField = "material_name";
@@ -616,8 +616,8 @@ public class RepositoryReturnMaterialController extends BaseController {
                 String oneStr = theOneSearch.get("searchStr");
                 String theQueryField = null;
                 if (StringUtils.isNotBlank(oneField)) {
-                    if (searchField.equals("departmentName")) {
-                        queryField = "department_name";
+                    if (oneField.equals("departmentName")) {
+                        theQueryField = "department_name";
                     }
                     else if (oneField.equals("materialName")) {
                         theQueryField = "material_name";

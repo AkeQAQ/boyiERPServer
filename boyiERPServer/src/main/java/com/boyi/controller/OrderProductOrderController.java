@@ -334,7 +334,7 @@ public class OrderProductOrderController extends BaseController {
                 String theQueryField = null;
                 if (StringUtils.isNotBlank(oneField)) {
                     if (searchField.equals("productNum")) {
-                        queryField = "product_num";
+                        theQueryField = "product_num";
                     }
                     else if (oneField.equals("productBrand")) {
                         theQueryField = "product_brand";

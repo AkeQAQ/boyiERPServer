@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -52,6 +53,8 @@ public class RepositoryPickMaterialController extends BaseController {
 
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
+
+
 
     /**
      * 锁单据
@@ -375,6 +378,10 @@ public class RepositoryPickMaterialController extends BaseController {
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
+            List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameComment(repositoryPickMaterial.getId(),repositoryPickMaterial.getComment());
+            if(pickM!=null && pickM.size()>0){
+                return ResponseResult.fail("备注内容不能重复!.");
+            }
 
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
@@ -545,6 +552,11 @@ public class RepositoryPickMaterialController extends BaseController {
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
 
+            // 查看备注的内容，ID> 当年年份+月份+日+0000，并且comment!=''并且comment =当前comment内容，存在则不允许创建
+            List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameComment(null,repositoryPickMaterial.getComment());
+            if(pickM!=null && pickM.size()>0){
+                return ResponseResult.fail("备注内容不能重复!.");
+            }
             Map<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
             // 1. 遍历获取一个物料要减少的数目。
             for (RepositoryPickMaterialDetail detail : repositoryPickMaterial.getRowList()) {
@@ -620,8 +632,8 @@ public class RepositoryPickMaterialController extends BaseController {
                 String oneStr = theOneSearch.get("searchStr");
                 String theQueryField = null;
                 if (StringUtils.isNotBlank(oneField)) {
-                    if (searchField.equals("departmentName")) {
-                        queryField = "department_name";
+                    if (oneField.equals("departmentName")) {
+                        theQueryField = "department_name";
                     }
                     else if (oneField.equals("materialName")) {
                         theQueryField = "material_name";
@@ -711,8 +723,8 @@ public class RepositoryPickMaterialController extends BaseController {
                 String oneStr = theOneSearch.get("searchStr");
                 String theQueryField = null;
                 if (StringUtils.isNotBlank(oneField)) {
-                    if (searchField.equals("departmentName")) {
-                        queryField = "department_name";
+                    if (oneField.equals("departmentName")) {
+                        theQueryField = "department_name";
                     }
                     else if (oneField.equals("materialName")) {
                         theQueryField = "material_name";

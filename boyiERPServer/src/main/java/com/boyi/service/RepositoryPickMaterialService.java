@@ -31,4 +31,6 @@ public interface RepositoryPickMaterialService extends IService<RepositoryPickMa
     Double countByDepartmentIdMaterialId(Long departmentId, String materialId);
 
     List<RepositoryPickMaterial> countLTByCloseDate(LocalDate closeDate);
+
+    List<RepositoryPickMaterial> getSameComment(Long id,String comment);
 }

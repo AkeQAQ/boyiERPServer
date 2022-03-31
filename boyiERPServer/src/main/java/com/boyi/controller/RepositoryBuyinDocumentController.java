@@ -53,6 +53,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
     public static final Map<Long,String> locks = new ConcurrentHashMap<Long,String>();
 
 
+    @Value("${boyi.isStartMaterialProgress}")
+    private boolean isStartMaterialProgress;
+
+
     /**
      * 一键采购订单领料
      */
@@ -272,11 +276,13 @@ public class RepositoryBuyinDocumentController extends BaseController {
         repositoryStockService.subNumByMaterialId(subMap);
 
         // 进度表消单
-        /*for (Map.Entry<String, Double> entries :subMap.entrySet()){
-            String materialId = entries.getKey();
-            Double subNum = entries.getValue();
-            produceOrderMaterialProgressService.subInNum(subNum,materialId);
-        }*/
+        if(isStartMaterialProgress){
+            for (Map.Entry<String, Double> entries :subMap.entrySet()){
+                String materialId = entries.getKey();
+                Double subNum = entries.getValue();
+                produceOrderMaterialProgressService.subInNum(subNum,materialId);
+            }
+        }
 
         boolean flag = repositoryBuyinDocumentService.removeByIds(Arrays.asList(ids));
 
@@ -437,17 +443,19 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 repositoryStockService.subNumByMaterialId(needSubMap);
                 repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
                 // 进度表消单
-               /* for (Map.Entry<String, Double> entries :needSubMap.entrySet()){
-                    String materialId = entries.getKey();
-                    Double subNum = entries.getValue();
-                    produceOrderMaterialProgressService.subInNum(subNum,materialId);
+                if(isStartMaterialProgress){
+                    for (Map.Entry<String, Double> entries :needSubMap.entrySet()){
+                        String materialId = entries.getKey();
+                        Double subNum = entries.getValue();
+                        produceOrderMaterialProgressService.subInNum(subNum,materialId);
+                    }
+                    for (Map.Entry<String, Double> entries :needAddMap.entrySet()){
+                        String materialId = entries.getKey();
+                        Double addNum = entries.getValue();
+                        produceOrderMaterialProgressService.addInNum(addNum,materialId);
+                    }
                 }
-                for (Map.Entry<String, Double> entries :needAddMap.entrySet()){
-                    String materialId = entries.getKey();
-                    Double addNum = entries.getValue();
-                    produceOrderMaterialProgressService.addInNum(addNum,materialId);
-                }
-*/
+
                 log.info("采购入库模块-更新内容:{}",repositoryBuyinDocument);
             }else{
                 // 假如是采购订单来源的，需要删除对应记录
@@ -709,11 +717,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
             for (RepositoryBuyinDocumentDetail detail : repositoryBuyinDocument.getRowList()){
                 repositoryStockService.addNumByMaterialId(detail.getMaterialId()
                         ,detail.getRadioNum());
-                Double xiaodanNum = detail.getRadioNum();
 
                 // 进度表消单
                 // 目前暂不考虑采购订单的物料，只考虑仓库这边报出去的物料 进度表消单
-//                produceOrderMaterialProgressService.addInNum(xiaodanNum,detail.getMaterialId());
+                if(isStartMaterialProgress){
+                    produceOrderMaterialProgressService.addInNum(detail.getRadioNum(),detail.getMaterialId());
+                }
 
             }
 
@@ -776,8 +785,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     }else if (oneField.equals("id")) {
                         theQueryField = "id";
                     }
-                    else if (searchField.equals("supplierDocNum")) {
-                        queryField = "supplier_document_num";
+                    else if (oneField.equals("supplierDocNum")) {
+                        theQueryField = "supplier_document_num";
 
                     }
                     else {
@@ -869,12 +878,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     }else if (oneField.equals("id")) {
                         theQueryField = "id";
                     }
-                    else if (searchField.equals("supplierDocNum")) {
-                        queryField = "supplier_document_num";
+                    else if (oneField.equals("supplierDocNum")) {
+                        theQueryField = "supplier_document_num";
 
                     }
-                    else if (searchField.equals("price")) {
-                        queryField = "price";
+                    else if (oneField.equals("price")) {
+                        theQueryField = "price";
 
                     }
                     else {
