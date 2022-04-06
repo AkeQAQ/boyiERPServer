@@ -40,7 +40,7 @@ public class SaticScheduleTask {
     @Autowired
     private RepositoryStockHistoryService repositoryStockHistoryService;
 
-    private Long heartInterval = 20000L;
+    private Long heartInterval = 30000L;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
     private Set<String> tables = new HashSet<>();
@@ -54,7 +54,7 @@ public class SaticScheduleTask {
     }
 
     // 心跳检测
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     private void validOnline() {
         Set<String> removeSets = new HashSet<>();
         for(Map.Entry<String,Long> entry:HeartController.onlineMap.entrySet()){

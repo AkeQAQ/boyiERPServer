@@ -6,6 +6,9 @@ import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * <p>
  * 
@@ -77,6 +80,9 @@ public class ProduceOrderMaterialProgress extends BaseEntity {
     @TableField(exist = false)
     private String addNum;
 
+    @TableField(exist = false) // 批量备料用
+    private String addNums;
+
     @TableField(exist = false)
     private String orderNumber;
     /**
@@ -85,5 +91,10 @@ public class ProduceOrderMaterialProgress extends BaseEntity {
     @TableField(exist = false)
     private String materialName;
 
+    /**
+     *  批量备料接受参数用
+     */
+    @TableField(exist = false)
+    private List<Map<String,Object>> details;
 
 }

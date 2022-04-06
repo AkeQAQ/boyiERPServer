@@ -7,16 +7,13 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.OrderBuyorderDocument;
-import com.boyi.entity.OrderBuyorderDocument;
-import com.boyi.entity.RepositoryBuyinDocument;
-import com.boyi.mapper.OrderBuyorderDocumentMapper;
 import com.boyi.mapper.OrderBuyorderDocumentMapper;
 import com.boyi.service.OrderBuyorderDocumentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,7 +53,7 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
     }
 
     @Override
-    public Page<OrderBuyorderDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String, String> otherSearch,Object[] searchDocNum) {
+    public Page<OrderBuyorderDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, String searchStartDate, String searchEndDate, Map<String, String> otherSearch, Object[] searchDocNum) {
         QueryWrapper<OrderBuyorderDocument> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
             if(key.equals("price")){
@@ -90,6 +87,7 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
 
         return this.innerQuery(page,
                 queryWrapper
+                        .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.DETAIL_STATUS_FIELDNAME,searchStatus)
                         .ge(StrUtil.isNotBlank(searchStartDate)  &&!searchStartDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate)  &&!searchEndDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchEndDate)
                         .in(searchDocNum!=null && searchDocNum.length != 0,DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,searchDocNum)

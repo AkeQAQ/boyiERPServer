@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
-import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.boyi.mapper.ProduceOrderMaterialProgressComplementMapper;
 import com.boyi.mapper.ProduceOrderMaterialProgressMapper;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -210,6 +208,15 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
     @Override
     public List<ProduceOrderMaterialProgress> listByMaterialIdCreatedDescHasInNum(String materialId) {
         return this.produceOrderMaterialProgressMapper.listByMaterialIdCreatedDescHasInNum(materialId);
+    }
+
+    @Override
+    public List<ProduceOrderMaterialProgress> listByOrderIdsAndMaterialId(Long[] orderIds, String materialId) {
+
+        return this.list(new QueryWrapper<ProduceOrderMaterialProgress>()
+                .in(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ORDER_ID_FIELDNAME,orderIds)
+                .eq(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.MATERIAL_ID_FIELDNAME,materialId)
+                .orderByAsc(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ORDER_ID_FIELDNAME));
     }
 
 }

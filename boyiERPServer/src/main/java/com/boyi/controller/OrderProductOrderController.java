@@ -52,10 +52,48 @@ public class OrderProductOrderController extends BaseController {
     }
 
     @Transactional
-    @PostMapping("preparedSuccess")
+    @PostMapping("prepareNotSure")
     @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    public ResponseResult prepareNotSure(Long id) throws Exception{
+        try {
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            if(!old.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_2)){
+                return ResponseResult.fail("备料状态不对，已修改，请刷新!");
+            }
+            orderProductOrderService.updatePrepared(id,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
+            return ResponseResult.succ("备料取消确认成功!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+    @Transactional
+    @PostMapping("prepareSure")
+    @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    public ResponseResult prepareSure(Long id) throws Exception{
+        try {
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            if(!old.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1)){
+                return ResponseResult.fail("备料状态不对，已修改，请刷新!");
+            }
+            orderProductOrderService.updatePrepared(id,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_2);
+            return ResponseResult.succ("备料确认完成!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+    @Transactional
+    @PostMapping("preparedSuccess")
+    @PreAuthorize("hasAuthority('order:productOrder:prepareDone')")
     public ResponseResult preparedSuccess(Long id) throws Exception{
         try {
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            if(!old.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_2)){
+                return ResponseResult.fail("备料状态不对，已修改，请刷新!");
+            }
 
             orderProductOrderService.updatePrepared(id,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_0);
             return ResponseResult.succ("备料完成!");
@@ -66,11 +104,24 @@ public class OrderProductOrderController extends BaseController {
     }
     @Transactional
     @PostMapping("preparedNotSuccess")
-    @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    @PreAuthorize("hasAuthority('order:productOrder:prepareDone')")
     public ResponseResult preparedNotSuccess(Long id) throws Exception{
         try {
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            if(!old.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_0)){
+                return ResponseResult.fail("备料状态不对，已修改，请刷新!");
+            }
+            // 假如有入库的，就不能反
+            List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderId(id);
+            if(progresses != null && progresses.size() > 0){
+                for (ProduceOrderMaterialProgress progress : progresses){
+                    if(Double.valueOf(progress.getInNum()) > 0.0){
+                        return ResponseResult.fail("物料["+progress.getMaterialId()+"],已经存在入库的消单记录,不能解除!");
+                    }
+                }
+            }
 
-            orderProductOrderService.updatePrepared(id,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
+            orderProductOrderService.updatePrepared(id,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_2);
             return ResponseResult.succ("备料解除完成!");
         }catch (Exception e){
             log.error("报错.",e);
@@ -87,7 +138,7 @@ public class OrderProductOrderController extends BaseController {
      */
 
     @GetMapping("/listOrderConstituentProgress")
-    public ResponseResult getByOrderId(Principal principal, Long orderId)throws Exception {
+    public ResponseResult listOrderConstituentProgress(Principal principal, Long orderId)throws Exception {
         OrderProductOrder order = orderProductOrderService.getById(orderId);
         ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(order.getProductNum(), order.getProductBrand(), order.getProductColor());
         if(theConstituent==null){
@@ -131,7 +182,7 @@ public class OrderProductOrderController extends BaseController {
             calTheMap.put("materialName",material.getName());
             ProduceOrderMaterialProgress dbProgress = theMaterialIdAndProgress.get(material.getId());
 
-            calTheMap.put("calNum",dbProgress == null|| dbProgress.getCalNum()==null || dbProgress.getCalNum().isEmpty() ?Double.valueOf(item.getDosage()) * Double.valueOf(orderNumber) : dbProgress.getCalNum());
+            calTheMap.put("calNum",dbProgress == null|| dbProgress.getCalNum()==null || dbProgress.getCalNum().isEmpty() ? BigDecimalUtil.mul(item.getDosage(),orderNumber).doubleValue() : dbProgress.getCalNum());
             calTheMap.put("materialUnit",material.getUnit());
             calTheMap.put("preparedNum",dbProgress==null?0:dbProgress.getPreparedNum());
             calTheMap.put("comment",dbProgress==null?"":dbProgress.getComment());
@@ -147,6 +198,114 @@ public class OrderProductOrderController extends BaseController {
         }
 
         return ResponseResult.succ(result);
+    }
+
+    /***
+     * 根据批量订单，获取订单，产品组成，用料，进度表信息
+     * @param principal
+     * @return
+     * @throws Exception
+     */
+
+    @PostMapping("/listBatchOrderConstituentProgress")
+    public ResponseResult listBatchOrderConstituentProgress(Principal principal, @RequestBody Long[] ids)throws Exception {
+
+        boolean canBatchPrepareFlag = true;
+        List<OrderProductOrder> ods = orderProductOrderService.listByIds(Arrays.asList(ids));
+        for (OrderProductOrder obj : ods){
+            if(!obj.getStatus().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0)){
+                return ResponseResult.fail("订单号["+obj.getOrderNum()+"]没有审核通过");
+            }
+            if(!obj.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1)){
+                canBatchPrepareFlag=false;
+            }
+        }
+
+        // 查看是否该些订单存在对应审核通过的产品组成结构
+        List<OrderProductOrder> listsGroupProductNumBrandColors= orderProductOrderService.listProductNumBrandColor(Arrays.asList(ids));
+        if(listsGroupProductNumBrandColors==null || listsGroupProductNumBrandColors.isEmpty()){
+            return ResponseResult.fail("所选订单全没有产品组成结构!");
+        }
+        for (OrderProductOrder obj : listsGroupProductNumBrandColors){
+            ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(obj.getProductNum(), obj.getProductBrand(), obj.getProductColor());
+            if(theConstituent == null){
+                return ResponseResult.fail("公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"],颜色["+obj.getProductColor()+"]没有审核通过的产品组成结构");
+            }
+        }
+
+        // 1. 根据批量订单ID，获取订单的组成信息，获取订单数量信息
+        // 2. 获取进度表对应的信息
+        List<OrderProductOrder> orders = orderProductOrderService.listBatchMaterialsByOrderIds(Arrays.asList(ids));
+
+        // 3. 根据物料分组，列出订单号，公司货号，品牌，颜色，订单数目，用量，应备数目，已报备数目的明细列表，应备数目（合计），已报备（合计）
+        Map<String,Map<String, Object>> result2 = new HashMap<String,Map<String, Object>>();
+
+        for (OrderProductOrder item : orders){
+            Map<String, Object> theMaterialIdMaps = result2.get(item.getMaterialId());
+            if(theMaterialIdMaps ==null){
+                theMaterialIdMaps = new HashMap<String,Object>();
+                result2.put(item.getMaterialId(),theMaterialIdMaps);
+            }
+
+            Object materialName = theMaterialIdMaps.get("materialName");
+            if(materialName == null ){
+                theMaterialIdMaps.put("materialName",item.getMaterialName());
+            }
+
+            Object materialId = theMaterialIdMaps.get("materialId");
+            if(materialId == null ){
+                theMaterialIdMaps.put("materialId",item.getMaterialId());
+            }
+
+            Object materialUnit = theMaterialIdMaps.get("materialUnit");
+            if(materialUnit == null){
+                theMaterialIdMaps.put("materialUnit",item.getMaterialUnit());
+            }
+
+            Object calNums = theMaterialIdMaps.get("calNums");
+            if(calNums == null ){
+                theMaterialIdMaps.put("calNums",item.getCalNum());
+            }else{
+                theMaterialIdMaps.put("calNums",BigDecimalUtil.add(calNums+"",item.getCalNum()).doubleValue());
+            }
+
+            Object preparedNums = theMaterialIdMaps.get("preparedNums");
+            String preparedNum = item.getPreparedNum() == null ? "0":item.getPreparedNum();
+            if(preparedNums == null ){
+                theMaterialIdMaps.put("preparedNums", preparedNum);
+            }else{
+                theMaterialIdMaps.put("preparedNums",BigDecimalUtil.add(preparedNums+"",preparedNum).doubleValue());
+            }
+
+            Object theMaterialIdLists = theMaterialIdMaps.get("details");
+
+            if(theMaterialIdLists ==null){
+                theMaterialIdLists = new LinkedList<>();
+                theMaterialIdMaps.put("details",theMaterialIdLists);
+            }
+
+            HashMap<String, Object> oneRow = new HashMap<>();
+            oneRow.put("orderId",item.getOrderId());
+            oneRow.put("orderNum",item.getOrderNum());
+            oneRow.put("productNum",item.getProductNum());
+            oneRow.put("productBrand",item.getProductBrand());
+            oneRow.put("productColor",item.getProductColor());
+            oneRow.put("orderNumber",item.getOrderNumber());
+            oneRow.put("dosage",item.getDosage());
+            oneRow.put("calNum",item.getCalNum());
+            oneRow.put("preparedNum", preparedNum);
+            ((List)theMaterialIdLists).add(oneRow);
+
+        }
+        ArrayList<Map<String, Object>> result = new ArrayList<>();
+        for (Map.Entry<String,Map<String, Object>> entry : result2.entrySet()){
+            result.add(entry.getValue());
+        }
+        HashMap<String, Object> returnMap = new HashMap<>();
+        returnMap.put("datas",result);
+        returnMap.put("canBatchPrepareFlag",canBatchPrepareFlag);
+
+        return ResponseResult.succ(returnMap);
     }
 
     /**

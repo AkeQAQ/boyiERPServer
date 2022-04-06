@@ -159,13 +159,8 @@ public class ProduceProductConstituentController extends BaseController {
             if(!flag){
                 return ResponseResult.fail("产品组成结构删除失败");
             }
+             produceProductConstituentDetailService.delByDocumentIds(ids);
 
-            boolean flagDetail = produceProductConstituentDetailService.delByDocumentIds(ids);
-            log.info("删除产品组成结构表详情信息,document_id:{},是否成功：{}",ids,flagDetail?"成功":"失败");
-
-            if(!flagDetail){
-                return ResponseResult.fail("产品组成结构详情表没有删除成功!");
-            }
             return ResponseResult.succ("删除成功");
         }catch (Exception e){
             log.error("报错.",e);
@@ -205,6 +200,13 @@ public class ProduceProductConstituentController extends BaseController {
 
         if(productConstituent.getRowList() ==null || productConstituent.getRowList().size() ==0){
             return ResponseResult.fail("物料信息不能为空");
+        }
+        HashSet<String> materialIds = new HashSet<>();
+        for (ProduceProductConstituentDetail detail: productConstituent.getRowList()){
+            if(materialIds.contains(detail.getMaterialId())){
+                return ResponseResult.fail("物料编码"+detail.getMaterialId()+"重复");
+            }
+            materialIds.add(detail.getMaterialId());
         }
 
         productConstituent.setUpdated(LocalDateTime.now());
@@ -256,6 +258,13 @@ public class ProduceProductConstituentController extends BaseController {
         productConstituent.setUpdatedUser(principal.getName());
         productConstituent.setStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDVALUE_2);
         try {
+            HashSet<String> materialIds = new HashSet<>();
+            for (ProduceProductConstituentDetail detail: productConstituent.getRowList()){
+                if(materialIds.contains(detail.getMaterialId())){
+                    return ResponseResult.fail("物料编码"+detail.getMaterialId()+"重复");
+                }
+                materialIds.add(detail.getMaterialId());
+            }
 
 
             produceProductConstituentService.save(productConstituent);

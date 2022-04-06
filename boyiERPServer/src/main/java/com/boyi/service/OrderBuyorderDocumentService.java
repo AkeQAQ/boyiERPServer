@@ -5,9 +5,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.OrderBuyorderDocument;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.boyi.entity.RepositoryBuyinDocument;
 
-import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,7 +25,7 @@ public interface OrderBuyorderDocumentService extends IService<OrderBuyorderDocu
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
 
     Page<OrderBuyorderDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
-    Page<OrderBuyorderDocument> innerQueryByManySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, Map<String,String> otherSearch,Object[] searchDocNum);
+    Page<OrderBuyorderDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList, String searchStartDate, String searchEndDate, Map<String, String> otherSearch, Object[] searchDocNum);
 
     int countBySupplierId(String ids[]);
 

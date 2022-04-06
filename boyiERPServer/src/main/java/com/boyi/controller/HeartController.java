@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @RestController
@@ -29,7 +30,7 @@ public class HeartController extends BaseController {
     @Autowired
     JwtUtils jwtUtils;
 
-    public final static Map<String,Long> onlineMap = new HashMap<String,Long>();
+    public final static Map<String,Long> onlineMap = new ConcurrentHashMap<>();
     public final static String KEY_SPERATOR = "_";
 
     /**
@@ -41,7 +42,7 @@ public class HeartController extends BaseController {
         long now = System.currentTimeMillis();
         String remoteIp = request.getRemoteAddr();
         onlineMap.put(remoteIp+":"+principal.getName()+KEY_SPERATOR+jwt,now);
-        log.info("【心跳】:key:{},now time:{}",principal.getName()+"_"+jwt, new Date(now));
+        log.warn("【心跳】:key:{},now time:{}",principal.getName()+"_"+jwt, new Date(now));
         return ResponseResult.succ("");
     }
 

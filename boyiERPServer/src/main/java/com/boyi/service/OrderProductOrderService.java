@@ -26,4 +26,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductOrder> getByNumBrandColor(String productNum, String productBrand, String productColor);
 
 
+    List<OrderProductOrder> listBatchMaterialsByOrderIds(List<Long> orderIds);
+
+    List<OrderProductOrder> listProductNumBrandColor(List<Long> orderIds);
 }

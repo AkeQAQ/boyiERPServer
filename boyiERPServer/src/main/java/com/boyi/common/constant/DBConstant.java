@@ -276,6 +276,7 @@ public class DBConstant {
 
         public static final String ID_FIELDNAME = "id";
         public static final String STATUS_FIELDNAME = "status";
+        public static final String DETAIL_STATUS_FIELDNAME = "detail_status";//detail表得status字段，
 
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String ORDER_DATE_FIELDNAME = "order_date";
@@ -873,7 +874,9 @@ public class DBConstant {
         public static final Integer ORDER_TYPE_FIELDVALUE_1 = 1;
 
         public static final Integer PREPARED_FIELDVALUE_0 = 0;
-        public static final Integer PREPARED_FIELDVALUE_1 = 1;
+        public static final Integer PREPARED_FIELDVALUE_1 = 1;//备料未确认
+        public static final Integer PREPARED_FIELDVALUE_2 = 2;//备料已确认
+
 
     }
 

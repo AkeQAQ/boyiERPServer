@@ -42,6 +42,7 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
                         like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDNAME,searchStatus)
+                        .orderByDesc(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.CREATED_FIELDNAME)
 
         );
     }

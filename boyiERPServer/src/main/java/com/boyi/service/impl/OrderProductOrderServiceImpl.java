@@ -10,6 +10,7 @@ import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.mapper.OrderProductOrderMapper;
 import com.boyi.service.OrderProductOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +26,9 @@ import java.util.Map;
  */
 @Service
 public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderMapper, OrderProductOrder> implements OrderProductOrderService {
+
+    @Autowired
+    private OrderProductOrderMapper orderProductOrderMapper;
 
     @Override
     public Page<OrderProductOrder> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String, String> otherSearch) {
@@ -60,6 +64,17 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                 .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_BRAND_FIELDNAME,productBrand)
                 .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_COLOR_FIELDNAME,productColor);
         return this.list(queryW);
+    }
+
+    @Override
+    public List<OrderProductOrder> listBatchMaterialsByOrderIds(List<Long> orderIds) {
+
+        return orderProductOrderMapper.listBatchMaterialsByOrderIds(orderIds);
+    }
+
+    @Override
+    public List<OrderProductOrder> listProductNumBrandColor(List<Long> orderIds) {
+        return orderProductOrderMapper.listProductNumBrandColor(orderIds);
     }
 
 }

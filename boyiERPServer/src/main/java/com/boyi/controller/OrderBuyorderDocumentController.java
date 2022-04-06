@@ -8,10 +8,8 @@ import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
-import com.boyi.service.OrderBuyorderDocumentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -22,8 +20,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
-import java.sql.Array;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -367,7 +363,7 @@ public class OrderBuyorderDocumentController extends BaseController {
      */
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('order:buyOrder:export')")
-    public void export(HttpServletResponse response,String searchDocNum,  String searchField, String searchStartDate, String searchEndDate,
+    public void export(HttpServletResponse response,String searchDocNum,  String searchField,String searchStatus, String searchStartDate, String searchEndDate,
                        @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -414,13 +410,23 @@ public class OrderBuyorderDocumentController extends BaseController {
                 }
             }
         }
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            throw new RuntimeException("状态不能为空");
+        }
 
         log.info("搜索字段:{},对应ID:{}", searchField, ids);
         Page page = getPage();
         if(page.getSize()==10 && page.getCurrent() == 1){
             page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
         }
-        pageData = orderBuyorderDocumentService.innerQueryByManySearch(page, searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
+        pageData = orderBuyorderDocumentService.innerQueryByManySearch(page, searchField, queryField, searchStr, searchStatusList, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);) {
@@ -435,7 +441,7 @@ public class OrderBuyorderDocumentController extends BaseController {
      */
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('order:buyOrder:list')")
-    public ResponseResult list(String searchDocNum, String searchField, String searchStartDate, String searchEndDate
+    public ResponseResult list(String searchDocNum, String searchField,String searchStatus, String searchStartDate, String searchEndDate
                                ,@RequestBody Map<String,Object> params) {
 
 
@@ -488,9 +494,19 @@ public class OrderBuyorderDocumentController extends BaseController {
                 }
             }
         }
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ResponseResult.fail("状态不能为空");
+        }
 
         log.info("搜索字段:{},对应ID:{}", searchField, ids);
-        pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
+        pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr,searchStatusList, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
         return ResponseResult.succ(pageData);
     }
 

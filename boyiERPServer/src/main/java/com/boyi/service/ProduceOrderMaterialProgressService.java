@@ -2,10 +2,8 @@ package com.boyi.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.boyi.entity.RepositoryBuyinDocument;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -48,4 +46,7 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
     void subInNum(Double subNum, String materialId);
 
     List<ProduceOrderMaterialProgress> listByMaterialIdCreatedDescHasInNum(String materialId);
+
+    List<ProduceOrderMaterialProgress> listByOrderIdsAndMaterialId(Long[] orderIds, String materialId);
+
 }

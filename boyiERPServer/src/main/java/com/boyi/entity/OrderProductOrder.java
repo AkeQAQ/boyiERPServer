@@ -1,5 +1,6 @@
 package com.boyi.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
@@ -83,5 +84,23 @@ public class OrderProductOrder extends BaseEntity {
     private Integer prepared;
 
 
+    /**
+     *  批量备料多余字段
+     *
+     */
+    @TableField(exist = false)
+    private String materialId;
+    @TableField(exist = false)
+    private String materialName;
+    @TableField(exist = false)
+    private String materialUnit;
+    @TableField(exist = false)
+    private String dosage;
+    @TableField(exist = false)
+    private String calNum;
+    @TableField(exist = false)
+    private String preparedNum;
+    @TableField(exist = false)
+    private Long orderId;
 
 }
