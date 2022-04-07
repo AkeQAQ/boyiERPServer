@@ -102,6 +102,7 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME,searchStatus)
                         .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME,searchStatus2)
+                        .gt(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.PREPARED_NUM_FIELDNAME,0)
                         .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME)
 
         );
@@ -217,6 +218,13 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
                 .in(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ORDER_ID_FIELDNAME,orderIds)
                 .eq(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.MATERIAL_ID_FIELDNAME,materialId)
                 .orderByAsc(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ORDER_ID_FIELDNAME));
+    }
+
+    @Override
+    public void updateStatus(Long id, Integer complementStatusFieldvalue0) {
+        this.update(new UpdateWrapper<ProduceOrderMaterialProgress>()
+                .eq(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ID_FIELDNAME,id)
+                .set(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.COMPLEMENT_STATUS_FIELDNAME,complementStatusFieldvalue0));
     }
 
 }

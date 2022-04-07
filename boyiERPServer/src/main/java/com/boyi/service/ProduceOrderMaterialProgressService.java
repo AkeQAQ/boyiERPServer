@@ -49,4 +49,6 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
 
     List<ProduceOrderMaterialProgress> listByOrderIdsAndMaterialId(Long[] orderIds, String materialId);
 
+    void updateStatus(Long id, Integer complementStatusFieldvalue0);
+
 }

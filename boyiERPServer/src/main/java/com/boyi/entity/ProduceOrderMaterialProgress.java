@@ -56,6 +56,11 @@ public class ProduceOrderMaterialProgress extends BaseEntity {
     private Integer progressPercent;
     private String comment;
 
+    /**
+     * 差数备料状态
+     */
+    private Integer complementStatus;
+
     @TableField(exist = false)  // 字段数据库忽略
     private String orderNum;
 
@@ -90,6 +95,8 @@ public class ProduceOrderMaterialProgress extends BaseEntity {
      */
     @TableField(exist = false)
     private String materialName;
+
+
 
     /**
      *  批量备料接受参数用

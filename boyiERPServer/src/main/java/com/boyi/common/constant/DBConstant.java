@@ -896,6 +896,18 @@ public class DBConstant {
         public static final String ID_FIELDNAME = "id";
 
         public static final String COMMENT_FIELDNAME = "comment";
+        public static final String COMPLEMENT_STATUS_FIELDNAME = "complement_status";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer COMPLEMENT_STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 审核中
+         */
+        public static final Integer COMPLEMENT_STATUS_FIELDVALUE_1 = 1;
 
     }
 

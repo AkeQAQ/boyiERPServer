@@ -89,6 +89,7 @@ public class OrderBuyorderDocumentController extends BaseController {
                 }
             }
         }
+
         List<Long> detailIds = new ArrayList<>();
         String supplierId = details.get(0).getSupplierId();
         // 已经是下推过的，则不能执行
@@ -113,6 +114,8 @@ public class OrderBuyorderDocumentController extends BaseController {
         if (exitCount > 0) {
             return ResponseResult.fail("该供应商的单据已经存在！请确认信息!");
         }
+
+        // 假如没有价格也不能下推
 
         try {
             // 2.封装入库单据表的信息
@@ -443,7 +446,6 @@ public class OrderBuyorderDocumentController extends BaseController {
     @PreAuthorize("hasAuthority('order:buyOrder:list')")
     public ResponseResult list(String searchDocNum, String searchField,String searchStatus, String searchStartDate, String searchEndDate
                                ,@RequestBody Map<String,Object> params) {
-
 
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;

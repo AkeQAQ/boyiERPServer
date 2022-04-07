@@ -40,6 +40,67 @@ public class ProduceOrderMaterialProgressController extends BaseController {
         System.out.println(preparedNum);
     }
 
+    @Transactional
+    @PostMapping("/del")
+    @PreAuthorize("hasAuthority('order:complementPrepare:del')")
+    public ResponseResult del(@RequestBody Long[] ids) throws Exception{
+        try {
+            List<ProduceOrderMaterialProgress> dels = produceOrderMaterialProgressService.listByIds(Arrays.asList(ids));
+            for (ProduceOrderMaterialProgress progress : dels){
+                if(Double.valueOf(progress.getInNum()) > 0.0D){
+                    return ResponseResult.fail("已存在入库，不能删除");
+                }
+            }
+
+            boolean flag = produceOrderMaterialProgressService.removeByIds(Arrays.asList(ids));
+
+            log.info("删除补数备料进度表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");
+            if(!flag){
+                return ResponseResult.fail("产品订单删除失败");
+            }
+            return ResponseResult.succ("删除成功");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+    @Transactional
+    @PostMapping("complementValid")
+    @PreAuthorize("hasAuthority('order:complementPrepare:valid')")
+    public ResponseResult complementReValid(Long id) throws Exception{
+        try {
+            ProduceOrderMaterialProgress old = produceOrderMaterialProgressService.getById(id);
+            if(!old.getComplementStatus().equals(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.COMPLEMENT_STATUS_FIELDVALUE_1)){
+                return ResponseResult.fail("补数备料状态不对，已修改，请刷新!");
+            }
+
+            produceOrderMaterialProgressService.updateStatus(id,DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.COMPLEMENT_STATUS_FIELDVALUE_0);
+            return ResponseResult.succ("补数备料审核通过!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+    @Transactional
+    @PostMapping("complementReValid")
+    @PreAuthorize("hasAuthority('order:complementPrepare:valid')")
+    public ResponseResult complementValid(Long id) throws Exception{
+        try {
+            ProduceOrderMaterialProgress old = produceOrderMaterialProgressService.getById(id);
+            if(!old.getComplementStatus().equals(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.COMPLEMENT_STATUS_FIELDVALUE_0)){
+                return ResponseResult.fail("补数备料状态不对，已修改，请刷新!");
+            }
+
+            produceOrderMaterialProgressService.updateStatus(id,DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.COMPLEMENT_STATUS_FIELDVALUE_1);
+            return ResponseResult.succ("补数备料反审核通过!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
     @GetMapping("/queryByComplementId")
     @PreAuthorize("hasAuthority('order:complementPrepare:list')")
     public ResponseResult queryByComplementId(Long id ) {
@@ -106,7 +167,6 @@ public class ProduceOrderMaterialProgressController extends BaseController {
     @PreAuthorize("hasAuthority('order:complementPrepare:save')")
     public ResponseResult complementSave(Principal principal, @Validated @RequestBody ProduceOrderMaterialProgress materialProgresses) {
         LocalDateTime now = LocalDateTime.now();
-
         try {
 
             if (materialProgresses.getId() == null) {
@@ -114,6 +174,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                 materialProgresses.setUpdated(now);
                 materialProgresses.setCreatedUser(principal.getName());
                 materialProgresses.setUpdatedUser(principal.getName());
+                materialProgresses.setComplementStatus(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.COMPLEMENT_STATUS_FIELDVALUE_1);
                 materialProgresses.setPreparedNum(materialProgresses.getAddNum());
                 if(Double.valueOf(Double.valueOf(materialProgresses.getAddNum())) < 0.0D){
                     throw new RuntimeException("备料数目不能为负数");
@@ -126,6 +187,10 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                 materialProgresses.setPreparedNum(preparedNum.toString());
                 if(Double.valueOf(preparedNum.doubleValue()) < 0.0D){
                     throw new RuntimeException("备料数目不能为负数");
+                }
+                // 假如比已入库数量少，也不行
+                if(Double.valueOf(preparedNum.doubleValue()) < Double.valueOf(old.getInNum())){
+                    throw new RuntimeException("备料数目不能小于已入库数目");
                 }
                 UpdateWrapper<ProduceOrderMaterialProgress> updateW = new UpdateWrapper<>();
                 updateW.set(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.PREPARED_NUM_FIELDNAME, materialProgresses.getPreparedNum())
