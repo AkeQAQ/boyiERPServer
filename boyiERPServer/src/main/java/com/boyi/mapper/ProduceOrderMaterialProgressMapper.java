@@ -78,7 +78,7 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
     @Select("" +
             "select * from produce_order_material_progress" +
             " pomp " +
-            " where material_id = #{materialId}" +
+            " where material_id = #{materialId} and prepared_num > 0" +
             " order by pomp.created desc limit 1")
     ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDesc(@Param("materialId") String materialId);
 
