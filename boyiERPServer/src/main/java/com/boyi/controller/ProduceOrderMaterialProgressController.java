@@ -7,20 +7,32 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.ExcelImportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * <p>
@@ -35,9 +47,178 @@ import java.util.*;
 @Slf4j
 public class ProduceOrderMaterialProgressController extends BaseController {
 
+    private ExecutorService fixThread = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+
+
     public static void main(String[] args) {
         BigDecimal preparedNum = new BigDecimal("1").add(new BigDecimal("2"));
         System.out.println(preparedNum);
+    }
+
+    @Value("${poi.orderProductOrderImportDemoPath}")
+    private String poiImportDemoPath;
+    public static final Map<Object,Object> replaceMap = new HashMap<Object,Object>();
+    static {
+        replaceMap.put("订单",0);
+        replaceMap.put("回单",1);
+    }
+
+    /**
+     * 上传
+     */
+    @PostMapping("/upload")
+    @PreAuthorize("hasAuthority('order:productOrder:import')")
+    public ResponseResult upload(Principal principal, MultipartFile[] files) {
+
+        MultipartFile file = files[0];
+
+        log.info("上传内容: files:{}",file);
+        ExcelImportUtil<OrderProductOrder> utils = new ExcelImportUtil<OrderProductOrder>(OrderProductOrder.class);
+        List<OrderProductOrder> orderProductOrders = null;
+        try (InputStream fis = file.getInputStream();){
+            orderProductOrders = utils.readExcel(fis, 1, 0,18,replaceMap);
+
+            if(orderProductOrders == null || orderProductOrders.size() == 0){
+                return ResponseResult.fail("解析内容未空");
+            }
+            ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
+            // 查询是否有缺产品组成的，有则返回提示
+            for (OrderProductOrder obj: orderProductOrders){
+                ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(obj.getProductNum(), obj.getProductBrand(), obj.getProductColor());
+                if(theConstituent == null){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"],颜色["+obj.getProductColor()+"]没有审核通过的产品组成结构");
+                    errorMsgs.add(errorMsg);
+                }
+            }
+            if(errorMsgs.size() > 0){
+                return ResponseResult.succ(errorMsgs);
+            }
+
+
+            // 查询该组成的物料，和订单进行计算
+            Map<String,Map<String, Object>> result = new HashMap<String,Map<String, Object>>();
+            ArrayList<Future<Map<String,Map<String, Object>>>> futures = new ArrayList<>();
+
+            for (OrderProductOrder order : orderProductOrders) {
+                // 利用多线程，进行分配
+                Future<Map<String,Map<String, Object>>> future = fixThread.submit(new Callable<Map<String,Map<String, Object>>>() {
+                    @Override
+                    public Map<String,Map<String, Object>> call() throws Exception {
+                        long start = System.currentTimeMillis();
+                        Map<String,Map<String, Object>> result2 = new HashMap<String,Map<String, Object>>();
+
+                        List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrandColor(order.getProductNum(),order.getProductBrand(),order.getProductColor());
+                        for (OrderProductOrder orderOneMaterial : details){
+
+                            Map<String, Object> theMaterialIdMaps = result2.get(orderOneMaterial.getMaterialId());
+                            if(theMaterialIdMaps ==null){
+                                theMaterialIdMaps = new HashMap<String,Object>();
+                                result2.put(orderOneMaterial.getMaterialId(),theMaterialIdMaps);
+                            }
+
+                            Object materialName = theMaterialIdMaps.get("materialName");
+                            if(materialName == null ){
+                                theMaterialIdMaps.put("materialName",orderOneMaterial.getMaterialName());
+                            }
+
+                            Object materialId = theMaterialIdMaps.get("materialId");
+                            if(materialId == null ){
+                                theMaterialIdMaps.put("materialId",orderOneMaterial.getMaterialId());
+                            }
+
+                            Object materialUnit = theMaterialIdMaps.get("materialUnit");
+                            if(materialUnit == null){
+                                theMaterialIdMaps.put("materialUnit",orderOneMaterial.getMaterialUnit());
+                            }
+
+                            Object calNums = theMaterialIdMaps.get("calNums");
+                            BigDecimal oneOrderOneMaterialNeedNum = BigDecimalUtil.mul(orderOneMaterial.getDosage(), order.getOrderNumber());
+                            if(calNums == null ){
+                                theMaterialIdMaps.put("calNums",oneOrderOneMaterialNeedNum.doubleValue());
+                            }else{
+                                theMaterialIdMaps.put("calNums",BigDecimalUtil.add(calNums+"", oneOrderOneMaterialNeedNum.toString()).doubleValue());
+                            }
+
+                            Object theMaterialIdLists = theMaterialIdMaps.get("details");
+
+                            if(theMaterialIdLists ==null){
+                                theMaterialIdLists = new LinkedList<>();
+                                theMaterialIdMaps.put("details",theMaterialIdLists);
+                            }
+
+                            HashMap<String, Object> oneRow = new HashMap<>();
+                            oneRow.put("orderNum",order.getOrderNum());
+                            oneRow.put("productNum",orderOneMaterial.getProductNum());
+                            oneRow.put("productBrand",orderOneMaterial.getProductBrand());
+                            oneRow.put("productColor",orderOneMaterial.getProductColor());
+                            oneRow.put("orderNumber",order.getOrderNumber());
+                            oneRow.put("dosage",orderOneMaterial.getDosage());
+                            oneRow.put("calNum",oneOrderOneMaterialNeedNum.doubleValue());
+                            ((List)theMaterialIdLists).add(oneRow);
+                        }
+                        long end = System.currentTimeMillis();
+                        log.info("【订单批量计算】,线程:{},耗时:{}",Thread.currentThread().getName(),(end-start)+"ms");
+                        return result2;
+                    }
+                });
+                futures.add(future);
+
+            }
+            long start = System.currentTimeMillis();
+
+            for (Future<Map<String,Map<String, Object>>> future : futures){
+                Map<String, Map<String, Object>> theMap = future.get();
+                for (Map.Entry<String,Map<String,Object>> entry : theMap.entrySet()){
+                    String materialId = entry.getKey();
+                    Map<String, Object> oneMaterialMsg = entry.getValue();
+
+                    Map<String, Object> oldMap = result.get(materialId);
+                    if(oldMap ==null){
+                        result.put(materialId,oneMaterialMsg);
+                    }else{
+                        Object currentNum = oneMaterialMsg.get("calNums");
+                        Object oldTotal = oldMap.get("calNums");
+                        oldMap.put("calNums",BigDecimalUtil.add(oldTotal.toString(), currentNum.toString()).doubleValue());
+
+                        LinkedList<HashMap<String, Object>> currentDetails = (LinkedList<HashMap<String, Object>>)oneMaterialMsg.get("details");
+                        LinkedList<HashMap<String, Object>> oldDetails = (LinkedList<HashMap<String, Object>>)oldMap.get("details");
+                        oldDetails.addAll(currentDetails);
+                    }
+                }
+            }
+            long end = System.currentTimeMillis();
+            log.info("【等待线程get，for循环耗时】,耗时:{}",(end-start)+"ms");
+
+            ArrayList<Map<String, Object>> result3 = new ArrayList<>();
+
+            for (Map.Entry<String,Map<String, Object>> entry : result.entrySet()){
+                result3.add(entry.getValue());
+            }
+            HashMap<String, Object> returnMap = new HashMap<>();
+            returnMap.put("datas",result3);
+
+            long end2 = System.currentTimeMillis();
+            log.info("【循环结束，put返回】,耗时:{}",(end2-end)+"ms");
+            return ResponseResult.succ(returnMap);
+
+        }
+        catch (Exception e) {
+            log.error("发生错误:",e);
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @PostMapping("/down")
+    @PreAuthorize("hasAuthority('dataAnalysis:orderProgress:list')")
+    public ResponseResult down(HttpServletResponse response, Long id)throws Exception {
+        response.setContentType("application/octet-stream");
+        response.setHeader("content-disposition", "attachment;filename=" + new String("产品订单导入模板".getBytes("ISO8859-1")));
+        response.setHeader("filename","产品订单导入模板" );
+
+        FileInputStream fis = new FileInputStream(new File(poiImportDemoPath));
+        FileCopyUtils.copy(fis,response.getOutputStream());
+        return ResponseResult.succ("下载成功");
     }
 
     @Transactional

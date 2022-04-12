@@ -1,5 +1,6 @@
 package com.boyi.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Row;
@@ -14,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
+@Slf4j
 public class ExcelImportUtil<T> {
 
     private Class clazz;
@@ -29,6 +30,8 @@ public class ExcelImportUtil<T> {
      * 基于注解读取excel
      */
     public List<T> readExcel(InputStream is, int rowIndex, int cellIndex, int replaceIndex, Map<Object,Object> replaceMap) {
+        long start = System.currentTimeMillis();
+
         List<T> list = new ArrayList<T>();
         T entity = null;
         try {
@@ -65,6 +68,8 @@ public class ExcelImportUtil<T> {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        long end = System.currentTimeMillis();
+        log.info("耗时:{}ms",(end - start));
         return list;
     }
 

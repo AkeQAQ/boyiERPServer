@@ -3,11 +3,13 @@ package com.boyi.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.OrderBuyorderDocumentDetail;
+import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceProductConstituentDetail;
 import com.boyi.entity.RepositoryReturnMaterialDetail;
 import com.boyi.mapper.ProduceProductConstituentDetailMapper;
 import com.boyi.service.ProduceProductConstituentDetailService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,9 @@ import java.util.List;
  */
 @Service
 public class ProduceProductConstituentDetailServiceImpl extends ServiceImpl<ProduceProductConstituentDetailMapper, ProduceProductConstituentDetail> implements ProduceProductConstituentDetailService {
+
+    @Autowired
+    private ProduceProductConstituentDetailMapper produceProductConstituentDetailMapper;
 
     @Override
     public boolean delByDocumentIds(Long[] ids) {
@@ -49,5 +54,10 @@ public class ProduceProductConstituentDetailServiceImpl extends ServiceImpl<Prod
     public int countByMaterialId(String[] ids) {
         return this.count(new QueryWrapper<ProduceProductConstituentDetail>()
                 .in(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.MATERIAL_ID_FIELDNAME, ids));
+    }
+
+    @Override
+    public List<OrderProductOrder> listByNumBrandColor(String productNum, String productBrand, String productColor) {
+        return produceProductConstituentDetailMapper.listByNumBrandColor(productNum,productBrand,productColor);
     }
 }

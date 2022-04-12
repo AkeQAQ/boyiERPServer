@@ -227,4 +227,10 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
                 .set(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.COMPLEMENT_STATUS_FIELDNAME,complementStatusFieldvalue0));
     }
 
+    @Override
+    public int countByMaterialId(String materialId) {
+        return this.count(new QueryWrapper<ProduceOrderMaterialProgress>()
+                .eq(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.MATERIAL_ID_FIELDNAME,materialId));
+    }
+
 }

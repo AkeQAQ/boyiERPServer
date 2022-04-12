@@ -1,5 +1,6 @@
 package com.boyi.service;
 
+import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceProductConstituentDetail;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.RepositoryReturnMaterialDetail;
@@ -24,4 +25,5 @@ public interface ProduceProductConstituentDetailService extends IService<Produce
 
     int countByMaterialId(String[] ids);
 
+    List<OrderProductOrder> listByNumBrandColor(String productNum, String productBrand, String productColor);
 }
