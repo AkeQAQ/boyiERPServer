@@ -233,4 +233,9 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
                 .eq(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.MATERIAL_ID_FIELDNAME,materialId));
     }
 
+    @Override
+    public int countByMaterialIdAndPreparedNumGtInNum(String materialId) {
+        return produceOrderMaterialProgressMapper.countByMaterialIdAndPreparedNumGtInNum(materialId);
+    }
+
 }

@@ -53,4 +53,5 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
 
     int countByMaterialId(String materialId);
 
+    int countByMaterialIdAndPreparedNumGtInNum(String materialId);
 }

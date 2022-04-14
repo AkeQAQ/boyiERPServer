@@ -412,12 +412,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
                         materialId.startsWith("03.01") ||
                         materialId.startsWith("04.03") || materialId.startsWith("04.04") ||
                         materialId.startsWith("06.05")  ){
+                    // 存在则允许，不存在则不允许
+                    if(produceOrderMaterialProgressService.countByMaterialIdAndPreparedNumGtInNum(materialId) == 0){
+                        return ResponseResult.fail("物料["+materialId+"] 不存在已备数目>入库数目的备料计划,不允许入库");
+                    }
+                }
 
-                }
-                // 存在则允许，不存在则不允许
-                if(produceOrderMaterialProgressService.countByMaterialId(materialId) == 0){
-                    return ResponseResult.fail("物料["+materialId+"] 不在备料计划内,不允许入库");
-                }
             }
 
             // 分2种情况，采购订单来源的，和采购入库来源的
@@ -724,12 +724,12 @@ public class RepositoryBuyinDocumentController extends BaseController {
                         materialId.startsWith("03.01") ||
                         materialId.startsWith("04.03") || materialId.startsWith("04.04") ||
                         materialId.startsWith("06.05")  ){
+                    // 存在则允许，不存在则不允许
+                    if(produceOrderMaterialProgressService.countByMaterialIdAndPreparedNumGtInNum(materialId) == 0){
+                        return ResponseResult.fail("物料["+materialId+"] 不存在已备数目>入库数目的备料计划,不允许入库");
+                    }
+                }
 
-                }
-                // 存在则允许，不存在则不允许
-                if(produceOrderMaterialProgressService.countByMaterialId(materialId) == 0){
-                    return ResponseResult.fail("物料["+materialId+"] 不在备料计划内,不允许入库");
-                }
             }
             repositoryBuyinDocumentService.save(repositoryBuyinDocument);
 

@@ -82,9 +82,18 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                 return ResponseResult.fail("解析内容未空");
             }
             ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
+            HashSet<String> queriedSet = new HashSet<>();
+
             // 查询是否有缺产品组成的，有则返回提示
             for (OrderProductOrder obj: orderProductOrders){
+                String theKey = obj.getProductNum() + "_" + obj.getProductBrand() + "_" + obj.getProductColor();
+
+                // 假如已经查过的，不需要再查了
+                if(queriedSet.contains(theKey)){
+                    continue;
+                }
                 ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(obj.getProductNum(), obj.getProductBrand(), obj.getProductColor());
+                queriedSet.add(theKey);
                 if(theConstituent == null){
                     HashMap<String, String> errorMsg = new HashMap<>();
                     errorMsg.put("content","公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"],颜色["+obj.getProductColor()+"]没有审核通过的产品组成结构");

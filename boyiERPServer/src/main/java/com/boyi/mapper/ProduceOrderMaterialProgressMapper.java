@@ -82,4 +82,11 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             " order by pomp.created desc limit 1")
     ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDesc(@Param("materialId") String materialId);
 
+
+    @Select("select count(1) from " +
+            " produce_order_material_progress" +
+            " pomp" +
+            " where pomp.material_id = #{materialId} and " +
+            " pomp.prepared_num > pomp.in_num")
+    int countByMaterialIdAndPreparedNumGtInNum(@Param("materialId") String materialId);
 }

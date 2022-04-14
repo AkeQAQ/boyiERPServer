@@ -350,13 +350,16 @@ public class BaseMaterialController extends BaseController {
     public ResponseResult delete(@RequestBody String[] ids) {
 
         int count = repositoryBuyinDocumentDetailService.countByMaterialId(ids);
-
         if(count > 0){
             return ResponseResult.fail("请先删除"+count+"条对应入库记录!");
         }
+
+        int count3 = repositoryPickMaterialDetailService.countByMaterialId(ids);
+        if(count3 > 0){
+            return ResponseResult.fail("请先删除"+count3+"条对应出库记录!");
+        }
+
         int count2 = baseSupplierMaterialService.countByMaterialId(ids);
-
-
         if(count2 > 0){
             return ResponseResult.fail("请先删除"+count2+"条对应价目记录!");
         }
@@ -369,7 +372,9 @@ public class BaseMaterialController extends BaseController {
 
         //判断产品组成结构，是否有该物料
         int produceProductCount = produceProductConstituentDetailService.countByMaterialId(ids);
-
+        if(produceProductCount > 0){
+            return ResponseResult.fail("请先删除"+produceProductCount+"条对应产品组成信息!");
+        }
 
         baseMaterialService.removeByIds(Arrays.asList(ids));
 
