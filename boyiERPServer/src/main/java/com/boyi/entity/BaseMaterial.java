@@ -75,6 +75,10 @@ public class BaseMaterial  {
      */
     private String specs;
 
+    /**
+     * 低预警线
+     */
+    private Double lowWarningLine;
 
 
 }

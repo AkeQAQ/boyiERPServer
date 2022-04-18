@@ -52,6 +52,25 @@ public class OrderProductOrderController extends BaseController {
     }
 
     @Transactional
+    @PostMapping("cancelOrder")
+    @PreAuthorize("hasAuthority('order:productOrder:del')")
+    public ResponseResult cancelOrder(Principal principal,Long id) throws Exception{
+        try {
+            OrderProductOrder orderProductOrder = new OrderProductOrder();
+            orderProductOrder.setUpdated(LocalDateTime.now());
+            orderProductOrder.setUpdatedUser(principal.getName());
+            orderProductOrder.setId(id);
+            orderProductOrder.setOrderType(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2);
+            orderProductOrderService.updateById(orderProductOrder);
+            return ResponseResult.succ("订单取消成功!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+
+    @Transactional
     @PostMapping("prepareNotSure")
     @PreAuthorize("hasAuthority('order:productOrder:prepare')")
     public ResponseResult prepareNotSure(Long id) throws Exception{
@@ -140,7 +159,7 @@ public class OrderProductOrderController extends BaseController {
     @GetMapping("/listOrderConstituentProgress")
     public ResponseResult listOrderConstituentProgress(Principal principal, Long orderId)throws Exception {
         OrderProductOrder order = orderProductOrderService.getById(orderId);
-        ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(order.getProductNum(), order.getProductBrand(), order.getProductColor());
+        ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrand(order.getProductNum(), order.getProductBrand());
         if(theConstituent==null){
             return ResponseResult.fail("没有审核通过的产品组成结构信息，请确认!");
         }
@@ -222,14 +241,14 @@ public class OrderProductOrderController extends BaseController {
         }
 
         // 查看是否该些订单存在对应审核通过的产品组成结构
-        List<OrderProductOrder> listsGroupProductNumBrandColors= orderProductOrderService.listProductNumBrandColor(Arrays.asList(ids));
-        if(listsGroupProductNumBrandColors==null || listsGroupProductNumBrandColors.isEmpty()){
-            return ResponseResult.fail("所选订单全没有产品组成结构!");
+        List<OrderProductOrder> listsGroupProductNumBrands= orderProductOrderService.listProductNumBrand(Arrays.asList(ids));
+        if(listsGroupProductNumBrands==null || listsGroupProductNumBrands.isEmpty()){
+            return ResponseResult.fail("所需订单没有数据!");
         }
-        for (OrderProductOrder obj : listsGroupProductNumBrandColors){
-            ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(obj.getProductNum(), obj.getProductBrand(), obj.getProductColor());
+        for (OrderProductOrder obj : listsGroupProductNumBrands){
+            ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrand(obj.getProductNum(), obj.getProductBrand());
             if(theConstituent == null){
-                return ResponseResult.fail("公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"],颜色["+obj.getProductColor()+"]没有审核通过的产品组成结构");
+                return ResponseResult.fail("公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"]没有审核通过的产品组成结构");
             }
         }
 
@@ -335,7 +354,7 @@ public class OrderProductOrderController extends BaseController {
                 order.setUpdated(now);
                 order.setCreatedUser(principal.getName());
                 order.setUpdatedUser(principal.getName());
-                order.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_1);
+                order.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_2);
                 order.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
                 ids.add(order.getOrderNum());
             }

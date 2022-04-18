@@ -58,11 +58,10 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     }
 
     @Override
-    public List<OrderProductOrder> getByNumBrandColor(String productNum, String productBrand, String productColor) {
+    public List<OrderProductOrder> getByNumBrand(String productNum, String productBrand) {
         QueryWrapper<OrderProductOrder> queryW = new QueryWrapper<>();
         queryW.eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_NUM_FIELDNAME,productNum)
-                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_BRAND_FIELDNAME,productBrand)
-                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_COLOR_FIELDNAME,productColor);
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_BRAND_FIELDNAME,productBrand);
         return this.list(queryW);
     }
 
@@ -73,8 +72,8 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     }
 
     @Override
-    public List<OrderProductOrder> listProductNumBrandColor(List<Long> orderIds) {
-        return orderProductOrderMapper.listProductNumBrandColor(orderIds);
+    public List<OrderProductOrder> listProductNumBrand(List<Long> orderIds) {
+        return orderProductOrderMapper.listProductNumBrand(orderIds);
     }
 
 }

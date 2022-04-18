@@ -42,7 +42,6 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " )t2" +
             " where t1.product_num = t2.product_num " +
             " and t1.product_brand = t2.product_brand" +
-            " and t1.product_color = t2.product_color" +
             " ) t3 left join " +
             " produce_order_material_progress pomp " +
             " on t3.order_id = pomp.order_id and t3.material_id = pomp.material_id order by t3.order_num,t3.material_id  " +
@@ -50,10 +49,10 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     List<OrderProductOrder> listBatchMaterialsByOrderIds(@Param("orderIds") List<Long> orderIds);
 
     @Select("<script>" +
-            " select product_num,product_brand,product_color from " +
+            " select product_num,product_brand from " +
             " order_product_order where  id in"+
             " <foreach collection='orderIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> "  +
-            " group by product_num,product_brand,product_color"+
+            " group by product_num,product_brand"+
             " </script>")
-    List<OrderProductOrder> listProductNumBrandColor(@Param("orderIds")  List<Long> orderIds);
+    List<OrderProductOrder> listProductNumBrand(@Param("orderIds")  List<Long> orderIds);
 }

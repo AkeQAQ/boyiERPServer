@@ -153,6 +153,7 @@ public class DBConstant {
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "update_user";
         public static final String STATUS_FIELDNAME = "status";
+        public static final String LOW_WARNING_LINE_FIELDNAME = "low_warning_line";
 
 
         /**
@@ -822,6 +823,7 @@ public class DBConstant {
             Map<Integer,String> orderTypeMap2 = new HashMap<Integer,String>();
             orderTypeMap2.put(0,"订单");
             orderTypeMap2.put(1,"回单");
+            orderTypeMap2.put(2,"取消");
             orderTypeMap = orderTypeMap2;
         }
         public static final String ORDER_NUM_FIELDNAME = "order_num";
@@ -873,7 +875,12 @@ public class DBConstant {
          */
         public static final Integer ORDER_TYPE_FIELDVALUE_1 = 1;
 
-        public static final Integer PREPARED_FIELDVALUE_0 = 0;
+        /**
+         *  1:代表 订单取消
+         */
+        public static final Integer ORDER_TYPE_FIELDVALUE_2 = 2;
+
+        public static final Integer PREPARED_FIELDVALUE_0 = 0;//备料完成
         public static final Integer PREPARED_FIELDVALUE_1 = 1;//备料未确认
         public static final Integer PREPARED_FIELDVALUE_2 = 2;//备料已确认
 

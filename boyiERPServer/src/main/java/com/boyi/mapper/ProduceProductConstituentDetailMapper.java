@@ -26,6 +26,6 @@ public interface ProduceProductConstituentDetailMapper extends BaseMapper<Produc
             " produce_product_constituent_detail ppcd  ," +
             "base_material bm" +
             " where ppc.id = ppcd.constituent_id   and ppcd.material_id = bm.id " +
-            " and product_num =#{productNum} and product_brand=#{productBrand} and product_color=#{productColor}")
-    List<OrderProductOrder> listByNumBrandColor(@Param("productNum") String productNum,@Param("productBrand") String productBrand,@Param("productColor") String productColor);
+            " and product_num =#{productNum} and product_brand=#{productBrand}")
+    List<OrderProductOrder> listByNumBrand(@Param("productNum") String productNum,@Param("productBrand") String productBrand);
 }

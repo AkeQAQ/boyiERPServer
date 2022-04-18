@@ -25,4 +25,8 @@ public interface BaseMaterialService extends IService<BaseMaterial> {
     List<BaseMaterial> listSame(String name, String unit, String specs, String groupCode);
 
     List<BaseMaterial> listSameExcludSelf(String name, String unit, String specs, String groupCode, String id);
+
+    List<BaseMaterial> getLowWarningLines();
+
+    void updateNull(BaseMaterial baseMaterial);
 }

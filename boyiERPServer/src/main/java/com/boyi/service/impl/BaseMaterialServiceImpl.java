@@ -2,6 +2,7 @@ package com.boyi.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.BaseMaterial;
@@ -56,5 +57,18 @@ public class BaseMaterialServiceImpl extends ServiceImpl<BaseMaterialMapper, Bas
                 .eq(DBConstant.TABLE_BASE_MATERIAL.SPECS_FIELDNAME, specs)
                 .eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME,groupCode)
                 .ne(DBConstant.TABLE_BASE_MATERIAL.ID,id));
+    }
+
+    @Override
+    public List<BaseMaterial> getLowWarningLines() {
+        return this.list(new QueryWrapper<BaseMaterial>()
+                .isNotNull(DBConstant.TABLE_BASE_MATERIAL.LOW_WARNING_LINE_FIELDNAME));
+    }
+
+    @Override
+    public void updateNull(BaseMaterial baseMaterial) {
+        this.update(new UpdateWrapper<BaseMaterial>()
+                .set(DBConstant.TABLE_BASE_MATERIAL.LOW_WARNING_LINE_FIELDNAME,null)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.ID,baseMaterial.getId()));
     }
 }

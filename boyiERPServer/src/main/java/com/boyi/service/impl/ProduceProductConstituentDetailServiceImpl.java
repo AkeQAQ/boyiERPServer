@@ -57,7 +57,7 @@ public class ProduceProductConstituentDetailServiceImpl extends ServiceImpl<Prod
     }
 
     @Override
-    public List<OrderProductOrder> listByNumBrandColor(String productNum, String productBrand, String productColor) {
-        return produceProductConstituentDetailMapper.listByNumBrandColor(productNum,productBrand,productColor);
+    public List<OrderProductOrder> listByNumBrand(String productNum, String productBrand) {
+        return produceProductConstituentDetailMapper.listByNumBrand(productNum,productBrand);
     }
 }

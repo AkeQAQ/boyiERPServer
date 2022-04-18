@@ -44,7 +44,7 @@ public class ProduceProductConstituentController extends BaseController {
     /**
      * 计算用料
      */
-    @GetMapping("/calNumByBrandNumColor")
+    /*@GetMapping("/calNumByBrandNumColor")
     @PreAuthorize("hasAuthority('produce:productConstituent:list')")
     @Transactional
     public ResponseResult calNumById(Principal principal,String productNum,String productBrand,String productColor, Long orderNumber)throws Exception {
@@ -53,9 +53,9 @@ public class ProduceProductConstituentController extends BaseController {
         }
         try {
 
-            ProduceProductConstituent byNumBrandColor = produceProductConstituentService.getByNumBrandColor(productNum, productBrand, productColor);
+            ProduceProductConstituent byNumBrandColor = produceProductConstituentService.getByNumBrandColor(productNum, productBrand);
             if(byNumBrandColor == null){
-                return ResponseResult.fail("产品组成结构没有公司货号["+productNum+"],品牌["+productBrand+"],颜色["+productColor+"] 对应的信息");
+                return ResponseResult.fail("产品组成结构没有公司货号["+productNum+"],品牌["+productBrand+"] 对应的信息");
             }
             List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(byNumBrandColor.getId());
 
@@ -97,7 +97,7 @@ public class ProduceProductConstituentController extends BaseController {
             throw new RuntimeException(e.getMessage());
         }
     }
-
+*/
 
     /**
      * 计算用料
@@ -235,7 +235,7 @@ public class ProduceProductConstituentController extends BaseController {
             return ResponseResult.succ("编辑成功");
         }
         catch (DuplicateKeyException de){
-            return ResponseResult.fail("货号，品牌，颜色不能重复!");
+            return ResponseResult.fail("货号，品牌不能重复!");
         }
         catch (Exception e) {
             log.error("供应商，更新异常",e);
@@ -278,7 +278,7 @@ public class ProduceProductConstituentController extends BaseController {
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",productConstituent.getId());
         }
         catch (DuplicateKeyException de){
-            return ResponseResult.fail("货号，品牌，颜色不能重复!");
+            return ResponseResult.fail("货号，品牌不能重复!");
         }
         catch (Exception e) {
             log.error("产品组成结构单，插入异常",e);
@@ -429,7 +429,7 @@ public class ProduceProductConstituentController extends BaseController {
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
         // 假如有进度表关联了，不能反审核了。
         ProduceProductConstituent old = produceProductConstituentService.getById(id);
-        List<OrderProductOrder> orders = orderProductOrderService.getByNumBrandColor(old.getProductNum(),old.getProductBrand(),old.getProductColor());
+        List<OrderProductOrder> orders = orderProductOrderService.getByNumBrand(old.getProductNum(),old.getProductBrand());
         if(orders != null && orders.size() > 0){
             HashSet<Long> orderIds = new HashSet<>();
             // 去查询是否有该订单号的进度表

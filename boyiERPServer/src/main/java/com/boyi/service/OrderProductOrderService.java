@@ -23,10 +23,10 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
     void updatePrepared(Long orderId, Integer preparedFieldvalue1);
 
-    List<OrderProductOrder> getByNumBrandColor(String productNum, String productBrand, String productColor);
+    List<OrderProductOrder> getByNumBrand(String productNum, String productBrand);
 
 
     List<OrderProductOrder> listBatchMaterialsByOrderIds(List<Long> orderIds);
 
-    List<OrderProductOrder> listProductNumBrandColor(List<Long> orderIds);
+    List<OrderProductOrder> listProductNumBrand(List<Long> orderIds);
 }

@@ -1,16 +1,15 @@
 package com.boyi.config;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.boyi.common.utils.EmailUtils;
 import com.boyi.controller.*;
-import com.boyi.entity.RepositoryBuyinDocument;
-import com.boyi.entity.RepositoryPickMaterialDetail;
-import com.boyi.entity.RepositoryStock;
-import com.boyi.entity.RepositoryStockHistory;
+import com.boyi.entity.*;
 import com.boyi.mapper.OtherMapper;
 import com.boyi.mapper.RepositoryStockHistoryMapper;
 import com.boyi.mapper.RepositoryStockMapper;
 import com.boyi.mapper.SysUserMapper;
 import com.boyi.service.BaseDepartmentService;
+import com.boyi.service.BaseMaterialService;
 import com.boyi.service.RepositoryStockHistoryService;
 import com.boyi.service.RepositoryStockService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
+import javax.mail.MessagingException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,6 +40,9 @@ public class SaticScheduleTask {
     @Autowired
     private RepositoryStockHistoryService repositoryStockHistoryService;
 
+    @Autowired
+    private BaseMaterialService baseMaterialService;
+
     private Long heartInterval = 30000L;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
@@ -51,6 +54,36 @@ public class SaticScheduleTask {
         tables.add("repository_return_material");
         tables.add("order_buyorder_document");
 
+    }
+
+    @Value("${boyi.toEmail}")
+    private String toEmail;
+
+    @Value("${boyi.csEmails}")
+    private String csEmails;
+
+    // 库存预警线
+    @Scheduled(cron = "0 0 8 * * ?")
+    private void validStock() {
+        // 1. 查看有设置低预警线的物料，然后对比库存
+        List<BaseMaterial> warnings = baseMaterialService.getLowWarningLines();
+        log.info("【库存预警线】,查出{}物料设置了预警线",warnings);
+        StringBuilder sb = new StringBuilder();
+        for (BaseMaterial bm :warnings){
+            RepositoryStock stock = repositoryStockService.getByMaterialId(bm.getId());
+            if(stock !=null && stock.getNum()!=null && stock.getNum() <= bm.getLowWarningLine()){
+                sb.append("物料编码["+bm.getId()+"]-["+bm.getName()+"]，库存数目["+stock.getNum()+"]["+bm.getUnit()+"] <= 预警数目["+bm.getLowWarningLine()+"]");
+                sb.append("<br>");
+            }
+        }
+        if(sb.length() == 0){
+            return;
+        }
+        try {
+            EmailUtils.sendMail(EmailUtils.MODULE_NAME,toEmail,csEmails.split(","), sb.toString());
+        } catch (MessagingException e) {
+            log.error("【库存预警线】发送邮件报错..",e);
+        }
     }
 
     // 心跳检测

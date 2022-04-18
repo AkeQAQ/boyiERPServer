@@ -86,17 +86,17 @@ public class ProduceOrderMaterialProgressController extends BaseController {
 
             // 查询是否有缺产品组成的，有则返回提示
             for (OrderProductOrder obj: orderProductOrders){
-                String theKey = obj.getProductNum() + "_" + obj.getProductBrand() + "_" + obj.getProductColor();
+                String theKey = obj.getProductNum() + "_" + obj.getProductBrand() ;
 
                 // 假如已经查过的，不需要再查了
                 if(queriedSet.contains(theKey)){
                     continue;
                 }
-                ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrandColor(obj.getProductNum(), obj.getProductBrand(), obj.getProductColor());
+                ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrand(obj.getProductNum(), obj.getProductBrand());
                 queriedSet.add(theKey);
                 if(theConstituent == null){
                     HashMap<String, String> errorMsg = new HashMap<>();
-                    errorMsg.put("content","公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"],颜色["+obj.getProductColor()+"]没有审核通过的产品组成结构");
+                    errorMsg.put("content","公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"]没有审核通过的产品组成结构");
                     errorMsgs.add(errorMsg);
                 }
             }
@@ -117,7 +117,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                         long start = System.currentTimeMillis();
                         Map<String,Map<String, Object>> result2 = new HashMap<String,Map<String, Object>>();
 
-                        List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrandColor(order.getProductNum(),order.getProductBrand(),order.getProductColor());
+                        List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(),order.getProductBrand());
                         for (OrderProductOrder orderOneMaterial : details){
 
                             Map<String, Object> theMaterialIdMaps = result2.get(orderOneMaterial.getMaterialId());
