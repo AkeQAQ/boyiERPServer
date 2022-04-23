@@ -174,7 +174,7 @@ public class OrderProductOrderController extends BaseController {
             }
         }
 
-        String orderNumber = order.getOrderNumber();
+        Integer orderNumber = order.getOrderNumber();
         ArrayList<Map<String, Object>> result = new ArrayList<>();
         // 计算数目 * 每个物料的用量
         for (ProduceProductConstituentDetail item : theConsitituentDetails){
@@ -201,7 +201,7 @@ public class OrderProductOrderController extends BaseController {
             calTheMap.put("materialName",material.getName());
             ProduceOrderMaterialProgress dbProgress = theMaterialIdAndProgress.get(material.getId());
 
-            calTheMap.put("calNum",dbProgress == null|| dbProgress.getCalNum()==null || dbProgress.getCalNum().isEmpty() ? BigDecimalUtil.mul(item.getDosage(),orderNumber).doubleValue() : dbProgress.getCalNum());
+            calTheMap.put("calNum",dbProgress == null|| dbProgress.getCalNum()==null || dbProgress.getCalNum().isEmpty() ? BigDecimalUtil.mul(item.getDosage(),orderNumber+"").doubleValue() : dbProgress.getCalNum());
             calTheMap.put("materialUnit",material.getUnit());
             calTheMap.put("preparedNum",dbProgress==null?0:dbProgress.getPreparedNum());
             calTheMap.put("comment",dbProgress==null?"":dbProgress.getComment());
@@ -368,7 +368,6 @@ public class OrderProductOrderController extends BaseController {
                 }
                 return ResponseResult.succ(errorMsgs);
             }
-
             orderProductOrderService.saveBatch(orderProductOrders);
         }
         catch (Exception e) {

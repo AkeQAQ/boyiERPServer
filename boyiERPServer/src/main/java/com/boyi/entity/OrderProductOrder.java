@@ -54,7 +54,7 @@ public class OrderProductOrder extends BaseEntity {
      * 订单数目
      */
     @ExcelAttribute(sort = 16)
-    private String orderNumber;
+    private Integer orderNumber;
 
     /**
      * 品牌区域

@@ -265,6 +265,11 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     }
 
     @Override
+    public RepositoryBuyinDocument getNetInFromOrderBetweenDate(LocalDate startD, LocalDate endD,String materialId) {
+        return repositoryBuyinDocumentMapper.getNetInFromOrderBetweenDate(startD,endD,materialId);
+    }
+
+    @Override
     public int countBySupplierId(String ids[]) {
         return this.count(new QueryWrapper<RepositoryBuyinDocument>()
                 .in(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SUPPLIER_ID_FIELDNAME, ids));

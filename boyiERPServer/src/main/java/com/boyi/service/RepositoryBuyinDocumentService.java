@@ -57,4 +57,5 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     // 蜘蛛王核算用户，特殊SQL
     Double getAllPageTotalAmountZZW(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatusList, Map<String, String> queryMap);
 
+    RepositoryBuyinDocument getNetInFromOrderBetweenDate(LocalDate startD, LocalDate endD,String materialId);
 }

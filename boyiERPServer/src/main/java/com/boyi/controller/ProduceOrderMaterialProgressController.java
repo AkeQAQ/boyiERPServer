@@ -27,7 +27,9 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -68,7 +70,8 @@ public class ProduceOrderMaterialProgressController extends BaseController {
      */
     @PostMapping("/upload")
     @PreAuthorize("hasAuthority('order:productOrder:import')")
-    public ResponseResult upload(Principal principal, MultipartFile[] files) {
+    public ResponseResult upload(Principal principal, MultipartFile[] files,String startDate,String endDate) {
+
 
         MultipartFile file = files[0];
 
@@ -106,7 +109,6 @@ public class ProduceOrderMaterialProgressController extends BaseController {
 
 
             // 查询该组成的物料，和订单进行计算
-            Map<String,Map<String, Object>> result = new HashMap<String,Map<String, Object>>();
             ArrayList<Future<Map<String,Map<String, Object>>>> futures = new ArrayList<>();
 
             for (OrderProductOrder order : orderProductOrders) {
@@ -142,7 +144,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                             }
 
                             Object calNums = theMaterialIdMaps.get("calNums");
-                            BigDecimal oneOrderOneMaterialNeedNum = BigDecimalUtil.mul(orderOneMaterial.getDosage(), order.getOrderNumber());
+                            BigDecimal oneOrderOneMaterialNeedNum = BigDecimalUtil.mul(orderOneMaterial.getDosage(), order.getOrderNumber()+"");
                             if(calNums == null ){
                                 theMaterialIdMaps.put("calNums",oneOrderOneMaterialNeedNum.doubleValue());
                             }else{
@@ -175,6 +177,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
 
             }
             long start = System.currentTimeMillis();
+            Map<String,Map<String, Object>> result = new HashMap<String,Map<String, Object>>();
 
             for (Future<Map<String,Map<String, Object>>> future : futures){
                 Map<String, Map<String, Object>> theMap = future.get();
@@ -200,9 +203,24 @@ public class ProduceOrderMaterialProgressController extends BaseController {
             log.info("【等待线程get，for循环耗时】,耗时:{}",(end-start)+"ms");
 
             ArrayList<Map<String, Object>> result3 = new ArrayList<>();
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            LocalDate startD=null;
+            LocalDate endD=null;
+            if(startDate!=null && endDate!=null && !startDate.equals("null") && !endDate.equals("null") && !startDate.isEmpty() && !endDate.isEmpty()){
+                startD = LocalDate.parse(startDate, timeFormatter);
+                endD = LocalDate.parse(endDate, timeFormatter);
+            }
+
 
             for (Map.Entry<String,Map<String, Object>> entry : result.entrySet()){
-                result3.add(entry.getValue());
+                Map<String, Object> oneVal = entry.getValue();
+                // 根据物料ID，时间段，获取净入库数量
+                if(startD!=null && endD!=null){
+                    RepositoryBuyinDocument in= repositoryBuyinDocumentService.getNetInFromOrderBetweenDate(startD,endD,entry.getKey());
+                    oneVal.put("netInNums",in.getNum());
+                }
+
+                result3.add(oneVal);
             }
             HashMap<String, Object> returnMap = new HashMap<>();
             returnMap.put("datas",result3);

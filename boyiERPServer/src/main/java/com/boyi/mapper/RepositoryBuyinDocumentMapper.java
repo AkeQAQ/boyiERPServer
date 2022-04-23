@@ -156,4 +156,31 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " where rbd.source_type = 1 and rbd.id = rbdd.document_id " +
             " and rbd.buy_in_date between #{startDate} and #{endDate}")
     List<RepositoryBuyinDocument> getListFromOrderBetweenDate(@Param("startDate")LocalDate startDate, @Param("endDate")LocalDate endDate);
+
+    @Select("" +
+            " select CONVERT(" +
+            " (" +
+            " select IFNULL(sum(num),0) from " +
+            " " +
+            " repository_buyin_document rbd," +
+            " repository_buyin_document_detail rbdd" +
+            " where rbd.id = rbdd.document_id" +
+            " and rbd.buy_in_date >= #{startDate} and rbd.buy_in_date <= #{endDate}"+
+            " and rbdd.material_id=#{materialId}" +
+            "" +
+            " ) -" +
+            " (" +
+            " select IFNULL(sum(num),0)from " +
+            "" +
+            " repository_buyout_document rbd," +
+            " repository_buyout_document_detail rbdd" +
+            " where rbd.id = rbdd.document_id" +
+            " and rbd.buy_out_date >= #{startDate} and rbd.buy_out_date <= #{endDate}"+
+            " and rbdd.material_id=#{materialId}" +
+            "" +
+            ")"+
+            ",DECIMAL(9,2)) as num"
+
+    )
+    RepositoryBuyinDocument getNetInFromOrderBetweenDate(@Param("startDate")LocalDate startD,@Param("endDate") LocalDate endD,@Param("materialId")String materialId);
 }
