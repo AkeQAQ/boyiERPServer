@@ -58,6 +58,60 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
 
     /**
+     *  获取选中的批量打印的数据
+     * @param principal
+     * @param ids
+     * @return
+     */
+    @PostMapping("/getBatchPrintByIds")
+    public ResponseResult getBatchPrintByIds(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<RepositoryBuyinDocument> lists = new ArrayList<>();
+
+        for (Long id : ids){
+
+            RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getById(id);
+
+            List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(id);
+
+            BaseSupplier supplier = baseSupplierService.getById(repositoryBuyinDocument.getSupplierId());
+
+            double totalNum = 0d;
+            double totalAmount = 0.0d;
+
+            for (RepositoryBuyinDocumentDetail detail : details){
+                BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
+                detail.setMaterialName(material.getName());
+                detail.setUnit(material.getUnit());
+                detail.setBigUnit(material.getBigUnit());
+                detail.setUnitRadio(material.getUnitRadio());
+                detail.setSpecs(material.getSpecs());
+
+                // 查询对应的价目记录
+                BaseSupplierMaterial one = baseSupplierMaterialService.getSuccessPrice(supplier.getId(),material.getId(),detail.getPriceDate());
+
+
+                if(one !=null){
+                    detail.setPrice(one.getPrice());
+                    double amount = detail.getPrice() * detail.getNum();
+                    detail.setAmount(new BigDecimal(amount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+                    totalAmount += amount;
+                }
+                totalNum += detail.getNum();
+            }
+
+            repositoryBuyinDocument.setTotalNum( totalNum);
+            repositoryBuyinDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
+
+
+            repositoryBuyinDocument.setSupplierName(supplier.getName());
+            repositoryBuyinDocument.setRowList(details);
+            lists.add(repositoryBuyinDocument);
+        }
+        return ResponseResult.succ(lists);
+
+    }
+
+    /**
      * 一键采购订单领料
      */
     @GetMapping("/batchPick")

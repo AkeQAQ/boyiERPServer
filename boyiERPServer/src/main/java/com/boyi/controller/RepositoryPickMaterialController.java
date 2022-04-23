@@ -54,6 +54,45 @@ public class RepositoryPickMaterialController extends BaseController {
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
 
+    /**
+     *  获取选中的批量打印的数据
+     * @param principal
+     * @param ids
+     * @return
+     */
+    @PostMapping("/getBatchPrintByIds")
+    public ResponseResult getBatchPrintByIds(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<RepositoryPickMaterial> lists = new ArrayList<>();
+
+        for (Long id : ids){
+
+            RepositoryPickMaterial repositoryPickMaterial = repositoryPickMaterialService.getById(id);
+
+            List<RepositoryPickMaterialDetail> details = repositoryPickMaterialDetailService.listByDocumentId(id);
+
+            BaseDepartment department = baseDepartmentService.getById(repositoryPickMaterial.getDepartmentId());
+
+            Double totalNum = 0D;
+
+            for (RepositoryPickMaterialDetail detail : details){
+                BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
+                detail.setMaterialName(material.getName());
+                detail.setUnit(material.getUnit());
+                detail.setSpecs(material.getSpecs());
+
+                totalNum += detail.getNum();
+            }
+
+            repositoryPickMaterial.setTotalNum( totalNum);
+
+            repositoryPickMaterial.setDepartmentName(department.getName());
+
+            repositoryPickMaterial.setRowList(details);
+            lists.add(repositoryPickMaterial);
+        }
+        return ResponseResult.succ(lists);
+
+    }
 
 
     /**

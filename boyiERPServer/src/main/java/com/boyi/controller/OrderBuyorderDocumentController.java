@@ -124,7 +124,7 @@ public class OrderBuyorderDocumentController extends BaseController {
             repositoryBuyinDocument.setUpdated(now);
             repositoryBuyinDocument.setCreatedUser(principal.getName());
             repositoryBuyinDocument.setUpdatedUser(principal.getName());
-            repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_1);
+            repositoryBuyinDocument.setStatus(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
             repositoryBuyinDocument.setSourceType(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SOURCE_TYPE_FIELDVALUE_1);
 
             repositoryBuyinDocumentService.save(repositoryBuyinDocument);
