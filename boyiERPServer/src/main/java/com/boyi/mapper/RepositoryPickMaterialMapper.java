@@ -8,6 +8,7 @@ import com.boyi.entity.RepositoryPickMaterial;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -32,7 +33,7 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
             "        doc.updated, " +
             "        doc.updated_user, " +
             "        doc.comment, " +
-
+            "        doc.batch_id, " +
             "        dep.name department_name, " +
             "        dep.id department_id, " +
             "        m.id material_id, " +
@@ -78,4 +79,7 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
             " and pmd.material_id = #{materialId}" +
             " and bd.id = #{departmentId}" )
     Double countByDepartmentAndMaterial(@Param("departmentId") Long departmentId,@Param("materialId") String materialId);
+
+    @Update("update repository_pick_material set batch_id = null where id = #{id}")
+    void updateBatchIdNull(@Param("id")Long id);
 }

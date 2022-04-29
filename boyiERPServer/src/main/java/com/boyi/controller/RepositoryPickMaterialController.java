@@ -417,10 +417,37 @@ public class RepositoryPickMaterialController extends BaseController {
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
-            List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameComment(repositoryPickMaterial.getId(),repositoryPickMaterial.getComment());
-            if(pickM!=null && pickM.size()>0){
-                return ResponseResult.fail("备注内容不能重复!.");
+            if(repositoryPickMaterial.getBatchId()!=null){
+                List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId());
+                if(pickM!=null && pickM.size()>0){
+                    return ResponseResult.fail("生产序号不能重复!.");
+                }
+                ProduceBatch pb = produceBatchService.getByPassedBatchId(repositoryPickMaterial.getBatchId());
+                if( pb== null){
+                    return ResponseResult.fail("没有审核通过的生产序号");
+                }
+
+                HashMap<String, Boolean> isExistMaterial = new HashMap<>();
+                for (RepositoryPickMaterialDetail detail : repositoryPickMaterial.getRowList()){
+                    isExistMaterial.put(detail.getMaterialId(),false);
+                }
+                // 查询对应产品组成结构，假如不存在对应物料（皮料），不能出库
+                OrderProductOrder productOrder = orderProductOrderService.getByOrderNum(pb.getOrderNum());
+
+                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+                for (OrderProductOrder order : orders){
+                    if(isExistMaterial.containsKey(order.getMaterialId())){
+                        isExistMaterial.put(order.getMaterialId(),true);
+                    }
+                }
+                for (Map.Entry<String,Boolean> entry : isExistMaterial.entrySet()){
+                    // 有物料不在产品组成结构，不能领料
+                    if(!entry.getValue()){
+                        return ResponseResult.fail("有物料不在产品组成结构，请核对");
+                    }
+                }
             }
+
 
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
@@ -440,6 +467,13 @@ public class RepositoryPickMaterialController extends BaseController {
             //1. 先删除老的，再插入新的
             boolean flag = repositoryPickMaterialDetailService.removeByDocId(repositoryPickMaterial.getId());
             if(flag){
+                if(repositoryPickMaterial.getBatchId()==null){
+                    // 查看老的不是空，则更新为null
+                    RepositoryPickMaterial old = repositoryPickMaterialService.getById(repositoryPickMaterial.getId());
+                    if(old.getBatchId()!=null){
+                        repositoryPickMaterialService.updateBatchIdNull(old.getId());
+                    }
+                }
                 repositoryPickMaterialService.updateById(repositoryPickMaterial);
 
                 for (RepositoryPickMaterialDetail item : repositoryPickMaterial.getRowList()){
@@ -586,16 +620,43 @@ public class RepositoryPickMaterialController extends BaseController {
 
         try {
 
+
             boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
 
-            // 查看备注的内容，ID> 当年年份+月份+日+0000，并且comment!=''并且comment =当前comment内容，存在则不允许创建
-            List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameComment(null,repositoryPickMaterial.getComment());
-            if(pickM!=null && pickM.size()>0){
-                return ResponseResult.fail("备注内容不能重复!.");
+            if(repositoryPickMaterial.getBatchId()!=null){
+                List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId());
+                if(pickM!=null && pickM.size()>0){
+                    return ResponseResult.fail("生产序号不能重复!.");
+                }
+                ProduceBatch pb = produceBatchService.getByPassedBatchId(repositoryPickMaterial.getBatchId());
+                if( pb== null){
+                    return ResponseResult.fail("没有审核通过的生产序号");
+                }
+
+                HashMap<String, Boolean> isExistMaterial = new HashMap<>();
+                for (RepositoryPickMaterialDetail detail : repositoryPickMaterial.getRowList()){
+                    isExistMaterial.put(detail.getMaterialId(),false);
+                }
+                // 查询对应产品组成结构，假如不存在对应物料（皮料），不能出库
+                OrderProductOrder productOrder = orderProductOrderService.getByOrderNum(pb.getOrderNum());
+
+                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+                for (OrderProductOrder order : orders){
+                    if(isExistMaterial.containsKey(order.getMaterialId())){
+                        isExistMaterial.put(order.getMaterialId(),true);
+                    }
+                }
+                for (Map.Entry<String,Boolean> entry : isExistMaterial.entrySet()){
+                    // 有物料不在产品组成结构，不能领料
+                    if(!entry.getValue()){
+                        return ResponseResult.fail("有物料不在产品组成结构，请核对");
+                    }
+                }
             }
+
             Map<String, Double> map = new HashMap<>();// 一个物料，需要减少的数目
             // 1. 遍历获取一个物料要减少的数目。
             for (RepositoryPickMaterialDetail detail : repositoryPickMaterial.getRowList()) {

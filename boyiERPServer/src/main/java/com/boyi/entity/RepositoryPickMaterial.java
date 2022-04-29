@@ -46,9 +46,10 @@ public class RepositoryPickMaterial extends BaseEntity {
 
     private String updatedUser;
 
-    private Integer produceDocNum; // 生产计划单号
-
     @ExcelAttribute(sort = 4)
+    private Integer batchId; // 生产序号
+
+    @ExcelAttribute(sort = 10)
     private String comment; // 备注
 
 

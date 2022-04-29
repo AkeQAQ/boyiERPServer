@@ -2,13 +2,9 @@ package com.boyi.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
-import com.boyi.entity.*;
 import com.boyi.entity.RepositoryPickMaterial;
-import com.boyi.mapper.OrderBuyorderDocumentMapper;
-import com.boyi.mapper.RepositoryPickMaterialMapper;
 import com.boyi.mapper.RepositoryPickMaterialMapper;
 import com.boyi.service.RepositoryPickMaterialService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -17,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -91,17 +88,27 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
                         DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_0));
     }
 
-    // 查看备注的内容，ID!=自己的，ID> 当年年份+月份+日+0000，并且comment!=''并且comment =当前comment内容，存在则不允许创建
+    // 查看批次号的内容，ID!=自己的，ID> 当年年份+月份+日+0000，并且batchId!=''并且comment =当前comment内容，存在则不允许创建
     @Override
-    public List<RepositoryPickMaterial> getSameComment(Long id ,String comment) {
+    public List<RepositoryPickMaterial> getSameBatch(Long id ,Integer batchId) {
         Date today = new Date();
         String year = sdf_yy.format(today);
 
         return this.list(new QueryWrapper<RepositoryPickMaterial>()
                         .ne(id!=null,DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.ID_FIELDNAME,id)
                 .gt(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.ID_FIELDNAME,Long.valueOf(year+"01010000"))
-                .ne(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.COMMENT_FIELDNAME,"")
-                .eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.COMMENT_FIELDNAME,comment));
+                .eq(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.BATCH_ID_FIELDNAME,batchId));
+    }
+
+    @Override
+    public List<RepositoryPickMaterial> listByBatchIds(ArrayList<Integer> batchIds) {
+        return this.list(new QueryWrapper<RepositoryPickMaterial>()
+                .in(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,batchIds));
+    }
+
+    @Override
+    public void updateBatchIdNull(Long id) {
+        this.repositoryPickMaterialMapper.updateBatchIdNull(id);
     }
 
 }

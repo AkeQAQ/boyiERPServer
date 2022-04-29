@@ -2,12 +2,11 @@ package com.boyi.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.boyi.entity.BaseSupplierMaterial;
-import com.boyi.entity.RepositoryPickMaterial;
 import com.boyi.entity.RepositoryPickMaterial;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -32,5 +31,9 @@ public interface RepositoryPickMaterialService extends IService<RepositoryPickMa
 
     List<RepositoryPickMaterial> countLTByCloseDate(LocalDate closeDate);
 
-    List<RepositoryPickMaterial> getSameComment(Long id,String comment);
+    List<RepositoryPickMaterial> getSameBatch(Long id,Integer comment);
+
+    List<RepositoryPickMaterial> listByBatchIds(ArrayList<Integer> batchIds);
+
+    void updateBatchIdNull(Long id);
 }

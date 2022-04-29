@@ -385,6 +385,7 @@ public class DBConstant {
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "updated_user";
         public static final String COMMENT_FIELDNAME = "comment";
+        public static final String BATCH_ID_FIELDNAME = "batch_id";
 
 
         /**
@@ -915,6 +916,32 @@ public class DBConstant {
          *  1:代表 审核中
          */
         public static final Integer COMPLEMENT_STATUS_FIELDVALUE_1 = 1;
+
+    }
+
+
+    public static class TABLE_PRODUCE_BATCH{
+        public static final String ORDER_NUM_FIELDNAME = "order_num";
+
+        public static final String BATCH_ID_FIELDNAME = "batch_id";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer BATCH_STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 审核中
+         */
+        public static final Integer BATCH_STATUS_FIELDVALUE_1 = 1;
 
     }
 

@@ -85,4 +85,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                 .lt(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME,LocalDate.now().plusDays(-100)));
     }
 
+    @Override
+    public OrderProductOrder getByOrderNum(String orderNum) {
+        return this.getOne(new QueryWrapper<OrderProductOrder>().eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,orderNum));
+    }
+
 }

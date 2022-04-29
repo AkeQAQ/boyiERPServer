@@ -131,6 +131,9 @@ public class BaseController {
     @Autowired
     public ProduceOrderMaterialProgressService produceOrderMaterialProgressService;
 
+    @Autowired
+    public ProduceBatchService produceBatchService;
+
     /**
      * 获取页面
      * @return

@@ -399,6 +399,17 @@ public class OrderProductOrderController extends BaseController {
     public ResponseResult delete(@RequestBody Long[] ids) throws Exception{
         try {
 
+            for (Long id : ids){
+                OrderProductOrder order = orderProductOrderService.getById(id);
+
+                ProduceBatch pb = produceBatchService.getByOrderNum(order.getOrderNum());
+                if(pb != null){
+                    return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum());
+                }
+            }
+
+            // 查看是否有生产序号引用
+
             boolean flag = orderProductOrderService.removeByIds(Arrays.asList(ids));
 
             log.info("删除产品订单表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");
@@ -497,6 +508,10 @@ public class OrderProductOrderController extends BaseController {
             }
             else if (searchField.equals("productBrand")) {
                 queryField = "product_brand";
+
+            }
+            else if (searchField.equals("orderNum")) {
+                queryField = "order_num";
 
             }else {
                 return ResponseResult.fail("搜索字段不存在");
@@ -631,6 +646,15 @@ public class OrderProductOrderController extends BaseController {
         if(progresses!=null && progresses.size() > 0){
             return ResponseResult.fail("已有物料报备，无法反审核!");
         }
+
+        // 假如有生产序号引用，不能反审核
+        OrderProductOrder order = orderProductOrderService.getById(id);
+
+        ProduceBatch pb = produceBatchService.getByOrderNum(order.getOrderNum());
+        if(pb != null){
+            return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum());
+        }
+
         OrderProductOrder orderProductOrder = new OrderProductOrder();
         orderProductOrder.setUpdated(LocalDateTime.now());
         orderProductOrder.setUpdatedUser(principal.getName());
