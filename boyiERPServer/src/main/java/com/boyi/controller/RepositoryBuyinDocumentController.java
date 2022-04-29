@@ -457,23 +457,6 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
 
-            // 校验是否特定物料在备料计划中
-            for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
-                String materialId = item.getMaterialId();
-                // 受限的物料分组
-                if(materialId.startsWith("01.01") || materialId.startsWith("01.02") ||
-                        materialId.startsWith("02.01") ||
-                        materialId.startsWith("03.01") ||
-                        materialId.startsWith("04.03") || materialId.startsWith("04.04") ||
-                        materialId.startsWith("06.05")  ){
-                    // 存在则允许，不存在则不允许
-                    if(produceOrderMaterialProgressService.countByMaterialIdAndPreparedNumGtInNum(materialId) == 0){
-                        return ResponseResult.fail("物料["+materialId+"] 不存在已备数目>入库数目的备料计划,不允许入库");
-                    }
-                }
-
-            }
-
             // 分2种情况，采购订单来源的，和采购入库来源的
 
             // 采购入库来源的处理:
@@ -492,6 +475,25 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 // 校验退料数目
                 validCompareReturnNum(repositoryBuyinDocument, needSubMap,needAddMap,notUpdateMap);
                 log.info("需要减少的内容:{},需要添加的内容:{},需要修改的内容:{}",needSubMap,needAddMap,notUpdateMap);
+
+                // 校验是否特定物料在备料计划中
+                for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
+                    String materialId = item.getMaterialId();
+                    // 受限的物料分组
+                    if(materialId.startsWith("01.01") || materialId.startsWith("01.02") ||
+                            materialId.startsWith("02.01") ||
+                            materialId.startsWith("03.01") ||
+                            materialId.startsWith("04.03") || materialId.startsWith("04.04") ||
+                            materialId.startsWith("06.05")  ){
+                        // 假如数目没变动的不需要判断
+
+                        // 数目需要增加的，并且 存在备料计划则允许，
+                        if(needAddMap.containsKey(materialId)  && produceOrderMaterialProgressService.countByMaterialIdAndPreparedNumGtInNum(materialId) == 0){
+                            return ResponseResult.fail("物料["+materialId+"] 不存在已备数目>入库数目的备料计划,不允许入库");
+                        }
+                    }
+
+                }
 
                 // 校验库存能否减少
                 repositoryStockService.validStockNum(needSubMap);

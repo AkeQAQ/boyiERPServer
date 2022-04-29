@@ -1,6 +1,7 @@
 package com.boyi.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.sql.Order;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -13,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +76,13 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public List<OrderProductOrder> listProductNumBrand(List<Long> orderIds) {
         return orderProductOrderMapper.listProductNumBrand(orderIds);
+    }
+
+    @Override
+    public List<OrderProductOrder> listByMonthAndDay(String md) {
+        return this.list(new QueryWrapper<OrderProductOrder>()
+                .likeRight(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,md)
+                .lt(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME,LocalDate.now().plusDays(-100)));
     }
 
 }

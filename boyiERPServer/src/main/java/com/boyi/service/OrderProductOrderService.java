@@ -29,4 +29,6 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductOrder> listBatchMaterialsByOrderIds(List<Long> orderIds);
 
     List<OrderProductOrder> listProductNumBrand(List<Long> orderIds);
+
+    List<OrderProductOrder> listByMonthAndDay(String md);
 }
