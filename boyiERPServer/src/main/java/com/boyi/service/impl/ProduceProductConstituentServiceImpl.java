@@ -64,4 +64,22 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
 
         return this.getOne(queryWrapper);
     }
+
+    @Override
+    public Page<ProduceProductConstituent> innerQueryByManySearchWithDetailField(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, Map<String, String> otherSearch) {
+        QueryWrapper<ProduceProductConstituent> queryWrapper = new QueryWrapper<>();
+        for (String key : otherSearch.keySet()){
+            String val = otherSearch.get(key);
+            queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                    && StrUtil.isNotBlank(key),key,val);
+        }
+        return produceProductConstituentMapper.page2(page,
+                queryWrapper.
+                        like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDNAME,searchStatus)
+                        .orderByDesc(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.CREATED_FIELDNAME)
+
+        );
+    }
 }

@@ -44,4 +44,12 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
     @Select(wrapperSql)
     ProduceProductConstituent one(@Param("ew") Wrapper queryWrapper);
 
+    String query2Sql = "" +
+            " select  ppc.*,bm.name material_name from produce_product_constituent ppc,produce_product_constituent_detail ppcd,base_material bm" +
+            " where ppc.id = ppcd.constituent_id and ppcd.material_id = bm.id";
+    String wrapper2Sql = "SELECT * from ( " + query2Sql + " ) AS q ${ew.customSqlSegment}";
+
+    @Select(wrapper2Sql)
+    Page<ProduceProductConstituent> page2(Page page, @Param("ew") Wrapper queryWrapper);
+
 }

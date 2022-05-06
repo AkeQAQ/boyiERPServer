@@ -307,7 +307,12 @@ public class ProduceProductConstituentController extends BaseController {
             else if (searchField.equals("productBrand")) {
                 queryField = "product_brand";
 
-            }else {
+            }
+            else if (searchField.equals("materialName")) {
+                queryField = "material_name";
+
+            }
+            else {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
@@ -325,7 +330,12 @@ public class ProduceProductConstituentController extends BaseController {
                     else if (oneField.equals("productBrand")) {
                         theQueryField = "product_brand";
 
-                    } else {
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
+
+                    }
+                    else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);
@@ -344,7 +354,13 @@ public class ProduceProductConstituentController extends BaseController {
         if(searchStatusList.size() == 0){
             return ResponseResult.fail("状态不能为空");
         }
-        pageData = produceProductConstituentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
+        if(queryMap.containsKey("material_name") || queryField.equals("material_name")){
+            pageData = produceProductConstituentService.innerQueryByManySearchWithDetailField(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
+        }else{
+            pageData = produceProductConstituentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
+        }
+
+
 
         return ResponseResult.succ(pageData);
     }
