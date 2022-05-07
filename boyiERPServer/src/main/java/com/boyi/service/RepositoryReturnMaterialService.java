@@ -29,4 +29,8 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
     Double countByDepartmentIdMaterialId(Long departmentId, String materialId);
 
     List<RepositoryReturnMaterial> countLTByCloseDate(LocalDate closeDate);
+
+    List<RepositoryReturnMaterial> getSameBatch(Long id, Integer batchId);
+
+    void updateBatchIdNull(Long id);
 }

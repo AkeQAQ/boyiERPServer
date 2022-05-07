@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.RepositoryReturnMaterial;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             "        doc.return_date , " +
             "        doc.return_user , " +
             "        doc.status, " +
+            "        doc.batch_id, " +
+
             "        dep.name department_name, " +
             "        dep.id department_id, " +
             "        m.id material_id, " +
@@ -71,4 +74,7 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             " and pmd.material_id = #{materialId}" +
             " and bd.id = #{departmentId}" )
     Double countByDepartmentAndMaterial(@Param("departmentId") Long departmentId,@Param("materialId") String materialId);
+
+    @Update("update repository_return_material set batch_id = null where id = #{id}")
+    void updateBatchIdNull(@Param("id")Long id);
 }

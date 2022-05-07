@@ -170,6 +170,38 @@ public class RepositoryReturnMaterialController extends BaseController {
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
 
+
+            if(repositoryReturnMaterial.getBatchId()!=null){
+                List<RepositoryReturnMaterial> returnM = repositoryReturnMaterialService.getSameBatch(repositoryReturnMaterial.getId(),repositoryReturnMaterial.getBatchId());
+                if(returnM!=null && returnM.size()>0){
+                    return ResponseResult.fail("生产序号不能重复!.");
+                }
+                ProduceBatch pb = produceBatchService.getByPassedBatchId(repositoryReturnMaterial.getBatchId());
+                if( pb== null){
+                    return ResponseResult.fail("没有审核通过的生产序号");
+                }
+
+                HashMap<String, Boolean> isExistMaterial = new HashMap<>();
+                for (RepositoryReturnMaterialDetail detail : repositoryReturnMaterial.getRowList()){
+                    isExistMaterial.put(detail.getMaterialId(),false);
+                }
+                // 查询对应产品组成结构，假如不存在对应物料（皮料），不能退库
+                OrderProductOrder productOrder = orderProductOrderService.getByOrderNum(pb.getOrderNum());
+
+                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+                for (OrderProductOrder order : orders){
+                    if(isExistMaterial.containsKey(order.getMaterialId())){
+                        isExistMaterial.put(order.getMaterialId(),true);
+                    }
+                }
+                for (Map.Entry<String,Boolean> entry : isExistMaterial.entrySet()){
+                    // 有物料不在产品组成结构，不能退库
+                    if(!entry.getValue()){
+                        return ResponseResult.fail("有物料不在产品组成结构，请核对");
+                    }
+                }
+            }
+
             Map<String, Double> needSubMap = new HashMap<>();   // 需要减少库存的内容
             Map<String, Double> needAddMap = new HashMap<>();   // 需要增加库存的内容
             Map<String, Double> notUpdateMap = new HashMap<>();   // 不需要更新的内容
@@ -188,6 +220,14 @@ public class RepositoryReturnMaterialController extends BaseController {
             //1. 先删除老的，再插入新的
             boolean flag = repositoryReturnMaterialDetailService.removeByDocId(repositoryReturnMaterial.getId());
             if(flag){
+                if(repositoryReturnMaterial.getBatchId()==null){
+                    // 查看老的不是空，则更新为null
+                    RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(repositoryReturnMaterial.getId());
+                    if(old.getBatchId()!=null){
+                        repositoryReturnMaterialService.updateBatchIdNull(old.getId());
+                    }
+                }
+
                 repositoryReturnMaterialService.updateById(repositoryReturnMaterial);
 
                 for (RepositoryReturnMaterialDetail item : repositoryReturnMaterial.getRowList()){
@@ -328,6 +368,37 @@ public class RepositoryReturnMaterialController extends BaseController {
             boolean validIsClose = validIsClose(repositoryReturnMaterial.getReturnDate());
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
+            }
+
+            if(repositoryReturnMaterial.getBatchId()!=null){
+                List<RepositoryReturnMaterial> returnM = repositoryReturnMaterialService.getSameBatch(repositoryReturnMaterial.getId(),repositoryReturnMaterial.getBatchId());
+                if(returnM!=null && returnM.size()>0){
+                    return ResponseResult.fail("生产序号不能重复!.");
+                }
+                ProduceBatch pb = produceBatchService.getByPassedBatchId(repositoryReturnMaterial.getBatchId());
+                if( pb== null){
+                    return ResponseResult.fail("没有审核通过的生产序号");
+                }
+
+                HashMap<String, Boolean> isExistMaterial = new HashMap<>();
+                for (RepositoryReturnMaterialDetail detail : repositoryReturnMaterial.getRowList()){
+                    isExistMaterial.put(detail.getMaterialId(),false);
+                }
+                // 查询对应产品组成结构，假如不存在对应物料（皮料），不能退库
+                OrderProductOrder productOrder = orderProductOrderService.getByOrderNum(pb.getOrderNum());
+
+                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+                for (OrderProductOrder order : orders){
+                    if(isExistMaterial.containsKey(order.getMaterialId())){
+                        isExistMaterial.put(order.getMaterialId(),true);
+                    }
+                }
+                for (Map.Entry<String,Boolean> entry : isExistMaterial.entrySet()){
+                    // 有物料不在产品组成结构，不能退库
+                    if(!entry.getValue()){
+                        return ResponseResult.fail("有物料不在产品组成结构，请核对");
+                    }
+                }
             }
 
             // 1. 根据单据ID 获取该单据的全部详情信息，

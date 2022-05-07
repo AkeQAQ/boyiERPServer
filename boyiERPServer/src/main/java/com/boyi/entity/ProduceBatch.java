@@ -34,5 +34,19 @@ public class ProduceBatch extends BaseEntity {
 
     private Integer status;
 
+    private String size34;
+    private String size35;
+    private String size36;
+    private String size37;
+    private String size38;
+    private String size39;
+    private String size40;
+    private String size41;
+    private String size42;
+    private String size43;
+    private String size44;
+    private String size45;
+    private String size46;
+    private String size47;
 
 }

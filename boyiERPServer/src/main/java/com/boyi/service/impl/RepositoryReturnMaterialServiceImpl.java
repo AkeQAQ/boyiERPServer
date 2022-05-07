@@ -12,7 +12,9 @@ import com.boyi.service.RepositoryReturnMaterialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -26,6 +28,9 @@ import java.util.Map;
  */
 @Service
 public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryReturnMaterialMapper, RepositoryReturnMaterial> implements RepositoryReturnMaterialService {
+    private SimpleDateFormat sdf_yy = new SimpleDateFormat("yy");
+
+
     @Autowired
     RepositoryReturnMaterialMapper repositoryReturnMaterialMapper;
     public Page<RepositoryReturnMaterial> innerQuery(Page page, QueryWrapper<RepositoryReturnMaterial> eq) {
@@ -83,6 +88,22 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
                 .le(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.RETURN_DATE_FIELDNAME, closeDate)
                 .ne(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDNAME,
                         DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.STATUS_FIELDVALUE_0));
+    }
+
+    @Override
+    public List<RepositoryReturnMaterial> getSameBatch(Long id, Integer batchId) {
+        Date today = new Date();
+        String year = sdf_yy.format(today);
+
+        return this.list(new QueryWrapper<RepositoryReturnMaterial>()
+                .ne(id!=null,DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.ID_FIELDNAME,id)
+                .gt(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.ID_FIELDNAME,Long.valueOf(year+"01010000"))
+                .eq(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL.BATCH_ID_FIELDNAME,batchId));
+    }
+
+    @Override
+    public void updateBatchIdNull(Long id) {
+        this.repositoryReturnMaterialMapper.updateBatchIdNull(id);
     }
 
 }

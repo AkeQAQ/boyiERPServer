@@ -620,7 +620,6 @@ public class RepositoryPickMaterialController extends BaseController {
 
         try {
 
-
             boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
