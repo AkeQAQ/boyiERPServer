@@ -6,8 +6,10 @@ import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.ProduceProductConstituent;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -33,4 +35,6 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductOrder> listByMonthAndDay(String md);
 
     OrderProductOrder getByOrderNum(String orderNum);
+
+    List<OrderProductOrder> listByOrderNums(Set<String> orderNums);
 }

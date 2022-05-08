@@ -1,21 +1,30 @@
 package com.boyi.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.ExcelImportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -33,6 +42,8 @@ import java.util.*;
 @RequestMapping("/produce/batch")
 @Slf4j
 public class ProduceBatchController extends BaseController {
+    @Value("${poi.produceBatchImportDemoPath}")
+    private String poiImportDemoPath;
 
     @Transactional
     @PostMapping("/del")
@@ -420,11 +431,103 @@ public class ProduceBatchController extends BaseController {
                         BigDecimalUtil.mul(theRadio,"6").toString()
                 ).toString()
                 ,pb.getSize34());
-        BigDecimal bd40 = new BigDecimal(dosage);
+
+        BigDecimal bd40 = BigDecimalUtil.mul(dosage,pb.getSize40());
 
         return bd34.add(bd35).add(bd36).add(bd37).add(bd38).add(bd39).add(bd40).add(bd41)
                 .add(bd42).add(bd43).add(bd44).add(bd45).add(bd46).add(bd47).toString();
     }
 
+    /**
+     * 上传
+     */
+    @PostMapping("/upload")
+    @PreAuthorize("hasAuthority('produce:batch:import')")
+    public ResponseResult upload(Principal principal, MultipartFile[] files) {
+        MultipartFile file = files[0];
+
+        log.info("上传内容: files:{}",file);
+        ExcelImportUtil<ProduceBatch> utils = new ExcelImportUtil<ProduceBatch>(ProduceBatch.class);
+        List<ProduceBatch> batches = null;
+        try (InputStream fis = file.getInputStream();){
+            batches = utils.readExcel(fis, 1, 0,-1,null);
+            log.info("解析的excel数据:{}",batches);
+
+
+            if(batches == null || batches.size() == 0){
+                return ResponseResult.fail("解析内容未空");
+            }
+            ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
+            ArrayList<Integer> ids = new ArrayList<>();
+            HashSet<String> orderNums = new HashSet<>();
+
+
+            for (ProduceBatch batch: batches){
+                LocalDateTime now = LocalDateTime.now();
+                batch.setCreated(now);
+                batch.setUpdated(now);
+                batch.setCreatedUser(principal.getName());
+                batch.setUpdatedUser(principal.getName());
+                batch.setStatus(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_0);
+
+                ids.add(batch.getBatchId());
+                orderNums.add(batch.getOrderNum());
+            }
+
+            List<ProduceBatch> exist = produceBatchService.list(new QueryWrapper<ProduceBatch>().in(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME, ids));
+            if(exist != null && !exist.isEmpty()){
+                for (ProduceBatch existOne:exist){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","生产序号："+existOne.getBatchId()+"已存在");
+                    errorMsgs.add(errorMsg);
+                }
+                return ResponseResult.succ(errorMsgs);
+            }
+
+            List<OrderProductOrder> orders = orderProductOrderService.listByOrderNums(orderNums);
+            if(orders==null || orders.size()==0){
+                return ResponseResult.fail("没查到任何订单号");
+            }else{
+                Set<String> dbOrderNums = new HashSet<>();
+
+                for (OrderProductOrder order : orders){
+                    dbOrderNums.add(order.getOrderNum());
+                }
+                for (String uploadOrderNum : orderNums){
+                    if(!dbOrderNums.contains(uploadOrderNum)){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content","订单号："+uploadOrderNum+"不存在");
+                        errorMsgs.add(errorMsg);
+                    }
+                }
+
+                if(errorMsgs.size() > 0){
+                    return ResponseResult.succ(errorMsgs);
+                }
+            }
+            produceBatchService.saveBatch(batches);
+        }
+        catch (Exception e) {
+            if( e instanceof  DuplicateKeyException){
+                return ResponseResult.fail("生产序号重复！");
+            }
+            log.error("发生错误:",e);
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return ResponseResult.succ("上传成功");
+    }
+
+    @PostMapping("/down")
+    @PreAuthorize("hasAuthority('produce:batch:save')")
+    public ResponseResult down(HttpServletResponse response, Long id)throws Exception {
+        response.setContentType("application/octet-stream");
+        response.setHeader("content-disposition", "attachment;filename=" + new String("生产序号导入模板".getBytes("ISO8859-1")));
+        response.setHeader("filename","生产序号导入模板" );
+
+        FileInputStream fis = new FileInputStream(new File(poiImportDemoPath));
+        FileCopyUtils.copy(fis,response.getOutputStream());
+        return ResponseResult.succ("下载成功");
+    }
 
 }

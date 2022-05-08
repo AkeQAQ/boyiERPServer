@@ -43,6 +43,7 @@ poi:
   produceReturnShoesDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/returnShoesDemo.xlsx
   baseDataSupplierDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/baseDataSupplierDemo.xlsx
   orderProductOrderImportDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/orderProductOrderImportDemo.xlsx
+  produceBatchImportDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/produceBatchImportDemo.xlsx
 
 
 picture:

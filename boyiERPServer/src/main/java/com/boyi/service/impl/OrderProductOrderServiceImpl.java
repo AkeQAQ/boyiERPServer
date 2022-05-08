@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -88,6 +90,11 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public OrderProductOrder getByOrderNum(String orderNum) {
         return this.getOne(new QueryWrapper<OrderProductOrder>().eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,orderNum));
+    }
+
+    @Override
+    public List<OrderProductOrder> listByOrderNums(Set<String> orderNums) {
+        return this.list(new QueryWrapper<OrderProductOrder>().in(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,orderNums));
     }
 
 }
