@@ -247,6 +247,114 @@ public class ProduceBatchController extends BaseController {
         return ResponseResult.succ(pb);
     }
 
+    @PostMapping("/queryCaiDuanPrintByIds")
+    @PreAuthorize("hasAuthority('produce:batch:list')")
+    public ResponseResult queryCaiDuanPrintByIds(@RequestBody Long[] ids ) {
+
+        try{
+            HashMap<String, Object> theMap = new HashMap<>();
+            List<HashMap<String, Object>> onePageLists = new ArrayList<>();
+            for(Long id : ids){
+
+                HashMap<String, Object> onePage = new HashMap<>();
+
+                ArrayList<HashMap<String, String>> subLists = new ArrayList<>();
+
+                onePageLists.add(onePage);
+                onePage.put("subList",subLists);
+
+                ProduceBatch pb = produceBatchService.getById(id);
+                // 1. 查询订单信息
+                OrderProductOrder order = orderProductOrderService.getByOrderNum(pb.getOrderNum());
+                if(pb.getSize40()==null||pb.getSize40().isEmpty()){
+                    pb.setSize40("0");
+                }
+                if(pb.getSize41()==null||pb.getSize41().isEmpty()){
+                    pb.setSize41("0");
+                }
+                if(pb.getSize42()==null||pb.getSize42().isEmpty()){
+                    pb.setSize42("0");
+                }if(pb.getSize43()==null||pb.getSize43().isEmpty()){
+                    pb.setSize43("0");
+                }if(pb.getSize44()==null||pb.getSize44().isEmpty()){
+                    pb.setSize44("0");
+                }if(pb.getSize45()==null||pb.getSize45().isEmpty()){
+                    pb.setSize45("0");
+                }if(pb.getSize46()==null||pb.getSize46().isEmpty()){
+                    pb.setSize46("0");
+                }if(pb.getSize47()==null||pb.getSize47().isEmpty()){
+                    pb.setSize47("0");
+                }if(pb.getSize40()==null||pb.getSize40().isEmpty()){
+                    pb.setSize40("0");
+                }if(pb.getSize39()==null||pb.getSize39().isEmpty()){
+                    pb.setSize39("0");
+                }if(pb.getSize38()==null||pb.getSize38().isEmpty()){
+                    pb.setSize38("0");
+                }if(pb.getSize37()==null||pb.getSize37().isEmpty()){
+                    pb.setSize37("0");
+                }if(pb.getSize36()==null||pb.getSize36().isEmpty()){
+                    pb.setSize36("0");
+                }if(pb.getSize35()==null||pb.getSize35().isEmpty()){
+                    pb.setSize35("0");
+                }if(pb.getSize34()==null||pb.getSize34().isEmpty()){
+                    pb.setSize34("0");
+                }
+
+                onePage.put("productNum",order.getProductNum());
+                onePage.put("productBrand",order.getProductBrand());
+                onePage.put("productColor",order.getProductColor());
+
+                onePage.put("batchId",pb.getBatchId());
+                onePage.put("customerNum",order.getCustomerNum());
+                onePage.put("size34",pb.getSize34());
+                onePage.put("size35",pb.getSize35());
+                onePage.put("size36",pb.getSize36());
+                onePage.put("size37",pb.getSize37());
+                onePage.put("size38",pb.getSize38());
+                onePage.put("size39",pb.getSize39());
+                onePage.put("size40",pb.getSize40());
+                onePage.put("size41",pb.getSize41());
+                onePage.put("size42",pb.getSize42());
+                onePage.put("size43",pb.getSize43());
+                onePage.put("size44",pb.getSize44());
+                onePage.put("size45",pb.getSize45());
+                onePage.put("size46",pb.getSize46());
+                onePage.put("size47",pb.getSize47());
+                BigDecimal theTotalNum = new BigDecimal(pb.getSize34()).add(new BigDecimal(pb.getSize35())).add(new BigDecimal(pb.getSize36()))
+                        .add(new BigDecimal(pb.getSize37())).add(new BigDecimal(pb.getSize38())).add(new BigDecimal(pb.getSize39()))
+                        .add(new BigDecimal(pb.getSize40())).add(new BigDecimal(pb.getSize41())).add(new BigDecimal(pb.getSize42()))
+                        .add(new BigDecimal(pb.getSize43())).add(new BigDecimal(pb.getSize44())).add(new BigDecimal(pb.getSize45()))
+                        .add(new BigDecimal(pb.getSize46())).add(new BigDecimal(pb.getSize47()));
+                onePage.put("totalNum",theTotalNum.toString());
+
+
+                // 2. 查询组成结构
+                List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+                for (OrderProductOrder detail : details){
+                    String materialId = detail.getMaterialId();
+                    // 筛选皮料，
+                    if(materialId.startsWith("01.")){
+                        HashMap<String, String> theSub = new HashMap<>();
+                        theSub.put("materialId",materialId);
+                        theSub.put("materialName",detail.getMaterialName());
+                        theSub.put("dosage",detail.getDosage());
+
+                        // 计算用量，
+                        theSub.put("needNum",calOneOrderNeedNum(pb,detail.getDosage()));
+                        subLists.add(theSub);
+                    }
+                }
+
+                theMap.put("rowList",onePageLists);
+            }
+            return ResponseResult.succ(theMap);
+        }catch (Exception e){
+            log.error("报错",e);
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
     @GetMapping("/queryCaiDuanPrintById")
     @PreAuthorize("hasAuthority('produce:batch:list')")
     public ResponseResult queryCaiDuanPrintById(Long id ) {
