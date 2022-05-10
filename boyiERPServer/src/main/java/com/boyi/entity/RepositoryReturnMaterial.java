@@ -45,7 +45,7 @@ public class RepositoryReturnMaterial extends BaseEntity {
     private String createdUser;
 
     private String updatedUser;
-    private Integer batchId;
+    private String batchId;
 
     /**
      *  明细信息 用于接收前端数据

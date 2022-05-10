@@ -84,7 +84,7 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     public List<OrderProductOrder> listByMonthAndDay(String md) {
         return this.list(new QueryWrapper<OrderProductOrder>()
                 .likeRight(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,md)
-                .lt(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME,LocalDate.now().plusDays(-100)));
+                .lt(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME,LocalDate.now().plusDays(-300)));
     }
 
     @Override

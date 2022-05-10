@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceBatch;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.boyi.mapper.ProduceBatchMapper;
@@ -12,6 +13,8 @@ import com.boyi.service.ProduceBatchService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -50,13 +53,13 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     }
 
     @Override
-    public ProduceBatch getByBatchId(Integer batchId) {
+    public ProduceBatch getByBatchId(String batchId) {
         return this.getOne(new QueryWrapper<ProduceBatch>()
                 .eq(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,batchId));
     }
 
     @Override
-    public ProduceBatch getByPassedBatchId(Integer batchId) {
+    public ProduceBatch getByPassedBatchId(String batchId) {
         return this.getOne(new QueryWrapper<ProduceBatch>()
                 .eq(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,batchId)
                 .eq(DBConstant.TABLE_PRODUCE_BATCH.STATUS_FIELDNAME,
@@ -67,5 +70,12 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     public ProduceBatch getByOrderNum(String orderNum) {
         return this.getOne(new QueryWrapper<ProduceBatch>()
                 .eq(DBConstant.TABLE_PRODUCE_BATCH.ORDER_NUM_FIELDNAME,orderNum));
+    }
+
+    @Override
+    public List<ProduceBatch> listByMonthAndDay(String md) {
+        return this.list(new QueryWrapper<ProduceBatch>()
+                .likeRight(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,md)
+                .lt(DBConstant.TABLE_PRODUCE_BATCH.CREATED_FIELDNAME, LocalDate.now().plusDays(-300)));
     }
 }

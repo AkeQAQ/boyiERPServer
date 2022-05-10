@@ -51,7 +51,7 @@ public class ProduceBatchController extends BaseController {
     public ResponseResult del(@RequestBody Long[] ids) throws Exception{
         try {
             List<ProduceBatch> batches = produceBatchService.listByIds(Arrays.asList(ids));
-            ArrayList<Integer> batchIds = new ArrayList<>();
+            ArrayList<String> batchIds = new ArrayList<>();
             for (ProduceBatch batch : batches){
                 batchIds.add(batch.getBatchId());
             }
@@ -566,7 +566,7 @@ public class ProduceBatchController extends BaseController {
                 return ResponseResult.fail("解析内容未空");
             }
             ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
-            ArrayList<Integer> ids = new ArrayList<>();
+            ArrayList<String> ids = new ArrayList<>();
             HashSet<String> orderNums = new HashSet<>();
 
 

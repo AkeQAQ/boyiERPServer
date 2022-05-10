@@ -90,7 +90,7 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
 
     // 查看批次号的内容，ID!=自己的，ID> 当年年份+月份+日+0000，并且batchId!=''并且comment =当前comment内容，存在则不允许创建
     @Override
-    public List<RepositoryPickMaterial> getSameBatch(Long id ,Integer batchId) {
+    public List<RepositoryPickMaterial> getSameBatch(Long id ,String batchId) {
         Date today = new Date();
         String year = sdf_yy.format(today);
 
@@ -101,7 +101,7 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
     }
 
     @Override
-    public List<RepositoryPickMaterial> listByBatchIds(ArrayList<Integer> batchIds) {
+    public List<RepositoryPickMaterial> listByBatchIds(ArrayList<String> batchIds) {
         return this.list(new QueryWrapper<RepositoryPickMaterial>()
                 .in(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,batchIds));
     }

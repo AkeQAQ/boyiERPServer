@@ -5,6 +5,7 @@ import com.boyi.entity.ProduceBatch;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,9 +22,11 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
 
     void updateStatus(Long id, Integer batchStatusFieldvalue1);
 
-    ProduceBatch getByBatchId(Integer batchId);
+    ProduceBatch getByBatchId(String batchId);
 
-    ProduceBatch getByPassedBatchId(Integer batchId);
+    ProduceBatch getByPassedBatchId(String batchId);
 
     ProduceBatch getByOrderNum(String orderNum);
+
+    List<ProduceBatch> listByMonthAndDay(String md);
 }

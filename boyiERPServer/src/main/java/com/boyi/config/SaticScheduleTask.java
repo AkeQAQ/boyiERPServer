@@ -54,6 +54,12 @@ public class SaticScheduleTask {
     @Autowired
     private HisOrderProductOrderService hisOrderProductOrderService;
 
+    @Autowired
+    private ProduceBatchService produceBatchService;
+
+    @Autowired
+    private HisProduceBatchService hisProduceBatchService;
+
     private Long heartInterval = 30000L;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
@@ -241,7 +247,44 @@ public class SaticScheduleTask {
         addProgressHisAndRemove(progresses,year);
         log.info("【定时任务】添加进度表{}，删除进度表",progresses);
 
+    }
 
+    @Scheduled(cron = "0 * * * * ?")
+    private void changeProduceBatch() {
+        LocalDate now = LocalDate.now();
+        int m = now.getMonthValue();
+        int d = now.getDayOfMonth();
+        String md = m+""+d;
+        int year = now.getYear()-1;
+
+        // 3. 移动生产序号表
+        List<ProduceBatch> batches = produceBatchService.listByMonthAndDay(md);
+        if(batches==null || batches.size() ==0){
+            return;
+        }
+        addBatchHisAndRemove(batches,year);
+        log.info("【定时任务】添加生产序号历史表，删除生产序号表{}",batches);
+    }
+
+    private void addBatchHisAndRemove(List<ProduceBatch> batches, int year) {
+
+        // 1. 添加到历史表（订单号,批次号加年份）
+        ArrayList<HisProduceBatch> hisLists = new ArrayList<>();
+        ArrayList<Long> removeIds = new ArrayList<>();
+
+        for(ProduceBatch batch : batches){
+            HisProduceBatch hisBatch = new HisProduceBatch();
+            BeanUtils.copyProperties(batch,hisBatch);
+            hisBatch.setId(batch.getId());
+            hisBatch.setOrderNum(year+""+hisBatch.getOrderNum());
+            hisBatch.setBatchId(Integer.valueOf(year+""+hisBatch.getBatchId()));
+
+            hisLists.add(hisBatch);
+            removeIds.add(batch.getId());
+        }
+        hisProduceBatchService.saveBatch(hisLists);
+        // 2. 删除原表
+        produceBatchService.removeByIds(removeIds);
     }
 
     private void addProgressHisAndRemove(List<ProduceOrderMaterialProgress> progresses,int year) {

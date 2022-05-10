@@ -30,7 +30,7 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
 
     List<RepositoryReturnMaterial> countLTByCloseDate(LocalDate closeDate);
 
-    List<RepositoryReturnMaterial> getSameBatch(Long id, Integer batchId);
+    List<RepositoryReturnMaterial> getSameBatch(Long id, String batchId);
 
     void updateBatchIdNull(Long id);
 }

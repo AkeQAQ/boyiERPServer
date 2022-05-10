@@ -91,7 +91,7 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
     }
 
     @Override
-    public List<RepositoryReturnMaterial> getSameBatch(Long id, Integer batchId) {
+    public List<RepositoryReturnMaterial> getSameBatch(Long id, String batchId) {
         Date today = new Date();
         String year = sdf_yy.format(today);
 

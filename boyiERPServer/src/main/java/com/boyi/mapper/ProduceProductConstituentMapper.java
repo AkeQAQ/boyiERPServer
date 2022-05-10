@@ -55,7 +55,7 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
 
     @Select("" +
             " select t1.*,t2.return_num," +
-            "  cast(t1.order_number as decimal(6,2)) / (cast(t1.num as decimal(6,2)) - IFNULL(0,cast(t2.return_num as decimal(6,2))))   real_dosage from " +
+            "  (cast(t1.num as decimal(6,2)) - IFNULL(0,cast(t2.return_num as decimal(6,2))))  / cast(t1.order_number as decimal(6,2))    real_dosage from " +
             " (" +
             " select opo.order_num,opo.product_num ,opo.product_brand,opo.order_number,pb.batch_id,ppcd.material_id,bm.name material_name,rpmd.num" +
             "  from " +

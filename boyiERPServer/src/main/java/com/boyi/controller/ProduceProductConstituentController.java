@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.EmailUtils;
 import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.vo.RealDosageVO;
 import com.boyi.controller.base.BaseController;
@@ -39,7 +40,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/produce/productConstituent")
 @Slf4j
 public class ProduceProductConstituentController extends BaseController {
+    @Value("${boyi.toEmail}")
+    private String toEmail;
 
+    @Value("${boyi.csEmails}")
+    private String csEmails;
 
     @GetMapping("/queryRealDosageById")
     @PreAuthorize("hasAuthority('produce:productConstituent:list')")
@@ -233,13 +238,31 @@ public class ProduceProductConstituentController extends BaseController {
         if(productConstituent.getRowList() ==null || productConstituent.getRowList().size() ==0){
             return ResponseResult.fail("物料信息不能为空");
         }
-        HashSet<String> materialIds = new HashSet<>();
+        // 1. 假如比老的有多新增01.的物料，邮件通知
+        List<ProduceProductConstituentDetail> oldDetails = produceProductConstituentDetailService.listByForeignId(productConstituent.getId());
+
+        Set<String> oldMaterialIds = new HashSet<>();
+
+        for(ProduceProductConstituentDetail old : oldDetails){
+            oldMaterialIds.add(old.getMaterialId());
+        }
+
+        Set<String> materialIds = new HashSet<>();
+        StringBuilder sb = new StringBuilder("产品组成ID:").append(productConstituent.getId());
+
         for (ProduceProductConstituentDetail detail: productConstituent.getRowList()){
             if(materialIds.contains(detail.getMaterialId())){
                 return ResponseResult.fail("物料编码"+detail.getMaterialId()+"重复");
             }
             materialIds.add(detail.getMaterialId());
+            if(!oldMaterialIds.contains(detail.getMaterialId()) && detail.getMaterialId().startsWith("01.")){
+                sb.append(",新增01分组物料:").append(detail.getMaterialId()).append("-").append(detail.getMaterialName()).append("<br>");
+            }
         }
+        if(sb.length() > 10){
+            EmailUtils.sendMail(EmailUtils.MODULE_ADDNEW_MATERIAL_NAME,toEmail, csEmails.split(","),sb.toString());
+        }
+
 
         productConstituent.setUpdated(LocalDateTime.now());
         productConstituent.setUpdatedUser(principal.getName());
