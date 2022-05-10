@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
@@ -41,6 +42,20 @@ import java.util.*;
 @RequestMapping("/baseData/supplierMaterial")
 public class BaseSupplierMaterialController extends BaseController {
 
+    /**
+     * 查询报价
+     */
+    @GetMapping("/queryPriceByMaterialId")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:list')")
+    public ResponseResult queryPriceByMaterialId(String materialId,String dosage) {
+        List<BaseSupplierMaterial> list = baseSupplierMaterialService.listByMaterialId(materialId);
+        for (BaseSupplierMaterial bsm : list){
+            if(bsm.getPrice()!=null){
+                bsm.setComment(BigDecimalUtil.mul(dosage,bsm.getPrice()+"").toString());
+            }
+        }
+        return ResponseResult.succ(list);
+    }
 
     /**
      * 查询报价

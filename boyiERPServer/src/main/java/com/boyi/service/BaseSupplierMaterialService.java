@@ -41,4 +41,6 @@ public interface BaseSupplierMaterialService extends IService<BaseSupplierMateri
 
     int isRigion(BaseSupplierMaterial baseSupplierMaterial);
 
+    List<BaseSupplierMaterial> listByMaterialId(String materialId);
+
 }

@@ -3,6 +3,7 @@ package com.boyi.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.boyi.common.vo.RealDosageVO;
 import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.entity.RepositoryReturnMaterial;
 
@@ -25,4 +26,5 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
 
     Page<ProduceProductConstituent> innerQueryByManySearchWithDetailField(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList, Map<String, String> queryMap);
 
+    List<RealDosageVO> listRealDosageById(Long id);
 }

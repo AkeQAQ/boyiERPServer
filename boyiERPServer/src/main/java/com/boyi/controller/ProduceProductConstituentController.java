@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.ExcelExportUtil;
+import com.boyi.common.vo.RealDosageVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
@@ -39,6 +40,37 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 public class ProduceProductConstituentController extends BaseController {
 
+
+    @GetMapping("/queryRealDosageById")
+    @PreAuthorize("hasAuthority('produce:productConstituent:list')")
+    public ResponseResult queryRealDosageById(Long id) {
+
+        List<RealDosageVO> lists = produceProductConstituentService.listRealDosageById(id);
+
+        HashMap<String, String> materialSum = new HashMap<>();
+        HashMap<String, String> materialCount = new HashMap<>();
+        // 根据物料进行分组，对实际用料进行平均求值,
+        for(RealDosageVO vo : lists){
+            String sum = materialSum.get(vo.getMaterialId());
+
+            if(sum == null){
+                materialSum.put(vo.getMaterialId(),vo.getRealDosage());
+            }else{
+                materialSum.put(vo.getMaterialId(),BigDecimalUtil.add(sum,vo.getRealDosage()).toString());
+            }
+            String count = materialCount.get(vo.getMaterialId());
+            if(count == null){
+                materialCount.put(vo.getMaterialId(),"1");
+            }else{
+                materialCount.put(vo.getMaterialId(),BigDecimalUtil.add(count,"1").toString());
+            }
+        }
+        // 求出均值
+        for(RealDosageVO vo : lists) {
+            vo.setAvgDosage(BigDecimalUtil.div(materialSum.get(vo.getMaterialId()),materialCount.get(vo.getMaterialId())).toString());
+        }
+            return ResponseResult.succ(lists);
+    }
 
 
     /**

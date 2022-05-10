@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.vo.RealDosageVO;
 import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.entity.RepositoryReturnMaterial;
 import com.boyi.mapper.ProduceProductConstituentMapper;
@@ -81,5 +82,10 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
                         .orderByDesc(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.CREATED_FIELDNAME)
 
         );
+    }
+
+    @Override
+    public List<RealDosageVO> listRealDosageById(Long id) {
+        return produceProductConstituentMapper.listRealDosageById(id);
     }
 }

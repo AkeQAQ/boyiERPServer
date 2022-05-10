@@ -60,4 +60,5 @@ public interface BaseSupplierMaterialMapper extends BaseMapper<BaseSupplierMater
             "              )t where NOT ((end_date < #{startDate}) OR (start_date > #{endDate}))" +
             "")
     int isRigion(BaseSupplierMaterial baseSupplierMaterial);
+
 }

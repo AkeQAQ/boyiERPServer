@@ -114,4 +114,10 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
         return baseSupplierMaterialMapper.isRigion(baseSupplierMaterial);
     }
 
+    @Override
+    public List<BaseSupplierMaterial> listByMaterialId(String materialId) {
+        return baseSupplierMaterialMapper.list(new QueryWrapper<BaseSupplierMaterial>()
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME,materialId));
+    }
+
 }
