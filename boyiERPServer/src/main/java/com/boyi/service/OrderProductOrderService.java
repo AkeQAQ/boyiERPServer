@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.boyi.entity.ProduceProductConstituent;
 
 import java.util.HashSet;
@@ -37,4 +38,6 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     OrderProductOrder getByOrderNum(String orderNum);
 
     List<OrderProductOrder> listByOrderNums(Set<String> orderNums);
+
+    List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(String productNum, String productBrand, String materialId);
 }

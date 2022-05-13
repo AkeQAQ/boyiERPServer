@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.OrderProductOrder;
+import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.mapper.OrderProductOrderMapper;
 import com.boyi.service.OrderProductOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.boyi.service.ProduceOrderMaterialProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -95,6 +97,11 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public List<OrderProductOrder> listByOrderNums(Set<String> orderNums) {
         return this.list(new QueryWrapper<OrderProductOrder>().in(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,orderNums));
+    }
+
+    @Override
+    public List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(String productNum, String productBrand, String materialId) {
+        return orderProductOrderMapper.listByProductNumBrandAndProgressMaterialId(productNum,productBrand,materialId);
     }
 
 }

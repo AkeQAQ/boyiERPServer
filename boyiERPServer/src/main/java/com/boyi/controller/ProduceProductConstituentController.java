@@ -219,6 +219,18 @@ public class ProduceProductConstituentController extends BaseController {
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
+
+            // 假如是采购进度备料进度，入库数量>0的记录数量，则标注为可以修改
+            List<ProduceOrderMaterialProgress> list = orderProductOrderService.listByProductNumBrandAndProgressMaterialId(productConstituent.getProductNum(),
+                    productConstituent.getProductBrand(),detail.getMaterialId());
+            Boolean canChange = true;
+            for(ProduceOrderMaterialProgress progress: list){
+                String inNum = progress.getInNum();
+                if(inNum !=null && !inNum.isEmpty() && Double.valueOf(inNum).doubleValue() > 0D){
+                    canChange = false;
+                }
+            }
+            detail.setCanChange(canChange);
         }
 
         productConstituent.setRowList(details);
@@ -259,6 +271,13 @@ public class ProduceProductConstituentController extends BaseController {
                 sb.append(",新增01分组物料:").append(detail.getMaterialId()).append("-").append(detail.getMaterialName()).append("<br>");
             }
         }
+
+        // 老物料被删除了的列表
+        Set<String> delMaterialIds = new HashSet<>();
+        delMaterialIds.addAll(oldMaterialIds);
+        delMaterialIds.removeAll(materialIds);
+
+
         if(sb.length() > 10){
             EmailUtils.sendMail(EmailUtils.MODULE_ADDNEW_MATERIAL_NAME,toEmail, csEmails.split(","),sb.toString());
         }
@@ -285,6 +304,28 @@ public class ProduceProductConstituentController extends BaseController {
                 log.info("产品组成结构模块-更新内容:{}",productConstituent);
             }else{
                 return ResponseResult.fail("操作失败，期间detail删除失败");
+            }
+
+            log.info("【补充物料】，组成结构ID：{},删除掉的物料列表：{}",productConstituent.getId(),delMaterialIds);
+            HashSet<Long> removeIds = new HashSet<>();
+            // 老物料被修改的，要删除对应进度表记录
+            for(String delMaterialId:delMaterialIds){
+
+                List<ProduceOrderMaterialProgress> list = orderProductOrderService.listByProductNumBrandAndProgressMaterialId(productConstituent.getProductNum(),
+                        productConstituent.getProductBrand(), delMaterialId);
+
+                for(ProduceOrderMaterialProgress progress : list){
+                    if(progress.getInNum()!=null && Double.valueOf(progress.getInNum()).doubleValue() > 0D){
+                        log.error("逻辑出现漏洞，能删除品牌{},货号{},物料{}有入库数量的采购进度表.",productConstituent.getProductNum(),
+                                productConstituent.getProductBrand(),delMaterialId);
+                        return ResponseResult.fail("【异常情况，请通知管理员】物料编码"+delMaterialId+",在进度表ID:{"+progress.getId()+"}中存在入库记录{"+progress.getId()+"}");
+                    }
+                    removeIds.add(progress.getId());
+                }
+            }
+            if(!removeIds.isEmpty()){
+                produceOrderMaterialProgressService.removeByIds(removeIds);
+                log.info("【补充物料】【删除修改物料的进度表内容】,物料{},进度表ID：{}",delMaterialIds,removeIds);
             }
 
             return ResponseResult.succ("编辑成功");
@@ -524,6 +565,23 @@ public class ProduceProductConstituentController extends BaseController {
         log.info("生产模块-反审核通过内容:{}",produceProductConstituent);
 
         return ResponseResult.succ("反审核成功");
+    }
+
+    public static void main(String[] args) {
+        Set<String> s1 = new HashSet<>();
+        Set<String> s2 = new HashSet<>();
+        Set<String> s3 = new HashSet<>();
+
+        s1.add("1");
+        s1.add("2");
+
+        s2.add("1");
+        s2.add("3");
+
+        s3.addAll(s1);
+
+        s3.removeAll(s2);
+        System.out.println(s3);
     }
 
 }

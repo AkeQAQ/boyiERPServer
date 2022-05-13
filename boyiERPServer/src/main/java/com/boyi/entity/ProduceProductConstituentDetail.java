@@ -50,4 +50,7 @@ public class ProduceProductConstituentDetail extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     private String specs;
 
+    @TableField(exist = false)  // 字段数据库忽略
+    private Boolean canChange;
+
 }

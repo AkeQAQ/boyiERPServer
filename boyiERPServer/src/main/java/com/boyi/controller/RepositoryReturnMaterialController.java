@@ -171,7 +171,7 @@ public class RepositoryReturnMaterialController extends BaseController {
             }
 
 
-            if(repositoryReturnMaterial.getBatchId()!=null){
+            if(repositoryReturnMaterial.getBatchId()!=null && !repositoryReturnMaterial.getBatchId().isEmpty()){
                 List<RepositoryReturnMaterial> returnM = repositoryReturnMaterialService.getSameBatch(repositoryReturnMaterial.getId(),repositoryReturnMaterial.getBatchId());
                 if(returnM!=null && returnM.size()>0){
                     return ResponseResult.fail("生产序号不能重复!.");
@@ -220,7 +220,7 @@ public class RepositoryReturnMaterialController extends BaseController {
             //1. 先删除老的，再插入新的
             boolean flag = repositoryReturnMaterialDetailService.removeByDocId(repositoryReturnMaterial.getId());
             if(flag){
-                if(repositoryReturnMaterial.getBatchId()==null){
+                if(repositoryReturnMaterial.getBatchId()==null || repositoryReturnMaterial.getBatchId().isEmpty()){
                     // 查看老的不是空，则更新为null
                     RepositoryReturnMaterial old = repositoryReturnMaterialService.getById(repositoryReturnMaterial.getId());
                     if(old.getBatchId()!=null){
@@ -370,7 +370,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
 
-            if(repositoryReturnMaterial.getBatchId()!=null){
+            if(repositoryReturnMaterial.getBatchId()!=null && !repositoryReturnMaterial.getBatchId().isEmpty()){
                 List<RepositoryReturnMaterial> returnM = repositoryReturnMaterialService.getSameBatch(repositoryReturnMaterial.getId(),repositoryReturnMaterial.getBatchId());
                 if(returnM!=null && returnM.size()>0){
                     return ResponseResult.fail("生产序号不能重复!.");

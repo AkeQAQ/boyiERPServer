@@ -2,6 +2,8 @@ package com.boyi.mapper;
 
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.boyi.entity.ProduceOrderMaterialProgress;
+import com.boyi.service.ProduceOrderMaterialProgressService;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -55,4 +57,15 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " group by product_num,product_brand"+
             " </script>")
     List<OrderProductOrder> listProductNumBrand(@Param("orderIds")  List<Long> orderIds);
+
+    @Select(" select in_num,pomp.id id " +
+            " from" +
+            " order_product_order opo ," +
+            " produce_order_material_progress pomp " +
+            " where opo.id = pomp.order_id" +
+            " and opo.product_num = #{productNum} and opo.product_brand = #{productBrand} and material_id = #{materialId}" +
+            " ")
+    List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(@Param("productNum")String productNum,
+                                                                                  @Param("productBrand") String productBrand,
+                                                                                  @Param("materialId") String materialId);
 }

@@ -417,7 +417,7 @@ public class RepositoryPickMaterialController extends BaseController {
             if(!validIsClose){
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
-            if(repositoryPickMaterial.getBatchId()!=null){
+            if(repositoryPickMaterial.getBatchId()!=null && !repositoryPickMaterial.getBatchId().isEmpty()){
                 List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId());
                 if(pickM!=null && pickM.size()>0){
                     return ResponseResult.fail("生产序号不能重复!.");
@@ -467,7 +467,7 @@ public class RepositoryPickMaterialController extends BaseController {
             //1. 先删除老的，再插入新的
             boolean flag = repositoryPickMaterialDetailService.removeByDocId(repositoryPickMaterial.getId());
             if(flag){
-                if(repositoryPickMaterial.getBatchId()==null){
+                if(repositoryPickMaterial.getBatchId()==null || repositoryPickMaterial.getBatchId().isEmpty()){
                     // 查看老的不是空，则更新为null
                     RepositoryPickMaterial old = repositoryPickMaterialService.getById(repositoryPickMaterial.getId());
                     if(old.getBatchId()!=null){
@@ -625,7 +625,7 @@ public class RepositoryPickMaterialController extends BaseController {
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
 
-            if(repositoryPickMaterial.getBatchId()!=null){
+            if(repositoryPickMaterial.getBatchId()!=null && !repositoryPickMaterial.getBatchId().isEmpty()){
                 List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId());
                 if(pickM!=null && pickM.size()>0){
                     return ResponseResult.fail("生产序号不能重复!.");
