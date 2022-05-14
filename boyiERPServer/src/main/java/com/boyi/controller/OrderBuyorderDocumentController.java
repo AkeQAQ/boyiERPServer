@@ -116,6 +116,12 @@ public class OrderBuyorderDocumentController extends BaseController {
         }
 
         // 假如没有价格也不能下推
+        for (OrderBuyorderDocumentDetail item : details) {
+            BaseSupplierMaterial successPrice = baseSupplierMaterialService.getSuccessPrice(item.getSupplierId(), item.getMaterialId(), item.getOrderDate());
+            if(successPrice == null || successPrice.getPrice()==null || successPrice.getPrice()==0D){
+                return ResponseResult.fail("供应商:"+item.getSupplierId()+",物料:"+item.getMaterialId()+",没有价格，不能下推");
+            }
+        }
 
         try {
             // 2.封装入库单据表的信息
@@ -509,7 +515,13 @@ public class OrderBuyorderDocumentController extends BaseController {
 
         log.info("搜索字段:{},对应ID:{}", searchField, ids);
         pageData = orderBuyorderDocumentService.innerQueryByManySearch(getPage(), searchField, queryField, searchStr,searchStatusList, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
-        return ResponseResult.succ(pageData);
+
+        Map<String,Double> allPageTotalAmountAndNum = orderBuyorderDocumentService.getAllPageTotalAmount( searchField, queryField, searchStr,searchStatusList, searchStartDate, searchEndDate,queryMap,StringUtils.isBlank(searchDocNum)?null:searchDocNum.split(","));
+        Double sumAmount = allPageTotalAmountAndNum.get("sumAmount");
+        Double sumNum = allPageTotalAmountAndNum.get("sumNum");
+
+        return ResponseResult.succ(ResponseResult.SUCCESS_CODE,sumAmount+"_"+sumNum,pageData);
+
     }
 
 

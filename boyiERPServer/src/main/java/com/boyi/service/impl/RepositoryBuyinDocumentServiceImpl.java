@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.BaseSupplierMaterialCopy;
 import com.boyi.entity.RepositoryBuyinDocument;
@@ -209,7 +210,7 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
             if(one.getAmount()==null || one.getAmount() ==0.0D){
                 continue;
             }
-            sumAmount+=one.getAmount();
+            sumAmount = BigDecimalUtil.add(sumAmount,one.getAmount()).doubleValue();
         }
         return sumAmount;
     }

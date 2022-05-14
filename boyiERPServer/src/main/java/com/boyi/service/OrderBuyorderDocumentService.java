@@ -32,4 +32,7 @@ public interface OrderBuyorderDocumentService extends IService<OrderBuyorderDocu
     void statusSuccess(Long id);
 
     void statusNotSuccess(Long id);
+
+    Map<String, Double> getAllPageTotalAmount( String searchField, String queryField, String searchStr, List<Long> searchStatusList, String searchStartDate, String searchEndDate, Map<String, String> otherSearch, Object[] searchDocNum);
+
 }

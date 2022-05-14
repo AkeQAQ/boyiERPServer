@@ -5,14 +5,17 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.OrderBuyorderDocument;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.OrderBuyorderDocumentMapper;
 import com.boyi.service.OrderBuyorderDocumentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -121,5 +124,65 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
                 .set(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDNAME, DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDVALUE_1)
                 .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ID_FIELDNAME, id);
         this.update(updateWrapper);
+    }
+
+    @Override
+    public Map<String, Double> getAllPageTotalAmount( String searchField, String queryField, String searchStr, List<Long> searchStatusList, String searchStartDate, String searchEndDate, Map<String, String> otherSearch, Object[] searchDocNum) {
+        QueryWrapper<OrderBuyorderDocument> queryWrapper = new QueryWrapper<>();
+        for (String key : otherSearch.keySet()){
+            if(key.equals("price")){
+                String val = otherSearch.get(key);
+                if(val.isEmpty()){
+                    queryWrapper.isNull("price");
+                }else{
+                    queryWrapper.eq( !val.equals("null"),key,val);
+                }
+            }else{
+                String val = otherSearch.get(key);
+                queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }
+
+        }
+        if(queryField.equals("price")){
+            if(searchStr.isEmpty()){
+                queryWrapper.isNull("price");
+            }else{
+                queryWrapper.
+                        eq(!searchStr.equals("null")
+                                && StrUtil.isNotBlank(searchField),queryField,searchStr);
+            }
+
+        }else{
+            queryWrapper.
+                    like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }
+
+        List<OrderBuyorderDocument> list = orderBuyorderDocumentMapper.list(
+                queryWrapper
+                        .in(searchStatusList != null && searchStatusList.size() > 0, DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.DETAIL_STATUS_FIELDNAME, searchStatusList)
+                        .ge(StrUtil.isNotBlank(searchStartDate) && !searchStartDate.equals("null"), DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME, searchStartDate)
+                        .le(StrUtil.isNotBlank(searchEndDate) && !searchEndDate.equals("null"), DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME, searchEndDate)
+                        .in(searchDocNum != null && searchDocNum.length != 0, DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME, searchDocNum)
+        );
+        Double sumAmount = 0.0D;
+        Double sumNum = 0.0D;
+
+        for (OrderBuyorderDocument one: list
+        ) {
+            if(one.getAmount()!=null && one.getAmount() >0.0D){
+                sumAmount = BigDecimalUtil.add(sumAmount,one.getAmount()).doubleValue();
+            }
+            if(one.getNum()!=null && one.getNum() > 0.0D){
+                sumNum = BigDecimalUtil.add(sumNum,one.getNum()).doubleValue();
+
+            }
+        }
+        HashMap<String, Double> returnMap = new HashMap<>();
+        returnMap.put("sumAmount",sumAmount);
+        returnMap.put("sumNum",sumNum);
+
+        return returnMap;
     }
 }
