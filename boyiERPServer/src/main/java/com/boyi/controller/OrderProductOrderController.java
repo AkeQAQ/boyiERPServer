@@ -525,13 +525,17 @@ public class OrderProductOrderController extends BaseController {
                 String oneStr = theOneSearch.get("searchStr");
                 String theQueryField = null;
                 if (StringUtils.isNotBlank(oneField)) {
-                    if (searchField.equals("productNum")) {
+                    if (oneField.equals("productNum")) {
                         theQueryField = "product_num";
                     }
                     else if (oneField.equals("productBrand")) {
                         theQueryField = "product_brand";
 
-                    } else {
+                    }
+                    else if (oneField.equals("orderNum")) {
+                        theQueryField = "order_num";
+
+                    }else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);

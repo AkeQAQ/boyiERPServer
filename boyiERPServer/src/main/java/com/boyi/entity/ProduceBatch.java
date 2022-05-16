@@ -1,5 +1,6 @@
 package com.boyi.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
@@ -59,5 +60,11 @@ public class ProduceBatch extends BaseEntity {
     private String size45;
     private String size46;
     private String size47;
+
+    @TableField(exist = false)
+    private String productNum;
+
+    @TableField(exist = false)
+    private String productBrand;
 
 }

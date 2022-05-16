@@ -8,9 +8,11 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceBatch;
 import com.boyi.entity.ProduceOrderMaterialProgress;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.ProduceBatchMapper;
 import com.boyi.service.ProduceBatchService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -28,6 +30,13 @@ import java.util.Map;
 @Service
 public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, ProduceBatch> implements ProduceBatchService {
 
+    @Autowired
+    private ProduceBatchMapper produceBatchMapper;
+
+    public Page<ProduceBatch> innerQuery(Page page, QueryWrapper<ProduceBatch> eq) {
+        return produceBatchMapper.page(page,eq);
+    }
+
     @Override
     public Page<ProduceBatch> complementInnerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, Map<String, String> otherSearch) {
         QueryWrapper<ProduceBatch> queryWrapper = new QueryWrapper<>();
@@ -37,7 +46,7 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
             queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
                     && StrUtil.isNotBlank(key),key,val);
         }
-        return this.page(page,
+        return this.innerQuery(page,
                 queryWrapper.
                         like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
