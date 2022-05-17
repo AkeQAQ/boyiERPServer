@@ -556,9 +556,14 @@ public class ProduceBatchController extends BaseController {
 
         log.info("上传内容: files:{}",file);
         ExcelImportUtil<ProduceBatch> utils = new ExcelImportUtil<ProduceBatch>(ProduceBatch.class);
-        List<ProduceBatch> batches = null;
+        List<ProduceBatch> batches = new ArrayList<ProduceBatch>();
         try (InputStream fis = file.getInputStream();){
-            batches = utils.readExcel(fis, 1, 0,-1,null);
+            List<ProduceBatch> excelBatch = utils.readExcel(fis, 1, 0,-1,null);
+            for (ProduceBatch batch : excelBatch){
+                if(batch.getBatchId()!=null && !batch.getBatchId().isEmpty()){
+                    batches.add(batch);
+                }
+            }
             log.info("解析的excel数据:{}",batches);
 
 
