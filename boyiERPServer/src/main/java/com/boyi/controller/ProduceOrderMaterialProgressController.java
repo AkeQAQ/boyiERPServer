@@ -625,6 +625,9 @@ public class ProduceOrderMaterialProgressController extends BaseController {
         LocalDateTime now = LocalDateTime.now();
         try {
 
+            StringBuilder sb = new StringBuilder();
+
+
             for (ProduceOrderMaterialProgress process : materialProgresses) {
 //                if((process.getAddNum() == null || Double.valueOf(process.getAddNum()) == 0 ) &&( process.getComment()==null || process.getComment().isEmpty())){
 //                    continue;
@@ -646,8 +649,17 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                     process.setProgressPercent((int)thePercent);
                     produceOrderMaterialProgressService.save(process);
                 } else {
+                    // 假如已经进度表已经有入库数量，不能修改
+                    if(old.getInNum()!=null && !old.getInNum().isEmpty()&&Double.valueOf(old.getInNum())>0.0D&&!process.getAddNum().isEmpty()&&Double.valueOf(process.getAddNum()).doubleValue() > 0D){
+                        sb.append(old.getMaterialId()+"已存在入库数量，不能修改备料数量,");
+                        continue;
+                    }
+
                     process.setUpdated(now);
                     process.setUpdatedUser(principal.getName());
+
+
+
                     BigDecimal preparedNum = new BigDecimal(old.getPreparedNum()).add(new BigDecimal(process.getAddNum()));
                     if(Double.valueOf(preparedNum.doubleValue()) < 0.0D){
                         throw new RuntimeException("备料数目不能为负数");
@@ -670,14 +682,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                     produceOrderMaterialProgressService.update(updateW);
                 }
             }
-            // 判断该物料是否全部进度已齐？是则修改订单的进度状态
-            /*boolean flag = produceOrderMaterialProgressService.isPreparedByOrderId(orderId);
-            if(flag){
-                orderProductOrderService.updatePrepared(orderId,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_0);
-            }else{
-                orderProductOrderService.updatePrepared(orderId,DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
-            }*/
-            return ResponseResult.succ("备料成功");
+            return ResponseResult.succ("备料成功"+sb.toString());
         }catch (Exception e){
             log.error("报错",e);
             throw new RuntimeException(e.getMessage());
