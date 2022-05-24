@@ -808,6 +808,9 @@ public class RepositoryPickMaterialController extends BaseController {
             else if (searchField.equals("comment")) {
                 queryField = "comment";
 
+            }else if (searchField.equals("batchId")) {
+                queryField = "batch_id";
+
             }
             else {
                 return ResponseResult.fail("搜索字段不存在");
@@ -836,6 +839,9 @@ public class RepositoryPickMaterialController extends BaseController {
                     }
                     else if (oneField.equals("comment")) {
                         theQueryField = "comment";
+                    }
+                    else if (oneField.equals("batchId")) {
+                        theQueryField = "batch_id";
                     }
                     else {
                         continue;

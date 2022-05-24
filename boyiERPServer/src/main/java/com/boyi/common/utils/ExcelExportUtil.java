@@ -64,10 +64,10 @@ public class ExcelExportUtil<T> {
                         if(i == ea.sort()) { //列序号
                             try{
                                 Object f = field.get(t);
-                                if("status".equals(field.getName())){
+                                if("status".equals(field.getName()) && statusMap!=null){
                                     cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
                                 }
-                                else if("detailStatus".equals(field.getName())){
+                                else if("detailStatus".equals(field.getName())&& statusMap!=null){
                                     cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
                                 }
                                 else if("amount".equals(field.getName())){

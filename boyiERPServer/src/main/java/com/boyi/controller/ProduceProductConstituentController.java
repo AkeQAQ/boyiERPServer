@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -46,6 +47,49 @@ public class ProduceProductConstituentController extends BaseController {
     @Value("${boyi.csEmails}")
     private String csEmails;
 
+    @Value("${poi.realDosageDemoPath}")
+    private String poiDemoPath;
+
+    @PostMapping("/exportAllRealDosage")
+    @PreAuthorize("hasAuthority('produce:productConstituent:list')")
+    public void exportAllRealDosage(HttpServletResponse response) {
+        List<RealDosageVO> lists = produceProductConstituentService.listRealDosage();
+
+        HashMap<String, String> materialSum = new HashMap<>();
+        HashMap<String, String> materialCount = new HashMap<>();
+        // 根据物料进行分组，对实际用料进行平均求值,
+        for(RealDosageVO vo : lists){
+            String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();
+            String sum = materialSum.get(key);
+
+            String netUse = BigDecimalUtil.sub(vo.getNum(), vo.getReturnNum()).toString();
+            if(sum == null){
+                materialSum.put(key,netUse);
+            }else{
+                materialSum.put(key,BigDecimalUtil.add(sum,netUse).toString());
+            }
+            String count = materialCount.get(key);
+            if(count == null){
+                materialCount.put(key,vo.getBatchNum());
+            }else{
+                materialCount.put(key,BigDecimalUtil.add(count,vo.getBatchNum()).toString());
+            }
+        }
+        // 求出均值
+        for(RealDosageVO vo : lists) {
+            String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();
+            vo.setAvgDosage(BigDecimalUtil.div(materialSum.get(key),materialCount.get(key)).toString());
+        }
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(RealDosageVO.class,1,0).export("","",response,fis,lists,"报表.xlsx",null);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
+
+
     @GetMapping("/queryRealDosageById")
     @PreAuthorize("hasAuthority('produce:productConstituent:list')")
     public ResponseResult queryRealDosageById(Long id) {
@@ -56,23 +100,26 @@ public class ProduceProductConstituentController extends BaseController {
         HashMap<String, String> materialCount = new HashMap<>();
         // 根据物料进行分组，对实际用料进行平均求值,
         for(RealDosageVO vo : lists){
-            String sum = materialSum.get(vo.getMaterialId());
+            String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();
+            String sum = materialSum.get(key);
 
+            String netUse = BigDecimalUtil.sub(vo.getNum(), vo.getReturnNum()).toString();
             if(sum == null){
-                materialSum.put(vo.getMaterialId(),vo.getRealDosage());
+                materialSum.put(key,netUse);
             }else{
-                materialSum.put(vo.getMaterialId(),BigDecimalUtil.add(sum,vo.getRealDosage()).toString());
+                materialSum.put(key,BigDecimalUtil.add(sum,netUse).toString());
             }
-            String count = materialCount.get(vo.getMaterialId());
+            String count = materialCount.get(key);
             if(count == null){
-                materialCount.put(vo.getMaterialId(),"1");
+                materialCount.put(key,vo.getBatchNum());
             }else{
-                materialCount.put(vo.getMaterialId(),BigDecimalUtil.add(count,"1").toString());
+                materialCount.put(key,BigDecimalUtil.add(count,vo.getBatchNum()).toString());
             }
         }
         // 求出均值
         for(RealDosageVO vo : lists) {
-            vo.setAvgDosage(BigDecimalUtil.div(materialSum.get(vo.getMaterialId()),materialCount.get(vo.getMaterialId())).toString());
+            String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();
+            vo.setAvgDosage(BigDecimalUtil.div(materialSum.get(key),materialCount.get(key)).toString());
         }
             return ResponseResult.succ(lists);
     }

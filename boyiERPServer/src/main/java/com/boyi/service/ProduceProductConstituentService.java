@@ -27,4 +27,7 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
     Page<ProduceProductConstituent> innerQueryByManySearchWithDetailField(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList, Map<String, String> queryMap);
 
     List<RealDosageVO> listRealDosageById(Long id);
+
+    List<RealDosageVO> listRealDosage();
+
 }

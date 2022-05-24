@@ -88,4 +88,9 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
     public List<RealDosageVO> listRealDosageById(Long id) {
         return produceProductConstituentMapper.listRealDosageById(id);
     }
+
+    @Override
+    public List<RealDosageVO> listRealDosage() {
+        return produceProductConstituentMapper.listRealDosage();
+    }
 }
