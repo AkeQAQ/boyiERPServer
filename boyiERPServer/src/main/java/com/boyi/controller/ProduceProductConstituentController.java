@@ -51,7 +51,7 @@ public class ProduceProductConstituentController extends BaseController {
     private String poiDemoPath;
 
     @PostMapping("/exportAllRealDosage")
-    @PreAuthorize("hasAuthority('produce:productConstituent:list')")
+    @PreAuthorize("hasAuthority('produce:productConstituent:queryRealDosage')")
     public void exportAllRealDosage(HttpServletResponse response) {
         List<RealDosageVO> lists = produceProductConstituentService.listRealDosage();
 
