@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -104,6 +105,17 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
     @Override
     public void updateBatchIdNull(Long id) {
         this.repositoryReturnMaterialMapper.updateBatchIdNull(id);
+    }
+
+    @Override
+    public List<RepositoryReturnMaterial> listByBatchIds(ArrayList<String> batchIds) {
+        return this.list(new QueryWrapper<RepositoryReturnMaterial>()
+                .in(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,batchIds));
+    }
+
+    @Override
+    public void updateBatchIdAppendYearById(int year, List<String> batchIds) {
+        this.repositoryReturnMaterialMapper.updateBatchIdAppendYearById(year,batchIds);
     }
 
 }

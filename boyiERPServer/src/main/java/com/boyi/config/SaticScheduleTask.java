@@ -1,6 +1,8 @@
 package com.boyi.config;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.EmailUtils;
 import com.boyi.controller.*;
 import com.boyi.entity.*;
@@ -59,6 +61,12 @@ public class SaticScheduleTask {
 
     @Autowired
     private HisProduceBatchService hisProduceBatchService;
+
+    @Autowired
+    private RepositoryPickMaterialService repositoryPickMaterialService;
+
+    @Autowired
+    private RepositoryReturnMaterialService repositoryReturnMaterialService;
 
     private Long heartInterval = 30000L;
 
@@ -227,7 +235,6 @@ public class SaticScheduleTask {
         int m = now.getMonthValue();
         int d = now.getDayOfMonth();
         String md = m+""+d;
-        int year = now.getYear()-1;
         // 1. 获取老的产品订单表
         List<OrderProductOrder> lists =orderProductOrderService.listByMonthAndDay(md);
         log.info("【定时任务】获取月日%{},去年创建的产品订单数据{}",md,lists);
@@ -241,6 +248,9 @@ public class SaticScheduleTask {
         }
         List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderIds(orderIds);
         log.info("【定时任务】获取采购进度，订单号{}",orderIds);
+
+        int year = lists.get(0).getCreated().getYear();
+
         // 3. 添加到历史表，并且移除原表
         addOrderHisAndRemove(lists,year);
         log.info("【定时任务】添加产品订单历史表{}，删除产品订单表",lists);
@@ -255,16 +265,35 @@ public class SaticScheduleTask {
         int m = now.getMonthValue();
         int d = now.getDayOfMonth();
         String md = m+""+d;
-        int year = now.getYear()-1;
 
         // 3. 移动生产序号表
         List<ProduceBatch> batches = produceBatchService.listByMonthAndDay(md);
         if(batches==null || batches.size() ==0){
             return;
         }
+        LocalDateTime createdDate = batches.get(0).getCreated();
+        int year = createdDate.getYear();
         addBatchHisAndRemove(batches,year);
         log.info("【定时任务】添加生产序号历史表，删除生产序号表{}",batches);
+
+        // 修改领料表，退料表得生产序号，加上日期
+        updatePickReturnBatchId(batches,year);
+
     }
+
+    private void updatePickReturnBatchId(List<ProduceBatch> batches, int year) {
+        ArrayList<String> batchIds = new ArrayList<>();
+        // 查询生产序号的领料表和退料表
+        for(ProduceBatch pb : batches){
+            batchIds.add(pb.getBatchId());
+        }
+        // 修改对应的领料表和退料表
+        repositoryPickMaterialService.updateBatchIdAppendYearById(year,batchIds);
+        repositoryReturnMaterialService.updateBatchIdAppendYearById(year,batchIds);
+        log.info("【定时任务】修改领料表表，退料表，batchIds:{},添加年份:{}",batchIds,year);
+
+    }
+
 
     private void addBatchHisAndRemove(List<ProduceBatch> batches, int year) {
 
@@ -277,7 +306,7 @@ public class SaticScheduleTask {
             BeanUtils.copyProperties(batch,hisBatch);
             hisBatch.setId(batch.getId());
             hisBatch.setOrderNum(year+""+hisBatch.getOrderNum());
-            hisBatch.setBatchId(Integer.valueOf(year+""+hisBatch.getBatchId()));
+            hisBatch.setBatchId(year+""+hisBatch.getBatchId());
 
             hisLists.add(hisBatch);
             removeIds.add(batch.getId());

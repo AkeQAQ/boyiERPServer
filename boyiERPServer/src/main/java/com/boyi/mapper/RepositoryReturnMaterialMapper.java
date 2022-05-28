@@ -77,4 +77,12 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
 
     @Update("update repository_return_material set batch_id = null where id = #{id}")
     void updateBatchIdNull(@Param("id")Long id);
+
+    @Update("<script>" +
+            " update " +
+            "repository_return_material  set batch_id =  CONCAT(#{year},batch_id)" +
+            "  where  id in"+
+            " <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> "  +
+            " </script>")
+    void updateBatchIdAppendYearById(@Param("year")int year,@Param("batchIds") List<String> batchIds);
 }

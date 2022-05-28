@@ -24,7 +24,7 @@ public class HisProduceBatch extends BaseEntity {
     /**
      * 投产序号
      */
-    private Integer batchId;
+    private String batchId;
 
     private String createdUser;
 

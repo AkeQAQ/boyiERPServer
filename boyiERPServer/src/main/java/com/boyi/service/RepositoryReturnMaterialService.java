@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.RepositoryReturnMaterial;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -33,4 +34,8 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
     List<RepositoryReturnMaterial> getSameBatch(Long id, String batchId);
 
     void updateBatchIdNull(Long id);
+
+    List<RepositoryReturnMaterial> listByBatchIds(ArrayList<String> batchIds);
+
+    void updateBatchIdAppendYearById(int year, List<String> batchIds);
 }

@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -82,4 +83,12 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
 
     @Update("update repository_pick_material set batch_id = null where id = #{id}")
     void updateBatchIdNull(@Param("id")Long id);
+
+    @Update("<script>" +
+            " update " +
+            "repository_pick_material  set batch_id =  CONCAT(#{year},batch_id)" +
+            "  where  batch_id in"+
+            " <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> "  +
+            " </script>")
+    void updateBatchIdAppendYearById(@Param("year")int year,@Param("batchIds") List<String> batchIds);
 }

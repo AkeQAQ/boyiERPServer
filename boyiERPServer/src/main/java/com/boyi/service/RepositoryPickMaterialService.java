@@ -36,4 +36,6 @@ public interface RepositoryPickMaterialService extends IService<RepositoryPickMa
     List<RepositoryPickMaterial> listByBatchIds(ArrayList<String> batchIds);
 
     void updateBatchIdNull(Long id);
+
+    void updateBatchIdAppendYearById(int year, List<String> batchIds);
 }

@@ -111,4 +111,9 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
         this.repositoryPickMaterialMapper.updateBatchIdNull(id);
     }
 
+    @Override
+    public void updateBatchIdAppendYearById(int year, List<String> batchIds) {
+        this.repositoryPickMaterialMapper.updateBatchIdAppendYearById(year,batchIds);
+    }
+
 }
