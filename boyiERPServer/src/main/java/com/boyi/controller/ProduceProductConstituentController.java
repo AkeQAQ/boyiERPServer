@@ -302,8 +302,12 @@ public class ProduceProductConstituentController extends BaseController {
 
         Set<String> oldMaterialIds = new HashSet<>();
 
+        Map<String, ProduceProductConstituentDetail> oldDetailsObj = new HashMap<>();
+
+
         for(ProduceProductConstituentDetail old : oldDetails){
             oldMaterialIds.add(old.getMaterialId());
+            oldDetailsObj.put(old.getMaterialId(),old);
         }
 
         Set<String> materialIds = new HashSet<>();
@@ -345,6 +349,21 @@ public class ProduceProductConstituentController extends BaseController {
                 for (ProduceProductConstituentDetail item : productConstituent.getRowList()){
                     item.setId(null);
                     item.setConstituentId(productConstituent.getId());
+                    ProduceProductConstituentDetail theOneMaterial = oldDetailsObj.get(item.getMaterialId());
+                    // 老的存在，则赋值创建时间等字段，
+                    if(theOneMaterial!=null){
+                        item.setCreated(theOneMaterial.getCreated());
+                        item.setUpdated(LocalDateTime.now());
+                        item.setCreatedUser(theOneMaterial.getCreatedUser());
+                        item.setUpdatedUser(principal.getName());
+                    }
+                    //新增物料，赋值初始数值
+                    else{
+                        item.setCreated(LocalDateTime.now());
+                        item.setUpdated(LocalDateTime.now());
+                        item.setCreatedUser(principal.getName());
+                        item.setUpdatedUser(principal.getName());
+                    }
                 }
 
                 produceProductConstituentDetailService.saveBatch(productConstituent.getRowList());
@@ -414,6 +433,11 @@ public class ProduceProductConstituentController extends BaseController {
 
             for (ProduceProductConstituentDetail item : productConstituent.getRowList()){
                 item.setConstituentId(productConstituent.getId());
+                item.setCreated(now);
+                item.setUpdated(now);
+                item.setCreatedUser(principal.getName());
+                item.setUpdatedUser(principal.getName());
+
             }
 
             produceProductConstituentDetailService.saveBatch(productConstituent.getRowList());
