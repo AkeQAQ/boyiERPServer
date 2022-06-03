@@ -354,7 +354,7 @@ public class OrderProductOrderController extends BaseController {
                 order.setUpdated(now);
                 order.setCreatedUser(principal.getName());
                 order.setUpdatedUser(principal.getName());
-                order.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_2);
+                order.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0);
                 order.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
                 ids.add(order.getOrderNum());
             }

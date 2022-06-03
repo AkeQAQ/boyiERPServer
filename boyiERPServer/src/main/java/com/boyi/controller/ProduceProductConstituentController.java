@@ -521,7 +521,7 @@ public class ProduceProductConstituentController extends BaseController {
         if(searchStatusList.size() == 0){
             return ResponseResult.fail("状态不能为空");
         }
-        if(queryMap.containsKey("material_name") || queryField.equals("material_name")){
+        if(((queryMap.containsKey("material_name")&&!queryMap.get("material_name").isEmpty())) || (queryField.equals("material_name")&&!searchStr.isEmpty())){
             pageData = produceProductConstituentService.innerQueryByManySearchWithDetailField(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
         }else{
             pageData = produceProductConstituentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
