@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
@@ -16,12 +17,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -41,6 +45,80 @@ import java.util.*;
 @RestController
 @RequestMapping("/baseData/supplierMaterial")
 public class BaseSupplierMaterialController extends BaseController {
+
+    @Value("${poi.supplierMaterialDemoPath}")
+    private String poiDemoPath;
+
+    /**
+     * 获取采购入库 分页导出
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('baseData:supplierMaterial:valid')")
+    public void export(HttpServletResponse response, String searchField, String searchStartDate, String searchEndDate, String searchStatus,
+                       @RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        Page<BaseSupplierMaterial> pageData = null;
+        List<String> ids = new ArrayList<>();
+        String queryField = "";
+        if (searchField != "") {
+            if (searchField.equals("supplierName")) {
+                queryField = "supplier_name";
+            }
+            else if (searchField.equals("materialName")) {
+                queryField = "material_name";
+
+            }
+        }
+
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
+
+                    } else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(com.baomidou.mybatisplus.core.toolkit.StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+        pageData = baseSupplierMaterialService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStatusList,queryMap);
+
+
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(BaseSupplierMaterial.class,1,0).export(null,null,response,fis,pageData.getRecords(),"报表.xlsx",DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.statusMap);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
 
     /**
      * 查询报价

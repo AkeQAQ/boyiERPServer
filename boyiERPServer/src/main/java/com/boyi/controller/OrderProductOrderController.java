@@ -348,7 +348,12 @@ public class OrderProductOrderController extends BaseController {
             }
             ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
             ArrayList<String> ids = new ArrayList<>();
+
+            List<OrderProductOrder> saveOrders = new ArrayList<OrderProductOrder>();
             for (OrderProductOrder order: orderProductOrders){
+                if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
+                    continue;
+                }
                 LocalDateTime now = LocalDateTime.now();
                 order.setCreated(now);
                 order.setUpdated(now);
@@ -356,6 +361,7 @@ public class OrderProductOrderController extends BaseController {
                 order.setUpdatedUser(principal.getName());
                 order.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0);
                 order.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
+                saveOrders.add(order);
                 ids.add(order.getOrderNum());
             }
             List<OrderProductOrder> exist = orderProductOrderService.list(new QueryWrapper<OrderProductOrder>()
@@ -368,7 +374,7 @@ public class OrderProductOrderController extends BaseController {
                 }
                 return ResponseResult.succ(errorMsgs);
             }
-            orderProductOrderService.saveBatch(orderProductOrders);
+            orderProductOrderService.saveBatch(saveOrders);
         }
         catch (Exception e) {
             if( e instanceof  DuplicateKeyException){
@@ -431,6 +437,33 @@ public class OrderProductOrderController extends BaseController {
     public ResponseResult queryById(Long id) {
         OrderProductOrder orderProductOrder = orderProductOrderService.getById(id);
         return ResponseResult.succ(orderProductOrder);
+    }
+
+    /**
+     * 修改订单号
+     */
+    @PostMapping("/updateOrderNum")
+    @PreAuthorize("hasAuthority('order:productOrder:update')")
+    @Transactional
+    public ResponseResult updateOrderNum(Principal principal, @Validated @RequestBody OrderProductOrder orderProductOrder)
+            throws Exception{
+
+        orderProductOrder.setUpdated(LocalDateTime.now());
+        orderProductOrder.setUpdatedUser(principal.getName());
+        try {
+
+            orderProductOrderService.updateById(orderProductOrder);
+
+            log.info("产品订单模块-更新订单号内容:{}",orderProductOrder);
+
+            return ResponseResult.succ("编辑成功");
+        }
+        catch (DuplicateKeyException de){
+            return ResponseResult.fail("订单号不能重复!");
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
 
@@ -602,6 +635,36 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrderService.updateById(orderProductOrder);
 
         return ResponseResult.succ("审核通过");
+    }
+
+    @PostMapping("/sureBatch")
+    @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    public ResponseResult sureBatch(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<OrderProductOrder> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            if(old.getOrderType().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2)){
+                return ResponseResult.fail("备料:"+old.getOrderNum()+",订单类型错误，不能是订单取消的");
+            }
+            if(!old.getStatus().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0)){
+                return ResponseResult.fail("备料:"+old.getOrderNum()+",状态错误，要求是是审核通过的");
+
+            }
+            if(!old.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1)){
+                return ResponseResult.fail("备料:"+old.getOrderNum()+",备料状态错误，要求是备料未确认的");
+
+            }
+            OrderProductOrder orderProductOrder = new OrderProductOrder();
+            orderProductOrder.setId(id);
+            orderProductOrder.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_2);
+            lists.add(orderProductOrder);
+
+
+        }
+
+        orderProductOrderService.updateBatchById(lists);
+        return ResponseResult.succ("批量确认通过");
     }
 
     @PostMapping("/statusPassBatch")

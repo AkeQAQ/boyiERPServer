@@ -169,6 +169,13 @@ public class DBConstant {
 
     }
     public static class TABLE_BASE_SUPPLIER_MATERIAL{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
 
         public static final String STATUS_FIELDNAME = "status";
         public static final String MATERIAL_ID_FIELDNAME = "material_id";

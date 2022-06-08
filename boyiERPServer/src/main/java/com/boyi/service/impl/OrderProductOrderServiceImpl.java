@@ -50,7 +50,7 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME,searchStatus)
                         .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME,searchStatus2)
-                        .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME)
+                        .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME)
 
         );
     }
