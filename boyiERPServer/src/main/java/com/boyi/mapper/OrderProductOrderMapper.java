@@ -1,5 +1,6 @@
 package com.boyi.mapper;
 
+import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.boyi.entity.ProduceOrderMaterialProgress;
@@ -68,4 +69,23 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(@Param("productNum")String productNum,
                                                                                   @Param("productBrand") String productBrand,
                                                                                   @Param("materialId") String materialId);
+
+    @Select("select t.product_num, t.sum  from (" +
+            " select product_num ,sum(order_number) sum from order_product_order  where order_type!=#{orderType} and created >= #{searchStartDate} and created <= #{searchEndDate}" +
+            " group by product_num " +
+            " ) t order by sum desc")
+    List<AnalysisProductOrderVO> listGroupByProductNum(@Param("orderType") Integer orderType, @Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate);
+
+    @Select("select order_num,order_number,created from order_product_order where order_type!=#{orderType} and created >= #{searchStartDate} and created <= #{searchEndDate}  ")
+    List<AnalysisProductOrderVO> listByDate(@Param("orderType") Integer orderType, @Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate);
+
+    @Select("select t.product_brand, t.sum  from (" +
+            " select product_brand ,sum(order_number) sum from order_product_order  where order_type!=#{orderType} and created >= #{searchStartDate} and created <= #{searchEndDate}" +
+            " group by product_brand " +
+            " ) t order by sum desc")
+    List<AnalysisProductOrderVO> listGroupByProductBrand(@Param("orderType") Integer orderType, @Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate);
+
+    @Select("select product_num,count(DISTINCT product_brand) sum from order_product_order where order_type!=#{orderType} and created >= #{searchStartDate} and created <= #{searchEndDate} group by product_num  order by count(DISTINCT product_brand) desc ")
+    List<AnalysisProductOrderVO> listGroupByMostProductNum(@Param("orderType") Integer orderType, @Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate);
+
 }

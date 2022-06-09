@@ -1,23 +1,20 @@
 package com.boyi.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.db.sql.Order;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceOrderMaterialProgress;
-import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.mapper.OrderProductOrderMapper;
 import com.boyi.service.OrderProductOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.boyi.service.ProduceOrderMaterialProgressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -102,6 +99,26 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(String productNum, String productBrand, String materialId) {
         return orderProductOrderMapper.listByProductNumBrandAndProgressMaterialId(productNum,productBrand,materialId);
+    }
+
+    @Override
+    public List<AnalysisProductOrderVO> listGroupByProductNum(String searchStartDate, String searchEndDate) {
+        return this.orderProductOrderMapper.listGroupByProductNum(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2,searchStartDate,searchEndDate);
+    }
+
+    @Override
+    public List<AnalysisProductOrderVO> listByDate(String searchStartDate, String searchEndDate) {
+        return this.orderProductOrderMapper.listByDate(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2,searchStartDate,searchEndDate);
+    }
+
+    @Override
+    public List<AnalysisProductOrderVO> listGroupByProductBrand(String searchStartDate, String searchEndDate) {
+        return this.orderProductOrderMapper.listGroupByProductBrand(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2,searchStartDate,searchEndDate);
+    }
+
+    @Override
+    public List<AnalysisProductOrderVO> listGroupByMostProductNum(String searchStartDate, String searchEndDate) {
+        return this.orderProductOrderMapper.listGroupByMostProductNum(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2,searchStartDate,searchEndDate);
     }
 
 }

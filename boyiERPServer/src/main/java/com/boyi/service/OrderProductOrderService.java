@@ -1,13 +1,11 @@
 package com.boyi.service;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.ProduceOrderMaterialProgress;
-import com.boyi.entity.ProduceProductConstituent;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,4 +38,12 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductOrder> listByOrderNums(Set<String> orderNums);
 
     List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(String productNum, String productBrand, String materialId);
+
+    List<AnalysisProductOrderVO> listGroupByProductNum(String searchStartDate, String searchEndDate);
+
+    List<AnalysisProductOrderVO> listByDate(String searchStartDate, String searchEndDate);
+
+    List<AnalysisProductOrderVO> listGroupByProductBrand(String searchStartDate, String searchEndDate);
+
+    List<AnalysisProductOrderVO> listGroupByMostProductNum(String searchStartDate, String searchEndDate);
 }
