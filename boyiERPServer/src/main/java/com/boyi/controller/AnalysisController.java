@@ -6,17 +6,21 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
+import com.boyi.entity.AnalysisMaterailVO;
 import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.AnalysisRequest;
 import com.boyi.entity.OrderProductOrder;
+import com.boyi.mapper.RepositoryBuyinDocumentMapper;
 import com.boyi.service.AnalysisRequestService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
@@ -230,8 +234,6 @@ public class AnalysisController extends BaseController {
         return ResponseResult.succ(returnMap);
     }
 
-
-
     /**
      * 产品订单，款式被挑选最多的
      */
@@ -261,6 +263,90 @@ public class AnalysisController extends BaseController {
             HashMap<String, Object> nameValue = new HashMap<>();
             nameValue.put("name",obj.getProductNum());
             nameValue.put("value",obj.getSum());
+            seriesData.add(nameValue);
+        }
+
+        returnMap.put("legendData",legendData);
+        returnMap.put("seriesData",seriesData);
+        return ResponseResult.succ(returnMap);
+    }
+
+
+    /**
+     *  供应商金额排行榜
+     */
+    @GetMapping("/materialSupplierAmountPercent")
+    public ResponseResult materialSupplierAmountPercent(String searchStartDate, String searchEndDate,String searchField) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+        List<AnalysisMaterailVO> list = null;
+        if(searchField.equals("all")){
+            list = repositoryBuyinDocumentService.listSupplierAmountPercent(searchStartDate,searchEndDate);
+        }else{
+            list = repositoryBuyinDocumentService.listSupplierAmountPercentBySupType(searchStartDate,searchEndDate,searchField);
+        }
+
+        HashMap<String, Object> returnMap = new HashMap<>();
+        List<String> legendData = new ArrayList<String>();
+        List<HashMap<String, Object>> seriesData = new ArrayList<HashMap<String, Object>>();
+
+        int limitShowNum = 25;
+
+
+        for (int i = 0; i < list.size(); i++) {
+            AnalysisMaterailVO obj = list.get(i);
+            if(i>=limitShowNum){
+                continue;
+            }
+
+            legendData.add(obj.getSupplierName());
+            HashMap<String, Object> nameValue = new HashMap<>();
+            nameValue.put("name",obj.getSupplierName());
+            nameValue.put("value",new BigDecimal(obj.getSum()).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+            seriesData.add(nameValue);
+        }
+
+        returnMap.put("legendData",legendData);
+        returnMap.put("seriesData",seriesData);
+        return ResponseResult.succ(returnMap);
+    }
+
+
+    /**
+     *  物料金额排行榜
+     */
+    @GetMapping("/materialAmountPercent")
+    public ResponseResult materialAmountPercent(String searchStartDate, String searchEndDate,String searchField) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+        List<AnalysisMaterailVO> list = null;
+        if(searchField.equals("all")){
+            list = repositoryBuyinDocumentService.listMaterialAmountPercent(searchStartDate,searchEndDate);
+        }else{
+            list = repositoryBuyinDocumentService.listMaterialAmountPercentByMaterialType(searchStartDate,searchEndDate,searchField);
+        }
+
+        HashMap<String, Object> returnMap = new HashMap<>();
+        List<String> legendData = new ArrayList<String>();
+        List<HashMap<String, Object>> seriesData = new ArrayList<HashMap<String, Object>>();
+
+        int limitShowNum = 25;
+
+
+        for (int i = 0; i < list.size(); i++) {
+            AnalysisMaterailVO obj = list.get(i);
+            if(i>=limitShowNum){
+                continue;
+            }
+
+            legendData.add(obj.getMaterialName());
+            HashMap<String, Object> nameValue = new HashMap<>();
+            nameValue.put("name",obj.getMaterialName());
+            nameValue.put("value",new BigDecimal(obj.getSum()).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
             seriesData.add(nameValue);
         }
 

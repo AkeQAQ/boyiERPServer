@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.entity.AnalysisMaterailVO;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.BaseSupplierMaterialCopy;
 import com.boyi.entity.RepositoryBuyinDocument;
@@ -268,6 +269,26 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     @Override
     public RepositoryBuyinDocument getNetInFromOrderBetweenDate(LocalDate startD, LocalDate endD,String materialId) {
         return repositoryBuyinDocumentMapper.getNetInFromOrderBetweenDate(startD,endD,materialId);
+    }
+
+    @Override
+    public List<AnalysisMaterailVO> listSupplierAmountPercent(String searchStartDate, String searchEndDate) {
+        return repositoryBuyinDocumentMapper.listSupplierAmountPercent( searchStartDate,  searchEndDate);
+    }
+
+    @Override
+    public List<AnalysisMaterailVO> listSupplierAmountPercentBySupType(String searchStartDate, String searchEndDate, String searchField) {
+        return repositoryBuyinDocumentMapper.listSupplierAmountPercentBySupType( searchStartDate,  searchEndDate,searchField);
+    }
+
+    @Override
+    public List<AnalysisMaterailVO> listMaterialAmountPercent(String searchStartDate, String searchEndDate) {
+        return repositoryBuyinDocumentMapper.listMaterialAmountPercent( searchStartDate,  searchEndDate);
+    }
+
+    @Override
+    public List<AnalysisMaterailVO> listMaterialAmountPercentByMaterialType(String searchStartDate, String searchEndDate, String searchField) {
+        return repositoryBuyinDocumentMapper.listMaterialAmountPercentByMaterialType( searchStartDate,  searchEndDate,searchField);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.boyi.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.AnalysisMaterailVO;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.BaseSupplierMaterialCopy;
 import com.boyi.entity.RepositoryBuyinDocument;
@@ -58,4 +59,12 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     Double getAllPageTotalAmountZZW(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatusList, Map<String, String> queryMap);
 
     RepositoryBuyinDocument getNetInFromOrderBetweenDate(LocalDate startD, LocalDate endD,String materialId);
+
+    List<AnalysisMaterailVO> listSupplierAmountPercent(String searchStartDate, String searchEndDate);
+
+    List<AnalysisMaterailVO> listSupplierAmountPercentBySupType(String searchStartDate, String searchEndDate, String searchField);
+
+    List<AnalysisMaterailVO> listMaterialAmountPercent(String searchStartDate, String searchEndDate);
+
+    List<AnalysisMaterailVO> listMaterialAmountPercentByMaterialType(String searchStartDate, String searchEndDate, String searchField);
 }

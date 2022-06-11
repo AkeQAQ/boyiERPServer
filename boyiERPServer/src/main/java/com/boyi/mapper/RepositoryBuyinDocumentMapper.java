@@ -2,6 +2,7 @@ package com.boyi.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.AnalysisMaterailVO;
 import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.BaseSupplierMaterialCopy;
 import com.boyi.entity.RepositoryBuyinDocument;
@@ -183,4 +184,97 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
 
     )
     RepositoryBuyinDocument getNetInFromOrderBetweenDate(@Param("startDate")LocalDate startD,@Param("endDate") LocalDate endD,@Param("materialId")String materialId);
+
+
+    @Select("select bs2.name supplier_name,t3.sum from ( " +
+            " select supplier_id,sum(amount) sum from (" +
+            "" +
+            " select t.supplier_id,(sm.price * num) amount" +
+            " from (" +
+            " select rbd.supplier_id  supplier_id,rbdd.material_id,rbdd.num,rbdd.price_date from " +
+            " repository_buyin_document rbd ," +
+            " repository_buyin_document_detail rbdd," +
+            " base_supplier bs  ," +
+            " base_material bm" +
+            " where rbd.id = rbdd.document_id " +
+            " and rbd.supplier_id = bs.id" +
+            " and rbdd.material_id = bm.id " +
+            " and rbd.buy_in_date >= #{searchStartDate}  and rbd.buy_in_date <= #{searchEndDate} " +
+            " ) t" +
+            " left join base_supplier_material sm" +
+            " on sm.status=0 and t.material_id = sm.material_id and t.supplier_id = sm.supplier_id" +
+            " and t.price_date between  sm.start_date and sm.end_date " +
+            " ) t2 group by supplier_id "+
+            " ) t3 ,base_supplier bs2 " +
+            " where t3.supplier_id = bs2.id and sum is not null order by sum desc")
+    List<AnalysisMaterailVO> listSupplierAmountPercent(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
+
+    @Select("select bs2.name supplier_name,t3.sum from ( " +
+            " select supplier_id,sum(amount) sum from (" +
+            "" +
+            " select t.supplier_id,(sm.price * num) amount" +
+            " from (" +
+            " select rbd.supplier_id  supplier_id,rbdd.material_id,rbdd.num,rbdd.price_date from " +
+            " repository_buyin_document rbd ," +
+            " repository_buyin_document_detail rbdd," +
+            " base_supplier bs  ," +
+            " base_material bm" +
+            " where rbd.id = rbdd.document_id " +
+            " and rbd.supplier_id = bs.id" +
+            " and rbdd.material_id = bm.id " +
+            " and bs.group_code = #{searchField}"+
+            " and rbd.buy_in_date >= #{searchStartDate}  and rbd.buy_in_date <= #{searchEndDate} " +
+            " ) t" +
+            " left join base_supplier_material sm" +
+            " on sm.status=0 and t.material_id = sm.material_id and t.supplier_id = sm.supplier_id" +
+            " and t.price_date between  sm.start_date and sm.end_date " +
+            " ) t2 group by supplier_id "+
+            " ) t3 ,base_supplier bs2 " +
+            " where t3.supplier_id = bs2.id and sum is not null order by sum desc")
+    List<AnalysisMaterailVO> listSupplierAmountPercentBySupType(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate")  String searchEndDate,@Param("searchField") String searchField);
+
+    @Select("" +
+            " select bm2.name material_name,t3.sum from (" +
+            " select material_id,sum(amount) sum from (" +
+            " select t.material_id,(sm.price * num) amount" +
+            " from (" +
+            " select rbd.supplier_id  supplier_id,rbdd.material_id,rbdd.num,rbdd.price_date from " +
+            " repository_buyin_document rbd ," +
+            " repository_buyin_document_detail rbdd," +
+            " base_supplier bs  ," +
+            " base_material bm" +
+            " where rbd.id = rbdd.document_id " +
+            " and rbd.supplier_id = bs.id" +
+            " and rbdd.material_id = bm.id " +
+            " ) t" +
+            " left join base_supplier_material sm" +
+            " on sm.status=0 and t.material_id = sm.material_id and t.supplier_id = sm.supplier_id" +
+            " and t.price_date between  sm.start_date and sm.end_date " +
+            " ) t2 group by material_id " +
+            " ) t3 ,base_material bm2 " +
+            " where t3.material_id = bm2.id and t3.sum is not  null  order by sum desc")
+    List<AnalysisMaterailVO> listMaterialAmountPercent(@Param("searchStartDate")String searchStartDate, @Param("searchEndDate") String searchEndDate);
+
+    @Select("" +
+            " select bm2.name material_name,t3.sum from (" +
+            " select material_id,sum(amount) sum from (" +
+            " select t.material_id,(sm.price * num) amount" +
+            " from (" +
+            " select rbd.supplier_id  supplier_id,rbdd.material_id,rbdd.num,rbdd.price_date from " +
+            " repository_buyin_document rbd ," +
+            " repository_buyin_document_detail rbdd," +
+            " base_supplier bs  ," +
+            " base_material bm" +
+            " where rbd.id = rbdd.document_id " +
+            " and rbd.supplier_id = bs.id" +
+            " and rbdd.material_id = bm.id " +
+            " and bm.group_code = #{searchField}"+
+            " ) t" +
+            " left join base_supplier_material sm" +
+            " on sm.status=0 and t.material_id = sm.material_id and t.supplier_id = sm.supplier_id" +
+            " and t.price_date between  sm.start_date and sm.end_date " +
+            " ) t2 group by material_id " +
+            " ) t3 ,base_material bm2 " +
+            " where t3.material_id = bm2.id and t3.sum is not  null  order by sum desc")
+    List<AnalysisMaterailVO> listMaterialAmountPercentByMaterialType(@Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate,@Param("searchField") String searchField);
 }
