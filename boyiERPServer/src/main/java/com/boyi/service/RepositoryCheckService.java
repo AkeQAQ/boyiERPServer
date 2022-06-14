@@ -13,4 +13,5 @@ public interface RepositoryCheckService extends IService<RepositoryCheck> {
     RepositoryCheck one(QueryWrapper<RepositoryCheck> id);
 
     Page<RepositoryCheck> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
+
 }

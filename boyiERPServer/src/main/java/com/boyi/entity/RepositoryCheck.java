@@ -32,6 +32,12 @@ public class RepositoryCheck extends BaseEntity {
 
 
     /**
+     * 数据区间截至日期（包含）
+     */
+    private LocalDate stockEndDate;
+
+
+    /**
      *  明细信息 用于接收前端数据
      */
     @TableField(exist = false)  // 字段数据库忽略

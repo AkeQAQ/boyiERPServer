@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.fileFilter.CraftPicFileFilter;
 import com.boyi.common.fileFilter.MaterialPicFileFilter;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -104,6 +105,83 @@ public class BaseMaterialController extends BaseController {
         return ResponseResult.succ("");
     }
 
+
+
+    /**
+     *  // 用于盘点的物料信息加库存信息(根据出入库截至日期（包含）来对及时库存进行增减
+     * @return
+     */
+    @PostMapping("/loadTableSearchMaterialDetailAllWithStockGTEndDate")
+    @PreAuthorize("hasAuthority('baseData:material:list')")
+    public ResponseResult loadTableSearchMaterialDetailAllWithStockGTEndDate(String endDate) {
+        QueryWrapper<BaseMaterial> validStatus = new QueryWrapper<BaseMaterial>().isNull(DBConstant.TABLE_BASE_MATERIAL.STATUS_FIELDNAME);
+
+        List<BaseMaterial> baseMaterials = baseMaterialService.list(validStatus);
+        List<String> ids = new ArrayList<>();
+        for (BaseMaterial baseMaterial : baseMaterials) {
+            ids.add(baseMaterial.getId());
+        }
+        List<RepositoryStock> stocks = repositoryStockService.listByMaterialIds(ids);// 及时库存，物料和数目
+
+        // 再找出当前日期之后的所有出入库记录，根据物料分组，进行加减
+        List<RepositoryBuyinDocument> buyIns = repositoryBuyinDocumentService.listGTEndDate(endDate);
+        List<RepositoryBuyoutDocument> buyOuts = repositoryBuyoutDocumentService.listGTEndDate(endDate);
+        List<RepositoryPickMaterial> picks = repositoryPickMaterialService.listGTEndDate(endDate);
+        List<RepositoryReturnMaterial> returns = repositoryReturnMaterialService.listGTEndDate(endDate);
+
+        HashMap<String, Double> materialIns = new HashMap<>();
+        HashMap<String, Double> materialOuts = new HashMap<>();
+        HashMap<String, Double> materialPicks = new HashMap<>();
+        HashMap<String, Double> materialReturns = new HashMap<>();
+
+        for (RepositoryBuyinDocument obj : buyIns){
+            materialIns.put(obj.getMaterialId(),obj.getTotalNum());
+        }
+        for (RepositoryBuyoutDocument obj : buyOuts){
+            materialOuts.put(obj.getMaterialId(),obj.getTotalNum());
+        }
+        for (RepositoryPickMaterial obj : picks){
+            materialPicks.put(obj.getMaterialId(),obj.getTotalNum());
+        }
+        for (RepositoryReturnMaterial obj : returns){
+            materialReturns.put(obj.getMaterialId(),obj.getTotalNum());
+        }
+
+
+        HashMap<String, Double> stockNum = new HashMap<>();
+        for (RepositoryStock stock : stocks) {
+            Double sNum = stock.getNum();
+            Double inNum = materialIns.get(stock.getMaterialId());
+            Double outNum = materialOuts.get(stock.getMaterialId());
+            Double pickNum = materialPicks.get(stock.getMaterialId());
+            Double returnNum = materialReturns.get(stock.getMaterialId());
+
+            if(inNum!=null){
+                sNum = BigDecimalUtil.sub(sNum,inNum).doubleValue();
+            }
+            if(outNum!=null){
+                sNum = BigDecimalUtil.add(sNum,outNum).doubleValue();
+            }if(pickNum!=null){
+                sNum = BigDecimalUtil.add(sNum,pickNum).doubleValue();
+            }if(returnNum!=null){
+                sNum = BigDecimalUtil.sub(sNum,returnNum).doubleValue();
+            }
+            stockNum.put(stock.getMaterialId(),sNum );
+        }
+
+        ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
+        baseMaterials.forEach(obj -> {
+            Double num = stockNum.get(obj.getId());
+            Map<Object, Object> returnMap = MapUtil.builder().put(
+                            "value", obj.getId() + " : " + obj.getName())
+                    .put("id", obj.getId())
+                    .put("obj", obj)
+                    .put("stockNum", num == null ? 0D : num)
+                    .map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
 
 
     /**

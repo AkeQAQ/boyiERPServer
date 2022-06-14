@@ -91,4 +91,13 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
             " <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> "  +
             " </script>")
     void updateBatchIdAppendYearById(@Param("year")int year,@Param("batchIds") List<String> batchIds);
+
+    @Select("select rpmd.material_id, cast( sum( rpmd.num )  as decimal(14,5)) totalNum  from " +
+            " repository_pick_material rpm," +
+            " repository_pick_material_detail rpmd" +
+            " where " +
+            " rpm.id = rpmd.document_id " +
+            " and rpm.pick_date > #{endDate}" +
+            " group by rpmd.material_id")
+    List<RepositoryPickMaterial> listGTEndDate(@Param("endDate") String endDate);
 }

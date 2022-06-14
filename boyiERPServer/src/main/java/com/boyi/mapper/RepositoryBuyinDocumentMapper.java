@@ -277,4 +277,14 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " ) t3 ,base_material bm2 " +
             " where t3.material_id = bm2.id and t3.sum is not  null  order by sum desc")
     List<AnalysisMaterailVO> listMaterialAmountPercentByMaterialType(@Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate,@Param("searchField") String searchField);
+
+    @Select("" +
+            " select rbdd.material_id, cast( sum( rbdd.num )  as decimal(14,5)) totalNum  from " +
+            " repository_buyin_document rbd," +
+            " repository_buyin_document_detail rbdd" +
+            " where " +
+            " rbd.id = rbdd.document_id " +
+            " and rbd.buy_in_date > #{endDate}" +
+            " group by rbdd.material_id")
+    List<RepositoryBuyinDocument> listGTEndDate(@Param("endDate") String endDate);
 }

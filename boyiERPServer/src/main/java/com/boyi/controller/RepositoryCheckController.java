@@ -17,7 +17,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Slf4j
@@ -105,6 +107,14 @@ public class RepositoryCheckController extends BaseController {
             return ResponseResult.fail("物料信息不能为空");
         }
 
+        String yearAndMonth = repositoryCheck.getCheckDate().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+
+        List<RepositoryCheck> list = repositoryCheckService.list(new QueryWrapper<RepositoryCheck>().likeRight(DBConstant.TABLE_REPOSITORY_CHECK.CHECK_DATE_FIELDNAME, yearAndMonth));
+
+        if(list.size() > 0){
+            return ResponseResult.fail("已存在该月盘点，请确认");
+        }
+
         repositoryCheck.setUpdated(LocalDateTime.now());
         repositoryCheck.setUpdatedUser(principal.getName());
 
@@ -169,8 +179,13 @@ public class RepositoryCheckController extends BaseController {
         repositoryCheck.setCreatedUser(principal.getName());
         repositoryCheck.setUpdatedUser(principal.getName());
         repositoryCheck.setStatus(DBConstant.TABLE_REPOSITORY_CHECK.STATUS_FIELDVALUE_1);
-//        double theNum = repositoryCheck.getCheckNum() - repositoryCheck.getStockNum(); // 盘点数目 - 账存数目，> 0 则盘赢，加库存. < 0 则盘亏，减库存数目
-//        repositoryCheck.setChangeNum(theNum);
+        String yearAndMonth = repositoryCheck.getCheckDate().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+
+        List<RepositoryCheck> list = repositoryCheckService.list(new QueryWrapper<RepositoryCheck>().likeRight(DBConstant.TABLE_REPOSITORY_CHECK.CHECK_DATE_FIELDNAME, yearAndMonth));
+
+        if(list.size() > 0){
+            return ResponseResult.fail("已存在该月盘点，请确认");
+        }
         try {
 
 

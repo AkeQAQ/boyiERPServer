@@ -55,8 +55,67 @@ public class ProduceProductConstituentController extends BaseController {
     public void exportAllRealDosage(HttpServletResponse response) {
         List<RealDosageVO> lists = produceProductConstituentService.listRealDosage();
 
+        // 由于目前实际发皮出现一种现象： 一个批次号，本来是用A皮料，但部分改成B皮料进行发皮，所以导致A用料和B用料的应发都对不上。
+        // 目前解决方案：在一个批次号领料中同时存在 用料相同的的领料记录，则进行合并（物料合并，用料合并）
+
+        Map<String, List<RealDosageVO>> batchDosage_picks = new HashMap<>();
+
+        //  需要合并处理的数据
+        Set<String> needMergeKeys = new HashSet<>();
+        Map<String,Boolean> needMergeRemoveKeys = new HashMap<String,Boolean>();// 重复的，是否跳过第一条，可以删除后续的标识
+
+        for(RealDosageVO vo : lists) {
+            String batchId = vo.getBatchId();
+            String planDosage = vo.getPlanDosage();
+            String key = batchId+"_"+planDosage;
+            List<RealDosageVO> oneBatch_sameDosages = batchDosage_picks.get(key);
+
+            // 同批次号，同用料的记录
+            if(oneBatch_sameDosages==null){
+                oneBatch_sameDosages = new ArrayList<>();
+                oneBatch_sameDosages.add(vo);
+                batchDosage_picks.put(key,oneBatch_sameDosages);
+            }else{
+                // 有同批次号，同用料的多个领料记录
+                oneBatch_sameDosages.add(vo);
+                needMergeKeys.add(key);
+                needMergeRemoveKeys.put(key,false);
+            }
+        }
+        // 将有同批次号，同用料的金额合并
+        for(String key : needMergeKeys){
+            List<RealDosageVO> realDosageVOS = batchDosage_picks.get(key);
+            RealDosageVO first = realDosageVOS.get(0);
+            for (int i = 1; i < realDosageVOS.size(); i++) {
+                RealDosageVO current = realDosageVOS.get(i);
+                first.setMaterialId(first.getMaterialId()+"(合并"+ current.getMaterialId()+")");
+                first.setMaterialName(first.getMaterialName()+"(合并"+current.getMaterialName()+")");
+                first.setNum(BigDecimalUtil.add(first.getNum(),current.getNum()).toString());
+                first.setReturnNum(BigDecimalUtil.add(first.getReturnNum(),current.getReturnNum()).toString());
+                first.setRealDosage(BigDecimalUtil.add(first.getRealDosage(),current.getRealDosage()).toString());
+            }
+        }
+
+        // 将合并后的从数组移除
+        for (int i = 0; i < lists.size(); i++) {
+            RealDosageVO vo = lists.get(i);
+            String batchId = vo.getBatchId();
+            String planDosage = vo.getPlanDosage();
+            String key = batchId+"_"+planDosage;
+            if(needMergeKeys.contains(key)){
+                if(needMergeRemoveKeys.get(key)){
+                    lists.remove(i--);
+                }else{
+                    needMergeRemoveKeys.put(key,true);
+                }
+            }
+        }
+
+
         HashMap<String, String> materialSum = new HashMap<>();
         HashMap<String, String> materialCount = new HashMap<>();
+
+
         // 根据物料进行分组，对实际用料进行平均求值,
         for(RealDosageVO vo : lists){
             String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();
@@ -98,6 +157,66 @@ public class ProduceProductConstituentController extends BaseController {
 
         HashMap<String, String> materialSum = new HashMap<>();
         HashMap<String, String> materialCount = new HashMap<>();
+
+        // 由于目前实际发皮出现一种现象： 一个批次号，本来是用A皮料，但部分改成B皮料进行发皮，所以导致A用料和B用料的应发都对不上。
+        // 目前解决方案：在一个批次号领料中同时存在 用料相同的的领料记录，则进行合并（物料合并，用料合并）
+
+        Map<String, List<RealDosageVO>> batchDosage_picks = new HashMap<>();
+
+        //  需要合并处理的数据
+        Set<String> needMergeKeys = new HashSet<>();
+        Map<String,Boolean> needMergeRemoveKeys = new HashMap<String,Boolean>();// 重复的，是否跳过第一条，可以删除后续的标识
+
+        for(RealDosageVO vo : lists) {
+            String batchId = vo.getBatchId();
+            String planDosage = vo.getPlanDosage();
+            String key = batchId+"_"+planDosage;
+            List<RealDosageVO> oneBatch_sameDosages = batchDosage_picks.get(key);
+
+            // 同批次号，同用料的记录
+            if(oneBatch_sameDosages==null){
+                oneBatch_sameDosages = new ArrayList<>();
+                oneBatch_sameDosages.add(vo);
+                batchDosage_picks.put(key,oneBatch_sameDosages);
+            }else{
+                // 有同批次号，同用料的多个领料记录
+                oneBatch_sameDosages.add(vo);
+                needMergeKeys.add(key);
+                needMergeRemoveKeys.put(key,false);
+            }
+        }
+        // 将有同批次号，同用料的金额合并
+        for(String key : needMergeKeys){
+            List<RealDosageVO> realDosageVOS = batchDosage_picks.get(key);
+            RealDosageVO first = realDosageVOS.get(0);
+            for (int i = 1; i < realDosageVOS.size(); i++) {
+                RealDosageVO current = realDosageVOS.get(i);
+                first.setMaterialId(first.getMaterialId()+"(合并"+ current.getMaterialId()+")");
+                first.setMaterialName(first.getMaterialName()+"(合并"+current.getMaterialName()+")");
+                first.setNum(BigDecimalUtil.add(first.getNum(),current.getNum()).toString());
+                first.setReturnNum(BigDecimalUtil.add(first.getReturnNum(),current.getReturnNum()).toString());
+                first.setRealDosage(BigDecimalUtil.add(first.getRealDosage(),current.getRealDosage()).toString());
+            }
+        }
+
+        // 将合并后的从数组移除
+        for (int i = 0; i < lists.size(); i++) {
+            RealDosageVO vo = lists.get(i);
+            String batchId = vo.getBatchId();
+            String planDosage = vo.getPlanDosage();
+            String key = batchId+"_"+planDosage;
+            if(needMergeKeys.contains(key)){
+                if(needMergeRemoveKeys.get(key)){
+                    lists.remove(i--);
+                }else{
+                    needMergeRemoveKeys.put(key,true);
+                }
+            }
+        }
+
+
+
+
         // 根据物料进行分组，对实际用料进行平均求值,
         for(RealDosageVO vo : lists){
             String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();

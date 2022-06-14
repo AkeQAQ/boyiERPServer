@@ -67,4 +67,6 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     List<AnalysisMaterailVO> listMaterialAmountPercent(String searchStartDate, String searchEndDate);
 
     List<AnalysisMaterailVO> listMaterialAmountPercentByMaterialType(String searchStartDate, String searchEndDate, String searchField);
+
+    List<RepositoryBuyinDocument> listGTEndDate(String endDate);
 }

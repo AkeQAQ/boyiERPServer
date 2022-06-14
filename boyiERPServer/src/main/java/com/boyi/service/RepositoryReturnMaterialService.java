@@ -38,4 +38,6 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
     List<RepositoryReturnMaterial> listByBatchIds(ArrayList<String> batchIds);
 
     void updateBatchIdAppendYearById(int year, List<String> batchIds);
+
+    List<RepositoryReturnMaterial> listGTEndDate(String endDate);
 }

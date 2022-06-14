@@ -50,4 +50,5 @@ public interface RepositoryCheckMapper extends BaseMapper<RepositoryCheck> {
      */
     @Select(wrapperSql)
     RepositoryCheck one(@Param("ew") Wrapper queryWrapper);
+
 }

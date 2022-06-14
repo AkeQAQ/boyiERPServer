@@ -78,4 +78,13 @@ public interface RepositoryBuyoutDocumentMapper extends BaseMapper<RepositoryBuy
             " where rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
             " and rbdd.material_id = #{materialId}")
     Double getSumNumBySupplierIdAndMaterialId(@Param("supplierId") String supplierId,@Param("materialId")String materialId);
+
+    @Select("select rbdd.material_id, cast( sum( rbdd.num )  as decimal(14,5)) totalNum  from " +
+            " repository_buyout_document rbd," +
+            " repository_buyout_document_detail rbdd" +
+            " where " +
+            " rbd.id = rbdd.document_id " +
+            " and rbd.buy_out_date > #{endDate}" +
+            " group by rbdd.material_id")
+    List<RepositoryBuyoutDocument> listGTEndDate(@Param("endDate") String endDate);
 }

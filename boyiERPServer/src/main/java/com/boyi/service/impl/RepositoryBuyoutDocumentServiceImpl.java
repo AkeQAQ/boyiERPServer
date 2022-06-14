@@ -85,4 +85,9 @@ public class RepositoryBuyoutDocumentServiceImpl extends ServiceImpl<RepositoryB
                         DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_0));
     }
 
+    @Override
+    public List<RepositoryBuyoutDocument> listGTEndDate(String endDate) {
+        return this.repositoryBuyoutDocumentMapper.listGTEndDate(endDate);
+    }
+
 }

@@ -3,6 +3,7 @@ package com.boyi.controller;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.poi.excel.style.Align;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -63,11 +64,16 @@ public class OrderProductpricePreController extends BaseController {
 
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('order:productPricePre:list')")
-    public void export(HttpServletResponse response, @RequestBody String exceldatas) {
-        exceldatas = exceldatas.replace("&#xA;", "\\r\\n");//去除luckysheet中 &#xA 的换行
-        JSONObject jobj = (JSONObject) JSONObject.parse(exceldatas);
+    public void export(HttpServletResponse response, @RequestBody LuckySheetExportRequestDTO param) {
+        String str = null;
+        log.info("导出核算excel:",param);
+//        if(param instanceof  JSONObject){
+             str = param.getExceldatas().replace("&#xA;", "\\r\\n");//去除luckysheet中 &#xA 的换行
+//        }else{
+//             str = ((JSONArray)param).getJSONObject(0).get("exceldatas").toString().replace("&#xA;", "\\r\\n");//去除luckysheet中 &#xA 的换行
+//        }
 
-        LuckeySheetPOIUtils.exportLuckySheetXlsx(jobj.getString("exceldatas"),response,"");
+        LuckeySheetPOIUtils.exportLuckySheetXlsx(str,response,"");
     }
 
 

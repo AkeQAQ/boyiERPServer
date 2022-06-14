@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.vo.RealDosageVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.AnalysisMaterailVO;
@@ -354,4 +355,195 @@ public class AnalysisController extends BaseController {
         returnMap.put("seriesData",seriesData);
         return ResponseResult.succ(returnMap);
     }
+
+    /**
+     *  物料金额排行榜
+     */
+    @GetMapping("/productNumBrandMaterialWinPercent")
+    public ResponseResult productNumBrandMaterialWinPercent(String searchStartDate, String searchEndDate,String searchField) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+
+        List<AnalysisMaterailVO> list = getProductNumBrandMaterialWinLoseLists(searchStartDate,searchEndDate);
+
+        HashMap<String, Object> returnMap = new HashMap<>();
+        List<String> legendData = new ArrayList<String>();
+        List<HashMap<String, Object>> seriesData = new ArrayList<HashMap<String, Object>>();
+
+        int limitShowNum = 25;
+
+
+        for (int i = 0; i < list.size(); i++) {
+            AnalysisMaterailVO obj = list.get(i);
+            if(i>=limitShowNum){
+                continue;
+            }
+            if(Double.valueOf(obj.getSquareFoot()) < 0){
+                continue;
+            }
+
+            legendData.add(obj.getProductNumBrandMaterial());
+            HashMap<String, Object> nameValue = new HashMap<>();
+            nameValue.put("name",obj.getProductNumBrandMaterial());
+            nameValue.put("value",new BigDecimal(obj.getSquareFoot()).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue());
+            seriesData.add(nameValue);
+        }
+
+        returnMap.put("legendData",legendData);
+        returnMap.put("seriesData",seriesData);
+        return ResponseResult.succ(returnMap);
+    }
+
+    /**
+     *  物料金额排行榜
+     */
+    @GetMapping("/productNumBrandMaterialLosePercent")
+    public ResponseResult productNumBrandMaterialLosePercent(String searchStartDate, String searchEndDate,String searchField) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+
+        List<AnalysisMaterailVO> list = getProductNumBrandMaterialWinLoseLists(searchStartDate,searchEndDate);
+
+        HashMap<String, Object> returnMap = new HashMap<>();
+        List<String> legendData = new ArrayList<String>();
+        List<HashMap<String, Object>> seriesData = new ArrayList<HashMap<String, Object>>();
+
+        int count = 0;
+
+        for (int i = list.size() -1; i > 0; i--) {
+            AnalysisMaterailVO obj = list.get(i);
+            count ++;
+            if(count>=25){
+                continue;
+            }
+            if(Double.valueOf(obj.getSquareFoot()) > 0){
+                continue;
+            }
+
+            legendData.add(obj.getProductNumBrandMaterial());
+            HashMap<String, Object> nameValue = new HashMap<>();
+            nameValue.put("name",obj.getProductNumBrandMaterial());
+            nameValue.put("value",Math.abs(new BigDecimal(obj.getSquareFoot()).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue()));
+            seriesData.add(nameValue);
+        }
+
+        returnMap.put("legendData",legendData);
+        returnMap.put("seriesData",seriesData);
+        return ResponseResult.succ(returnMap);
+    }
+
+    private List<AnalysisMaterailVO> getProductNumBrandMaterialWinLoseLists(String searchStartDate, String searchEndDate) {
+
+        List<RealDosageVO> lists = produceProductConstituentService.listRealDosageBetweenDate(searchStartDate,searchEndDate);
+        // 由于目前实际发皮出现一种现象： 一个批次号，本来是用A皮料，但部分改成B皮料进行发皮，所以导致A用料和B用料的应发都对不上。
+        // 目前解决方案：在一个批次号领料中同时存在 用料相同的的领料记录，则进行合并（物料合并，用料合并）
+
+        Map<String, List<RealDosageVO>> batchDosage_picks = new HashMap<>();
+
+        //  需要合并处理的数据
+        Set<String> needMergeKeys = new HashSet<>();
+        Map<String,Boolean> needMergeRemoveKeys = new HashMap<String,Boolean>();// 重复的，是否跳过第一条，可以删除后续的标识
+
+        for(RealDosageVO vo : lists) {
+            String batchId = vo.getBatchId();
+            String planDosage = vo.getPlanDosage();
+            String key = batchId+"_"+planDosage;
+            List<RealDosageVO> oneBatch_sameDosages = batchDosage_picks.get(key);
+
+            // 同批次号，同用料的记录
+            if(oneBatch_sameDosages==null){
+                oneBatch_sameDosages = new ArrayList<>();
+                oneBatch_sameDosages.add(vo);
+                batchDosage_picks.put(key,oneBatch_sameDosages);
+            }else{
+                // 有同批次号，同用料的多个领料记录
+                oneBatch_sameDosages.add(vo);
+                needMergeKeys.add(key);
+                needMergeRemoveKeys.put(key,false);
+            }
+        }
+        // 将有同批次号，同用料的金额合并
+        for(String key : needMergeKeys){
+            List<RealDosageVO> realDosageVOS = batchDosage_picks.get(key);
+            RealDosageVO first = realDosageVOS.get(0);
+            for (int i = 1; i < realDosageVOS.size(); i++) {
+                RealDosageVO current = realDosageVOS.get(i);
+                first.setMaterialId(first.getMaterialId()+"(合并"+ current.getMaterialId()+")");
+                first.setMaterialName(first.getMaterialName()+"(合并"+current.getMaterialName()+")");
+                first.setNum(BigDecimalUtil.add(first.getNum(),current.getNum()).toString());
+                first.setReturnNum(BigDecimalUtil.add(first.getReturnNum(),current.getReturnNum()).toString());
+                first.setRealDosage(BigDecimalUtil.add(first.getRealDosage(),current.getRealDosage()).toString());
+            }
+        }
+
+        // 将合并后的从数组移除
+        for (int i = 0; i < lists.size(); i++) {
+            RealDosageVO vo = lists.get(i);
+            String batchId = vo.getBatchId();
+            String planDosage = vo.getPlanDosage();
+            String key = batchId+"_"+planDosage;
+            if(needMergeKeys.contains(key)){
+                if(needMergeRemoveKeys.get(key)){
+                    lists.remove(i--);
+                }else{
+                    needMergeRemoveKeys.put(key,true);
+                }
+            }
+        }
+
+
+        HashMap<String, String> materialSum = new HashMap<>();
+        HashMap<String, String> materialCount = new HashMap<>();
+
+
+        // 根据物料进行分组，对实际用料进行平均求值,
+        for(RealDosageVO vo : lists){
+            String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId()+"("+vo.getMaterialName()+")";
+            String sum = materialSum.get(key);
+
+            String netUse = BigDecimalUtil.sub(vo.getNum(), vo.getReturnNum()).toString();
+            if(sum == null){
+                materialSum.put(key,netUse);
+            }else{
+                materialSum.put(key,BigDecimalUtil.add(sum,netUse).toString());
+            }
+            String count = materialCount.get(key);
+            if(count == null){
+                materialCount.put(key,vo.getBatchNum());
+            }else{
+                materialCount.put(key,BigDecimalUtil.add(count,vo.getBatchNum()).toString());
+            }
+        }
+
+        List<AnalysisMaterailVO> returnLists = new ArrayList<>();
+        TreeMap<Double, String> resultMap = new TreeMap<>();
+
+        // 求出均值
+        for(RealDosageVO vo : lists) {
+            String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId()+"("+vo.getMaterialName()+")";
+            vo.setAvgDosage(BigDecimalUtil.div(materialSum.get(key),materialCount.get(key)).toString());
+
+            // 计划用量-实际用量， > 0的就是盈利，<0的就是亏损
+            if(resultMap.containsValue(key)){
+                continue;
+            }
+            resultMap.put(BigDecimalUtil.sub(vo.getPlanDosage(),vo.getAvgDosage()).doubleValue(),key);
+        }
+        for (Map.Entry<Double ,String> entry:resultMap.descendingMap().entrySet()){
+            Double winSquareFoot = entry.getKey();
+            String productNumBrandMaterialid = entry.getValue();
+            AnalysisMaterailVO vo = new AnalysisMaterailVO();
+            vo.setProductNumBrandMaterial(productNumBrandMaterialid);
+            vo.setSquareFoot(winSquareFoot+"");
+            returnLists.add(vo);
+        }
+        return returnLists;
+
+    }
+
+
 }

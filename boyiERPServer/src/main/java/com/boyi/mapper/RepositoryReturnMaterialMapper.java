@@ -85,4 +85,13 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             " <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> "  +
             " </script>")
     void updateBatchIdAppendYearById(@Param("year")int year,@Param("batchIds") List<String> batchIds);
+
+    @Select("select rrmd.material_id, cast( sum( rrmd.num )  as decimal(14,5)) totalNum  from " +
+            " repository_return_material rrm," +
+            " repository_return_material_detail rrmd" +
+            " where " +
+            " rrm.id = rrmd.document_id " +
+            " and rrm.return_date > #{endDate}" +
+            " group by rrmd.material_id")
+    List<RepositoryReturnMaterial> listGTEndDate(@Param("endDate") String endDate);
 }

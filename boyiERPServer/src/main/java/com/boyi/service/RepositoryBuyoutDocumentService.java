@@ -30,4 +30,6 @@ public interface RepositoryBuyoutDocumentService extends IService<RepositoryBuyo
     Double countBySupplierIdAndMaterialId(String supplierId, String materialId);
 
     List<RepositoryBuyoutDocument> countLTByCloseDate(LocalDate closeDate);
+
+    List<RepositoryBuyoutDocument> listGTEndDate(String endDate);
 }

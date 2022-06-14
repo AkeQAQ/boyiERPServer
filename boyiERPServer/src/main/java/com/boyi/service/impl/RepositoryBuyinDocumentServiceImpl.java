@@ -292,6 +292,11 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     }
 
     @Override
+    public List<RepositoryBuyinDocument> listGTEndDate(String endDate) {
+        return repositoryBuyinDocumentMapper.listGTEndDate(endDate);
+    }
+
+    @Override
     public int countBySupplierId(String ids[]) {
         return this.count(new QueryWrapper<RepositoryBuyinDocument>()
                 .in(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT.SUPPLIER_ID_FIELDNAME, ids));

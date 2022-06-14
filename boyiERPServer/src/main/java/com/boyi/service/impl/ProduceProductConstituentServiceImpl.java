@@ -93,4 +93,9 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
     public List<RealDosageVO> listRealDosage() {
         return produceProductConstituentMapper.listRealDosage();
     }
+
+    @Override
+    public List<RealDosageVO> listRealDosageBetweenDate(String searchStartDate, String searchEndDate) {
+        return produceProductConstituentMapper.listRealDosageBetweenDate(searchStartDate,searchEndDate);
+    }
 }
