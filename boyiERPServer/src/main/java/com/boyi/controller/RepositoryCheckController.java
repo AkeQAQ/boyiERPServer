@@ -109,7 +109,7 @@ public class RepositoryCheckController extends BaseController {
 
         String yearAndMonth = repositoryCheck.getCheckDate().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 
-        List<RepositoryCheck> list = repositoryCheckService.list(new QueryWrapper<RepositoryCheck>().likeRight(DBConstant.TABLE_REPOSITORY_CHECK.CHECK_DATE_FIELDNAME, yearAndMonth));
+        List<RepositoryCheck> list = repositoryCheckService.list(new QueryWrapper<RepositoryCheck>().ne(DBConstant.TABLE_REPOSITORY_CHECK.ID_FIELDNAME,repositoryCheck.getId()).likeRight(DBConstant.TABLE_REPOSITORY_CHECK.CHECK_DATE_FIELDNAME, yearAndMonth));
 
         if(list.size() > 0){
             return ResponseResult.fail("已存在该月盘点，请确认");
@@ -133,6 +133,7 @@ public class RepositoryCheckController extends BaseController {
                 BigDecimal mul = BigDecimalUtil.mul(-1.0D, item.getChangeNum()); // 取反：+1 其实就是要变成-1
                 needSubMap.put(item.getMaterialId(), BigDecimalUtil.add(materialNum,mul.doubleValue()).doubleValue());
             }
+
             repositoryStockService.addNumByMaterialIdFromMap(needSubMap); //  带了+- 号，所以还是用加法
 
             Map<String, Double> needAddMap = new HashMap<>();
@@ -142,6 +143,8 @@ public class RepositoryCheckController extends BaseController {
             if(flag){
                 repositoryCheckService.updateById(repositoryCheck);
 
+                HashMap<String, Double> needValidMap = new HashMap<>();
+
                 for (RepositoryCheckDetail item : repositoryCheck.getRowList()){
                     item.setId(null);
                     item.setDocumentId(repositoryCheck.getId());
@@ -150,8 +153,16 @@ public class RepositoryCheckController extends BaseController {
                     if(materialNum == null){
                         materialNum= 0D;
                     }
+
+                    if(item.getChangeNum() < 0){
+                        needValidMap.put(item.getMaterialId(),Math.abs(item.getChangeNum()));
+                    }
+
                     needAddMap.put(item.getMaterialId(), BigDecimalUtil.add(materialNum,item.getChangeNum()).doubleValue());
                 }
+
+                repositoryStockService.validStockNum(needValidMap);
+
 
                 repositoryCheckDetailService.saveBatch(repositoryCheck.getRowList());
                 repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
@@ -165,7 +176,7 @@ public class RepositoryCheckController extends BaseController {
         } catch (Exception e) {
             log.error("供应商，更新异常",e);
             log.error("报错.",e);
-            throw new RuntimeException("服务器报错");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -199,14 +210,23 @@ public class RepositoryCheckController extends BaseController {
 
             Map<String, Double> needAddMap = new HashMap<>();
 
+            HashMap<String, Double> needValidMap = new HashMap<>();
+
+
             // 把库存 进行调整，进行+-
             for (RepositoryCheckDetail item : repositoryCheck.getRowList()) {
                 Double materialNum = needAddMap.get(item.getMaterialId());
                 if(materialNum == null){
                     materialNum= 0D;
                 }
+                if(item.getChangeNum()<0){
+                    needValidMap.put(item.getMaterialId(),item.getChangeNum());
+                }
                 needAddMap.put(item.getMaterialId(), BigDecimalUtil.add(materialNum,item.getChangeNum()).doubleValue());
             }
+
+            repositoryStockService.validStockNum(needValidMap);
+
             repositoryStockService.addNumByMaterialIdFromMap(needAddMap);
 
             return ResponseResult.succ("新增成功");

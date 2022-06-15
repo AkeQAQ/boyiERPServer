@@ -51,4 +51,12 @@ public interface RepositoryCheckMapper extends BaseMapper<RepositoryCheck> {
     @Select(wrapperSql)
     RepositoryCheck one(@Param("ew") Wrapper queryWrapper);
 
+    @Select("select rcd.material_id, cast( sum( rcd.change_num )  as decimal(14,5)) totalNum  from " +
+            "            repository_check rc," +
+            "             repository_check_detail rcd" +
+            "             where " +
+            "             rc.id = rcd.document_id " +
+            "             and rc.check_date > #{endDate}" +
+            "             group by rcd.material_id")
+    List<RepositoryCheck> listGtEndDate(@Param("endDate") String endDate);
 }

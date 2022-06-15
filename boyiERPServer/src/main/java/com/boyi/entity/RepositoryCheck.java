@@ -67,6 +67,11 @@ public class RepositoryCheck extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     private Double stockNum;
 
+    @TableField(exist = false)  // 字段数据库忽略
+    private Double totalNum;
+
+
+
 
 
 }

@@ -27,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -128,11 +129,13 @@ public class BaseMaterialController extends BaseController {
         List<RepositoryBuyoutDocument> buyOuts = repositoryBuyoutDocumentService.listGTEndDate(endDate);
         List<RepositoryPickMaterial> picks = repositoryPickMaterialService.listGTEndDate(endDate);
         List<RepositoryReturnMaterial> returns = repositoryReturnMaterialService.listGTEndDate(endDate);
+        List<RepositoryCheck> checks =  repositoryCheckService.listGtEndDate(endDate);
 
         HashMap<String, Double> materialIns = new HashMap<>();
         HashMap<String, Double> materialOuts = new HashMap<>();
         HashMap<String, Double> materialPicks = new HashMap<>();
         HashMap<String, Double> materialReturns = new HashMap<>();
+        HashMap<String, Double> materialChecks = new HashMap<>();
 
         for (RepositoryBuyinDocument obj : buyIns){
             materialIns.put(obj.getMaterialId(),obj.getTotalNum());
@@ -147,6 +150,9 @@ public class BaseMaterialController extends BaseController {
             materialReturns.put(obj.getMaterialId(),obj.getTotalNum());
         }
 
+        for (RepositoryCheck obj : checks){
+            materialChecks.put(obj.getMaterialId(),obj.getTotalNum());
+        }
 
         HashMap<String, Double> stockNum = new HashMap<>();
         for (RepositoryStock stock : stocks) {
@@ -155,6 +161,7 @@ public class BaseMaterialController extends BaseController {
             Double outNum = materialOuts.get(stock.getMaterialId());
             Double pickNum = materialPicks.get(stock.getMaterialId());
             Double returnNum = materialReturns.get(stock.getMaterialId());
+            Double checkNums = materialChecks.get(stock.getMaterialId());
 
             if(inNum!=null){
                 sNum = BigDecimalUtil.sub(sNum,inNum).doubleValue();
@@ -165,6 +172,9 @@ public class BaseMaterialController extends BaseController {
                 sNum = BigDecimalUtil.add(sNum,pickNum).doubleValue();
             }if(returnNum!=null){
                 sNum = BigDecimalUtil.sub(sNum,returnNum).doubleValue();
+            }if(checkNums!=null){
+                BigDecimal mul = BigDecimalUtil.mul(-1.0D, checkNums); // 取反：+1 其实就是要变成-1
+                sNum = BigDecimalUtil.add(sNum,mul.doubleValue()).doubleValue();
             }
             stockNum.put(stock.getMaterialId(),sNum );
         }

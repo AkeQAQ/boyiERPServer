@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.RepositoryCheck;
 import com.boyi.entity.RepositoryCheck;
 
+import java.util.List;
+
 public interface RepositoryCheckService extends IService<RepositoryCheck> {
 
     Page<RepositoryCheck> innerQuery(Page page, QueryWrapper<RepositoryCheck> like);
@@ -14,4 +16,5 @@ public interface RepositoryCheckService extends IService<RepositoryCheck> {
 
     Page<RepositoryCheck> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate);
 
+    List<RepositoryCheck> listGtEndDate(String endDate);
 }

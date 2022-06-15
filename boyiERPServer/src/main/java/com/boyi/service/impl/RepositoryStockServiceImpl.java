@@ -10,6 +10,7 @@ import com.boyi.entity.*;
 import com.boyi.mapper.RepositoryStockMapper;
 import com.boyi.service.RepositoryStockService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.Map;
  * @since 2021-09-02
  */
 @Service
+@Slf4j
 public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMapper, RepositoryStock> implements RepositoryStockService {
 
     @Autowired
@@ -231,6 +233,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             if(stock == null){
                 throw new Exception("该物料库存："+materialId+"不存在，不能减库存!");
             }
+            log.info("校验库存。物料{},待减少数目[{}],库存数目:[{}]",materialId,entry.getValue(),entry.getKey());
             if(stock.getNum() < entry.getValue()){
                 throw new Exception("该物料："+materialId+",库存数量:"+stock.getNum()+"小于要减少的数量:"+entry.getValue()+"不能减库存!");
             }

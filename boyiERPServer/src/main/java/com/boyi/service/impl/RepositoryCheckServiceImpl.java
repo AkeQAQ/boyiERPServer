@@ -11,6 +11,8 @@ import com.boyi.service.RepositoryCheckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class RepositoryCheckServiceImpl extends ServiceImpl<RepositoryCheckMapper, RepositoryCheck> implements RepositoryCheckService {
     @Autowired
@@ -32,6 +34,11 @@ public class RepositoryCheckServiceImpl extends ServiceImpl<RepositoryCheckMappe
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate),DBConstant.TABLE_REPOSITORY_CHECK.CHECK_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate),DBConstant.TABLE_REPOSITORY_CHECK.CHECK_DATE_FIELDNAME,searchEndDate));
+    }
+
+    @Override
+    public List<RepositoryCheck> listGtEndDate(String endDate) {
+        return this.repositoryCheckMapper.listGtEndDate(endDate);
     }
 
 
