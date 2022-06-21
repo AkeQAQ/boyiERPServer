@@ -92,40 +92,84 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
     List<RealDosageVO> listRealDosageById(@Param("id") Long id);
 
     @Select("" +
-            "select t1.*,t2.return_num," +
-            "             (cast(t1.num as decimal(6,2)) - IFNULL(0,cast(t2.return_num as decimal(6,2))))  / cast(batchNum as decimal(6,2))    real_dosage " +
-            "  from " +
-            "             (" +
-            "            select opo.order_num,opo.product_num ,opo.product_brand,opo.order_number,pb.batch_id,ppcd.material_id,bm.name material_name ,ppcd.dosage plan_dosage,rpmd.num ,(select IFNULL(size34,0)+IFNULL(size36,0)+IFNULL(size37,0)+IFNULL(size38,0)+IFNULL(size39,0)+IFNULL(size40,0)" +
-            " +IFNULL(size41,0)+IFNULL(size42,0)+IFNULL(size43,0)+IFNULL(size44,0)+IFNULL(size45,0)+IFNULL(size46,0)" +
-            "+IFNULL(size47,0) from produce_batch where batch_id = pb.batch_id) batchNum" +
-            "             from " +
-            "            order_product_order opo ," +
-            "            produce_product_constituent ppc," +
-            "            produce_product_constituent_detail ppcd," +
-            "            produce_batch pb," +
-            "            repository_pick_material rpm," +
-            "            repository_pick_material_detail rpmd ," +
-            "            base_material bm " +
-            "            where opo.product_num = ppc.product_num" +
-            "            and opo.product_brand = ppc.product_brand" +
-            "            and ppc.id = ppcd.constituent_id" +
-            "            and ppcd.material_id = rpmd.material_id" +
-            "            and ppcd.material_id like '01.%'" +
-            "            and opo.order_num = pb.order_num" +
-            "            and pb.batch_id = rpm.batch_id" +
-            "            and rpm.id = rpmd.document_id" +
-            "            and rpmd.material_id = bm.id" +
-            "            )t1 left join" +
-            "            (" +
-            "            select rrmd.material_id,rrm.batch_id ,IFNULL(rrmd.num,0) return_num from" +
-            "            repository_return_material rrm," +
-            "            repository_return_material_detail rrmd " +
-            "            where rrm.id = rrmd.document_id" +
-            "            ) t2" +
-            "            on t1.material_id = t2.material_id " +
-            "            and t1.batch_id = t2.batch_id" +
-            "            order by order_num desc")
+            " SELECT" +
+            " t1.*," +
+            " t2.return_num," +
+            " (" +
+            " cast(" +
+            " t1.num AS DECIMAL ( 6, 2 )) - IFNULL(" +
+            " 0," +
+            " cast(" +
+            " t2.return_num AS DECIMAL ( 6, 2 )))) / cast(" +
+            " batchNum AS DECIMAL ( 6, 2 )) real_dosage " +
+            " FROM" +
+            " (" +
+            " SELECT" +
+            " opo.order_num," +
+            " opo.product_num," +
+            " opo.product_brand," +
+            " opo.order_number," +
+            " pb.batch_id," +
+            " ppcd.material_id," +
+            " bm.NAME material_name," +
+            " (" +
+            " SELECT" +
+            " IFNULL( size34, 0 )+ IFNULL( size36, 0 )+ IFNULL( size37, 0 )+ IFNULL( size38, 0 )+ IFNULL( size39, 0 )+ IFNULL( size40, 0 ) + IFNULL( size41, 0 )+ IFNULL( size42, 0 )+ IFNULL( size43, 0 )+ IFNULL( size44, 0 )+ IFNULL( size45, 0 )+ IFNULL( size46, 0 ) + IFNULL( size47, 0 ) " +
+            " FROM" +
+            " produce_batch " +
+            " WHERE" +
+            " batch_id = pb.batch_id " +
+            " ) batchNum," +
+            " rpmd.num," +
+            " ( SELECT " +
+            " cast(IFNULL( size34, 0 ) * (ppcd.dosage - 0.24) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size35, 0 ) * (ppcd.dosage - 0.20) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size36, 0 ) * (ppcd.dosage - 0.16) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size37, 0 ) * (ppcd.dosage - 0.12) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size38, 0 ) * (ppcd.dosage - 0.08) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size39, 0 ) * (ppcd.dosage - 0.04) AS DECIMAL ( 6, 2 )) +" +
+            " cast(IFNULL( size40, 0 ) * ppcd.dosage  AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size41, 0 ) * (ppcd.dosage + 0.04) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size42, 0 ) * (ppcd.dosage + 0.08) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size43, 0 ) * (ppcd.dosage + 0.12) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size44, 0 ) * (ppcd.dosage + 0.16) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size45, 0 ) * (ppcd.dosage + 0.2) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size46, 0 ) * (ppcd.dosage + 0.24) AS DECIMAL ( 6, 2 ))+" +
+            " cast(IFNULL( size47, 0 ) * (ppcd.dosage + 0.28) AS DECIMAL ( 6, 2 )) FROM produce_batch WHERE batch_id = pb.batch_id ) caiduan_plan_pick_num," +
+            " ppcd.dosage plan_dosage" +
+            " FROM" +
+            " order_product_order opo," +
+            " produce_product_constituent ppc," +
+            " produce_product_constituent_detail ppcd," +
+            " produce_batch pb," +
+            " repository_pick_material rpm," +
+            " repository_pick_material_detail rpmd," +
+            " base_material bm " +
+            " WHERE" +
+            " opo.product_num = ppc.product_num " +
+            " AND opo.product_brand = ppc.product_brand " +
+            " AND ppc.id = ppcd.constituent_id " +
+            " AND ppcd.material_id = rpmd.material_id " +
+            " AND ppcd.material_id LIKE '01.%' " +
+            "  AND opo.order_num = pb.order_num " +
+            "  AND pb.batch_id = rpm.batch_id " +
+            "  AND rpm.id = rpmd.document_id " +
+            "  AND rpmd.material_id = bm.id " +
+            " ) t1" +
+            " LEFT JOIN (" +
+            " SELECT" +
+            "  rrmd.material_id," +
+            "  rrm.batch_id," +
+            "  IFNULL( rrmd.num, 0 ) return_num " +
+            " FROM" +
+            "  repository_return_material rrm," +
+            "  repository_return_material_detail rrmd " +
+            " WHERE" +
+            "  rrm.id = rrmd.document_id " +
+            " ) t2 ON t1.material_id = t2.material_id " +
+            " AND t1.batch_id = t2.batch_id " +
+            " ORDER BY" +
+            " order_num DESC")
     List<RealDosageVO> listRealDosage();
 
 

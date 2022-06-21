@@ -23,20 +23,26 @@ public class RealDosageVO implements Serializable {
     private String materialId;
     @ExcelAttribute(sort = 7)
     private String materialName;
-    @ExcelAttribute(sort = 8)
-    private String num;
     @ExcelAttribute(sort = 9)
+    private String num;
+    @ExcelAttribute(sort = 10)
     private String returnNum;
     @ExcelAttribute(sort = 5)
     private String batchNum;
 
-    @ExcelAttribute(sort = 10)
-    private String realDosage;
     @ExcelAttribute(sort = 11)
-    private String avgDosage;
+    private String realDosage;
     @ExcelAttribute(sort = 12)
+    private String avgDosage;
+    @ExcelAttribute(sort = 13)
     private String planDosage;
+    @ExcelAttribute(sort = 8)
+    private String caiduanPlanPickNum;
 
+    @ExcelAttribute(sort = 14)
+    private String caiduanPlanPickNumSum;
 
+    @ExcelAttribute(sort = 15)
+    private String numSum;
 
 }

@@ -1,5 +1,6 @@
 package com.boyi.mapper;
 
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -88,4 +89,18 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     @Select("select product_num,count(DISTINCT product_brand) sum from order_product_order where order_type!=#{orderType} and created >= #{searchStartDate} and created <= #{searchEndDate} group by product_num  order by count(DISTINCT product_brand) desc ")
     List<AnalysisProductOrderVO> listGroupByMostProductNum(@Param("orderType") Integer orderType, @Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate);
 
+    @Select(" " +
+            " select opo.order_num,opo.customer_num,opo.product_num,opo.product_brand,opo.product_color,opo.order_number,opo.product_region,opo.comment,ppcd.material_id,bm.name material_name,cast(ppcd.dosage * opo.order_number as DECIMAL (14,5)) need_num from  " +
+            " order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd,base_material bm  " +
+            "  where order_type != 2 and order_num not in( " +
+            " select order_num from " +
+            " produce_batch  " +
+            " ) " +
+            " and opo.product_num = ppc.product_num " +
+            " and opo.product_brand = ppc.product_brand " +
+            " and ppc.id = ppcd.constituent_id " +
+            " and ppcd.material_id like '01.%' " +
+            " and ppcd.material_id = bm.id " +
+            " order by opo.id desc")
+    List<OrderProductCalVO> calNoProductOrders();
 }

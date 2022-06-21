@@ -1,6 +1,7 @@
 package com.boyi.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -46,4 +47,8 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<AnalysisProductOrderVO> listGroupByProductBrand(String searchStartDate, String searchEndDate);
 
     List<AnalysisProductOrderVO> listGroupByMostProductNum(String searchStartDate, String searchEndDate);
+
+    List<OrderProductCalVO> calNoProductOrders();
+
+
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceOrderMaterialProgress;
@@ -119,6 +120,11 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public List<AnalysisProductOrderVO> listGroupByMostProductNum(String searchStartDate, String searchEndDate) {
         return this.orderProductOrderMapper.listGroupByMostProductNum(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2,searchStartDate,searchEndDate);
+    }
+
+    @Override
+    public List<OrderProductCalVO> calNoProductOrders() {
+        return this.orderProductOrderMapper.calNoProductOrders();
     }
 
 }

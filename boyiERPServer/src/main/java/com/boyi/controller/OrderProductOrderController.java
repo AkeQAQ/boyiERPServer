@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.ExcelImportUtil;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
@@ -50,6 +51,21 @@ public class OrderProductOrderController extends BaseController {
         replaceMap.put("订单",0);
         replaceMap.put("回单",1);
     }
+
+
+    @Transactional
+    @PostMapping("calNoProductOrders")
+    @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    public ResponseResult calNoProductOrders() throws Exception{
+        try {
+            List<OrderProductCalVO> lists = orderProductOrderService.calNoProductOrders();
+            return ResponseResult.succ(lists);
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
 
     @Transactional
     @PostMapping("cancelOrder")

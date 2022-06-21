@@ -93,6 +93,8 @@ public class ProduceProductConstituentController extends BaseController {
                 first.setNum(BigDecimalUtil.add(first.getNum(),current.getNum()).toString());
                 first.setReturnNum(BigDecimalUtil.add(first.getReturnNum(),current.getReturnNum()).toString());
                 first.setRealDosage(BigDecimalUtil.add(first.getRealDosage(),current.getRealDosage()).toString());
+//                first.setCaiduanPlanPickNum(BigDecimalUtil.add(first.getCaiduanPlanPickNum(),current.getCaiduanPlanPickNum()).toString());
+
             }
         }
 
@@ -115,11 +117,29 @@ public class ProduceProductConstituentController extends BaseController {
         HashMap<String, String> materialSum = new HashMap<>();
         HashMap<String, String> materialCount = new HashMap<>();
 
+        // 一款，一品牌，一个物料的计划出库总和
+        HashMap<String, String> materialSumByCaiduanPickNumSum = new HashMap<>();
+        // 一款，一品牌，一个物料的出库总和
+        HashMap<String, String> materialSumByNum = new HashMap<>();
 
         // 根据物料进行分组，对实际用料进行平均求值,
         for(RealDosageVO vo : lists){
             String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();
             String sum = materialSum.get(key);
+
+            String sum2 = materialSumByCaiduanPickNumSum.get(key);
+            if(sum2 == null){
+                materialSumByCaiduanPickNumSum.put(key,vo.getCaiduanPlanPickNum());
+            }else{
+                materialSumByCaiduanPickNumSum.put(key,BigDecimalUtil.add(sum2,vo.getCaiduanPlanPickNum()).toString());
+            }
+
+            String sum3 = materialSumByNum.get(key);
+            if(sum3 == null){
+                materialSumByNum.put(key,vo.getNum());
+            }else{
+                materialSumByNum.put(key,BigDecimalUtil.add(sum3,vo.getNum()).toString());
+            }
 
             String netUse = BigDecimalUtil.sub(vo.getNum(), vo.getReturnNum()).toString();
             if(sum == null){
@@ -134,10 +154,20 @@ public class ProduceProductConstituentController extends BaseController {
                 materialCount.put(key,BigDecimalUtil.add(count,vo.getBatchNum()).toString());
             }
         }
+
+
+        Set<String> isSet = new HashSet<>();
         // 求出均值
         for(RealDosageVO vo : lists) {
             String key = vo.getProductNum() + "_" + vo.getProductBrand() + "_" + vo.getMaterialId();
-            vo.setAvgDosage(BigDecimalUtil.div(materialSum.get(key),materialCount.get(key)).toString());
+
+            if(!isSet.contains(key)){
+                vo.setAvgDosage(BigDecimalUtil.div(materialSum.get(key),materialCount.get(key)).toString());
+                vo.setCaiduanPlanPickNumSum(materialSumByCaiduanPickNumSum.get(key));
+                vo.setNumSum(materialSumByNum.get(key));
+                isSet.add(key);
+            }
+
         }
 
         //加载模板流数据
