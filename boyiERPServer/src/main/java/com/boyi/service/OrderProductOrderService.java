@@ -51,4 +51,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductCalVO> calNoProductOrders();
 
 
+    List<OrderProductOrder> listNoProduct();
+
+
 }

@@ -103,4 +103,13 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " and ppcd.material_id = bm.id " +
             " order by opo.id desc")
     List<OrderProductCalVO> calNoProductOrders();
+
+    @Select("select opo.* from order_product_order opo  " +
+            "              where order_type != 2 and order_num not in( " +
+            "             select order_num from " +
+            "             produce_batch  " +
+            "             ) " +
+            "             order by opo.id desc")
+    List<OrderProductOrder> listNoProduct();
+
 }

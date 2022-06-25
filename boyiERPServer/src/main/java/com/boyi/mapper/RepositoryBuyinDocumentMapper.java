@@ -246,6 +246,8 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " where rbd.id = rbdd.document_id " +
             " and rbd.supplier_id = bs.id" +
             " and rbdd.material_id = bm.id " +
+            " and rbd.buy_in_date >= #{searchStartDate}  and rbd.buy_in_date <= #{searchEndDate} " +
+
             " ) t" +
             " left join base_supplier_material sm" +
             " on sm.status=0 and t.material_id = sm.material_id and t.supplier_id = sm.supplier_id" +
@@ -269,6 +271,8 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " and rbd.supplier_id = bs.id" +
             " and rbdd.material_id = bm.id " +
             " and bm.group_code = #{searchField}"+
+            " and rbd.buy_in_date >= #{searchStartDate}  and rbd.buy_in_date <= #{searchEndDate} " +
+
             " ) t" +
             " left join base_supplier_material sm" +
             " on sm.status=0 and t.material_id = sm.material_id and t.supplier_id = sm.supplier_id" +

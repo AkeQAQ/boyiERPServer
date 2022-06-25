@@ -217,7 +217,7 @@ public class OrderProductOrderController extends BaseController {
             calTheMap.put("materialName",material.getName());
             ProduceOrderMaterialProgress dbProgress = theMaterialIdAndProgress.get(material.getId());
 
-            calTheMap.put("calNum",dbProgress == null|| dbProgress.getCalNum()==null || dbProgress.getCalNum().isEmpty() ? BigDecimalUtil.mul(item.getDosage(),orderNumber+"").doubleValue() : dbProgress.getCalNum());
+            calTheMap.put("calNum",BigDecimalUtil.mul(item.getDosage(),orderNumber+"").doubleValue() );
             calTheMap.put("materialUnit",material.getUnit());
             calTheMap.put("preparedNum",dbProgress==null?0:dbProgress.getPreparedNum());
             calTheMap.put("comment",dbProgress==null?"":dbProgress.getComment());
@@ -341,6 +341,106 @@ public class OrderProductOrderController extends BaseController {
         returnMap.put("canBatchPrepareFlag",canBatchPrepareFlag);
 
         return ResponseResult.succ(returnMap);
+    }
+
+    /**
+     * 上传校验未投订单数目是否精准
+     */
+    @PostMapping("/uploadValidNoProduct")
+    @PreAuthorize("hasAuthority('order:productOrder:import')")
+    public ResponseResult uploadValidNoProduct(Principal principal, MultipartFile[] files) {
+        MultipartFile file = files[0];
+
+        log.info("上传内容: files:{}",file);
+        ExcelImportUtil<OrderProductOrder> utils = new ExcelImportUtil<OrderProductOrder>(OrderProductOrder.class);
+        List<OrderProductOrder> orderProductOrders = null;
+        try (InputStream fis = file.getInputStream();){
+            orderProductOrders = utils.readExcel(fis, 1, 0,18,replaceMap);
+            log.info("解析的excel数据:{}",orderProductOrders);
+
+
+            if(orderProductOrders == null || orderProductOrders.size() == 0){
+                return ResponseResult.fail("解析内容未空");
+            }
+            ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
+            ArrayList<String> ids = new ArrayList<>();
+
+            HashMap<String, OrderProductOrder> validOrders = new HashMap<>();
+            for (OrderProductOrder order: orderProductOrders){
+                if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
+                    continue;
+                }
+                String orderNum = order.getOrderNum();
+                if(validOrders.containsKey(orderNum)){
+                    return ResponseResult.fail("EXCEL存在重复订单号:",order.getOrderNum());
+                }
+                validOrders.put(orderNum,order);
+                ids.add(order.getOrderNum());
+            }
+
+            // 查询系统的未投订单
+            List<OrderProductOrder> sysNoProduct = orderProductOrderService.listNoProduct();
+            HashMap<String, OrderProductOrder> sysOrders = new HashMap<>();
+
+            for (OrderProductOrder order: sysNoProduct) {
+                String orderNum = order.getOrderNum();
+                if(sysOrders.containsKey(orderNum)){
+                    return ResponseResult.fail("系统存在重复订单号:",order.getOrderNum());
+                }
+                sysOrders.put(orderNum,order);
+            }
+
+
+            if(sysNoProduct != null && !sysNoProduct.isEmpty()){
+
+                for (Map.Entry<String,OrderProductOrder> entry: validOrders.entrySet()){
+                    String orderNum = entry.getKey();
+                    OrderProductOrder excelOpo = entry.getValue();
+                    OrderProductOrder sysOrder = sysOrders.get(orderNum);
+                    // 对未投的全部进行系统数量校验，有数量出入的，提示差值。，假如系统没有的也要提示不存在。
+
+                    if(sysOrder==null){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content","订单号："+orderNum+"系统不存在或系统取消");
+                        errorMsgs.add(errorMsg);
+                        continue;
+                    }
+                    Integer excelNumber = excelOpo.getOrderNumber();
+                    Integer orderNumber = sysOrder.getOrderNumber();
+
+                    if(excelNumber == null || orderNumber ==null){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content","订单号："+orderNum+"EXCEL或者系统订单数目为空");
+                        errorMsgs.add(errorMsg);
+                        continue;
+                    }
+                    if(excelNumber.intValue()!=orderNumber.intValue()){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content","订单号："+orderNum+",EXCEL数量["+excelNumber+"],系统数量["+orderNumber+"]");
+                        errorMsgs.add(errorMsg);
+                    }
+
+                }
+            }else{
+                HashMap<String, String> errorMsg = new HashMap<>();
+                errorMsg.put("content","系统的未投数量为0");
+                errorMsgs.add(errorMsg);
+            }
+            if(errorMsgs.isEmpty()){
+                HashMap<String, String> errorMsg = new HashMap<>();
+                errorMsg.put("content","校验一致！");
+                errorMsgs.add(errorMsg);
+            }
+            return ResponseResult.succ(errorMsgs);
+
+        }
+        catch (Exception e) {
+            if( e instanceof  DuplicateKeyException){
+                return ResponseResult.fail("订单号重复！");
+            }
+            log.error("发生错误:",e);
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**

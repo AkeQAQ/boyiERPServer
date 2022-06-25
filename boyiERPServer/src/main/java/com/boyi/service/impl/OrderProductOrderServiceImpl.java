@@ -127,4 +127,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.calNoProductOrders();
     }
 
+    @Override
+    public List<OrderProductOrder> listNoProduct() {
+        return this.orderProductOrderMapper.listNoProduct();
+    }
+
 }
