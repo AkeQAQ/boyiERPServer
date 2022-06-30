@@ -776,8 +776,8 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                     produceOrderMaterialProgressService.save(process);
                 } else {
                     // 假如已经进度表已经有入库数量，不能修改
-                    if(old.getInNum()!=null && !old.getInNum().isEmpty()&&Double.valueOf(old.getInNum())>0.0D&&!process.getAddNum().isEmpty()&&Double.valueOf(process.getAddNum()).doubleValue() > 0D){
-                        sb.append(old.getMaterialId()+"已存在入库数量，不能修改备料数量,");
+                    if(old.getInNum()!=null && !old.getInNum().isEmpty()&&Double.valueOf(old.getInNum())>0.0D&&!process.getAddNum().isEmpty()&&Double.valueOf(process.getAddNum()).doubleValue() < 0D){
+                        sb.append(old.getMaterialId()+"已存在入库消单，不能减少备料数量,");
                         continue;
                     }
 

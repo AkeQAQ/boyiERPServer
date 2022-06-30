@@ -846,6 +846,7 @@ public class DBConstant {
         public static final String PRODUCT_BRAND_FIELDNAME = "product_brand";
         public static final String PRODUCT_COLOR_FIELDNAME = "product_color";
         public static final String STATUS_FIELDNAME = "status";
+        public static final String ORDER_NUMBER_FIELDNAME = "order_number";
 
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "updated_user";

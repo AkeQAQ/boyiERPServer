@@ -52,4 +52,6 @@ public class OrderProductCalVO implements Serializable {
 
     private String needNum;
 
+    private String stockNum;
+
 }

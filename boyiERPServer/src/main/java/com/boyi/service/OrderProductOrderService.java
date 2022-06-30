@@ -54,4 +54,5 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductOrder> listNoProduct();
 
 
+    void addOrderNumberByOrderNum(String orderNum, String needAddNum);
 }

@@ -52,6 +52,33 @@ public class OrderProductOrderController extends BaseController {
         replaceMap.put("回单",1);
     }
 
+    /**
+     * 修改订单号
+     */
+    @PostMapping("/supOrderNumber")
+    @PreAuthorize("hasAuthority('order:productOrder:save')")
+    public ResponseResult supOrderNumber(Principal principal, @Validated @RequestBody List<Map<String,String>> supMaps)
+            throws Exception{
+
+        if(supMaps.isEmpty()){
+            return ResponseResult.fail("补充订单集合内容为空");
+        }
+        log.info("一键补订单的map:{}",supMaps);
+
+        // 根据key：订单号，value： 数量，进行加减
+        for(Map<String,String> entry : supMaps){
+            Set<String> key = entry.keySet();
+            for(String orderNum : key){
+                String needAddNum = entry.get(orderNum);
+                orderProductOrderService.addOrderNumberByOrderNum(orderNum,needAddNum);
+            }
+        }
+
+        return ResponseResult.succ("补充订单集合成功!");
+
+    }
+
+
 
     @Transactional
     @PostMapping("calNoProductOrders")
@@ -365,6 +392,12 @@ public class OrderProductOrderController extends BaseController {
             ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
             ArrayList<String> ids = new ArrayList<>();
 
+            Map<String, Object> returnMap = new HashMap<>();
+            returnMap.put("showContent",errorMsgs);
+
+            List<Map<String, String>> needRepairs = new ArrayList<Map<String, String>>();
+            returnMap.put("needRepairLists",needRepairs);
+
             HashMap<String, OrderProductOrder> validOrders = new HashMap<>();
             for (OrderProductOrder order: orderProductOrders){
                 if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
@@ -417,21 +450,43 @@ public class OrderProductOrderController extends BaseController {
                     if(excelNumber.intValue()!=orderNumber.intValue()){
                         HashMap<String, String> errorMsg = new HashMap<>();
                         errorMsg.put("content","订单号："+orderNum+",EXCEL数量["+excelNumber+"],系统数量["+orderNumber+"]");
+
                         errorMsgs.add(errorMsg);
+
+                        int chazhi = BigDecimalUtil.sub(excelNumber, orderNumber).intValue();
+                        if(chazhi > 0){
+                            HashMap<String, String> repair = new HashMap<>();
+                            repair.put(orderNum,chazhi+"");
+                            needRepairs.add(repair);
+                        }
+                        // 负数的目前先不考虑
+
                     }
 
                 }
+
+
             }else{
                 HashMap<String, String> errorMsg = new HashMap<>();
                 errorMsg.put("content","系统的未投数量为0");
                 errorMsgs.add(errorMsg);
             }
+
+            // 系统里的订单，要是没在生管未投订单里，也显示错误
+            for(Map.Entry<String,OrderProductOrder> sysOrder: sysOrders.entrySet()){
+                if(!validOrders.containsKey(sysOrder.getKey())){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","系统未投订单号:"+sysOrder.getKey()+",在生管EXCEL中不存在");
+                    errorMsgs.add(errorMsg);
+                }
+            }
+
             if(errorMsgs.isEmpty()){
                 HashMap<String, String> errorMsg = new HashMap<>();
                 errorMsg.put("content","校验一致！");
                 errorMsgs.add(errorMsg);
             }
-            return ResponseResult.succ(errorMsgs);
+            return ResponseResult.succ(returnMap);
 
         }
         catch (Exception e) {

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
@@ -130,6 +131,16 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public List<OrderProductOrder> listNoProduct() {
         return this.orderProductOrderMapper.listNoProduct();
+    }
+
+    @Override
+    public void addOrderNumberByOrderNum(String orderNum, String needAddNum) {
+        OrderProductOrder oldOPO = this.getByOrderNum(orderNum);
+        Integer oldOrderNumber = oldOPO.getOrderNumber();
+        BigDecimalUtil.add(oldOrderNumber+"",needAddNum);
+        this.update(new UpdateWrapper<OrderProductOrder>()
+                .set(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUMBER_FIELDNAME,BigDecimalUtil.add(oldOrderNumber+"",needAddNum).intValue())
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,orderNum));
     }
 
 }

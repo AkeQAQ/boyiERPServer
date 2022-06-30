@@ -90,8 +90,8 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     List<AnalysisProductOrderVO> listGroupByMostProductNum(@Param("orderType") Integer orderType, @Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate);
 
     @Select(" " +
-            " select opo.order_num,opo.customer_num,opo.product_num,opo.product_brand,opo.product_color,opo.order_number,opo.product_region,opo.comment,ppcd.material_id,bm.name material_name,cast(ppcd.dosage * opo.order_number as DECIMAL (14,5)) need_num from  " +
-            " order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd,base_material bm  " +
+            " select opo.order_num,opo.customer_num,opo.product_num,opo.product_brand,opo.product_color,opo.order_number,opo.product_region,opo.comment,ppcd.material_id,bm.name material_name,cast(ppcd.dosage * opo.order_number as DECIMAL (14,5)) need_num,rs.num stock_num from  " +
+            " order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd,base_material bm  ,repository_stock rs " +
             "  where order_type != 2 and order_num not in( " +
             " select order_num from " +
             " produce_batch  " +
@@ -101,6 +101,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " and ppc.id = ppcd.constituent_id " +
             " and ppcd.material_id like '01.%' " +
             " and ppcd.material_id = bm.id " +
+            " and bm.id = rs.material_id" +
             " order by opo.id desc")
     List<OrderProductCalVO> calNoProductOrders();
 
