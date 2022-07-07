@@ -103,4 +103,7 @@ public class OrderProductOrder extends BaseEntity {
     @TableField(exist = false)
     private Long orderId;
 
+    @TableField(exist = false)
+    private Boolean hasProductConstituent;
+
 }

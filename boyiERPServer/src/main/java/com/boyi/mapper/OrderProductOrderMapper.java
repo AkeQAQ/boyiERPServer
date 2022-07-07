@@ -99,7 +99,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " and opo.product_num = ppc.product_num " +
             " and opo.product_brand = ppc.product_brand " +
             " and ppc.id = ppcd.constituent_id " +
-            " and ppcd.material_id like '01.%' " +
+
             " and ppcd.material_id = bm.id " +
             " and bm.id = rs.material_id" +
             " order by opo.id desc")

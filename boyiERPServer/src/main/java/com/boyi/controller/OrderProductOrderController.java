@@ -85,8 +85,31 @@ public class OrderProductOrderController extends BaseController {
     @PreAuthorize("hasAuthority('order:productOrder:prepare')")
     public ResponseResult calNoProductOrders() throws Exception{
         try {
+            List<Object> returnLists = new ArrayList<>();
             List<OrderProductCalVO> lists = orderProductOrderService.calNoProductOrders();
-            return ResponseResult.succ(lists);
+
+            HashMap<String, OrderProductCalVO> groupMap = new HashMap<>();
+
+            // 遍历，根据物料进行分组，求和数量
+            for(OrderProductCalVO vo : lists){
+                String materialId = vo.getMaterialId();
+                OrderProductCalVO theOneMaterialIdOBJ = groupMap.get(materialId);
+
+                if(theOneMaterialIdOBJ==null){
+                    theOneMaterialIdOBJ  = new OrderProductCalVO();
+                    theOneMaterialIdOBJ.setMaterialId(vo.getMaterialId());
+                    theOneMaterialIdOBJ.setMaterialName(vo.getMaterialName());
+                    theOneMaterialIdOBJ.setNeedNum(vo.getNeedNum());
+                    theOneMaterialIdOBJ.setStockNum(vo.getStockNum());
+                    groupMap.put(materialId,theOneMaterialIdOBJ);
+                }else{
+                    theOneMaterialIdOBJ.setNeedNum(BigDecimalUtil.add( theOneMaterialIdOBJ.getNeedNum(),vo.getNeedNum()).toString() );
+                }
+
+            }
+            returnLists.add(lists);
+            returnLists.add(groupMap.values());
+            return ResponseResult.succ(returnLists);
         }catch (Exception e){
             log.error("报错.",e);
             throw new RuntimeException("服务器报错");
@@ -770,6 +793,12 @@ public class OrderProductOrderController extends BaseController {
         }
 
         pageData = orderProductOrderService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap);
+
+        // 标识是否有产品组成结构
+        for(OrderProductOrder opo :pageData.getRecords()){
+            ProduceProductConstituent productConsi = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
+            opo.setHasProductConstituent(productConsi !=null);
+        }
 
         return ResponseResult.succ(pageData);
     }

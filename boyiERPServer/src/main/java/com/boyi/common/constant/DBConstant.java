@@ -728,6 +728,16 @@ public class DBConstant {
     }
 
     public static class TABLE_REPOSITORY_INOUT_DETAIL{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
         public static final String ID_FIELDNAME = "id";
         public static final String CLOSE_DATE_FIELDNAME = "close_date";
         public static final String CREATED_FIELDNAME = "created";
