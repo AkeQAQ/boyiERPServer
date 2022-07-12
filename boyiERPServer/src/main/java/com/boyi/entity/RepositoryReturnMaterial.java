@@ -83,5 +83,8 @@ public class RepositoryReturnMaterial extends BaseEntity {
     @ExcelAttribute(sort = 3)
     private String departmentName; // 部门名称
 
+    @TableField(exist = false)  // 字段数据库忽略
+    private String reason; // 退料原因
+
 
 }

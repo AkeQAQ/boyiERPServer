@@ -45,7 +45,6 @@ public class RepositoryBuyinDocumentDetailServiceImpl extends ServiceImpl<Reposi
     @Override
     public boolean removeByDocId(Long docId) {
         return this.remove(new QueryWrapper<RepositoryBuyinDocumentDetail>().eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME, docId));
-
     }
 
     @Override

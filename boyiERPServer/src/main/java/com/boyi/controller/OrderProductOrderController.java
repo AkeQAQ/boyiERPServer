@@ -136,6 +136,29 @@ public class OrderProductOrderController extends BaseController {
     }
 
 
+    @PostMapping("/batchNotSurePrepare")
+    @PreAuthorize("hasAuthority('order:productOrder:prepare')")
+    public ResponseResult batchNotSurePrepare(Principal principal,@RequestBody Long[] ids) {
+        ArrayList<OrderProductOrder> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            if(!old.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_2)){
+                return ResponseResult.fail("备料状态不对，已修改，请刷新!");
+            }
+
+            OrderProductOrder orderProductOrder = new OrderProductOrder();
+            orderProductOrder.setUpdated(LocalDateTime.now());
+            orderProductOrder.setUpdatedUser(principal.getName());
+            orderProductOrder.setId(id);
+            orderProductOrder.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
+            lists.add(orderProductOrder);
+
+        }
+        orderProductOrderService.updateBatchById(lists);
+        return ResponseResult.succ("批量取消确认");
+    }
+
     @Transactional
     @PostMapping("prepareNotSure")
     @PreAuthorize("hasAuthority('order:productOrder:prepare')")
@@ -794,11 +817,22 @@ public class OrderProductOrderController extends BaseController {
 
         pageData = orderProductOrderService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap);
 
+        // 假如有组成结构的往前排
+        LinkedList<OrderProductOrder> newRecords = new LinkedList<>();
+
+
+
         // 标识是否有产品组成结构
         for(OrderProductOrder opo :pageData.getRecords()){
             ProduceProductConstituent productConsi = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
-            opo.setHasProductConstituent(productConsi !=null);
+            if(productConsi !=null){
+                opo.setHasProductConstituent(productConsi !=null);
+                newRecords.addFirst(opo);
+            }else{
+                newRecords.add(opo);
+            }
         }
+        pageData.setRecords(newRecords);
 
         return ResponseResult.succ(pageData);
     }
@@ -854,6 +888,11 @@ public class OrderProductOrderController extends BaseController {
             if(!old.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1)){
                 return ResponseResult.fail("备料:"+old.getOrderNum()+",备料状态错误，要求是备料未确认的");
 
+            }
+            // 假如是不存在组成结构的，也不能确认
+            ProduceProductConstituent isExist = produceProductConstituentService.getValidByNumBrand(old.getProductNum(), old.getProductBrand());
+            if(isExist ==null){
+                return ResponseResult.fail("备料:"+old.getOrderNum()+",要求是存在有组成结构的");
             }
             OrderProductOrder orderProductOrder = new OrderProductOrder();
             orderProductOrder.setId(id);

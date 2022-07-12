@@ -45,6 +45,68 @@ public class ProduceBatchController extends BaseController {
     @Value("${poi.produceBatchImportDemoPath}")
     private String poiImportDemoPath;
 
+    @PostMapping("/statusPassBatch")
+    @PreAuthorize("hasAuthority('produce:batch:valid')")
+    @Transactional
+    public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
+
+        ArrayList<ProduceBatch> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            ProduceBatch batch = produceBatchService.getById(id);
+            if(!batch.getStatus().equals(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_1)){
+                return ResponseResult.fail("状态不对，已修改，请刷新!");
+            }
+
+            ProduceBatch pb = new ProduceBatch();
+            pb.setUpdated(LocalDateTime.now());
+            pb.setUpdatedUser(principal.getName());
+            pb.setId(id);
+            pb.setStatus(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_0);
+            lists.add(pb);
+        }
+        produceBatchService.updateBatchById(lists);
+
+        return ResponseResult.succ("批量审核通过");
+    }
+
+    @PostMapping("/statusReturnPassBatch")
+    @PreAuthorize("hasAuthority('produce:batch:valid')")
+    @Transactional
+    public ResponseResult statusReturnPassBatch(Principal principal,@RequestBody Long[] ids) {
+
+        ArrayList<ProduceBatch> lists = new ArrayList<>();
+
+        for (Long id : ids){
+            ProduceBatch batch = produceBatchService.getById(id);
+            if(!batch.getStatus().equals(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_0)){
+                return ResponseResult.fail("状态不对，已修改，请刷新!");
+            }
+
+
+            List<RepositoryPickMaterial> picks = repositoryPickMaterialService.getSameBatch(null, batch.getBatchId());
+
+            if(picks.size() > 0){
+                StringBuilder sb = new StringBuilder();
+                for (RepositoryPickMaterial pick : picks){
+                    sb.append(pick.getBatchId()).append(",");
+                }
+                sb.deleteCharAt(sb.length() - 1);
+                return ResponseResult.fail("生产领料已关联生产序号["+sb.toString()+"]");
+            }
+            ProduceBatch pb = new ProduceBatch();
+            pb.setUpdated(LocalDateTime.now());
+            pb.setUpdatedUser(principal.getName());
+            pb.setId(id);
+            pb.setStatus(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_1);
+            lists.add(pb);
+
+        }
+        produceBatchService.updateBatchById(lists);
+
+        return ResponseResult.succ("批量反审核通过");
+    }
+
     @Transactional
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('produce:batch:del')")
@@ -53,6 +115,9 @@ public class ProduceBatchController extends BaseController {
             List<ProduceBatch> batches = produceBatchService.listByIds(Arrays.asList(ids));
             ArrayList<String> batchIds = new ArrayList<>();
             for (ProduceBatch batch : batches){
+                if(batch.getStatus().equals(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_0)){
+                    return ResponseResult.fail("唯一编码:"+batch.getId()+",已审核通过，不能删除");
+                }
                 batchIds.add(batch.getBatchId());
             }
 
@@ -87,7 +152,7 @@ public class ProduceBatchController extends BaseController {
         try {
             ProduceBatch old = produceBatchService.getById(id);
             if(!old.getStatus().equals(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_1)){
-                return ResponseResult.fail("补数备料状态不对，已修改，请刷新!");
+                return ResponseResult.fail("状态不对，已修改，请刷新!");
             }
 
 
@@ -104,13 +169,11 @@ public class ProduceBatchController extends BaseController {
     @PreAuthorize("hasAuthority('produce:batch:valid')")
     public ResponseResult complementValid(Long id) throws Exception{
         try {
-            ProduceBatch old = produceBatchService.getById(id);
-            if(!old.getStatus().equals(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_0)){
-                return ResponseResult.fail("补数备料状态不对，已修改，请刷新!");
+            ProduceBatch batch = produceBatchService.getById(id);
+            if(!batch.getStatus().equals(DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_0)){
+                return ResponseResult.fail("状态不对，已修改，请刷新!");
             }
 
-            // 假如存在生产领料，不能反审核，不能删除
-            ProduceBatch batch = produceBatchService.getById(id);
 
             List<RepositoryPickMaterial> picks = repositoryPickMaterialService.getSameBatch(null, batch.getBatchId());
 

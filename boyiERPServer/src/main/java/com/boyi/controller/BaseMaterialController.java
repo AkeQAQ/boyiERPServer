@@ -466,6 +466,18 @@ public class BaseMaterialController extends BaseController {
             return ResponseResult.fail("请先删除"+count+"条对应入库记录!");
         }
 
+        int buyoutCount = repositoryBuyoutDocumentDetailService.countByMaterialId(ids);
+
+        if(buyoutCount > 0){
+            return ResponseResult.fail("请先删除"+buyoutCount+"条对应采购退料记录!");
+        }
+
+        int returnCount = repositoryReturnMaterialDetailService.countByMaterialId(ids);
+
+        if(returnCount > 0){
+            return ResponseResult.fail("请先删除"+returnCount+"条对应生产退料记录!");
+        }
+
         int count3 = repositoryPickMaterialDetailService.countByMaterialId(ids);
         if(count3 > 0){
             return ResponseResult.fail("请先删除"+count3+"条对应出库记录!");

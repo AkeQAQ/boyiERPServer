@@ -36,7 +36,9 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             "        m.unit , " +
             "        m.specs , " +
             "        docD.num," +
-            "        docD.id detail_id" +
+            "        docD.id detail_id," +
+            "        docD.reason reason" +
+
             " from " +
             "                        repository_return_material doc , " +
             "                        repository_return_material_detail docD, " +
