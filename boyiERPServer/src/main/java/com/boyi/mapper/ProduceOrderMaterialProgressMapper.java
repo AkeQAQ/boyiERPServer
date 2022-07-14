@@ -2,6 +2,7 @@ package com.boyi.mapper;
 
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.boyi.entity.RepositoryBuyinDocument;
@@ -89,4 +90,24 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             " where pomp.material_id = #{materialId} and " +
             " pomp.prepared_num > pomp.in_num")
     int countByMaterialIdAndPreparedNumGtInNum(@Param("materialId") String materialId);
+
+    @Select("select pomp.material_id,cast((sum(pomp.prepared_num)-sum(pomp.in_num)) as DECIMAL(12,5)) no_in_num  from produce_order_material_progress pomp " +
+            "where cast(pomp.prepared_num as DECIMAL(12,5)) > cast(pomp.in_num as DECIMAL(12,5)) " +
+            "group by pomp.material_id ")
+    List<OrderProductCalVO> listNoInNums();
+
+    @Select("" +
+            " select t1.*,bm.name material_name from  " +
+            " ( " +
+            " select pomp.material_id, " +
+            " cast(sum(pomp.cal_num) as DECIMAL(12,5)) cal_num, " +
+            " cast(sum(pomp.prepared_num) as DECIMAL(12,5)) prepared_num, " +
+            " cast(sum(pomp.in_num) as DECIMAL(12,5)) in_num  " +
+            " from produce_order_material_progress pomp " +
+            " group by pomp.material_id " +
+            " ) t1 , " +
+            " base_material bm  " +
+            " where t1.material_id = bm.id")
+    List<ProduceOrderMaterialProgress> groupByMaterialIds();
+
 }

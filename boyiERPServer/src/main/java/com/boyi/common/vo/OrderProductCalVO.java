@@ -54,4 +54,6 @@ public class OrderProductCalVO implements Serializable {
 
     private String stockNum;
 
+    private String noInNum;// 备料未到全的数值
+
 }

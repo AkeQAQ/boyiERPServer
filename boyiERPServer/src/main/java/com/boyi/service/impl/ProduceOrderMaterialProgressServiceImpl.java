@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.boyi.mapper.ProduceOrderMaterialProgressComplementMapper;
 import com.boyi.mapper.ProduceOrderMaterialProgressMapper;
@@ -236,6 +237,16 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
     @Override
     public int countByMaterialIdAndPreparedNumGtInNum(String materialId) {
         return produceOrderMaterialProgressMapper.countByMaterialIdAndPreparedNumGtInNum(materialId);
+    }
+
+    @Override
+    public List<OrderProductCalVO> listNoInNums() {
+        return produceOrderMaterialProgressMapper.listNoInNums();
+    }
+
+    @Override
+    public List<ProduceOrderMaterialProgress> groupByMaterialIds() {
+        return produceOrderMaterialProgressMapper.groupByMaterialIds();
     }
 
 }

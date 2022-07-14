@@ -2,6 +2,7 @@ package com.boyi.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.stereotype.Repository;
@@ -54,4 +55,9 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
     int countByMaterialId(String materialId);
 
     int countByMaterialIdAndPreparedNumGtInNum(String materialId);
+
+    List<OrderProductCalVO> listNoInNums();
+
+    List<ProduceOrderMaterialProgress> groupByMaterialIds();
+
 }

@@ -88,6 +88,13 @@ public class OrderProductOrderController extends BaseController {
             List<Object> returnLists = new ArrayList<>();
             List<OrderProductCalVO> lists = orderProductOrderService.calNoProductOrders();
 
+            List<OrderProductCalVO> noInNums = produceOrderMaterialProgressService.listNoInNums();
+
+            HashMap<String, String> materialAndNoInNum = new HashMap<>();
+            for(OrderProductCalVO vo : noInNums){
+                materialAndNoInNum.put(vo.getMaterialId(),vo.getNoInNum());
+            }
+
             HashMap<String, OrderProductCalVO> groupMap = new HashMap<>();
 
             // 遍历，根据物料进行分组，求和数量
@@ -101,6 +108,7 @@ public class OrderProductOrderController extends BaseController {
                     theOneMaterialIdOBJ.setMaterialName(vo.getMaterialName());
                     theOneMaterialIdOBJ.setNeedNum(vo.getNeedNum());
                     theOneMaterialIdOBJ.setStockNum(vo.getStockNum());
+                    theOneMaterialIdOBJ.setNoInNum(materialAndNoInNum.get(materialId)==null?"0":materialAndNoInNum.get(materialId));
                     groupMap.put(materialId,theOneMaterialIdOBJ);
                 }else{
                     theOneMaterialIdOBJ.setNeedNum(BigDecimalUtil.add( theOneMaterialIdOBJ.getNeedNum(),vo.getNeedNum()).toString() );

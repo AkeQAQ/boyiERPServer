@@ -65,6 +65,20 @@ public class ProduceOrderMaterialProgressController extends BaseController {
         replaceMap.put("回单",1);
     }
 
+    /***
+     * @param principal
+     * @return
+     * @throws Exception
+     */
+
+    @PostMapping("/groupMaterialView")
+    public ResponseResult groupMaterialView(Principal principal)throws Exception {
+
+        List<ProduceOrderMaterialProgress> allList = produceOrderMaterialProgressService.groupByMaterialIds();
+
+        return ResponseResult.succ(allList);
+    }
+
     /**
      * 上传
      */
