@@ -98,4 +98,10 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
     public List<RealDosageVO> listRealDosageBetweenDate(String searchStartDate, String searchEndDate) {
         return produceProductConstituentMapper.listRealDosageBetweenDate(searchStartDate,searchEndDate);
     }
+
+    @Override
+    public int countProductNum(String productNum) {
+        return this.count(new QueryWrapper<ProduceProductConstituent>()
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_NUM_FIELDNAME,productNum));
+    }
 }

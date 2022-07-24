@@ -207,6 +207,10 @@ public class ProduceBatchController extends BaseController {
         if (searchField != "") {
             if (searchField.equals("batchId")) {
                 queryField = "batch_id";
+            }else if(searchField.equals("productNum")){
+                queryField = "product_num";
+            }else if(searchField.equals("productBrand")){
+                queryField = "product_brand";
             }
             else {
                 return ResponseResult.fail("搜索字段不存在");
@@ -222,7 +226,14 @@ public class ProduceBatchController extends BaseController {
                 if (StringUtils.isNotBlank(oneField)) {
                     if (oneField.equals("batchId")) {
                         theQueryField = "batch_id";
-                    }else {
+                    }else if(oneField.equals("productNum")){
+                        theQueryField = "product_num";
+                    }
+                    else if(oneField.equals("productBrand")){
+                        theQueryField = "product_brand";
+                    }
+
+                    else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);

@@ -82,6 +82,8 @@ public class OrderProductOrder extends BaseEntity {
     private String updatedUser;
 
     private Integer prepared;
+    @ExcelAttribute(sort = 20)
+    private String endDate;
 
 
     /**
@@ -105,5 +107,8 @@ public class OrderProductOrder extends BaseEntity {
 
     @TableField(exist = false)
     private Boolean hasProductConstituent;
+
+    @TableField(exist = false)
+    private Boolean hasProductNum;
 
 }

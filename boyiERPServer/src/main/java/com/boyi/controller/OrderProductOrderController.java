@@ -354,7 +354,7 @@ public class OrderProductOrderController extends BaseController {
         List<OrderProductOrder> orders = orderProductOrderService.listBatchMaterialsByOrderIds(Arrays.asList(ids));
 
         // 3. 根据物料分组，列出订单号，公司货号，品牌，颜色，订单数目，用量，应备数目，已报备数目的明细列表，应备数目（合计），已报备（合计）
-        Map<String,Map<String, Object>> result2 = new HashMap<String,Map<String, Object>>();
+        Map<String,Map<String, Object>> result2 = new TreeMap<String,Map<String, Object>>();
 
         for (OrderProductOrder item : orders){
             Map<String, Object> theMaterialIdMaps = result2.get(item.getMaterialId());
@@ -422,6 +422,83 @@ public class OrderProductOrderController extends BaseController {
         returnMap.put("canBatchPrepareFlag",canBatchPrepareFlag);
 
         return ResponseResult.succ(returnMap);
+    }
+
+
+    /**
+     * 上传校验 订单号是否存在
+     */
+    @PostMapping("/uploadValidOrderNum")
+    @PreAuthorize("hasAuthority('order:productOrder:import')")
+    public ResponseResult uploadValidOrderNum(Principal principal, MultipartFile[] files) {
+        MultipartFile file = files[0];
+
+        log.info("上传内容: files:{}",file);
+        ExcelImportUtil<OrderProductOrder> utils = new ExcelImportUtil<OrderProductOrder>(OrderProductOrder.class);
+        List<OrderProductOrder> orderProductOrders = null;
+        try (InputStream fis = file.getInputStream();){
+            orderProductOrders = utils.readExcel(fis, 1, 0,18,replaceMap);
+            log.info("解析的excel数据:{}",orderProductOrders);
+
+            if(orderProductOrders == null || orderProductOrders.size() == 0){
+                return ResponseResult.fail("解析内容未空");
+            }
+            ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
+            ArrayList<String> ids = new ArrayList<>();
+
+            Map<String, Object> returnMap = new HashMap<>();
+            returnMap.put("showContent",errorMsgs);
+
+            HashMap<String, OrderProductOrder> validOrders = new HashMap<>();
+            for (OrderProductOrder order: orderProductOrders){
+                if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
+                    continue;
+                }
+                OrderProductOrder sysOrder = orderProductOrderService.getByOrderNum(order.getOrderNum());
+                if(sysOrder==null){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","系统不存在订单号:"+order.getOrderNum()+"");
+                    errorMsgs.add(errorMsg);
+                }else{
+                    // 存在的情况下，看下内容
+                    if(!order.getProductNum().equals(sysOrder.getProductNum())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",order.getOrderNum()+":"+"系统工厂货号:"+sysOrder.getProductNum()+"，EXCEL工厂货号:"+order.getProductNum());
+                        errorMsgs.add(errorMsg);
+                    }
+                    if(!order.getProductBrand().equals(sysOrder.getProductBrand())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",order.getOrderNum()+":"+"系统品牌:"+sysOrder.getProductBrand()+"，EXCEL品牌:"+order.getProductBrand());
+                        errorMsgs.add(errorMsg);
+                    }if(!order.getOrderNumber().equals(sysOrder.getOrderNumber())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",order.getOrderNum()+":"+"系统订单数目:"+sysOrder.getOrderNumber()+"，EXCEL订单数目:"+order.getOrderNumber());
+                        errorMsgs.add(errorMsg);
+                    }
+
+                    /*if(!order.getEndDate().equals(sysOrder.getEndDate())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",order.getOrderNum()+":"+"系统货期:"+sysOrder.getEndDate()+"，EXCEL货期:"+order.getEndDate());
+                        errorMsgs.add(errorMsg);
+                    }*/
+                }
+            }
+
+            if(errorMsgs.isEmpty()){
+                HashMap<String, String> errorMsg = new HashMap<>();
+                errorMsg.put("content","导入的EXCEL订单号都存在！");
+                errorMsgs.add(errorMsg);
+            }
+            return ResponseResult.succ(returnMap);
+
+        }
+        catch (Exception e) {
+            if( e instanceof  DuplicateKeyException){
+                return ResponseResult.fail("订单号重复！");
+            }
+            log.error("发生错误:",e);
+            throw new RuntimeException(e.getMessage());
+        }
     }
 
     /**
@@ -833,12 +910,17 @@ public class OrderProductOrderController extends BaseController {
         // 标识是否有产品组成结构
         for(OrderProductOrder opo :pageData.getRecords()){
             ProduceProductConstituent productConsi = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
+            opo.setHasProductConstituent(productConsi !=null); // 标记是否有组成结构
             if(productConsi !=null){
-                opo.setHasProductConstituent(productConsi !=null);
                 newRecords.addFirst(opo);
             }else{
                 newRecords.add(opo);
             }
+
+            int count = produceProductConstituentService.countProductNum(opo.getProductNum());
+
+            opo.setHasProductNum(count > 0);
+
         }
         pageData.setRecords(newRecords);
 
@@ -964,8 +1046,8 @@ public class OrderProductOrderController extends BaseController {
         // 假如有生产序号引用，不能反审核
         OrderProductOrder order = orderProductOrderService.getById(id);
 
-        ProduceBatch pb = produceBatchService.getByOrderNum(order.getOrderNum());
-        if(pb != null){
+        List<ProduceBatch> pbs = produceBatchService.listByOrderNum(order.getOrderNum());
+        if(pbs != null && pbs.size() > 0){
             return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum());
         }
 

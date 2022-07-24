@@ -29,4 +29,6 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
     ProduceBatch getByOrderNum(String orderNum);
 
     List<ProduceBatch> listByMonthAndDay(String md);
+
+    List<ProduceBatch> listByOrderNum(String orderNum);
 }

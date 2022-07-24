@@ -87,4 +87,10 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
                 .likeRight(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,md)
                 .lt(DBConstant.TABLE_PRODUCE_BATCH.CREATED_FIELDNAME, LocalDate.now().plusDays(-300)));
     }
+
+    @Override
+    public List<ProduceBatch> listByOrderNum(String orderNum) {
+        return this.list(new QueryWrapper<ProduceBatch>()
+                .eq(DBConstant.TABLE_PRODUCE_BATCH.ORDER_NUM_FIELDNAME,orderNum));
+    }
 }

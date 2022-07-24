@@ -31,4 +31,6 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
     List<RealDosageVO> listRealDosage();
 
     List<RealDosageVO> listRealDosageBetweenDate(String searchStartDate, String searchEndDate);
+
+    int countProductNum(String productNum);
 }
