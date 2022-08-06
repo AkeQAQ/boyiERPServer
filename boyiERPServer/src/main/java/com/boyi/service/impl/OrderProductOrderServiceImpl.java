@@ -10,6 +10,7 @@ import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceOrderMaterialProgress;
+import com.boyi.entity.RepositoryStock;
 import com.boyi.mapper.OrderProductOrderMapper;
 import com.boyi.service.OrderProductOrderService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -141,6 +142,11 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         this.update(new UpdateWrapper<OrderProductOrder>()
                 .set(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUMBER_FIELDNAME,BigDecimalUtil.add(oldOrderNumber+"",needAddNum).intValue())
                 .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME,orderNum));
+    }
+
+    @Override
+    public List<RepositoryStock> listNoPickMaterials() {
+        return this.orderProductOrderMapper.listNoPickMaterials();
     }
 
 }

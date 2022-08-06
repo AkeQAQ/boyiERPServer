@@ -5,6 +5,7 @@ import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.boyi.entity.ProduceOrderMaterialProgress;
+import com.boyi.entity.RepositoryStock;
 import com.boyi.service.ProduceOrderMaterialProgressService;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -90,19 +91,22 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     List<AnalysisProductOrderVO> listGroupByMostProductNum(@Param("orderType") Integer orderType, @Param("searchStartDate")String searchStartDate, @Param("searchEndDate")String searchEndDate);
 
     @Select(" " +
-            " select opo.order_num,opo.customer_num,opo.product_num,opo.product_brand,opo.product_color,opo.order_number,opo.product_region,opo.comment,ppcd.material_id,bm.name material_name,cast(ppcd.dosage * opo.order_number as DECIMAL (14,5)) need_num,rs.num stock_num from  " +
-            " order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd,base_material bm  ,repository_stock rs " +
-            "  where order_type != 2 and order_num not in( " +
-            " select order_num from " +
-            " produce_batch  " +
-            " ) " +
-            " and opo.product_num = ppc.product_num " +
-            " and opo.product_brand = ppc.product_brand " +
-            " and ppc.id = ppcd.constituent_id " +
-
-            " and ppcd.material_id = bm.id " +
-            " and bm.id = rs.material_id" +
-            " order by opo.id desc")
+            " select t1.*,rs.num stock_num from  " +
+            " ( " +
+            " select opo.order_num,opo.customer_num,opo.product_num,opo.product_brand,opo.product_color,opo.order_number,opo.product_region,opo.comment,ppcd.material_id,bm.name material_name,cast(ppcd.dosage * opo.order_number as DECIMAL (14,5)) need_num from   " +
+            "             order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd,base_material bm   " +
+            "              where order_type != 2 and order_num not in(  " +
+            "             select order_num from  " +
+            "             produce_batch   " +
+            "             )  " +
+            "             and opo.product_num = ppc.product_num  " +
+            "             and opo.product_brand = ppc.product_brand  " +
+            "             and ppc.id = ppcd.constituent_id  " +
+            "             and ppcd.material_id = bm.id  " +
+            "             " +
+            "             order by opo.id desc " +
+            " ) t1 left join repository_stock rs  " +
+            " on   t1.material_id = rs.material_id")
     List<OrderProductCalVO> calNoProductOrders();
 
     @Select("select opo.* from order_product_order opo  " +
@@ -112,5 +116,27 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             "             ) " +
             "             order by opo.id desc")
     List<OrderProductOrder> listNoProduct();
+
+    @Select(" " +
+            " select t3.material_id,sum(pickNum) num from  " +
+            " ( " +
+            " select t1.product_num,t1.product_brand,t2.*,t1.material_id,bm.`name` material_name,t1.dosage,CAST(t2.batch_number * t1.dosage as decimal(8,3)) pickNum  from  " +
+            " ( " +
+            "  select opo.order_num,opo.product_num,opo.product_brand,ppcd.material_id,ppcd.dosage from  order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd  " +
+            "  where ppc.id = ppcd.constituent_id and ppcd.material_id like '01.01%' and opo.product_num = ppc.product_num and opo.product_brand = ppc.product_brand  " +
+            " )t1 , " +
+            " ( " +
+            " select pb.batch_id,pb.order_num, " +
+            " (IFNULL(size34,0)+IFNULL(size35,0)+IFNULL(size36,0)+IFNULL(size37,0)+IFNULL(size38,0)+IFNULL(size39,0)+IFNULL(size40,0)+IFNULL(size41,0)+IFNULL(size42,0)+IFNULL(size43,0)+IFNULL(size44,0)+IFNULL(size45,0)+IFNULL(size46,0)+IFNULL(size47,0)) batch_number from produce_batch pb  " +
+            " where pb.batch_id not in ( " +
+            " select batch_id from repository_pick_material rpm " +
+            " where rpm.batch_id != '' " +
+            " )  " +
+            " ) t2 ,base_material bm  " +
+            " where   " +
+            " t1.order_num = t2.order_num " +
+            " and t1.material_id = bm.id   and t2.batch_number > 5 " +
+            " ) t3 group by t3.material_id order by num desc")
+    List<RepositoryStock> listNoPickMaterials();
 
 }

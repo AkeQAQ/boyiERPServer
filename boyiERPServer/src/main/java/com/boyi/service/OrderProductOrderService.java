@@ -6,6 +6,7 @@ import com.boyi.entity.AnalysisProductOrderVO;
 import com.boyi.entity.OrderProductOrder;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.ProduceOrderMaterialProgress;
+import com.boyi.entity.RepositoryStock;
 
 import java.util.List;
 import java.util.Map;
@@ -55,4 +56,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
 
     void addOrderNumberByOrderNum(String orderNum, String needAddNum);
+
+    List<RepositoryStock> listNoPickMaterials();
+
 }

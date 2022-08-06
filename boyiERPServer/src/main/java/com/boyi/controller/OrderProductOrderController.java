@@ -95,6 +95,13 @@ public class OrderProductOrderController extends BaseController {
                 materialAndNoInNum.put(vo.getMaterialId(),vo.getNoInNum());
             }
 
+            // 获取投产未领料出库的物料数目
+            List<RepositoryStock> noPickMaterials = orderProductOrderService.listNoPickMaterials();
+            HashMap<String, String> materialAndNoPickNum = new HashMap<>();
+            for(RepositoryStock rs : noPickMaterials){
+                materialAndNoPickNum.put(rs.getMaterialId(),rs.getNum()+"");
+            }
+
             HashMap<String, OrderProductCalVO> groupMap = new HashMap<>();
 
             // 遍历，根据物料进行分组，求和数量
@@ -109,9 +116,11 @@ public class OrderProductOrderController extends BaseController {
                     theOneMaterialIdOBJ.setNeedNum(vo.getNeedNum());
                     theOneMaterialIdOBJ.setStockNum(vo.getStockNum());
                     theOneMaterialIdOBJ.setNoInNum(materialAndNoInNum.get(materialId)==null?"0":materialAndNoInNum.get(materialId));
+                    theOneMaterialIdOBJ.setNoPickNum(materialAndNoPickNum.get(materialId)==null?"0":materialAndNoPickNum.get(materialId));
                     groupMap.put(materialId,theOneMaterialIdOBJ);
                 }else{
                     theOneMaterialIdOBJ.setNeedNum(BigDecimalUtil.add( theOneMaterialIdOBJ.getNeedNum(),vo.getNeedNum()).toString() );
+                    theOneMaterialIdOBJ.setNoPickNum(BigDecimalUtil.add( theOneMaterialIdOBJ.getNoPickNum(),vo.getNoPickNum()==null?"0":vo.getNoPickNum()).toString() );
                 }
 
             }
@@ -968,7 +977,7 @@ public class OrderProductOrderController extends BaseController {
 
         for (Long id : ids){
             OrderProductOrder old = orderProductOrderService.getById(id);
-            if(old.getOrderType().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2)){
+            if(old.getOrderType()!=null && old.getOrderType().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2)){
                 return ResponseResult.fail("备料:"+old.getOrderNum()+",订单类型错误，不能是订单取消的");
             }
             if(!old.getStatus().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0)){
