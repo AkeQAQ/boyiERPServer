@@ -10,6 +10,7 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.common.fileFilter.CraftPicFileFilter;
 import com.boyi.common.fileFilter.MaterialPicFileFilter;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -25,7 +26,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
@@ -47,6 +50,47 @@ public class BaseMaterialController extends BaseController {
     @Value("${picture.craftPath}")
     private String pictureCraftPath;
     private final String  picPrefix = "baseDataMaterial-";
+
+    @Value("${poi.baseDataMaterialDemoPath}")
+    private String poiDemoPath;
+
+    /**
+     * 分页导出
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('baseData:material:list')")
+    public void export(HttpServletResponse response, String searchField, String searchStr) {
+        Page<BaseMaterial> pageData = null;
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        if (searchField == "") {
+            log.info("未选择搜索字段，全查询");
+            pageData = baseMaterialService.page(page);
+        } else {
+            String queryField = "";
+            if (searchField.equals("id")) {
+                queryField = "id";
+            } else if (searchField.equals("groupCode")) {
+                queryField = "group_code";
+            } else if (searchField.equals("subId")) {
+                queryField = "sub_id";
+            } else if (searchField.equals("name")) {
+                queryField = "name";
+            } else {
+                return ;
+            }
+            log.info("搜索字段:{},查询内容:{}", searchField, searchStr);
+            pageData = baseMaterialService.pageBySearch(page, queryField, searchStr);
+        }
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(BaseMaterial.class,1,0).export("null","null",response,fis,pageData.getRecords(),"报表.xlsx",new HashMap<String,String>());
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
 
     @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)
     public ResponseResult getPicturesById( String id) {

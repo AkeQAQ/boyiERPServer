@@ -40,6 +40,7 @@ poi:
   repositoryStockDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/stockDemo.xlsx
   repositoryInOutDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/inOutDemo.xlsx
 
+  orderBuyOrderImportDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/orderImportDemo.xlsx
   orderBuyOrderDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/orderDemo.xlsx
   produceReturnShoesDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/returnShoesDemo.xlsx
   baseDataSupplierDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/baseDataSupplierDemo.xlsx
@@ -47,6 +48,7 @@ poi:
   produceBatchImportDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/produceBatchImportDemo.xlsx
   realDosageDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/realDosageDemo.xlsx
   supplierMaterialDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/supplierMaterialDemoPath.xlsx
+  baseDataMaterialDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/baseDataMaterialDemo.xlsx
 
 
 picture:

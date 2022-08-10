@@ -72,4 +72,11 @@ public class OrderBuyorderDocumentDetailServiceImpl extends ServiceImpl<OrderBuy
                 .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ID_FIELDNAME,orderDetailIds);
         this.update(updateWrapper);
     }
+
+    @Override
+    public List<OrderBuyorderDocumentDetail> getByMaterialIdAndOrderSeq(String materialId, String docNum) {
+        return this.list(new QueryWrapper<OrderBuyorderDocumentDetail>()
+                .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME,materialId)
+                .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,docNum));
+    }
 }

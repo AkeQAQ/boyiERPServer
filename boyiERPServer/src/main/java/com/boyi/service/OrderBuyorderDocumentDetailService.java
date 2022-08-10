@@ -28,4 +28,6 @@ public interface OrderBuyorderDocumentDetailService extends IService<OrderBuyord
 
     void statusSuccess(Long[] orderDetailIds);
     void statusNotSuccess(List<Long> orderDetailIds);
+
+    List<OrderBuyorderDocumentDetail> getByMaterialIdAndOrderSeq(String materialId, String docNum);
 }

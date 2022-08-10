@@ -1,6 +1,7 @@
 package com.boyi.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -23,7 +24,7 @@ public class BaseMaterial  {
     private LocalDateTime created;
     private LocalDateTime updated;
 
-
+    @ExcelAttribute(sort = 0)
     private String id;
 
     /**
@@ -34,22 +35,27 @@ public class BaseMaterial  {
     /**
      * 物料分组ID
      */
+    @ExcelAttribute(sort = 2)
     private String groupCode;
 
+    @ExcelAttribute(sort = 1)
     private String name;
 
     /**
      * 单位
      */
+    @ExcelAttribute(sort = 3)
     private String unit;
 
     /**
      * 入库大单位
      */
+    @ExcelAttribute(sort = 5)
     private String bigUnit;
     /**
      * 换算系数
      */
+    @ExcelAttribute(sort = 6)
     private Integer unitRadio;
 
     /**
@@ -73,11 +79,13 @@ public class BaseMaterial  {
     /**
      * 规格型号
      */
+    @ExcelAttribute(sort = 4)
     private String specs;
 
     /**
      * 低预警线
      */
+    @ExcelAttribute(sort = 7)
     private Double lowWarningLine;
 
 

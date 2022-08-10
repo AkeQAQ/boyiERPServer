@@ -1,26 +1,37 @@
 package com.boyi.controller;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.ExcelExportUtil;
+import com.boyi.common.utils.ExcelImportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -40,7 +51,184 @@ public class OrderBuyorderDocumentController extends BaseController {
     @Value("${poi.orderBuyOrderDemoPath}")
     private String poiDemoPath;
 
+    @Value("${poi.orderBuyOrderImportDemoPath}")
+    private String poiImportDemoPath;
+
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
+
+    public static void main(String[] args) {
+        DateTimeFormatter dfm = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        String test = "2022-08-07 12:00:00";
+        LocalDate parse = LocalDate.parse(test, dfm);
+        System.out.println(parse);
+
+    }
+
+
+
+    /**
+     * 上传
+     */
+    @PostMapping("/upload")
+    @PreAuthorize("hasAuthority('order:buyOrder:export')")
+    @Transactional
+    public ResponseResult upload(Principal principal, MultipartFile[] files) {
+        MultipartFile file = files[0];
+        String userName = principal.getName();
+
+        log.info("上传内容: files:{}",file);
+        ExcelImportUtil<OrderBuyOrderImportVO> utils = new ExcelImportUtil<OrderBuyOrderImportVO>(OrderBuyOrderImportVO.class);
+        List<OrderBuyOrderImportVO> orders = null;
+        try (InputStream fis = file.getInputStream();){
+            orders = utils.readExcel(fis, 1, 0,20,null);
+            log.info("解析的excel数据:{}",orders);
+
+
+            if(orders == null || orders.size() == 0){
+                return ResponseResult.fail("解析内容未空");
+            }
+            List<Map<String,String>> errorMsgs = new ArrayList<>();
+            List<String> ids = new ArrayList<>();
+
+            // 一个供应商编号代表一个单据
+            Map<String, OrderBuyorderDocument> supplierId_vo = new HashMap<>();
+            // 一个供应商编号下面的所有记录列
+            Map<String, List<OrderBuyorderDocumentDetail>> supplierId_details = new HashMap<>();
+
+            LocalDateTime now = LocalDateTime.now();
+            DateTimeFormatter dfm = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            Set<String> materialId_docNum = new HashSet<>();
+
+            for (int i = 0; i < orders.size(); i++) {
+
+                OrderBuyOrderImportVO row = orders.get(i);
+
+
+                // 上传文件一个物料不能多个单号
+                if(materialId_docNum.contains(row.getMaterialId()+"_" +row.getDocNum())){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","第："+(i+1)+" 行 记录 物料:"+row.getMaterialId()+" , 单号:"+row.getDocNum()+" 重复！");
+                    errorMsgs.add(errorMsg);
+                    continue;
+                }
+                materialId_docNum.add(row.getMaterialId()+"_" +row.getDocNum());
+
+
+                // 空值校验
+                if(StringUtils.isBlank(row.getSupplierId()) || StringUtils.isBlank(row.getBuyDate())
+                || StringUtils.isBlank(row.getDocNum()) || StringUtils.isBlank(row.getMaterialId())
+                || StringUtils.isBlank(row.getBuyNum()) ){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","第："+(i+1)+" 行 记录有空值内容！");
+                    errorMsgs.add(errorMsg);
+                    continue;
+                }
+
+                String supplierId = row.getSupplierId();
+                String materialId = row.getMaterialId();
+                BaseSupplier isExistSupplierId = baseSupplierService.getById(supplierId);
+                // 校验供应商编码
+                if(isExistSupplierId == null){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content",""+supplierId+" ，供应商编码不存在！");
+                    errorMsgs.add(errorMsg);
+                    continue;
+                }
+                BaseMaterial isExistMaterialId = baseMaterialService.getById(materialId);
+                // 校验物料编码
+                if(isExistMaterialId == null){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content",""+materialId+" ，物料编码不存在！");
+                    errorMsgs.add(errorMsg);
+                    continue;
+                }
+
+                String docNum = row.getDocNum();
+                // 校验一个物料下，是否已经存在该订单号
+                List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.getByMaterialIdAndOrderSeq(materialId,docNum);
+                if(details != null && details.size() > 0){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","物料："+materialId+",单号:"+docNum+" 已经存在");
+                    errorMsgs.add(errorMsg);
+                    continue;
+                }
+
+                // 设置该供应商主单据对象
+                OrderBuyorderDocument oneRowDBObj = supplierId_vo.get(supplierId);
+                if(oneRowDBObj == null){
+                    oneRowDBObj = new OrderBuyorderDocument();
+                    oneRowDBObj.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDVALUE_1);
+                    oneRowDBObj.setSupplierId(supplierId);
+                    oneRowDBObj.setCreated(now);
+                    oneRowDBObj.setUpdated(now);
+                    oneRowDBObj.setCreatedUser(userName);
+                    oneRowDBObj.setUpdatedUser(userName);
+
+                    LocalDate parse = LocalDate.parse(row.getBuyDate(), dfm);
+                    oneRowDBObj.setOrderDate(parse);
+                    supplierId_vo.put(supplierId,oneRowDBObj);
+                }
+
+                // 设置该供应商下面的记录集合
+                List<OrderBuyorderDocumentDetail> oneRowDetailObj = supplierId_details.get(supplierId);
+                if(oneRowDetailObj == null){
+                    oneRowDetailObj = new ArrayList<OrderBuyorderDocumentDetail>();
+                    supplierId_details.put(supplierId,oneRowDetailObj);
+                }
+                OrderBuyorderDocumentDetail detail = new OrderBuyorderDocumentDetail();
+                detail.setMaterialId(row.getMaterialId());
+                detail.setNum(Double.valueOf(row.getBuyNum()));
+                detail.setOrderSeq(row.getDocNum());
+                detail.setOrderDate(oneRowDBObj.getOrderDate());
+                detail.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1);
+                detail.setRadioNum(BigDecimalUtil.mul(detail.getNum(),isExistMaterialId.getUnitRadio()).doubleValue());
+                detail.setSupplierId(supplierId);
+
+                oneRowDetailObj.add(detail);
+            }
+            if(errorMsgs.size() > 0){
+                return ResponseResult.succ(errorMsgs);
+            }
+
+            // 先批次插入主单据对象，生成ID
+            orderBuyorderDocumentService.saveBatch(supplierId_vo.values());
+
+            // 赋值外键
+            for (Map.Entry<String,List<OrderBuyorderDocumentDetail>> entry : supplierId_details.entrySet()){
+                String supplierId = entry.getKey();
+                List<OrderBuyorderDocumentDetail> details = entry.getValue();
+
+                OrderBuyorderDocument dbRow = supplierId_vo.get(supplierId);
+                for(OrderBuyorderDocumentDetail detail : details){
+                    detail.setDocumentId(dbRow.getId());
+                }
+            }
+
+            // 循环插入，一个供应商对应下面的记录
+            for (Map.Entry<String,List<OrderBuyorderDocumentDetail>> entry : supplierId_details.entrySet()){
+                orderBuyorderDocumentDetailService.saveBatch(entry.getValue());
+            }
+        }
+        catch (Exception e) {
+            log.error("发生错误:",e);
+            throw new RuntimeException(e.getMessage());
+        }
+
+        return ResponseResult.succ("上传成功");
+    }
+
+    @PostMapping("/down")
+    @PreAuthorize("hasAuthority('order:buyOrder:export')")
+    public ResponseResult down(HttpServletResponse response, Long id)throws Exception {
+        response.setContentType("application/octet-stream");
+        response.setHeader("content-disposition", "attachment;filename=" + new String("采购订单导入模板".getBytes("ISO8859-1")));
+        response.setHeader("filename","采购订单导入模板" );
+
+        FileInputStream fis = new FileInputStream(new File(poiImportDemoPath));
+        FileCopyUtils.copy(fis,response.getOutputStream());
+        return ResponseResult.succ("下载成功");
+    }
 
     /**
      * 锁单据
@@ -244,7 +432,7 @@ public class OrderBuyorderDocumentController extends BaseController {
 
             if (one != null) {
                 detail.setPrice(one.getPrice());
-                double amount = detail.getPrice() * detail.getNum();
+                double amount = BigDecimalUtil.mul(detail.getPrice(),detail.getNum()).doubleValue();
                 detail.setAmount(new BigDecimal(amount).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
                 totalAmount += amount;
             }
@@ -321,7 +509,7 @@ public class OrderBuyorderDocumentController extends BaseController {
                 item.setSupplierId(orderBuyorderDocument.getSupplierId());
                 item.setStatus(item.getStatus());
                 item.setOrderDate(orderBuyorderDocument.getOrderDate());
-                item.setRadioNum(item.getNum() * item.getUnitRadio());
+                item.setRadioNum(BigDecimalUtil.mul(item.getNum(),item.getUnitRadio()).doubleValue() );
             }
             orderBuyorderDocumentDetailService.saveBatch(updateDetails);
             log.info("采购订单模块-更新内容:{}", orderBuyorderDocument);
@@ -355,7 +543,7 @@ public class OrderBuyorderDocumentController extends BaseController {
                 item.setSupplierId(orderBuyorderDocument.getSupplierId());
                 item.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1);
                 item.setOrderDate(orderBuyorderDocument.getOrderDate());
-                item.setRadioNum(item.getNum() * item.getUnitRadio());
+                item.setRadioNum(BigDecimalUtil.mul(item.getNum(),item.getUnitRadio()).doubleValue()  );
             }
 
             orderBuyorderDocumentDetailService.saveBatch(orderBuyorderDocument.getRowList());
