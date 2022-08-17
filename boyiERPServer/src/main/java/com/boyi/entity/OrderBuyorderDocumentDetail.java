@@ -58,6 +58,8 @@ public class OrderBuyorderDocumentDetail  {
      */
     private Integer status;
 
+
+
     @TableField(exist = false)  // 字段数据库忽略
     private String materialName;
     @TableField(exist = false)  // 字段数据库忽略

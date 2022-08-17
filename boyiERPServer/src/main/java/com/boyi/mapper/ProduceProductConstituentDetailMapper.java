@@ -20,7 +20,7 @@ import java.util.List;
 @Repository
 public interface ProduceProductConstituentDetailMapper extends BaseMapper<ProduceProductConstituentDetail> {
 
-    @Select("select ppc.product_num,ppc.product_brand,ppc.product_color,ppcd.dosage ,bm.id material_id,bm.unit material_unit,bm.name material_name  from" +
+    @Select("select ppc.product_num,ppc.product_brand,ppc.product_color,ppcd.dosage ,bm.id material_id,bm.unit material_unit,bm.name material_name,ppcd.can_show_print  from" +
             "" +
             " produce_product_constituent ppc , " +
             " produce_product_constituent_detail ppcd  ," +

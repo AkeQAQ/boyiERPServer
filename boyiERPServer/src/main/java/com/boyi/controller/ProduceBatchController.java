@@ -517,7 +517,7 @@ public class ProduceBatchController extends BaseController {
             for (OrderProductOrder detail : details){
                 String materialId = detail.getMaterialId();
                 // 筛选皮料，
-                if(materialId.startsWith("01.")){
+                if(materialId.startsWith("01.") && detail.getCanShowPrint().equals("0")){
                     HashMap<String, String> theSub = new HashMap<>();
                     theSub.put("materialId",materialId);
                     theSub.put("materialName",detail.getMaterialName());

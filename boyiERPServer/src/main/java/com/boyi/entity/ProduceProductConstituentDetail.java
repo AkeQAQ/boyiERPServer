@@ -39,6 +39,7 @@ public class ProduceProductConstituentDetail extends BaseEntity {
     private String createdUser;
 
     private String updatedUser;
+    private String canShowPrint;
 
 
     @TableField(exist = false)  // 字段数据库忽略

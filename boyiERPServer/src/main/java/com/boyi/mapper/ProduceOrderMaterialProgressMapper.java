@@ -88,7 +88,7 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             " produce_order_material_progress" +
             " pomp" +
             " where pomp.material_id = #{materialId} and " +
-            " pomp.prepared_num > pomp.in_num")
+            "  cast(pomp.prepared_num as decimal(12,5)) > cast(pomp.in_num as decimal(12,5)) ")
     int countByMaterialIdAndPreparedNumGtInNum(@Param("materialId") String materialId);
 
     @Select("select pomp.material_id,cast((sum(pomp.prepared_num)-sum(pomp.in_num)) as DECIMAL(12,5)) no_in_num  from produce_order_material_progress pomp " +

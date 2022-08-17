@@ -145,7 +145,7 @@ public class OrderBuyorderDocumentController extends BaseController {
                 }
 
                 String docNum = row.getDocNum();
-                // 校验一个物料下，是否已经存在该订单号
+                // 校验一个物料下，300日内，是否已经存在该订单号,
                 List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.getByMaterialIdAndOrderSeq(materialId,docNum);
                 if(details != null && details.size() > 0){
                     HashMap<String, String> errorMsg = new HashMap<>();
