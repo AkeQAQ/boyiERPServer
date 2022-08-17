@@ -50,7 +50,7 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
                 queryWrapper.
                         like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
-                        .orderByDesc(DBConstant.TABLE_PRODUCE_BATCH.CREATED_FIELDNAME)
+                        .orderByDesc(DBConstant.TABLE_PRODUCE_BATCH.ID_FIELDNAME)
 
         );
     }

@@ -838,6 +838,7 @@ public class OrderProductOrderController extends BaseController {
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('order:productOrder:list')")
     public ResponseResult list( String searchField, String searchStatus, String searchStatus2,
+                                String searchStatus3,
                                 @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -909,7 +910,18 @@ public class OrderProductOrderController extends BaseController {
             return ResponseResult.fail("备料状态不能为空");
         }
 
-        pageData = orderProductOrderService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap);
+        List<Long> searchStatusList3 = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus3)){
+            String[] split = searchStatus3.split(",");
+            for (String statusVal : split){
+                searchStatusList3.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList3.size() == 0){
+            return ResponseResult.fail("订单状态不能为空");
+        }
+
+        pageData = orderProductOrderService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,searchStatusList3,queryMap);
 
         // 假如有组成结构的往前排
         LinkedList<OrderProductOrder> newRecords = new LinkedList<>();

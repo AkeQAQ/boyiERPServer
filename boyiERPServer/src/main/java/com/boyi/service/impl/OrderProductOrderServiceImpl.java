@@ -37,7 +37,7 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     private OrderProductOrderMapper orderProductOrderMapper;
 
     @Override
-    public Page<OrderProductOrder> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String, String> otherSearch) {
+    public Page<OrderProductOrder> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2,List<Long> searchStatus3, Map<String, String> otherSearch) {
         QueryWrapper<OrderProductOrder> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
             String val = otherSearch.get(key);
@@ -50,6 +50,8 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME,searchStatus)
                         .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME,searchStatus2)
+                        .in(searchStatus3 != null && searchStatus3.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDNAME,searchStatus3)
+
                         .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME)
 
         );
