@@ -24,10 +24,6 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " null as unit,qichu.qichunum as start_num ,null as add_num,null as sub_num" +
             " from " +
 
-            /*
-            " base_material bm " +
-            " left join repository_stock_history rsh" +
-            " on bm.id = rsh.material_id and rsh.date = DATE_SUB(#{startDate},INTERVAL 1 DAY) " +*/
             "("+
             "select material_id,material_name,(IFNULL(t.initnum,0)+  IFNULL(t.csum,0) + IFNULL(t.isum,0)+IFNULL(t.rsum,0)-IFNULL(t.osum,0)-IFNULL(t.psum,0)) as qichunum " +
             "from  " +
@@ -116,8 +112,6 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " from " +
             " base_material bm, repository_buyin_document_detail rbdd,repository_buyin_document rbd" +
             " where rbd.id = rbdd.document_id and bm.id = rbdd.material_id and rbd.buy_in_date >= #{startDate} and rbd.buy_in_date <= #{endDate} " +
-//            " and rbd.status in" +
-//            " <script> <foreach collection='#{statusList}' item='item' open='(' separator=',' close=')' >#{item} </foreach> </script>" +
             " order by rbdd.id asc )" +
             "" +
             " UNION ALL" +
@@ -127,8 +121,6 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " from " +
             " base_material bm, repository_pick_material_detail rpmd,repository_pick_material rpm" +
             " where rpm.id=rpmd.document_id and bm.id = rpmd.material_id and rpm.pick_date >= #{startDate} and rpm.pick_date <= #{endDate}" +
-//            " and rpm.status in" +
-//            " <script> <foreach collection='#{statusList}' item='item' open='(' separator=',' close=')' >#{item} </foreach> </script>" +
             ")" +
             "" +
             "" +
@@ -139,8 +131,6 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " from " +
             " base_material bm, repository_buyout_document_detail rbdd2,repository_buyout_document rbd" +
             " where rbd.id=rbdd2.document_id and bm.id = rbdd2.material_id and rbd.buy_out_date >= #{startDate} and rbd.buy_out_date <= #{endDate} " +
-//            " and rbd.status in" +
-//            " <script> <foreach collection='#{statusList}' item='item' open='(' separator=',' close=')' >#{item} </foreach> </script>" +
             " order by rbdd2.id asc )" +
             "" +
             "" +
@@ -152,8 +142,6 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " from " +
             " base_material bm, repository_return_material_detail rrmd,repository_return_material rrm" +
             " where rrm.id=rrmd.document_id and bm.id = rrmd.material_id and rrm.return_date >= #{startDate} and rrm.return_date <= #{endDate} " +
-//            " and rrm.status in " +
-//            " <script> <foreach collection='#{statusList}' item='item' open='(' separator=',' close=')' >#{item} </foreach> </script>" +
             ")" +
             "" +
             "" +
@@ -164,8 +152,6 @@ public interface RepositoryInOutDetailMapper extends BaseMapper<RepositoryInOutD
             " from " +
             " base_material bm, repository_check_detail rcd,repository_check rc" +
             " where rc.id=rcd.document_id and bm.id = rcd.material_id and rc.check_date >= #{startDate} and rc.check_date <= #{endDate} " +
-//            " and rc.status in" +
-//            " <script> <foreach collection='#{statusList}' item='item' open='(' separator=',' close=')' >#{item} </foreach> </script>" +
             ")" +
             "" +
             "" +

@@ -924,26 +924,24 @@ public class OrderProductOrderController extends BaseController {
         pageData = orderProductOrderService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,searchStatusList3,queryMap);
 
         // 假如有组成结构的往前排
-        LinkedList<OrderProductOrder> newRecords = new LinkedList<>();
-
-
+//        LinkedList<OrderProductOrder> newRecords = new LinkedList<>();
 
         // 标识是否有产品组成结构
         for(OrderProductOrder opo :pageData.getRecords()){
             ProduceProductConstituent productConsi = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
             opo.setHasProductConstituent(productConsi !=null); // 标记是否有组成结构
-            if(productConsi !=null){
-                newRecords.addFirst(opo);
-            }else{
-                newRecords.add(opo);
-            }
+//            if(productConsi !=null){
+//                newRecords.addFirst(opo);
+//            }else{
+//                newRecords.add(opo);
+//            }
 
             int count = produceProductConstituentService.countProductNum(opo.getProductNum());
 
             opo.setHasProductNum(count > 0);
 
         }
-        pageData.setRecords(newRecords);
+//        pageData.setRecords(newRecords);
 
         return ResponseResult.succ(pageData);
     }

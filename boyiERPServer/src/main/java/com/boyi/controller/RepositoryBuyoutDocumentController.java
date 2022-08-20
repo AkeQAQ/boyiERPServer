@@ -88,7 +88,6 @@ public class RepositoryBuyoutDocumentController extends BaseController {
 
         try {
 
-
         boolean flag = repositoryBuyoutDocumentService.removeByIds(Arrays.asList(ids));
 
         log.info("删除采购退料表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");

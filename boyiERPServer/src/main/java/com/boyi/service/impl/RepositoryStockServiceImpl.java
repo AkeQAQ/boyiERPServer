@@ -51,6 +51,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
                 stock.setMaterialId(materialId);
                 stock.setNum(num);
                 stock.setUpdated(LocalDateTime.now());
+                log.info("【库存缩减日志】物料:{},新增数量:{}", materialId,num);
                 this.save(stock);
             }else{
                 // 因为 num数据库类型是double类型，精度会丢失，所以目前方案：查出数据库数据，进行java计算，然后更新进去
@@ -59,6 +60,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
                 dbNum = dbNum == null ? 0D : dbNum;
                 double finalNum = BigDecimalUtil.add(dbNum, num).doubleValue();
                 UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
+                log.info("【库存缩减日志】物料:{},db数量:{},新增数量:{},设置数量:{}", materialId,dbNum,num,finalNum);
 
                 updateWrapper
                         .eq(DBConstant.TABLE_REPOSITORY_STOCK.MATERIAL_ID_FIELDNAME,materialId)
@@ -85,6 +87,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             stock = new RepositoryStock();
             stock.setMaterialId(materialId);
             stock.setNum(num);
+            log.info("【库存缩减日志】物料:{},新增数量:{}", materialId,num);
             stock.setUpdated(LocalDateTime.now());
             this.save(stock);
         }else{
@@ -93,6 +96,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             Double dbNum = queryStock == null ? 0D: queryStock.getNum() ;
             dbNum = dbNum == null ? 0D : dbNum;
             double finalNum = BigDecimalUtil.add(dbNum, num).doubleValue();
+            log.info("【库存缩减日志】物料:{},db数量:{},新增数量:{},设置数量:{}", materialId,dbNum,num,finalNum);
 
             UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
             updateWrapper
@@ -117,6 +121,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
         Double dbNum = queryStock.getNum() ;
         dbNum = dbNum == null ? 0D : dbNum;
         double finalNum = BigDecimalUtil.sub(dbNum, num).doubleValue();
+        log.info("【库存缩减日志】物料:{},db数量:{},减少数量:{},设置数量:{}", materialId,dbNum,num,finalNum);
 
         UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
         updateWrapper
@@ -145,6 +150,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             Double dbNum = queryStock.getNum() ;
             dbNum = dbNum == null ? 0D : dbNum;
             double finalNum = BigDecimalUtil.sub(dbNum, num).doubleValue();
+            log.info("【库存缩减日志】物料:{},db数量:{},减少数量:{},设置数量:{}", materialId,dbNum,num,finalNum);
 
             UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
             updateWrapper
@@ -194,6 +200,7 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
             Double dbNum = queryStock.getNum() ;
             dbNum = dbNum == null ? 0D : dbNum;
             double finalNum = BigDecimalUtil.sub(dbNum, num).doubleValue();
+            log.info("【库存缩减日志】物料:{},db数量:{},减少数量:{},设置数量:{}", materialId,dbNum,num,finalNum);
 
             UpdateWrapper<RepositoryStock> updateWrapper = new UpdateWrapper<>();
             updateWrapper
