@@ -71,7 +71,7 @@ public class OrderBuyorderDocumentController extends BaseController {
      * 上传
      */
     @PostMapping("/upload")
-    @PreAuthorize("hasAuthority('order:buyOrder:export')")
+    @PreAuthorize("hasAuthority('order:buyOrder:import')")
     @Transactional
     public ResponseResult upload(Principal principal, MultipartFile[] files) {
         MultipartFile file = files[0];
@@ -104,6 +104,13 @@ public class OrderBuyorderDocumentController extends BaseController {
 
                 OrderBuyOrderImportVO row = orders.get(i);
 
+                if((row.getMaterialId()==null || row.getMaterialId().isEmpty()) &&
+                        (row.getDocNum()==null || row.getDocNum().isEmpty() )&&
+                        (row.getSupplierId()==null || row.getSupplierId().isEmpty())&&
+                        (row.getBuyNum()==null || row.getBuyNum().isEmpty())&&
+                        (row.getBuyDate()==null || row.getBuyDate().isEmpty()) ){
+                    continue;
+                }
 
                 // 上传文件一个物料不能多个单号
                 if(materialId_docNum.contains(row.getMaterialId()+"_" +row.getDocNum())){

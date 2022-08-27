@@ -1058,8 +1058,20 @@ public class OrderProductOrderController extends BaseController {
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
         // 假如有进度表关联了，不能反审核了。
         List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderId(id);
+        List<Long> needRemovePOMPIds = new ArrayList<>();
         if(progresses!=null && progresses.size() > 0){
-            return ResponseResult.fail("已有物料报备，无法反审核!");
+            // 假如进度表备料信息都是0，可以反审核，并且删除备料信息
+            Boolean isExistPreparedNumflag = false;
+            for (ProduceOrderMaterialProgress pomp : progresses){
+                String preparedNum = pomp.getPreparedNum();
+                if(preparedNum!=null && Double.valueOf(preparedNum).doubleValue() > 0){
+                    isExistPreparedNumflag=true;
+                }
+                needRemovePOMPIds.add(pomp.getId());
+            }
+            if(isExistPreparedNumflag){
+                return ResponseResult.fail("已存在物料报备数量，无法反审核!");
+            }
         }
 
         // 假如有生产序号引用，不能反审核
@@ -1068,6 +1080,11 @@ public class OrderProductOrderController extends BaseController {
         List<ProduceBatch> pbs = produceBatchService.listByOrderNum(order.getOrderNum());
         if(pbs != null && pbs.size() > 0){
             return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum());
+        }
+
+        // 删除对应的进度表信息
+        if(progresses!=null && progresses.size() > 0 && needRemovePOMPIds.size() > 0) {
+            produceOrderMaterialProgressService.removeByIds(needRemovePOMPIds);
         }
 
         OrderProductOrder orderProductOrder = new OrderProductOrder();
