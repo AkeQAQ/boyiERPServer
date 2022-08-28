@@ -30,6 +30,13 @@ boyi:
   isStartMaterialProgress: true
   toEmail: 244454526@qq.com
   csEmails: 1447647127@qq.com
+  orderBeforeProductionProgress:
+    sureCustomerRequired:
+      sureCustomerRequiredEmail: 244454526@qq.com
+      sureCustomerRequiredEmails: 244454526@qq.com
+    sureShoes:
+      sureShoesEmail: 1447647127@qq.com
+      sureShoesEmails: 1447647127@qq.com
 
 poi:
   repositoryBuyInDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/buyInDemo.xlsx

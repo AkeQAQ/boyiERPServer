@@ -134,6 +134,13 @@ public class BaseController {
     @Autowired
     public ProduceBatchService produceBatchService;
 
+    @Autowired
+    public OrderBeforeProductionProgressService orderBeforeProductionProgressService;
+
+
+    @Autowired
+    public OrderBeforeProductionProgressDetailService orderBeforeProductionProgressDetailService;
+
     /**
      * 获取页面
      * @return

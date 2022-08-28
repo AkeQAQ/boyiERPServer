@@ -964,4 +964,62 @@ public class DBConstant {
 
     }
 
+    public static class TABLE_ORDER_BEFORE_PRODUCT_PROGRESS{
+        public static final String PRODUCT_NUM_FIELDNAME = "product_num";
+        public static final String PRODUCT_BRAND_FIELDNAME = "product_brand";
+        public static final String ID_FIELDNAME = "id";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String STATUS_FIELDNAME = "status";
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_ORDER_BEFORE_PRODUCT_DETAIL_PROGRESS{
+        public static final String FOREIGN_ID_FIELDNAME = "foreign_id";
+        public static final String TYPE_ID_FIELDNAME = "type_id";
+
+        public static final String IS_CURRENT_FIELDNAME = "is_current";
+        public static final String CONTENT_FIELDNAME = "content";
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        /**
+         *  10:代表 确认订单
+         */
+        public static final Integer TYPE_ID_FIELDVALUE_10 = 10;
+
+        /**
+         *  20:代表 客户要求
+         */
+        public static final Integer TYPE_ID_FIELDVALUE_20 = 20;
+
+        /**
+         *  30:代表 确认鞋
+         */
+        public static final Integer TYPE_ID_FIELDVALUE_30 = 30;
+
+        /**
+         *  0:代表  进度在当前
+         */
+        public static final Integer PROGRESS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 进度不在当前
+         */
+        public static final Integer PROGRESS_FIELDVALUE_1 = 1;
+    }
+
 }
