@@ -39,7 +39,7 @@ public class ProduceProductConstituentDetailController extends BaseController {
         if(old==null){
             return ResponseResult.fail("id:"+id+",不存在记录");
         }
-        if(old.getCanShowPrint().equals("0")){
+        if(old.getCanShowPrint()==null || old.getCanShowPrint().equals("0")){
             old.setCanShowPrint("1");
         }else{
             old.setCanShowPrint("0");

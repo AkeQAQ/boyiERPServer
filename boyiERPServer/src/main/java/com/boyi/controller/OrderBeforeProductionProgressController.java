@@ -349,7 +349,7 @@ public class OrderBeforeProductionProgressController extends BaseController {
                 if(detail.getTypeId().equals(DBConstant.TABLE_ORDER_BEFORE_PRODUCT_DETAIL_PROGRESS.TYPE_ID_FIELDVALUE_20)){
                     EmailUtils.sendMail(EmailUtils.MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMERREQUIRED_NAME
                                     +"【"+obpp.getProductNum()+"】"+"【"+obpp.getProductBrand()+"】"
-                            ,sureCustomerRequiredEmail,sureCustomerRequiredEmails,detail.getContent());
+                            ,sureCustomerRequiredEmail,sureCustomerRequiredEmails,detail.getContent()==null?"":detail.getContent());
                 }
                 break;
             }
@@ -357,7 +357,7 @@ public class OrderBeforeProductionProgressController extends BaseController {
                 if(detail.getTypeId().equals(DBConstant.TABLE_ORDER_BEFORE_PRODUCT_DETAIL_PROGRESS.TYPE_ID_FIELDVALUE_30)){
                     EmailUtils.sendMail(EmailUtils.MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMER_NAME
                                     +"【"+obpp.getProductNum()+"】"+"【"+obpp.getProductBrand()+"】"
-                            ,sureShoesEmail,sureShoesEmails,detail.getContent());
+                            ,sureShoesEmail,sureShoesEmails,detail.getContent()==null?"":detail.getContent());
                 }
             }
 

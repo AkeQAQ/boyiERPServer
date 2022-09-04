@@ -80,7 +80,7 @@
 		</filter>
 	</appender>
 
-	<root level="INFO">
+	<root level="STDOUT">
 		<appender-ref ref="STDOUT" />
 		<appender-ref ref="errorAppender" />
 		<appender-ref ref="warnAppender" />

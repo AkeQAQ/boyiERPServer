@@ -18,9 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -39,22 +38,69 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public Page<OrderProductOrder> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2,List<Long> searchStatus3, Map<String, String> otherSearch) {
         QueryWrapper<OrderProductOrder> queryWrapper = new QueryWrapper<>();
+
+        // 对某一搜索条件，内容进行去重存储
+        Map<String, Set<String>> searchFieldAndVals = new HashMap<>();
         for (String key : otherSearch.keySet()){
+            Set<String> sets = searchFieldAndVals.get(key);
             String val = otherSearch.get(key);
-            queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
-                    && StrUtil.isNotBlank(key),key,val);
+            if(StrUtil.isBlank(val) || val.equals("null")
+                    || StrUtil.isBlank(key)){
+                continue;
+            }
+            if(sets == null || sets.isEmpty()){
+                sets = new HashSet<String>();
+                searchFieldAndVals.put(key,sets);
+            }
+            String[] split = val.split("\\|");
+            for (int i = 0; i < split.length; i++) {
+                split[i] = split[i].trim();
+            }
+            sets.addAll(Arrays.asList(split));
+
         }
-        return this.page(page,
-                queryWrapper.
-                        like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
-                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
-                        .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME,searchStatus)
-                        .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME,searchStatus2)
-                        .in(searchStatus3 != null && searchStatus3.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDNAME,searchStatus3)
+        if(!searchFieldAndVals.isEmpty()){
+            for(Map.Entry<String,Set<String>> entry : searchFieldAndVals.entrySet()){
+
+                Set<String> sets = entry.getValue();
+                queryWrapper.and(qw -> {
+                    for (String key : sets){
+                        qw.or().like(entry.getKey(), key);
+                    }
+                });
+
+
+            }
+
+        }
+        String[] splits = searchStr.split("\\|");
+
+        if(splits.length > 0 && !splits[0].trim().equals("")){
+            queryWrapper.and(qw -> {
+                for (int i = 0; i < splits.length; i++) {
+                    splits[i] = splits[i].trim();
+                    if(StrUtil.isNotBlank(searchStr) && !searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField)){
+                        qw.or().like(queryField, splits[i]);
+                    }
+                }
+            });
+        }
+
+
+
+        Page page2 = this.page(page,
+                queryWrapper
+                        .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME, searchStatus)
+                        .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME, searchStatus2)
+                        .in(searchStatus3 != null && searchStatus3.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDNAME, searchStatus3)
 
                         .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME)
 
         );
+        String targetSql = queryWrapper.getTargetSql();
+
+        return page2;
     }
 
     @Override

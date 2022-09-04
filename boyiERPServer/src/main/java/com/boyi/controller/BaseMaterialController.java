@@ -388,8 +388,9 @@ public class BaseMaterialController extends BaseController {
         List<BaseMaterial> list = baseMaterialService.listSame(
                 baseMaterial.getName(),
                 baseMaterial.getUnit(),
-                baseMaterial.getSpecs(),
                 baseMaterial.getGroupCode());
+
+
 
         if (list != null && list.size() > 0) {
             return ResponseResult.fail("存在同名称，同规格，同单位的物料!请检查!");
@@ -436,7 +437,6 @@ public class BaseMaterialController extends BaseController {
         // 需要先判断，同名称，同规格，同基本单位是否存在
         List<BaseMaterial> list = baseMaterialService.listSameExcludSelf(baseMaterial.getName(),
                 baseMaterial.getUnit(),
-                baseMaterial.getSpecs(),
                 baseMaterial.getGroupCode(),
                 baseMaterial.getId());
 

@@ -586,7 +586,7 @@ public class ProduceProductConstituentController extends BaseController {
                 item.setUpdated(now);
                 item.setCreatedUser(principal.getName());
                 item.setUpdatedUser(principal.getName());
-
+                item.setCanShowPrint("0");
             }
 
             produceProductConstituentDetailService.saveBatch(productConstituent.getRowList());

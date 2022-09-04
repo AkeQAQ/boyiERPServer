@@ -71,4 +71,21 @@ public class BaseMaterialServiceImpl extends ServiceImpl<BaseMaterialMapper, Bas
                 .set(DBConstant.TABLE_BASE_MATERIAL.LOW_WARNING_LINE_FIELDNAME,null)
                 .eq(DBConstant.TABLE_BASE_MATERIAL.ID,baseMaterial.getId()));
     }
+
+    @Override
+    public List<BaseMaterial> listSame(String name, String unit, String groupCode) {
+        return this.list(new QueryWrapper<BaseMaterial>()
+                .eq(DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME, name)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.UNIT_FIELDNAME, unit)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME,groupCode));
+    }
+
+    @Override
+    public List<BaseMaterial> listSameExcludSelf(String name, String unit, String groupCode, String id) {
+        return this.list(new QueryWrapper<BaseMaterial>()
+                .eq(DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME, name)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.UNIT_FIELDNAME,unit)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME,groupCode)
+                .ne(DBConstant.TABLE_BASE_MATERIAL.ID,id));
+    }
 }
