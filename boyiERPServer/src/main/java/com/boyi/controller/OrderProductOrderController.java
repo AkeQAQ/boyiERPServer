@@ -52,6 +52,170 @@ public class OrderProductOrderController extends BaseController {
         replaceMap.put("回单",1);
     }
 
+
+    @PostMapping("/mergerOrders")
+    @PreAuthorize("hasAuthority('order:productOrder:save')")
+    @Transactional
+    public ResponseResult mergerOrders(Principal principal, @Validated @RequestBody  OrderProductOrderVO vo)throws Exception {
+        LocalDateTime now = LocalDateTime.now();
+
+        try {
+            if(vo==null){
+                return ResponseResult.fail("对象为null!");
+            }
+            String fromOrders = vo.getOrders();
+            String toMergeOrder = vo.getToMergeOrder();
+            //0. 非空判断
+            if( StringUtils.isBlank(fromOrders) || StringUtils.isBlank(toMergeOrder)){
+                return ResponseResult.fail("来源订单和目标订单内容为空!");
+            }
+            // 1. 来源订单，分割分组
+            String[] orders = fromOrders.split(",");
+            HashSet<String> ordersSet = new HashSet<>();
+
+            for(String orderNum : orders){
+                ordersSet.add(orderNum);
+            }
+            List<OrderProductOrder> fromOrderProdocutOrders = orderProductOrderService.listByOrderNums(ordersSet);
+
+
+            if(fromOrderProdocutOrders==null || fromOrderProdocutOrders.size()!= orders.length){
+                return ResponseResult.fail("来源订单号存在无效或者重复订单号!");
+            }
+
+            OrderProductOrder toMergerOrderProductOrder = orderProductOrderService.getByOrderNum(toMergeOrder);
+            if(toMergerOrderProductOrder==null){
+                return ResponseResult.fail("目标订单号存在无效订单号!");
+            }
+
+            // 2. 把来源订单号的数量+到目标订单号的数量上，并且取消状态。
+            Set<OrderProductOrder> removeOrders = new HashSet<>();
+            String removeNum ="0";
+            for(OrderProductOrder opo :fromOrderProdocutOrders){
+                // 遍历再这判断，假如来源目标是取消的。不能进行
+                if(opo.getOrderType().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2)){
+                    return ResponseResult.fail("来源订单号:"+opo.getOrderNum()+"是取消状态的订单!无法合并");
+                }
+                // 假如来源目标和目标订单不是同货号、同品牌，不能合并
+                if(!opo.getProductNum().equals(toMergerOrderProductOrder.getProductNum())
+                        || !opo.getProductBrand().equals(toMergerOrderProductOrder.getProductBrand())){
+                    return ResponseResult.fail("来源订单号:"+opo.getOrderNum()+"工厂货号:"+opo.getProductNum()
+                            +",品牌:"+opo.getProductBrand()+",和目标工厂货号:"+toMergerOrderProductOrder.getProductNum()+
+                            ",目标品牌:"+toMergerOrderProductOrder.getProductBrand()+",不一致，无法合并！");
+                }
+                //假如来源目标和目标订单是同订单号，不能合并
+                if(opo.getOrderNum().equals(toMergerOrderProductOrder.getOrderNum())){
+                    return ResponseResult.fail("来源订单号:"+opo.getOrderNum()+" 和目标订单号相同，不能合并");
+                }
+                removeNum = BigDecimalUtil.add(removeNum,opo.getOrderNumber()+"").toString();
+
+                OrderProductOrder productOrder = new OrderProductOrder();
+                productOrder.setId(opo.getId());
+                productOrder.setOrderType(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2);
+                productOrder.setUpdated(now);
+                productOrder.setUpdatedUser(principal.getName());
+                removeOrders.add(productOrder);
+            }
+            orderProductOrderService.updateBatchById(removeOrders);
+            OrderProductOrder updateToMergerOrder = new OrderProductOrder();
+            updateToMergerOrder.setId(toMergerOrderProductOrder.getId());
+            updateToMergerOrder.setOrderNumber(Integer.valueOf(BigDecimalUtil.add(toMergerOrderProductOrder.getOrderNumber()+"",removeNum).toString()));
+            updateToMergerOrder.setUpdated(now);
+            updateToMergerOrder.setUpdatedUser(principal.getName());
+            orderProductOrderService.updateById(updateToMergerOrder);
+
+            // 3. 进度表关联的已备信息，+到目标订单号的进度表上，并且删除记录
+
+            Map<String, String> mergeMaterialPreparedSum = new HashMap<>();
+            Map<String, String> mergeMaterialInSum = new HashMap<>();
+            Map<String, String> mergeMaterialCalSum = new HashMap<>();
+
+            HashSet<Long> removeProgressIds = new HashSet<>();
+
+            for(OrderProductOrder opo :fromOrderProdocutOrders) {
+
+                List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderId(opo.getId());
+                for(ProduceOrderMaterialProgress progress:progresses){
+                    String materialId = progress.getMaterialId();
+                    String preparedNum = progress.getPreparedNum();
+                    String inNum = progress.getInNum();
+                    String calNum = progress.getCalNum();
+
+                    String mapPreparedSum = mergeMaterialPreparedSum.get(materialId);
+                    String mapInSum = mergeMaterialInSum.get(materialId);
+                    String mapCalSum = mergeMaterialCalSum.get(materialId);
+
+                    if(StringUtils.isBlank(mapPreparedSum)){
+                        mapPreparedSum="0";
+                    }
+                    if(StringUtils.isBlank(mapInSum)){
+                        mapInSum="0";
+                    }
+                    if(StringUtils.isBlank(mapCalSum)){
+                        mapCalSum="0";
+                    }
+                    mergeMaterialPreparedSum.put(materialId,BigDecimalUtil.add(mapPreparedSum,preparedNum).toString());
+                    mergeMaterialInSum.put(materialId,BigDecimalUtil.add(mapInSum,inNum).toString());
+                    mergeMaterialCalSum.put(materialId,BigDecimalUtil.add(mapCalSum,calNum).toString());
+                    removeProgressIds.add(progress.getId());
+                }
+            }
+
+            List<ProduceOrderMaterialProgress> toMergerProgresses = produceOrderMaterialProgressService.listByOrderId(toMergerOrderProductOrder.getId());
+            if(toMergerProgresses.isEmpty()){
+                for (Map.Entry<String,String> entry : mergeMaterialPreparedSum.entrySet()){
+                    String materialId = entry.getKey();
+
+                    ProduceOrderMaterialProgress progress = new ProduceOrderMaterialProgress();
+                    progress.setMaterialId(materialId);
+                    String preparedNum = entry.getValue();
+                    String inNum = mergeMaterialInSum.get(materialId);
+                    String calNum = mergeMaterialCalSum.get(materialId);
+
+                    progress.setPreparedNum(preparedNum);
+                    progress.setInNum(inNum);
+                    progress.setCalNum(calNum);
+                    progress.setUpdated(now);
+                    progress.setUpdatedUser(principal.getName());
+
+                    progress.setOrderId(toMergerOrderProductOrder.getId());
+                    progress.setMaterialId(materialId);
+                    progress.setCreated(now);
+                    progress.setCreatedUser(principal.getName());
+                    double thePercent = BigDecimalUtil.div(BigDecimalUtil.mul(Double.valueOf(progress.getPreparedNum()), 100).doubleValue(),Double.valueOf(progress.getCalNum())).doubleValue();
+                    progress.setProgressPercent((int)thePercent);
+                    toMergerProgresses.add(progress);
+                }
+                produceOrderMaterialProgressService.saveBatch(toMergerProgresses);
+            }else{
+                for(ProduceOrderMaterialProgress progress : toMergerProgresses){
+                    progress.setPreparedNum(BigDecimalUtil.add(progress.getPreparedNum(),mergeMaterialPreparedSum.get(progress.getMaterialId())).toString());
+                    progress.setInNum(BigDecimalUtil.add(progress.getInNum(),mergeMaterialInSum.get(progress.getMaterialId())).toString());
+                    progress.setCalNum(BigDecimalUtil.add(progress.getCalNum(),mergeMaterialCalSum.get(progress.getMaterialId())).toString());
+                    progress.setUpdated(now);
+                    progress.setUpdatedUser(principal.getName());
+
+                    double thePercent = BigDecimalUtil.div(BigDecimalUtil.mul(Double.valueOf(progress.getPreparedNum()), 100).doubleValue(),Double.valueOf(progress.getCalNum())).doubleValue();
+                    progress.setProgressPercent((int)thePercent);
+
+                }
+                produceOrderMaterialProgressService.updateBatchById(toMergerProgresses);
+            }
+
+
+            produceOrderMaterialProgressService.removeByIds(removeProgressIds);
+
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE);
+        }
+        catch (DuplicateKeyException de){
+            return ResponseResult.fail("订单号不能重复!");
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+
     /**
      * 修改订单号
      */
