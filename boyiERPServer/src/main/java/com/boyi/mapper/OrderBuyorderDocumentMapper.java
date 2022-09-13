@@ -51,7 +51,7 @@ public interface OrderBuyorderDocumentMapper extends BaseMapper<OrderBuyorderDoc
             ") t " +
             "left join base_supplier_material sm " +
             "on sm.status=0 and t.material_id = sm.material_id and supId = sm.supplier_id" +
-            " and t.order_date between  sm.start_date and sm.end_date order by id desc,detail_id desc";
+            " and t.order_date between  sm.start_date and sm.end_date order by id desc,order_seq desc";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询

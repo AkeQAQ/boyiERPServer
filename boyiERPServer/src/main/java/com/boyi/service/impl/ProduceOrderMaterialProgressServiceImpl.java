@@ -90,7 +90,7 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
     }
 
     @Override
-    public Page<ProduceOrderMaterialProgress> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String, String> otherSearch) {
+    public Page<ProduceOrderMaterialProgress> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String, String> otherSearch,String searchNoPropread) {
         QueryWrapper<ProduceOrderMaterialProgress> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
             String val = otherSearch.get(key);
@@ -103,7 +103,7 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME,searchStatus)
                         .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME,searchStatus2)
-                        .gt(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.PREPARED_NUM_FIELDNAME,0)
+                        .gt(!Boolean.valueOf(searchNoPropread),DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.PREPARED_NUM_FIELDNAME,0)
                         .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME)
 
         );

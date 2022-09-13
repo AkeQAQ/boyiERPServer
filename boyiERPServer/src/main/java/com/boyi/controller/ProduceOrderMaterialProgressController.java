@@ -436,7 +436,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
      */
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('dataAnalysis:orderProgress:list')")
-    public ResponseResult list( String searchField, String searchStatus, String searchStatus2,
+    public ResponseResult list( String searchField, String searchStatus, String searchStatus2,String searchNoPropread,
                                 @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -509,7 +509,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
             return ResponseResult.fail("备料状态不能为空");
         }
 
-        pageData = produceOrderMaterialProgressService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap);
+        pageData = produceOrderMaterialProgressService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap,searchNoPropread);
 
 
 

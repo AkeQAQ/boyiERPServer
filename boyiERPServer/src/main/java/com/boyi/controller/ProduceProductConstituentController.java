@@ -478,7 +478,7 @@ public class ProduceProductConstituentController extends BaseController {
         delMaterialIds.removeAll(materialIds);
 
 
-        if(sb.length() > 10){
+        if(sb.length() > 13){
             EmailUtils.sendMail(EmailUtils.MODULE_ADDNEW_MATERIAL_NAME,toEmail, csEmails.split(","),sb.toString());
         }
 
