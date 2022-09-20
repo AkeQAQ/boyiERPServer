@@ -325,6 +325,8 @@ public class DBConstant {
         public static final String NUM_FIELDNAME = "num";
         public static final String COMMENT_FIELDNAME = "comment";
         public static final String DONE_DATE_FIELDNAME = "done_date";
+        public static final String ORDER_DATE_FIELDNAME = "order_date";
+
         public static final String ORDER_SEQ_FIELDNAME = "order_seq";
         public static final String STATUS_FIELDNAME = "status";
 

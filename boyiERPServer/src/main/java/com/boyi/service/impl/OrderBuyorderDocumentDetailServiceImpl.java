@@ -12,6 +12,7 @@ import com.boyi.service.OrderBuyorderDocumentDetailService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -75,8 +76,10 @@ public class OrderBuyorderDocumentDetailServiceImpl extends ServiceImpl<OrderBuy
 
     @Override
     public List<OrderBuyorderDocumentDetail> getByMaterialIdAndOrderSeq(String materialId, String docNum) {
+        LocalDate localDate = LocalDate.now().plusDays(-300);
         return this.list(new QueryWrapper<OrderBuyorderDocumentDetail>()
                 .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME,materialId)
-                .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,docNum));
+                .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,docNum)
+                .gt(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_DATE_FIELDNAME,localDate));
     }
 }
