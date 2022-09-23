@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.EmailUtils;
 import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -46,6 +47,12 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping("/repository/buyIn")
 public class RepositoryBuyinDocumentController extends BaseController {
+
+    @Value("${boyi.toEmail}")
+    private String toEmail;
+
+    @Value("${boyi.csEmails}")
+    private String csEmails;
 
     @Value("${poi.repositoryBuyInDemoPath}")
     private String poiDemoPath;
@@ -788,6 +795,8 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
             }
             repositoryBuyinDocumentService.save(repositoryBuyinDocument);
+            StringBuilder sb = new StringBuilder();
+
 
             for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
                 item.setDocumentId(repositoryBuyinDocument.getId());
@@ -797,6 +806,11 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 item.setPriceDate(repositoryBuyinDocument.getBuyInDate());
 
                 item.setRadioNum(item.getUnitRadio() * item.getNum());// 系数换算
+
+                String materialId = item.getMaterialId();
+                if(materialId.startsWith("01.01") || materialId.startsWith("01.02")){
+                    sb.append("物料["+item.getMaterialId()+","+item.getMaterialName()+"]单价:"+item.getPrice()+".入库数量:"+item.getRadioNum()).append("<br>");
+                }
             }
 
             repositoryBuyinDocumentDetailService.saveBatch(repositoryBuyinDocument.getRowList());
@@ -813,6 +827,16 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 }
 
             }
+            try {
+                if(sb.length() > 0){
+                    EmailUtils.sendMail(EmailUtils.MODULE_ADD_MATERIAL_NAME,
+                            toEmail,csEmails.split(","), sb.toString());
+                }
+
+            }catch (Exception e){
+                log.error("发生异常.",e);
+            }
+
 
 
             HashMap<String, Object> returnMap = new HashMap<>();
@@ -944,6 +968,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 queryField = "price";
 
             }
+            else if (searchField.equals("orderSeq")) {
+                queryField = "order_seq";
+
+            }
             else {
                 return ResponseResult.fail("搜索字段不存在");
             }
@@ -972,6 +1000,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
                     }
                     else if (oneField.equals("price")) {
                         theQueryField = "price";
+
+                    }
+                    else if (oneField.equals("orderSeq")) {
+                        theQueryField = "order_seq";
 
                     }
                     else {

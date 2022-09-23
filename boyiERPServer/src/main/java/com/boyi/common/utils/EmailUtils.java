@@ -14,6 +14,7 @@ import java.util.Properties;
 public class EmailUtils {
     public static final String MODULE_NAME="【博艺ERP】【物料低预警线】";
     public static final String MODULE_ADDNEW_MATERIAL_NAME="【博艺ERP】【补充物料】";
+    public static final String MODULE_ADD_MATERIAL_NAME="【博艺ERP】【入库皮料】";
 
     public static final String MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMERREQUIRED_NAME="【博艺ERP】【产前沟通确认进度表模块】【客户要求确认】";
     public static final String MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMER_NAME="【博艺ERP】【产前沟通确认进度表模块】【确认鞋确认】";
