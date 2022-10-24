@@ -7,6 +7,7 @@ import com.boyi.common.vo.RealDosageVO;
 import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.entity.RepositoryReturnMaterial;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -33,4 +34,6 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
     List<RealDosageVO> listRealDosageBetweenDate(String searchStartDate, String searchEndDate);
 
     int countProductNum(String productNum);
+
+    Long countPickMaterialRows(String productNum, String productBrand, String materialId, LocalDate localDate);
 }

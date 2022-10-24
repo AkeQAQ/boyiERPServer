@@ -410,13 +410,15 @@ public class ProduceProductConstituentController extends BaseController {
         ProduceProductConstituent productConstituent = produceProductConstituentService.getById(id);
         List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(id);
 
+        LocalDate localDate = LocalDate.now().plusDays(-300);
+
         for (ProduceProductConstituentDetail detail : details){
             BaseMaterial material = baseMaterialService.getById(detail.getMaterialId());
             detail.setMaterialName(material.getName());
             detail.setUnit(material.getUnit());
             detail.setSpecs(material.getSpecs());
 
-            // 假如是采购进度备料进度，入库数量>0的记录数量，则标注为可以修改
+            // 假如是采购进度备料进度，入库数量>0的记录数量，则标注为不可以修改
             List<ProduceOrderMaterialProgress> list = orderProductOrderService.listByProductNumBrandAndProgressMaterialId(productConstituent.getProductNum(),
                     productConstituent.getProductBrand(),detail.getMaterialId());
             Boolean canChange = true;
@@ -427,6 +429,17 @@ public class ProduceProductConstituentController extends BaseController {
                 }
             }
             detail.setCanChange(canChange);
+
+            // 假如是true的，并且是01编码开头物料，
+            // 还要看该品牌、该工厂货号对应的订单，对应的批次号有没有出现在最近300内的领料记录里，存在则设置fasle
+            if(detail.getCanChange() && material.getId().startsWith("01.")){
+                Long count = produceProductConstituentService.countPickMaterialRows(productConstituent.getProductNum(),
+                        productConstituent.getProductBrand(),detail.getMaterialId(),localDate);
+                if(count !=null && count > 0){
+                    detail.setCanChange(false);
+                }
+            }
+
         }
 
         productConstituent.setRowList(details);

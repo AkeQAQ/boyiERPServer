@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -103,5 +104,10 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
     public int countProductNum(String productNum) {
         return this.count(new QueryWrapper<ProduceProductConstituent>()
                 .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_NUM_FIELDNAME,productNum));
+    }
+
+    @Override
+    public Long countPickMaterialRows(String productNum, String productBrand, String materialId, LocalDate localDate) {
+        return produceProductConstituentMapper.countPickMaterialRows(productNum,productBrand,materialId,localDate);
     }
 }

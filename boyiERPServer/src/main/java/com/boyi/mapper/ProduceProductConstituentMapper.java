@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -210,4 +211,16 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
             "            and t1.batch_id = t2.batch_id" +
             "            order by order_num desc")
     List<RealDosageVO> listRealDosageBetweenDate(@Param("searchStartDate") String searchStartDate, @Param("searchEndDate") String searchEndDate);
+
+    @Select("select count(1) from order_product_order opo ," +
+            " produce_batch pb," +
+            " repository_pick_material rpm ," +
+            " repository_pick_material_detail rpmd " +
+            " where opo.order_num = pb.order_num" +
+            " and rpm.batch_id = pb.batch_id" +
+            " and rpm.id=rpmd.document_id" +
+            " and opo.product_num = #{productNum} and opo.product_brand=#{productBrand}" +
+            " and rpmd.material_id = #{materialId}" +
+            " and rpm.pick_date > #{localDate}")
+    Long countPickMaterialRows(String productNum, String productBrand, String materialId, LocalDate localDate);
 }
