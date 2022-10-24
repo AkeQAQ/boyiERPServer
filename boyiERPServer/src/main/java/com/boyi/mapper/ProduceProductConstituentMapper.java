@@ -222,5 +222,5 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
             " and opo.product_num = #{productNum} and opo.product_brand=#{productBrand}" +
             " and rpmd.material_id = #{materialId}" +
             " and rpm.pick_date > #{localDate}")
-    Long countPickMaterialRows(String productNum, String productBrand, String materialId, LocalDate localDate);
+    Long countPickMaterialRows(@Param("productNum")String productNum,@Param("productBrand") String productBrand,@Param("materialId") String materialId,@Param("localDate") LocalDate localDate);
 }
