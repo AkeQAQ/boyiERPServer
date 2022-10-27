@@ -141,6 +141,12 @@ public class BaseController {
     @Autowired
     public OrderBeforeProductionProgressDetailService orderBeforeProductionProgressDetailService;
 
+    @Autowired
+    public CostOfLabourTypeService costOfLabourTypeService;
+
+    @Autowired
+    public CostOfLabourProcessesService costOfLabourProcessesService;
+
     /**
      * 获取页面
      * @return

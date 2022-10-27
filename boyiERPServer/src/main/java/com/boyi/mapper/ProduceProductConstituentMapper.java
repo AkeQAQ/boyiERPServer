@@ -223,4 +223,8 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
             " and rpmd.material_id = #{materialId}" +
             " and rpm.pick_date > #{localDate}")
     Long countPickMaterialRows(@Param("productNum")String productNum,@Param("productBrand") String productBrand,@Param("materialId") String materialId,@Param("localDate") LocalDate localDate);
+
+    @Select("select distinct(product_num) product_num from produce_product_constituent")
+    List<ProduceProductConstituent> listDistinctProductNum();
+
 }

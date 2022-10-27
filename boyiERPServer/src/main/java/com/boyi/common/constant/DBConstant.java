@@ -23,6 +23,50 @@ public class DBConstant {
 
 
     }
+
+    public static class TABLE_COST_OF_LABOUR_PROCESSES{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String COST_OF_LABOUR_TYPE_ID_FIELDNAME = "cost_of_labour_type_id";
+        public static final String LOW_PRICE_FIELDNAME = "low_price";
+        public static final String PIECES_PRICE_FIELDNAME = "pieces_price";
+        public static final String PROCESSES_NAME_FIELDNAME = "processes_name";
+
+        public static final String START_DATE_FIELDNAME = "start_date";
+        public static final String END_DATE_FIELDNAME = "end_date";
+        public static final String COMMENT_FIELDNAME = "comment";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_COST_OF_LABOUR_TYPE{
+        public static final String TYPE_NAME_FIELDNAME = "type_name";
+        public static final String ID_FIELDNAME = "id";
+        public static final String ROLE_ID_FIELDNAME = "role_id";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String CREATED_TIME_FIELDNAME = "created_time";
+
+    }
     public static class TABLE_TAG{
         public static final String TAG_NAME_FIELDNAME = "tag_name";
         public static final String TYPE_FIELDNAME = "type";

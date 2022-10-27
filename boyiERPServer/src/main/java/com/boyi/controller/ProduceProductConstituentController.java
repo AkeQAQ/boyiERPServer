@@ -1,6 +1,7 @@
 package com.boyi.controller;
 
 
+import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -49,6 +50,21 @@ public class ProduceProductConstituentController extends BaseController {
 
     @Value("${poi.realDosageDemoPath}")
     private String poiDemoPath;
+
+    /**
+     * 获取全部
+     */
+    @PostMapping("/getSearchAllData")
+    @PreAuthorize("hasAuthority('produce:productConstituent:list')")
+    public ResponseResult getSearchAllData() {
+        List<ProduceProductConstituent> produceProductConstituents = produceProductConstituentService.listDistinctProductNum();
+        ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
+        produceProductConstituents.forEach(obj ->{
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getProductNum() ).put("name", obj.getProductNum()).map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
 
     @PostMapping("/exportAllRealDosage")
     @PreAuthorize("hasAuthority('produce:productConstituent:queryRealDosage')")

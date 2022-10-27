@@ -110,4 +110,9 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
     public Long countPickMaterialRows(String productNum, String productBrand, String materialId, LocalDate localDate) {
         return produceProductConstituentMapper.countPickMaterialRows(productNum,productBrand,materialId,localDate);
     }
+
+    @Override
+    public List<ProduceProductConstituent> listDistinctProductNum() {
+        return produceProductConstituentMapper.listDistinctProductNum();
+    }
 }

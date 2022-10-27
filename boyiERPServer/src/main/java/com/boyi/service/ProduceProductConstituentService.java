@@ -36,4 +36,7 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
     int countProductNum(String productNum);
 
     Long countPickMaterialRows(String productNum, String productBrand, String materialId, LocalDate localDate);
+
+    List<ProduceProductConstituent> listDistinctProductNum();
+
 }
