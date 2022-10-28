@@ -57,10 +57,11 @@ public class ProduceProductConstituentController extends BaseController {
     @PostMapping("/getSearchAllData")
     @PreAuthorize("hasAuthority('produce:productConstituent:list')")
     public ResponseResult getSearchAllData() {
-        List<ProduceProductConstituent> produceProductConstituents = produceProductConstituentService.listDistinctProductNum();
+        List<ProduceProductConstituent> produceProductConstituents = produceProductConstituentService.list();
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
         produceProductConstituents.forEach(obj ->{
-            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getProductNum() ).put("name", obj.getProductNum()).map();
+            String showStr = obj.getProductNum() + obj.getProductBrand();
+            Map<Object, Object> returnMap = MapUtil.builder().put("value",obj.getId()+" : "+showStr ).put("id", obj.getId()).put("name", showStr).map();
             returnList.add(returnMap);
         });
         return ResponseResult.succ(returnList);

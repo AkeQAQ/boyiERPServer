@@ -23,6 +23,7 @@ import java.io.FileInputStream;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -37,6 +38,18 @@ import java.util.*;
 @RequestMapping("/costOfLabour/processes")
 @Slf4j
 public class CostOfLabourProcessesController extends BaseController {
+
+
+    /**
+     *
+     */
+    @PostMapping("/getLists")
+    @PreAuthorize("hasAuthority('costOfLabour:processes:list')")
+    public ResponseResult getLists(String labourTypeId,String priceDate) {
+        LocalDate parse = LocalDate.parse(priceDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+        List<CostOfLabourProcesses> returns= costOfLabourProcessesService.listByTypeIdAndPriceDate(labourTypeId,parse);
+        return ResponseResult.succ(returns);
+    }
 
     /**
      * 查询工序
@@ -171,16 +184,15 @@ public class CostOfLabourProcessesController extends BaseController {
             return ResponseResult.fail("日期区间冲突，请检查!");
         }
 
-        //TODO
         // 假如状态是0的编辑，则是修改失效日期。查看是否存在，改为新的日期区间之后，是否有审核通过的工价价目变成空
-        /*if(costOfLabourProcesses.getStatus() == 0 && costOfLabourProcesses.getId()!=0){
+        if(costOfLabourProcesses.getStatus() == 0 && costOfLabourProcesses.getId()!=0){
             CostOfLabourProcesses old = costOfLabourProcessesService.getById(costOfLabourProcesses.getId());
-            Integer oldCount= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(old);
-            Integer newCount= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(baseSupplierMaterial);
+            Integer oldCount = costOfLabourDetailService.countByProcessesIdBetweenDate(old);
+            Integer newCount = costOfLabourDetailService.countByProcessesIdBetweenDate(costOfLabourProcesses);
             if(oldCount != newCount){
-                return ResponseResult.fail("该供应商:"+old.getSupplierId()+"，该物料:"+old.getMaterialId()+"，调整时间区将会导致"+(oldCount-newCount)+"条审核通过的采购入库记录，价格变成空");
+                return ResponseResult.fail("调整时间区将会导致"+(oldCount-newCount)+"条工价记录，价格变成空");
             }
-        }*/
+        }
 
         costOfLabourProcesses.setUpdated(LocalDateTime.now());
         costOfLabourProcesses.setUpdateUser(principal.getName());
@@ -211,15 +223,15 @@ public class CostOfLabourProcessesController extends BaseController {
     public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
         ArrayList<CostOfLabourProcesses> lists = new ArrayList<>();
         for (Long id : ids){
-            //TODO// 1. 工序价目审核，先查询是否有工价表审核完成的引用，有则不能修改
-            /*BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
-            Integer count= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(one);
+            // 1. 工序价目审核，先查询是否有工价表审核完成的引用，有则不能修改
+            CostOfLabourProcesses one = costOfLabourProcessesService.getById(id);
+            Integer count = costOfLabourDetailService.countByProcessesIdBetweenDate(one);
             if(count > 0){
-                return ResponseResult.fail("ID:"+one.getId()+"已有"+count+"条审核通过的采购入库记录");
+                return ResponseResult.fail("ID:"+one.getId()+"已有"+count+"条审核通过的工价记录");
             }
             if(one.getStatus() == 0){
                 return ResponseResult.fail("ID:"+id+"的状态已是审核通过，无法再次审核");
-            }*/
+            }
 
             CostOfLabourProcesses costOfLabourProcesses = new CostOfLabourProcesses();
             costOfLabourProcesses.setUpdated(LocalDateTime.now());
@@ -241,15 +253,6 @@ public class CostOfLabourProcessesController extends BaseController {
     @PreAuthorize("hasAuthority('costOfLabour:processes:valid')")
     public ResponseResult statusPass(Principal principal,Long id) {
 
-        //TODO 1. 采购价目审核，先查询是否有采购入库审核完成的引用，有则不能修改
-        /*BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
-        Integer count= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(one);
-        if(count > 0){
-            return ResponseResult.fail("该供应商:"+one.getSupplierId()+"，该物料:"+one.getMaterialId()+"，该时间区已有"+count+"条审核通过的采购入库记录");
-        }
-        if(one.getStatus() != 1){
-            return ResponseResult.fail("ID:"+id+"状态不对，审核失败");
-        }*/
 
         CostOfLabourProcesses costOfLabourProcesses = new CostOfLabourProcesses();
         costOfLabourProcesses.setUpdated(LocalDateTime.now());
@@ -270,12 +273,12 @@ public class CostOfLabourProcessesController extends BaseController {
     @PreAuthorize("hasAuthority('costOfLabour:processes:valid')")
     public ResponseResult statusReturn(Principal principal,Long id) {
 
-        //TODO 1. 采购价目反审核，先查询是否有采购入库审核完成的引用，有则不能修改
-        /*BaseSupplierMaterial one = baseSupplierMaterialService.getById(id);
-        Integer count= repositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(one);
+        // 1. 采购价目审核，先查询是否有工价的引用，有则不能修改
+        CostOfLabourProcesses one = costOfLabourProcessesService.getById(id);
+        Integer count = costOfLabourDetailService.countByProcessesIdBetweenDate(one);
         if(count > 0){
-            return ResponseResult.fail("该供应商，该物料，该时间区已有"+count+"条审核通过的采购入库记录");
-        }*/
+            return ResponseResult.fail("ID:"+one.getId()+"已有"+count+"条审核通过的工价记录");
+        }
         CostOfLabourProcesses costOfLabourProcesses = new CostOfLabourProcesses();
         costOfLabourProcesses.setUpdated(LocalDateTime.now());
         costOfLabourProcesses.setUpdateUser(principal.getName());

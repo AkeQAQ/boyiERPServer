@@ -147,6 +147,12 @@ public class BaseController {
     @Autowired
     public CostOfLabourProcessesService costOfLabourProcessesService;
 
+    @Autowired
+    public CostOfLabourService costOfLabourService;
+
+    @Autowired
+    public CostOfLabourDetailService costOfLabourDetailService;
+
     /**
      * 获取页面
      * @return

@@ -26,4 +26,6 @@ public interface OrderProductpricePreService extends IService<OrderProductpriceP
     void updateStatusFinal(String updateUser,Long id);
 
     void updateStatusReturnReal(String updateUser,Long id);
+
+    OrderProductpricePre getByCustomerAndCompanyNumSimple(String productBrand, String productNum);
 }

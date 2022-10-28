@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -59,5 +60,14 @@ public class CostOfLabourProcessesServiceImpl extends ServiceImpl<CostOfLabourPr
     @Override
     public int isRigionExcludeSelf(CostOfLabourProcesses costOfLabourProcesses) {
         return this.costOfLabourProcessesMapper.isRigionExcludeSelf(costOfLabourProcesses);
+    }
+
+    @Override
+    public List<CostOfLabourProcesses> listByTypeIdAndPriceDate(String labourTypeId, LocalDate priceDate) {
+        return this.costOfLabourProcessesMapper.list(new QueryWrapper<CostOfLabourProcesses>()
+                .eq(DBConstant.TABLE_COST_OF_LABOUR_PROCESSES.COST_OF_LABOUR_TYPE_ID_FIELDNAME,labourTypeId)
+                .le(DBConstant.TABLE_COST_OF_LABOUR_PROCESSES.START_DATE_FIELDNAME,priceDate)
+                .ge(DBConstant.TABLE_COST_OF_LABOUR_PROCESSES.END_DATE_FIELDNAME,priceDate)
+                .eq(DBConstant.TABLE_COST_OF_LABOUR_PROCESSES.STATUS_FIELDNAME,DBConstant.TABLE_COST_OF_LABOUR_PROCESSES.STATUS_FIELDVALUE_0));
     }
 }

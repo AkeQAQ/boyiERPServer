@@ -1,7 +1,10 @@
 package com.boyi.entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,6 +44,23 @@ public class CostOfLabourDetail extends BaseEntity {
     private BigDecimal realPrice;
 
     private String reason;
+
+    @TableField(exist = false)
+    private LocalDateTime created;
+
+    @TableField(exist = false)
+    private LocalDateTime updated;
+
+    @TableField(exist = false)
+    private String processesName;
+    @TableField(exist = false)
+    private String lowPrice;
+    @TableField(exist = false)
+    private String piecesPrice;
+
+    @TableField(exist = false)
+    private String calPrice;
+
 
 
 }

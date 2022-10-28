@@ -93,4 +93,14 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,id);
         this.update(update);
     }
+
+    @Override
+    public OrderProductpricePre getByCustomerAndCompanyNumSimple(String customer, String companyNum) {
+        return this.getOne(new QueryWrapper<OrderProductpricePre>()
+                        .select(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.CAIDUAN_PRICE_FIELDNAME,
+                                DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ZHENCHE_PRICE_FIELDNAME,
+                                DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.CX_PRICE_FIELDNAME)
+                .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,companyNum)
+                .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COSTOMER_FIELDNAME,customer));
+    }
 }

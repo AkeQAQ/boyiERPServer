@@ -5,6 +5,7 @@ import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.CostOfLabourProcesses;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -23,5 +24,6 @@ public interface CostOfLabourProcessesService extends IService<CostOfLabourProce
     int isRigion(CostOfLabourProcesses costOfLabourProcesses);
 
     int isRigionExcludeSelf(CostOfLabourProcesses costOfLabourProcesses);
-    
+
+    List<CostOfLabourProcesses> listByTypeIdAndPriceDate(String labourTypeId, LocalDate priceDate);
 }

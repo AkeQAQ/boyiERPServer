@@ -4,6 +4,7 @@ import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -57,6 +58,10 @@ public class OrderProductpricePre extends BaseEntity {
     private String realPriceLastUpdateUser;
 
     private Integer ykStatus;
+
+    private BigDecimal caiduanPrice;
+    private BigDecimal zhenchePrice;
+    private BigDecimal cxPrice;
 
 
 }

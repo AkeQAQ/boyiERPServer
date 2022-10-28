@@ -50,7 +50,7 @@ public interface CostOfLabourProcessesMapper extends BaseMapper<CostOfLabourProc
     @Select("select count(1) from (" +
             "                  select *" +
             "                  from cost_of_labour_processes" +
-            "                  where cost_of_labour_type_id = #{costOfLabourTypeId}" +
+            "                  where cost_of_labour_type_id = #{costOfLabourTypeId} and processes_name=#{processesName}" +
             "                   and id != #{id}" +
             "              )t where NOT ((end_date < #{startDate}) OR (start_date > #{endDate}))" +
             "")
@@ -59,7 +59,7 @@ public interface CostOfLabourProcessesMapper extends BaseMapper<CostOfLabourProc
     @Select("select count(1) from (" +
             "                  select *" +
             "                  from cost_of_labour_processes" +
-            "                  where cost_of_labour_type_id = #{costOfLabourTypeId}" +
+            "                  where cost_of_labour_type_id = #{costOfLabourTypeId} and processes_name=#{processesName}" +
             "              )t where NOT ((end_date < #{startDate}) OR (start_date > #{endDate}))" +
             "")
     int isRigion(CostOfLabourProcesses baseSupplierMaterial);

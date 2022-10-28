@@ -24,6 +24,60 @@ public class DBConstant {
 
     }
 
+    public static class TABLE_COST_OF_LABOUR_DETAIL{
+        public static final String ID_FIELDNAME = "id";
+        public static final String FOREIGN_ID_FIELDNAME = "foreign_id";
+        public static final String COST_OF_LABOUR_PROCESSES_ID_FIELDNAME = "cost_of_labour_processes_id";
+        public static final String PIECES_FIELDNAME = "pieces";
+        public static final String REAL_PRICE_FIELDNAME = "real_price";
+        public static final String REASON_FIELDNAME = "reason";
+
+
+    }
+
+    public static class TABLE_COST_OF_LABOUR{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String PRODUCE_PRODUCT_CONSITUENT_ID_FIELDNAME = "produce_product_constituent_id";
+        public static final String COST_OF_LABOUR_TYPE_ID_FIELDNAME = "cost_of_labour_type_id";
+        public static final String PRICE_DATE_FIELDNAME = "price_date";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String COMMENT_FIELDNAME = "comment";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+    }
+
     public static class TABLE_COST_OF_LABOUR_PROCESSES{
         static{
             Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
@@ -625,6 +679,9 @@ public class DBConstant {
         public static final String REAL_PRICE_LAST_UPDATE_DATE_FIELDNAME = "real_price_last_update_date";
         public static final String REAL_PRICE_LAST_UPDATE_USER_FIELDNAME = "real_price_last_update_user";
         public static final String YK_STATUS_FIELDNAME = "yk_status";
+        public static final String CAIDUAN_PRICE_FIELDNAME = "caiduan_price";
+        public static final String ZHENCHE_PRICE_FIELDNAME = "zhenche_price";
+        public static final String CX_PRICE_FIELDNAME = "cx_price";
 
 
 
