@@ -153,6 +153,9 @@ public class BaseController {
     @Autowired
     public CostOfLabourDetailService costOfLabourDetailService;
 
+    @Autowired
+    public ProduceBatchProgressService produceBatchProgressService;
+
     /**
      * 获取页面
      * @return

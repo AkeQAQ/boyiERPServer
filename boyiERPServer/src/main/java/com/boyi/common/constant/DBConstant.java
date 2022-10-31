@@ -1041,6 +1041,30 @@ public class DBConstant {
 
     }
 
+    public static class TABLE_PRODUCE_BATCH_PROGRESS{
+        public static final String ID_FIELDNAME = "id";
+
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+
+        public static final String SUPPLIER_NAME_FIELDNAME = "supplier_name";
+
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String MATERIAL_NAME_FIELDNAME = "material_name";
+        public static final String SEND_FOREIGN_PRODUCT_DATE_FIELDNAME = "send_foreign_product_date";
+        public static final String BACK_FOREIGN_PRODUCT_DATE_FIELDNAME = "back_foreign_product_date";
+        public static final String OUT_DATE_FIELDNAME = "out_date";
+        public static final String PRODUCE_BATCH_ID_FIELDNAME = "produce_batch_id";
+        public static final String COST_OF_LABOUR_TYPE_ID_FIELDNAME = "cost_of_labour_type_id";
+        public static final String COST_OF_LABOUR_TYPE_NAME_FIELDNAME = "cost_of_labour_type_name";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATE_USER_FIELDNAME = "update_user";
+
+
+    }
+
 
     public static class TABLE_PRODUCE_BATCH{
         public static final String ORDER_NUM_FIELDNAME = "order_num";

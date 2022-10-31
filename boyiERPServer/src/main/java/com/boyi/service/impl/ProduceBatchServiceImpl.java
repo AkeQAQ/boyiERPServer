@@ -50,7 +50,7 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
                 queryWrapper.
                         like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
-                        .orderByDesc(DBConstant.TABLE_PRODUCE_BATCH.ID_FIELDNAME)
+                        .orderByDesc(DBConstant.TABLE_PRODUCE_BATCH.ORDER_NUM_FIELDNAME,DBConstant.TABLE_PRODUCE_BATCH.ID_FIELDNAME)
 
         );
     }
@@ -92,5 +92,15 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     public List<ProduceBatch> listByOrderNum(String orderNum) {
         return this.list(new QueryWrapper<ProduceBatch>()
                 .eq(DBConstant.TABLE_PRODUCE_BATCH.ORDER_NUM_FIELDNAME,orderNum));
+    }
+
+    @Override
+    public Long sumByBatchIdPre(String preBatchId) {
+        return this.produceBatchMapper.sumByBatchIdPre(preBatchId);
+    }
+
+    @Override
+    public List<ProduceBatch> listByBatchId(String batchId) {
+        return this.list(new QueryWrapper<ProduceBatch>().likeRight(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,batchId));
     }
 }

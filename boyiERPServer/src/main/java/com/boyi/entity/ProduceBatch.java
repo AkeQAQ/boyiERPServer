@@ -3,8 +3,13 @@ package com.boyi.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -66,5 +71,16 @@ public class ProduceBatch extends BaseEntity {
 
     @TableField(exist = false)
     private String productBrand;
+
+    @TableField(exist = false)
+    private String mergeBatchId;
+
+    @TableField(exist = false)
+    private String mergeBatchNumber;
+
+    @TableField(exist = false)
+    private List<ProduceBatchProgress> progresses;
+
+
 
 }

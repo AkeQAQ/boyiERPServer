@@ -29,6 +29,8 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -44,6 +46,9 @@ import java.util.*;
 public class ProduceBatchController extends BaseController {
     @Value("${poi.produceBatchImportDemoPath}")
     private String poiImportDemoPath;
+
+
+
 
     @PostMapping("/statusPassBatch")
     @PreAuthorize("hasAuthority('produce:batch:valid')")
@@ -94,6 +99,19 @@ public class ProduceBatchController extends BaseController {
                 sb.deleteCharAt(sb.length() - 1);
                 return ResponseResult.fail("生产领料已关联生产序号["+sb.toString()+"]");
             }
+
+            // 已关联进度表
+            // 查询当前批次号 前缀的batchId，看看是否进度表存在关联记录
+            List<ProduceBatch> pbs = produceBatchService.listByBatchId(batch.getBatchId().split("-")[0]);
+            if(!pbs.isEmpty()){
+                for(ProduceBatch pb : pbs){
+                    List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
+                    if(progresses!=null&&progresses.size()>0){
+                        return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间进度表记录。不能删除");
+                    }
+                }
+            }
+
             ProduceBatch pb = new ProduceBatch();
             pb.setUpdated(LocalDateTime.now());
             pb.setUpdatedUser(principal.getName());
@@ -131,6 +149,22 @@ public class ProduceBatchController extends BaseController {
                 sb.deleteCharAt(sb.length() - 1);
                 return ResponseResult.fail("生产领料已关联生产序号["+sb.toString()+"]");
             }
+
+            for(ProduceBatch batch:batches){
+
+                // 已关联进度表
+                // 查询当前批次号 前缀的batchId，看看是否进度表存在关联记录
+                List<ProduceBatch> pbs = produceBatchService.listByBatchId(batch.getBatchId().split("-")[0]);
+                if(!pbs.isEmpty()){
+                    for(ProduceBatch pb : pbs){
+                        List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
+                        if(progresses!=null&&progresses.size()>0){
+                            return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间进度表记录。不能删除");
+                        }
+                    }
+                }
+            }
+
 
             boolean flag = produceBatchService.removeByIds(Arrays.asList(ids));
 
@@ -186,6 +220,18 @@ public class ProduceBatchController extends BaseController {
                 return ResponseResult.fail("生产领料已关联生产序号["+sb.toString()+"]");
             }
 
+            // 已关联进度表
+            // 查询当前批次号 前缀的batchId，看看是否进度表存在关联记录
+            List<ProduceBatch> pbs = produceBatchService.listByBatchId(batch.getBatchId().split("-")[0]);
+            if(!pbs.isEmpty()){
+                for(ProduceBatch pb : pbs){
+                    List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
+                    if(progresses!=null&&progresses.size()>0){
+                        return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间进度表记录。不能删除");
+                    }
+                }
+            }
+
             produceBatchService.updateStatus(id,DBConstant.TABLE_PRODUCE_BATCH.BATCH_STATUS_FIELDVALUE_1);
             return ResponseResult.succ("反审核通过!");
         }catch (Exception e){
@@ -196,7 +242,7 @@ public class ProduceBatchController extends BaseController {
 
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('produce:batch:list')")
-    public ResponseResult list( String searchField, @RequestBody Map<String,Object> params) {
+    public ResponseResult list(Principal principal, String searchField, @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
         String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
@@ -245,6 +291,64 @@ public class ProduceBatchController extends BaseController {
 
 
         pageData = produceBatchService.complementInnerQueryByManySearch(getPage(),searchField,queryField,searchStr,queryMap);
+        // 获取该用户拥有的工价类别
+        String name = principal.getName();
+        List<CostOfLabourType> currentUserOwnerTypes = new ArrayList<>();
+
+        if(name.equals("admin")){
+            currentUserOwnerTypes = costOfLabourTypeService.list();
+        }else{
+
+            SysUser currentUser = sysUserService.getByUsername(name);
+            List<SysRole> sysRoles = sysRoleService.listRolesByUserId(currentUser.getId());
+            Set<String> userRoleIds = new HashSet<>();
+            for(SysRole role:sysRoles){
+                userRoleIds.add(role.getId()+"");
+            }
+
+
+            currentUserOwnerTypes = new ArrayList<>();
+
+            List<CostOfLabourType> allTypeLists = costOfLabourTypeService.list();
+            a:for (CostOfLabourType type : allTypeLists){
+                String roleId = type.getRoleId();
+                if(roleId==null || roleId.isEmpty()){
+                    continue;
+                }
+                String[] roles = roleId.split(",");
+                b:for (String role : roles){
+                    if(userRoleIds.contains(role)){
+                        currentUserOwnerTypes.add(type);
+                        continue a;
+                    }
+                }
+
+            }
+        }
+        Set<Long> typeIds = new HashSet<>();
+        for(CostOfLabourType type : currentUserOwnerTypes){
+            typeIds.add(type.getId());
+        }
+
+        for(ProduceBatch pb : pageData.getRecords()){
+            String pre = pb.getBatchId().split("-")[0];
+            pb.setMergeBatchId(pre);
+            Long sum = produceBatchService.sumByBatchIdPre(pre);
+            pb.setMergeBatchNumber(sum+"");
+
+            List<ProduceBatchProgress> progresses = produceBatchProgressService.listByBatchId(pb.getId());
+            if(progresses==null || progresses.isEmpty()){
+                progresses= new ArrayList<>();
+            }
+            List<ProduceBatchProgress> ownProgress = new ArrayList<>();
+
+            for(ProduceBatchProgress progress : progresses){
+                if(typeIds.contains(progress.getCostOfLabourTypeId())){
+                    ownProgress.add(progress);
+                }
+            }
+            pb.setProgresses(ownProgress);
+        }
 
         return ResponseResult.succ(pageData);
     }
@@ -621,6 +725,15 @@ public class ProduceBatchController extends BaseController {
     }
 
     /**
+     *  只允许数字和-出现
+     * @return
+     */
+    public  Boolean isMatchesBatchIdRegEx(String str) {
+        Pattern pattern = Pattern.compile("\\d+-?\\d+");
+        return pattern.matcher(str).matches();
+
+    }
+    /**
      * 上传
      */
     @PostMapping("/upload")
@@ -635,8 +748,13 @@ public class ProduceBatchController extends BaseController {
             List<ProduceBatch> excelBatch = utils.readExcel(fis, 1, 0,-1,null);
             for (ProduceBatch batch : excelBatch){
                 if(batch.getBatchId()!=null && !batch.getBatchId().isEmpty()){
-                    batches.add(batch);
+                    if(this.isMatchesBatchIdRegEx(batch.getBatchId())){
+                        batches.add(batch);
+                    }else{
+                        return ResponseResult.fail("批次号ID："+batch.getBatchId()+"不是数字和(0或1个'-')字符的组合");
+                    }
                 }
+
             }
             log.info("解析的excel数据:{}",batches);
 
@@ -715,6 +833,17 @@ public class ProduceBatchController extends BaseController {
         FileInputStream fis = new FileInputStream(new File(poiImportDemoPath));
         FileCopyUtils.copy(fis,response.getOutputStream());
         return ResponseResult.succ("下载成功");
+    }
+
+    public static void main(String[] args) {
+        String str1 = "100.1";
+        String str2 = "100-10";
+        String str3 = "100- 1";
+        Pattern pattern = Pattern.compile("\\d+-?\\d+");
+        System.out.println(pattern.matcher(str1).matches());
+        System.out.println(pattern.matcher(str2).matches());
+        System.out.println(pattern.matcher(str3).matches());
+
     }
 
 }

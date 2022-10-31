@@ -31,4 +31,8 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
     List<ProduceBatch> listByMonthAndDay(String md);
 
     List<ProduceBatch> listByOrderNum(String orderNum);
+
+    Long sumByBatchIdPre(String pre);
+
+    List<ProduceBatch> listByBatchId(String batchId);
 }
