@@ -35,4 +35,41 @@ public class ProduceBatchProgressServiceImpl extends ServiceImpl<ProduceBatchPro
         return this.list(new QueryWrapper<ProduceBatchProgress>()
                 .eq(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.PRODUCE_BATCH_ID_FIELDNAME,id));
     }
+
+    @Override
+    public void updateNullByField(String field,Long id) {
+        if(field.equals(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.SEND_FOREIGN_PRODUCT_DATE_FIELDNAME)){
+            this.produceBatchProgressMapper.updateSendDateByField(id);
+        }else if(field.equals(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.BACK_FOREIGN_PRODUCT_DATE_FIELDNAME)){
+            this.produceBatchProgressMapper.updateBackDateByField(id);
+        }else if(field.equals(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.OUT_DATE_FIELDNAME)){
+            this.produceBatchProgressMapper.updateOutDateByField(id);
+        }
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listBySupplierId(String id) {
+
+        return this.list(new QueryWrapper<ProduceBatchProgress>()
+                .eq(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.SUPPLIER_ID_FIELDNAME,id));
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listByMaterialId(String id) {
+        return this.list(new QueryWrapper<ProduceBatchProgress>()
+                .eq(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.MATERIAL_ID_FIELDNAME,id));
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listByMaterialIds(String[] id) {
+        return this.list(new QueryWrapper<ProduceBatchProgress>()
+                .in(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.MATERIAL_ID_FIELDNAME,id));
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listBySupplierIds(String[] ids) {
+
+        return this.list(new QueryWrapper<ProduceBatchProgress>()
+                .in(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.SUPPLIER_ID_FIELDNAME,ids));
+    }
 }

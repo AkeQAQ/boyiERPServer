@@ -1041,6 +1041,22 @@ public class DBConstant {
 
     }
 
+    public static class TABLE_PRODUCE_BATCH_DELAY{
+        public static final String ID_FIELDNAME = "id";
+
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String MATERIAL_NAME_FIELDNAME = "material_name";
+        public static final String DATE_FIELDNAME = "date";
+        public static final String PRODUCE_BATCH_ID_FIELDNAME = "produce_batch_id";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATE_USER_FIELDNAME = "update_user";
+
+
+    }
+
     public static class TABLE_PRODUCE_BATCH_PROGRESS{
         public static final String ID_FIELDNAME = "id";
 

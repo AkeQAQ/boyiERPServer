@@ -18,4 +18,13 @@ public interface ProduceBatchProgressService extends IService<ProduceBatchProgre
     List<ProduceBatchProgress> listByBatchId(Long id);
 
     List<ProduceBatchProgress> listByProduceBatchId(Long id);
+
+    void updateNullByField(String sendForeignProductDateFieldname,Long id);
+
+    List<ProduceBatchProgress> listBySupplierId(String id);
+    List<ProduceBatchProgress> listByMaterialId(String id);
+
+    List<ProduceBatchProgress> listByMaterialIds(String[] ids);
+
+    List<ProduceBatchProgress> listBySupplierIds(String[] ids);
 }

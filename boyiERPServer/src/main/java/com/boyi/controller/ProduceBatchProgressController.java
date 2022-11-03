@@ -61,21 +61,49 @@ public class ProduceBatchProgressController extends BaseController {
      */
     @PostMapping("/updateProgress")
     @PreAuthorize("hasAuthority('produce:progress:update')")
-    public ResponseResult updateProgress(Principal principal, @RequestBody ProduceBatchProgress progress) {
+    public ResponseResult updateProgress(Principal principal, @RequestBody List<ProduceBatchProgress> progresses) {
         LocalDateTime now = LocalDateTime.now();
         String userName = principal.getName();
         try {
-            //新增
-            if(progress.getId()==null){
+            for(ProduceBatchProgress progress : progresses){
+                if(progress.getSupplierId() ==null || progress.getSupplierName().isEmpty()
+                        || progress.getSupplierName().equals("空值")
+                        ||progress.getMaterialId() ==null
+                        || progress.getMaterialName().equals("空值")
+                        || progress.getMaterialName().isEmpty()){
+                    continue;
+                }
+                //新增
+                if(progress.getId()==null){
+                    progress.setCreated(now);
+                    progress.setCreatedUser(userName);
+                    produceBatchProgressService.save(progress);
 
-                progress.setCreated(now);
-                progress.setCreatedUser(userName);
-                produceBatchProgressService.save(progress);
+                }else{
+                    progress.setUpdated(now);
+                    progress.setUpdateUser(userName);
+                    produceBatchProgressService.updateById(progress);
 
-            }else{
-                progress.setUpdated(now);
-                progress.setUpdateUser(userName);
-                produceBatchProgressService.updateById(progress);
+                    if(progress.getSendForeignProductDate()==null){
+
+                        produceBatchProgressService.updateNullByField(
+                                DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.SEND_FOREIGN_PRODUCT_DATE_FIELDNAME
+                        ,progress.getId());
+                    }
+                    if(progress.getBackForeignProductDate()==null){
+
+                        produceBatchProgressService.updateNullByField(
+                                DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.BACK_FOREIGN_PRODUCT_DATE_FIELDNAME
+                                ,progress.getProduceBatchId());
+                    }
+                    if(progress.getOutDate()==null){
+
+                        produceBatchProgressService.updateNullByField(
+                                DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.OUT_DATE_FIELDNAME
+                                ,progress.getId());
+                    }
+                }
+
             }
 
         }

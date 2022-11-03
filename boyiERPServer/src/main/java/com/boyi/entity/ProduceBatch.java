@@ -81,6 +81,8 @@ public class ProduceBatch extends BaseEntity {
     @TableField(exist = false)
     private List<ProduceBatchProgress> progresses;
 
+    @TableField(exist = false)
+    private List<ProduceBatchDelay> delays;
 
 
 }

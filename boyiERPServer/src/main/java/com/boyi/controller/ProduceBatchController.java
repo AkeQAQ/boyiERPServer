@@ -348,6 +348,13 @@ public class ProduceBatchController extends BaseController {
                 }
             }
             pb.setProgresses(ownProgress);
+
+            List<ProduceBatchDelay> delays = produceBatchDelayService.listByBatchId(pb.getId());
+            if(delays==null || delays.isEmpty()){
+                delays= new ArrayList<>();
+            }
+            pb.setDelays(delays);
+
         }
 
         return ResponseResult.succ(pageData);

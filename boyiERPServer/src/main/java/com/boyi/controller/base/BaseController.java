@@ -156,6 +156,9 @@ public class BaseController {
     @Autowired
     public ProduceBatchProgressService produceBatchProgressService;
 
+    @Autowired
+    public ProduceBatchDelayService produceBatchDelayService;
+
     /**
      * 获取页面
      * @return

@@ -449,6 +449,7 @@ public class BaseMaterialController extends BaseController {
             // 1. 查询以前的信息
             BaseMaterial oldOne = baseMaterialService.getById(baseMaterial.getId());
 
+
             // 2. 先查询是否有被价目表审核完成的引用，有则不能修改，
             int count = baseSupplierMaterialService.countSuccessByMaterialId(baseMaterial.getId());
 
@@ -466,6 +467,14 @@ public class BaseMaterialController extends BaseController {
                 log.info("物料ID[{}]不能修改，存在{}个 审核完成的 采购价目记录", baseMaterial.getId(), count);
                 return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + count + "个 审核完成的 采购价目记录");
             }
+
+            // 2. 查询生产进度表
+            List<ProduceBatchProgress> progresses = produceBatchProgressService.listByMaterialId(baseMaterial.getId());
+
+            if(progresses!=null && !progresses.isEmpty()){
+                return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + progresses.size() + "个生产序号进度表");
+            }
+
 
             // 3. 有入库,退料，领料记录的，不能修改系数
             int buyInCount = repositoryBuyinDocumentDetailService.count(new QueryWrapper<RepositoryBuyinDocumentDetail>().eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
@@ -542,6 +551,13 @@ public class BaseMaterialController extends BaseController {
         int produceProductCount = produceProductConstituentDetailService.countByMaterialId(ids);
         if(produceProductCount > 0){
             return ResponseResult.fail("请先删除"+produceProductCount+"条对应产品组成信息!");
+        }
+
+        // 2. 查询生产进度表
+        List<ProduceBatchProgress> progresses = produceBatchProgressService.listByMaterialIds(ids);
+
+        if(progresses!=null && !progresses.isEmpty()){
+            return ResponseResult.fail("物料ID[" + Arrays.asList(ids).toString() + "]不能删除，存在" + progresses.size() + "个生产序号进度表");
         }
 
         baseMaterialService.removeByIds(Arrays.asList(ids));

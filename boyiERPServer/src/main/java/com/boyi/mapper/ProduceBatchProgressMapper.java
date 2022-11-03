@@ -4,6 +4,7 @@ import com.boyi.entity.ProduceBatchProgress;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,15 @@ public interface ProduceBatchProgressMapper extends BaseMapper<ProduceBatchProgr
             "             produce_batch pb inner join order_product_order opo on pb.order_num = opo.order_num" +
             "             inner join produce_batch_progress pbp on pb.id=pbp.produce_batch_id" +
             "             left join  cost_of_labour_type colt on colt.id = pbp.cost_of_labour_type_id where pb.id = #{id}" +
-            "            order by pbp.id desc")
+            "            order by pbp.id asc")
     List<ProduceBatchProgress> listByBatchId(@Param("id") Long id);
+
+    @Update("update produce_batch_progress set send_foreign_product_date = null where id = #{id}" )
+    void updateSendDateByField(@Param("id") Long id);
+
+    @Update("update produce_batch_progress set back_foreign_product_date = null where id = #{id}" )
+    void updateBackDateByField(@Param("id") Long id);
+
+    @Update("update produce_batch_progress set out_date = null where id = #{id}" )
+    void updateOutDateByField(@Param("id") Long id);
 }

@@ -208,6 +208,12 @@ public class BaseSupplierController extends BaseController {
                     return ResponseResult.fail("供应商ID[" + baseSupplier.getId() + "]不能修改，存在" + count + "个 审核完成的 采购价目记录");
                 }
             }
+            // 2. 查询生产进度表
+            List<ProduceBatchProgress> progresses = produceBatchProgressService.listBySupplierId(baseSupplier.getId());
+
+            if(progresses!=null && !progresses.isEmpty()){
+                return ResponseResult.fail("供应商ID[" + baseSupplier.getId() + "]不能修改，存在" + progresses.size() + "个生产序号进度表");
+            }
 
             baseSupplierService.updateById(baseSupplier);
             log.info("供应商ID[{}]更新成功，old{},new:{}.",baseSupplier.getId(),oldOne,baseSupplier);
@@ -239,6 +245,13 @@ public class BaseSupplierController extends BaseController {
         int orderBuyorderCount = orderBuyorderDocumentDetailService.countBySupplierId(ids);
         if(orderBuyorderCount > 0){
             return ResponseResult.fail("请先删除"+orderBuyorderCount+"条对应采购订单信息!");
+        }
+
+        // 2. 查询生产进度表
+        List<ProduceBatchProgress> progresses = produceBatchProgressService.listBySupplierIds(ids);
+
+        if(progresses!=null && !progresses.isEmpty()){
+            return ResponseResult.fail("供应商ID[" + Arrays.asList(ids).toString() + "]不能删除，存在" + progresses.size() + "个生产序号进度表");
         }
 
         baseSupplierService.removeByIds(Arrays.asList(ids));
