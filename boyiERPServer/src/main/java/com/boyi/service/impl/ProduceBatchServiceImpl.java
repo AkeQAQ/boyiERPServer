@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
-import com.boyi.entity.OrderProductOrder;
 import com.boyi.entity.ProduceBatch;
-import com.boyi.entity.ProduceOrderMaterialProgress;
-import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.ProduceBatchMapper;
 import com.boyi.service.ProduceBatchService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,13 +40,28 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
 
         for (String key : otherSearch.keySet()){
             String val = otherSearch.get(key);
-            queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
-                    && StrUtil.isNotBlank(key),key,val);
+
+            if(key.equals("batch_id")){
+                queryWrapper.likeRight(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }else{
+                queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }
+
         }
+        if(queryField.equals("batch_id")){
+            queryWrapper.
+                    likeRight(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }else{
+            queryWrapper.
+                    like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }
+
         return this.innerQuery(page,
-                queryWrapper.
-                        like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
-                                && StrUtil.isNotBlank(searchField),queryField,searchStr)
+                queryWrapper
                         .orderByDesc(DBConstant.TABLE_PRODUCE_BATCH.ORDER_NUM_FIELDNAME,DBConstant.TABLE_PRODUCE_BATCH.ID_FIELDNAME)
 
         );
@@ -100,7 +112,32 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     }
 
     @Override
-    public List<ProduceBatch> listByBatchId(String batchId) {
+    public List<ProduceBatch> listByLikeRightBatchId(String batchId) {
         return this.list(new QueryWrapper<ProduceBatch>().likeRight(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME,batchId));
+    }
+
+    @Override
+    public List<ProduceBatch> listByOutDate( String searchQueryOutDateStr) {
+        return this.produceBatchMapper.listByOutDate(searchQueryOutDateStr);
+    }
+
+    @Override
+    public List<ProduceBatch> listByMaterialName(String name) {
+        return this.produceBatchMapper.listByMaterialName(name);
+    }
+
+    @Override
+    public List<ProduceBatch> listByOutDateIsNull() {
+        return this.produceBatchMapper.listByOutDateIsNull();
+    }
+
+    @Override
+    public List<ProduceBatch> listByMaterialNameIsNull() {
+        return this.produceBatchMapper.listByMaterialNameIsNull();
+    }
+
+    @Override
+    public List<ProduceBatch> listDelay() {
+        return this.produceBatchMapper.listDelay();
     }
 }

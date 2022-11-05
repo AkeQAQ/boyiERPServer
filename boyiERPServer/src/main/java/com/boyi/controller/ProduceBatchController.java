@@ -27,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.regex.Matcher;
@@ -48,6 +49,199 @@ public class ProduceBatchController extends BaseController {
     private String poiImportDemoPath;
 
 
+
+    @PostMapping("/push")
+    @PreAuthorize("hasAuthority('produce:batch:push')")
+    @Transactional
+    public ResponseResult push(Principal principal,@RequestBody Long[] ids) {
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate nowDate = LocalDate.now();
+
+        String username = principal.getName();
+
+        List<CostOfLabourType> colts = costOfLabourTypeService.listByName(username);
+        if(colts.isEmpty()){
+            return ResponseResult.fail("没有工价类型权限");
+        }
+        if(colts.size() > 1){
+            return ResponseResult.fail("工价类型权限超过1个，无法筛选所属进度表");
+        }
+        CostOfLabourType colt = colts.get(0);
+
+
+        Map<String, Long> batchIdStr_totalNum = new HashMap<>();
+
+        Map<String, List<ProduceBatchProgress>> supplierId_progresses = new HashMap<>();
+
+
+        for (Long id : ids){
+            // 1. 查询所有批次号前缀的总数量.
+            ProduceBatch pb = produceBatchService.getById(id);
+            String batchIdStr = pb.getBatchId().split("-")[0];
+            Long total = produceBatchService.sumByBatchIdPre(batchIdStr);
+            batchIdStr_totalNum.put(batchIdStr,total);
+            // 2. 按供应商分组
+            List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchIdByCostOfLabourTypeId(id,colt.getId());
+            if(progresses.isEmpty()){
+                continue;
+            }
+            pb.setPush(DBConstant.TABLE_PRODUCE_BATCH.PUSH_FIELDVALUE_0);
+            pb.setUpdated(now);
+            pb.setUpdatedUser(username);
+            produceBatchService.updateById(pb);
+
+            for(ProduceBatchProgress progress : progresses){
+                String supplierId = progress.getSupplierId();
+                // 没有工艺，只有出库进度信息。
+                if(supplierId ==null || supplierId.isEmpty()){
+                    continue;
+                }
+                List<ProduceBatchProgress> theSupplierProgresses = supplierId_progresses.get(supplierId);
+                if(theSupplierProgresses==null){
+                    theSupplierProgresses = new ArrayList<>();
+                    supplierId_progresses.put(supplierId,theSupplierProgresses);
+                }
+
+                // 重新设置批次号前缀。
+                progress.setBatchIdStr(batchIdStr);
+                theSupplierProgresses.add(progress);
+            }
+        }
+
+        // 3. 生成采购订单表,一个供应商一个订单表
+        for(Map.Entry<String,List<ProduceBatchProgress>> entry : supplierId_progresses.entrySet()){
+            String supplierId = entry.getKey();
+            List<ProduceBatchProgress> progresses = entry.getValue();
+            if(progresses==null||progresses.isEmpty()){
+                log.warn("出现生产采购订单表，有供应商但是进度表信息是空的情况.{}",entry);
+                continue;
+            }
+
+            // 生成一个采购订单记录
+            OrderBuyorderDocument obd = new OrderBuyorderDocument();
+            obd.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.STATUS_FIELDVALUE_1);
+            obd.setSupplierId(supplierId);
+            obd.setOrderDate(nowDate); // 采购日期默认当天
+            obd.setCreated(now);
+            obd.setCreatedUser(username);
+            orderBuyorderDocumentService.save(obd);
+
+            // 生成采购订单下的子记录
+            ArrayList<OrderBuyorderDocumentDetail> obdds = new ArrayList<>();
+            for(ProduceBatchProgress progress:progresses){
+
+                BaseMaterial bm = baseMaterialService.getById(progress.getMaterialId());
+
+                OrderBuyorderDocumentDetail obdd = new OrderBuyorderDocumentDetail();
+                obdd.setMaterialId(progress.getMaterialId());
+                obdd.setDocumentId(obd.getId());
+                obdd.setNum(Double.valueOf(batchIdStr_totalNum.get(progress.getBatchIdStr())));
+                obdd.setSupplierId(obd.getSupplierId());
+
+                LocalDateTime backForeignProductDate = progress.getBackForeignProductDate();
+                if(backForeignProductDate!=null){
+                    LocalDate localDate = backForeignProductDate.toLocalDate();
+                    obdd.setDoneDate(localDate);// 交货日期根据进度表的返回时间
+                }
+
+                obdd.setOrderSeq(progress.getBatchIdStr());
+                obdd.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1);
+                obdd.setOrderDate(nowDate);
+                obdd.setRadioNum(BigDecimalUtil.mul(obdd.getNum(),bm.getUnitRadio()).doubleValue()  );
+                obdds.add(obdd);
+            }
+
+            orderBuyorderDocumentDetailService.saveBatch(obdds);
+
+        }
+
+        return ResponseResult.succ("下推成功！");
+    }
+
+    @PostMapping("/progressList")
+    @PreAuthorize("hasAuthority('produce:batch:list')")
+    public ResponseResult list(Principal principal,@RequestBody Map<String,Object> params) {
+        Object searchQueryOutDateStr = params.get("searchQueryOutDateStr");
+        Object searchQueryMaterialName = params.get("searchQueryMaterialName");
+        List<ProduceBatch> progresses= new ArrayList<>();
+        List<ProduceBatch> delays = new ArrayList<>();
+
+        List<ProduceBatch> progressesLists= new ArrayList<>();
+
+
+        String name = principal.getName();
+        List<CostOfLabourType> currentUserOwnerTypes = null;
+        if(name.equals("admin")){
+            currentUserOwnerTypes = costOfLabourTypeService.list();
+        }else{
+            currentUserOwnerTypes = costOfLabourTypeService.listByName(name);
+        }
+        HashSet<Integer> ownSeqs = new HashSet<>();
+        for(CostOfLabourType type : currentUserOwnerTypes){
+            if(type.getSeq()!=null){
+                ownSeqs.add(type.getSeq());
+            }
+        }
+
+        if(searchQueryOutDateStr!=null && !searchQueryOutDateStr.toString().trim().equals("")){
+            progressesLists = this.produceBatchService.listByOutDate(searchQueryOutDateStr.toString());
+        }else {
+            progressesLists = this.produceBatchService.listByOutDateIsNull();
+        }
+
+        // 将同batchId的去除,并且将-1这种消除
+        HashSet<String> batchId = new HashSet<>();
+        for(ProduceBatch pb : progressesLists){
+
+            boolean isCan = false;
+            // 只能看此用户或者此用户前1个流程的
+            if(ownSeqs.contains(pb.getSeq()) || pb.getSeq() ==null ){
+                isCan = true;
+            }else{
+                a:for(Integer seq : ownSeqs){
+                    // 拥有的部门，不是0的顺序，并且前一个部门就是该进度表也可查看
+                    if( seq!=0 && seq-1==pb.getSeq()){
+                        isCan = true;
+                        break a;
+                    }
+                }
+            }
+            if(!isCan){
+                continue;
+            }
+            String batchIdPre = pb.getBatchId().split("-")[0];
+
+            if(batchId.contains(batchIdPre)  ){
+                continue;
+            }
+
+
+            batchId.add(batchIdPre);
+            pb.setBatchId(batchIdPre);
+            progresses.add(pb);
+        }
+
+        List<ProduceBatch> delaysLists = this.produceBatchService.listDelay();
+        /*if(searchQueryMaterialName !=null && !searchQueryMaterialName.toString().trim().equals("")){
+            delaysLists = this.produceBatchService.listByMaterialName(searchQueryMaterialName.toString());
+        }else {
+            delaysLists  = this.produceBatchService.listByMaterialNameIsNull();
+        }*/
+
+        for(ProduceBatch pb : delaysLists){
+            String batchIdPre = pb.getBatchId().split("-")[0];
+            pb.setBatchId(batchIdPre);
+            delays.add(pb);
+        }
+
+        HashMap<String, Object> returnMap = new HashMap<>();
+        returnMap.put("delayData",delays);
+        returnMap.put("progressData",progresses);
+
+        return ResponseResult.succ(returnMap);
+
+    }
 
 
     @PostMapping("/statusPassBatch")
@@ -102,7 +296,7 @@ public class ProduceBatchController extends BaseController {
 
             // 已关联进度表
             // 查询当前批次号 前缀的batchId，看看是否进度表存在关联记录
-            List<ProduceBatch> pbs = produceBatchService.listByBatchId(batch.getBatchId().split("-")[0]);
+            List<ProduceBatch> pbs = produceBatchService.listByLikeRightBatchId(batch.getBatchId().split("-")[0]);
             if(!pbs.isEmpty()){
                 for(ProduceBatch pb : pbs){
                     List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
@@ -154,7 +348,7 @@ public class ProduceBatchController extends BaseController {
 
                 // 已关联进度表
                 // 查询当前批次号 前缀的batchId，看看是否进度表存在关联记录
-                List<ProduceBatch> pbs = produceBatchService.listByBatchId(batch.getBatchId().split("-")[0]);
+                List<ProduceBatch> pbs = produceBatchService.listByLikeRightBatchId(batch.getBatchId().split("-")[0]);
                 if(!pbs.isEmpty()){
                     for(ProduceBatch pb : pbs){
                         List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
@@ -222,7 +416,7 @@ public class ProduceBatchController extends BaseController {
 
             // 已关联进度表
             // 查询当前批次号 前缀的batchId，看看是否进度表存在关联记录
-            List<ProduceBatch> pbs = produceBatchService.listByBatchId(batch.getBatchId().split("-")[0]);
+            List<ProduceBatch> pbs = produceBatchService.listByLikeRightBatchId(batch.getBatchId().split("-")[0]);
             if(!pbs.isEmpty()){
                 for(ProduceBatch pb : pbs){
                     List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
@@ -293,37 +487,12 @@ public class ProduceBatchController extends BaseController {
         pageData = produceBatchService.complementInnerQueryByManySearch(getPage(),searchField,queryField,searchStr,queryMap);
         // 获取该用户拥有的工价类别
         String name = principal.getName();
-        List<CostOfLabourType> currentUserOwnerTypes = new ArrayList<>();
+        List<CostOfLabourType> currentUserOwnerTypes = null;
 
         if(name.equals("admin")){
             currentUserOwnerTypes = costOfLabourTypeService.list();
         }else{
-
-            SysUser currentUser = sysUserService.getByUsername(name);
-            List<SysRole> sysRoles = sysRoleService.listRolesByUserId(currentUser.getId());
-            Set<String> userRoleIds = new HashSet<>();
-            for(SysRole role:sysRoles){
-                userRoleIds.add(role.getId()+"");
-            }
-
-
-            currentUserOwnerTypes = new ArrayList<>();
-
-            List<CostOfLabourType> allTypeLists = costOfLabourTypeService.list();
-            a:for (CostOfLabourType type : allTypeLists){
-                String roleId = type.getRoleId();
-                if(roleId==null || roleId.isEmpty()){
-                    continue;
-                }
-                String[] roles = roleId.split(",");
-                b:for (String role : roles){
-                    if(userRoleIds.contains(role)){
-                        currentUserOwnerTypes.add(type);
-                        continue a;
-                    }
-                }
-
-            }
+            currentUserOwnerTypes = costOfLabourTypeService.listByName(name);
         }
         Set<Long> typeIds = new HashSet<>();
         for(CostOfLabourType type : currentUserOwnerTypes){
@@ -343,6 +512,7 @@ public class ProduceBatchController extends BaseController {
             List<ProduceBatchProgress> ownProgress = new ArrayList<>();
 
             for(ProduceBatchProgress progress : progresses){
+
                 if(typeIds.contains(progress.getCostOfLabourTypeId())){
                     ownProgress.add(progress);
                 }
@@ -353,7 +523,14 @@ public class ProduceBatchController extends BaseController {
             if(delays==null || delays.isEmpty()){
                 delays= new ArrayList<>();
             }
-            pb.setDelays(delays);
+            List<ProduceBatchDelay> ownDelays = new ArrayList<>();
+
+            for(ProduceBatchDelay delay : delays){
+                if(typeIds.contains(delay.getCostOfLabourTypeId())){
+                    ownDelays.add(delay);
+                }
+            }
+            pb.setDelays(ownDelays);
 
         }
 

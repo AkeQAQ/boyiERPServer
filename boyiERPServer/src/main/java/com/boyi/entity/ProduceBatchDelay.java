@@ -2,6 +2,8 @@ package com.boyi.entity;
 
 import java.time.LocalDateTime;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.entity.base.BaseEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -36,6 +38,11 @@ public class ProduceBatchDelay extends BaseEntity {
 
     private String createdUser;
     private String updateUser;
+
+    private Long costOfLabourTypeId;
+
+    private String costOfLabourTypeName;
+
 
 
 }

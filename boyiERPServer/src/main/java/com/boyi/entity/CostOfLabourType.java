@@ -35,5 +35,10 @@ public class CostOfLabourType extends BaseEntity {
     @TableField(exist = false)
     private List<SysRole> roles;
 
+    /**
+     * 顺序
+     */
+    private Integer seq;
+
 
 }

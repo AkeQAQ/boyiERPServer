@@ -97,7 +97,14 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
                 }else{
                     queryWrapper.eq( !val.equals("null"),key,val);
                 }
-            }else{
+            }else if(key.equals("supplier_name")){
+                String val = otherSearch.get(key);
+
+                queryWrapper.eq(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }
+
+            else{
                 String val = otherSearch.get(key);
                 queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
                         && StrUtil.isNotBlank(key),key,val);
@@ -113,7 +120,13 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr);
             }
 
-        }else{
+        }else if(queryField.equals("supplier_name")){
+            queryWrapper.
+                    eq(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }
+
+        else{
             queryWrapper.
                     like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
                             && StrUtil.isNotBlank(searchField),queryField,searchStr);

@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
+import com.boyi.entity.CostOfLabourType;
 import com.boyi.entity.ProduceBatchDelay;
 import com.boyi.entity.ProduceBatchProgress;
 import lombok.extern.slf4j.Slf4j;
@@ -67,6 +68,8 @@ public class ProduceBatchDelayController extends BaseController {
                         || delay.getMaterialName().isEmpty()){
                     continue;
                 }
+                CostOfLabourType type = costOfLabourTypeService.getById(delay.getCostOfLabourTypeId());
+                delay.setCostOfLabourTypeName(type.getTypeName());
                 //新增
                 if(delay.getId()==null){
                     delay.setCreated(now);

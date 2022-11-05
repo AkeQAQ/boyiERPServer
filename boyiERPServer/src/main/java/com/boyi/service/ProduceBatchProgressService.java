@@ -27,4 +27,8 @@ public interface ProduceBatchProgressService extends IService<ProduceBatchProgre
     List<ProduceBatchProgress> listByMaterialIds(String[] ids);
 
     List<ProduceBatchProgress> listBySupplierIds(String[] ids);
+
+    Integer countByBatchIdSeqOutDateAccept(String batchIdStr, int i);
+
+    List<ProduceBatchProgress> listByProduceBatchIdByCostOfLabourTypeId(Long id,Long costOfLabourTypeId);
 }

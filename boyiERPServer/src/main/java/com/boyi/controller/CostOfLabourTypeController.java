@@ -45,38 +45,12 @@ public class CostOfLabourTypeController extends BaseController {
 
 
         String name = principal.getName();
-        List<CostOfLabourType> currentUserOwnerTypes = new ArrayList<>();
+        List<CostOfLabourType> currentUserOwnerTypes = null;
 
         if(name.equals("admin")){
             currentUserOwnerTypes = costOfLabourTypeService.list();
         }else{
-
-            SysUser currentUser = sysUserService.getByUsername(name);
-            List<SysRole> sysRoles = sysRoleService.listRolesByUserId(currentUser.getId());
-            Set<String> userRoleIds = new HashSet<>();
-            for(SysRole role:sysRoles){
-                userRoleIds.add(role.getId()+"");
-            }
-
-
-             currentUserOwnerTypes = new ArrayList<>();
-
-            List<CostOfLabourType> allTypeLists = costOfLabourTypeService.list();
-            a:for (CostOfLabourType type : allTypeLists){
-                String roleId = type.getRoleId();
-                if(roleId==null || roleId.isEmpty()){
-                    continue;
-                }
-                String[] roles = roleId.split(",");
-                b:for (String role : roles){
-                    if(userRoleIds.contains(role)){
-                        currentUserOwnerTypes.add(type);
-                        continue a;
-                    }
-                }
-
-            }
-
+            currentUserOwnerTypes = costOfLabourTypeService.listByName(name);
         }
 
         ArrayList<Map<Object,Object>> returnList = new ArrayList<>();
@@ -149,7 +123,10 @@ public class CostOfLabourTypeController extends BaseController {
     public ResponseResult update(@Validated @RequestBody CostOfLabourType costOfLabourType) {
         costOfLabourType.setUpdated(LocalDateTime.now());
         try {
-            costOfLabourTypeService.updateById(costOfLabourType);
+            CostOfLabourType old = costOfLabourTypeService.getById(costOfLabourType.getId());
+            old.setTypeName(costOfLabourType.getTypeName());
+            old.setSeq(costOfLabourType.getSeq());
+            costOfLabourTypeService.updateById(old);
             return ResponseResult.succ("编辑成功");
         }catch (DuplicateKeyException e){
             return ResponseResult.fail("工价类型名重复!");

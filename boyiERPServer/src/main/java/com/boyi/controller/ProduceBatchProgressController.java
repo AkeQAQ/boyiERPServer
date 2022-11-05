@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
+import com.boyi.entity.CostOfLabourType;
 import com.boyi.entity.ProduceBatch;
 import com.boyi.entity.ProduceBatchProgress;
 import com.boyi.entity.RepositoryPickMaterial;
@@ -18,9 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -34,6 +33,27 @@ import java.util.List;
 @RequestMapping("/produce/batchProgress")
 @Slf4j
 public class ProduceBatchProgressController extends BaseController {
+
+
+    @Transactional
+    @PostMapping("/accept")
+    @PreAuthorize("hasAuthority('produce:progress:update')")
+    public ResponseResult accept(Principal principal,String id) throws Exception{
+        try {
+            if(id==null||id.equals("null")){
+                return ResponseResult.fail("id是null，不能接收!");
+            }
+            ProduceBatchProgress progress = produceBatchProgressService.getById(id);
+            progress.setUpdated(LocalDateTime.now());
+            progress.setUpdateUser(principal.getName());
+            progress.setIsAccept(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.ACCEPT_STATUS_FIELDVALUE_0);
+            produceBatchProgressService.updateById(progress);
+            return ResponseResult.succ("已被接收");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
 
 
     @Transactional
@@ -65,43 +85,75 @@ public class ProduceBatchProgressController extends BaseController {
         LocalDateTime now = LocalDateTime.now();
         String userName = principal.getName();
         try {
-            for(ProduceBatchProgress progress : progresses){
-                if(progress.getSupplierId() ==null || progress.getSupplierName().isEmpty()
-                        || progress.getSupplierName().equals("空值")
-                        ||progress.getMaterialId() ==null
-                        || progress.getMaterialName().equals("空值")
-                        || progress.getMaterialName().isEmpty()){
+            HashMap<Long, String> batchUniqueId_batchIdStr = new HashMap<>();
+
+            HashMap<String, Integer> batchIdStr_count = new HashMap<>();
+
+
+            // 判断一个批次号只能有一个出库日期
+            for(ProduceBatchProgress progress : progresses) {
+                String batchIdStr = batchUniqueId_batchIdStr.get(progress.getProduceBatchId());
+
+                if(batchIdStr==null){
+                    ProduceBatch pb = produceBatchService.getById(progress.getProduceBatchId());
+                    batchIdStr = pb.getBatchId().split("-")[0];
+                    batchUniqueId_batchIdStr.put(progress.getProduceBatchId(),batchIdStr);
+                }
+
+                if(progress.getOutDate()!=null){
+                    Integer oldCount = batchIdStr_count.get(batchIdStr)==null?0:batchIdStr_count.get(batchIdStr);
+                    batchIdStr_count.put(batchIdStr,oldCount+1);
+                }
+            }
+
+            for(Map.Entry<String,Integer> entry : batchIdStr_count.entrySet()){
+                String batchIdStr = entry.getKey();
+                Integer count = entry.getValue();
+
+                if(count !=null && count > 1){
+                    return ResponseResult.fail("批次号:"+batchIdStr+",有"+count +"个出库日期，不允许。");
+                }
+
+            }
+
+                for(ProduceBatchProgress progress : progresses){
+                if(progress.getCostOfLabourTypeId() ==null || progress.getCostOfLabourTypeName() ==null
+                        || progress.getCostOfLabourTypeName().equals("空值")
+                       ){
                     continue;
                 }
+
+                CostOfLabourType type = costOfLabourTypeService.getById(progress.getCostOfLabourTypeId());
+                progress.setCostOfLabourTypeName(type.getTypeName());
                 //新增
+
+
                 if(progress.getId()==null){
+                    String batchIdStr = batchUniqueId_batchIdStr.get(progress.getProduceBatchId());
+
+//                    ProduceBatch pb = produceBatchService.getById(progress.getProduceBatchId());
+                    if(type.getSeq()> 1 ){
+                        // 判断该批次号，前一个部门，有出库时间，并且已被我们接收了的
+                        Integer count = produceBatchProgressService.countByBatchIdSeqOutDateAccept(batchIdStr, type.getSeq() - 1);
+                        if(count == 0){
+                            return ResponseResult.fail("没有前置流程，不能新增");
+                        }
+                    }
+
                     progress.setCreated(now);
                     progress.setCreatedUser(userName);
                     produceBatchProgressService.save(progress);
 
                 }else{
+                    if(progress.getSupplierName()==null||progress.getSupplierName().isEmpty()){
+                        progress.setSupplierId(null);
+                    }
+                    if(progress.getMaterialName()==null||progress.getMaterialName().isEmpty()){
+                        progress.setMaterialId(null);
+                    }
                     progress.setUpdated(now);
                     progress.setUpdateUser(userName);
                     produceBatchProgressService.updateById(progress);
-
-                    if(progress.getSendForeignProductDate()==null){
-
-                        produceBatchProgressService.updateNullByField(
-                                DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.SEND_FOREIGN_PRODUCT_DATE_FIELDNAME
-                        ,progress.getId());
-                    }
-                    if(progress.getBackForeignProductDate()==null){
-
-                        produceBatchProgressService.updateNullByField(
-                                DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.BACK_FOREIGN_PRODUCT_DATE_FIELDNAME
-                                ,progress.getProduceBatchId());
-                    }
-                    if(progress.getOutDate()==null){
-
-                        produceBatchProgressService.updateNullByField(
-                                DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.OUT_DATE_FIELDNAME
-                                ,progress.getId());
-                    }
                 }
 
             }

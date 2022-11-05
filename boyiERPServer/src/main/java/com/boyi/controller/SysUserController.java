@@ -56,30 +56,7 @@ public class SysUserController extends BaseController {
 
         // 获取当前用户拥有的工价类型
         String name = principal.getName();
-        List<CostOfLabourType> currentUserOwnerTypes = new ArrayList<>();
-
-        List<SysRole> sysRoles = sysRoleService.listRolesByUserId(sysUser.getId());
-        Set<String> userRoleIds = new HashSet<>();
-        for(SysRole role:sysRoles){
-            userRoleIds.add(role.getId()+"");
-        }
-        currentUserOwnerTypes = new ArrayList<>();
-
-        List<CostOfLabourType> allTypeLists = costOfLabourTypeService.list();
-        a:for (CostOfLabourType type : allTypeLists){
-            String roleId = type.getRoleId();
-            if(roleId==null || roleId.isEmpty()){
-                continue;
-            }
-            String[] roles = roleId.split(",");
-            b:for (String role : roles){
-                if(userRoleIds.contains(role)){
-                    currentUserOwnerTypes.add(type);
-                    continue a;
-                }
-            }
-
-        }
+        List<CostOfLabourType> currentUserOwnerTypes = this.costOfLabourTypeService.listByName(name);
 
         Map<Object, Object> returnMap = MapUtil.builder().put("id", sysUser.getId()).put("userName", sysUser.getUserName())
                 .map();

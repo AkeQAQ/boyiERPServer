@@ -3,7 +3,6 @@ package com.boyi.service;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.ProduceBatch;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.boyi.entity.ProduceOrderMaterialProgress;
 
 import java.util.List;
 import java.util.Map;
@@ -34,5 +33,15 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
 
     Long sumByBatchIdPre(String pre);
 
-    List<ProduceBatch> listByBatchId(String batchId);
+    List<ProduceBatch> listByLikeRightBatchId(String batchId);
+
+    List<ProduceBatch> listByOutDate( String searchQueryOutDateStr);
+
+    List<ProduceBatch> listByMaterialName(String searchQueryOutDateStr);
+
+    List<ProduceBatch> listByOutDateIsNull();
+
+    List<ProduceBatch> listByMaterialNameIsNull();
+
+    List<ProduceBatch> listDelay();
 }

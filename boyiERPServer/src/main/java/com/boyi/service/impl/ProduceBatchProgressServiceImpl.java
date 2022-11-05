@@ -72,4 +72,16 @@ public class ProduceBatchProgressServiceImpl extends ServiceImpl<ProduceBatchPro
         return this.list(new QueryWrapper<ProduceBatchProgress>()
                 .in(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.SUPPLIER_ID_FIELDNAME,ids));
     }
+
+    @Override
+    public Integer countByBatchIdSeqOutDateAccept(String batchIdStr, int Seq) {
+        return this.produceBatchProgressMapper.countByBatchIdSeqOutDateAccept(batchIdStr,Seq);
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listByProduceBatchIdByCostOfLabourTypeId(Long id,Long costOfLabourTypeId) {
+        return this.list(new QueryWrapper<ProduceBatchProgress>()
+                .eq(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.PRODUCE_BATCH_ID_FIELDNAME,id)
+                .eq(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.COST_OF_LABOUR_TYPE_ID_FIELDNAME,costOfLabourTypeId));
+    }
 }

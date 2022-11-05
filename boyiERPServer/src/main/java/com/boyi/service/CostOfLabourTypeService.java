@@ -15,4 +15,5 @@ import java.util.List;
  */
 public interface CostOfLabourTypeService extends IService<CostOfLabourType> {
 
+    public List<CostOfLabourType> listByName(String name);
 }

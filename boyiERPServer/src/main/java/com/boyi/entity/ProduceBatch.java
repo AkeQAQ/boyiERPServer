@@ -65,6 +65,8 @@ public class ProduceBatch extends BaseEntity {
     private String size45;
     private String size46;
     private String size47;
+    private Integer push;
+
 
     @TableField(exist = false)
     private String productNum;
@@ -84,5 +86,19 @@ public class ProduceBatch extends BaseEntity {
     @TableField(exist = false)
     private List<ProduceBatchDelay> delays;
 
+    @TableField(exist = false)
+    private String costOfLabourTypeName;
+
+    @TableField(exist = false)
+    private LocalDateTime outDate;
+
+    @TableField(exist = false)
+    private String materialName;
+
+    @TableField(exist = false)
+    private Integer isAccept;
+
+    @TableField(exist = false)
+    private Integer seq;
 
 }

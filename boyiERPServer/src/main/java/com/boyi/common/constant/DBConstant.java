@@ -1079,6 +1079,16 @@ public class DBConstant {
         public static final String UPDATE_USER_FIELDNAME = "update_user";
 
 
+        /**
+         *  0:代表 已被接收
+         */
+        public static final Integer ACCEPT_STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 未接收
+         */
+        public static final Integer ACCEPT_STATUS_FIELDVALUE_1 = 1;
+
     }
 
 
@@ -1104,6 +1114,17 @@ public class DBConstant {
          *  1:代表 审核中
          */
         public static final Integer BATCH_STATUS_FIELDVALUE_1 = 1;
+
+
+        /**
+         *  0:代表 已经下推
+         */
+        public static final Integer PUSH_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 未下推
+         */
+        public static final Integer PUSH_FIELDVALUE_1 = 1;
 
     }
 
