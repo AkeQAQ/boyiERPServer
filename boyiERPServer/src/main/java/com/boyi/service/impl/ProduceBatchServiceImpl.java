@@ -62,7 +62,7 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
 
         return this.innerQuery(page,
                 queryWrapper
-                        .orderByDesc(DBConstant.TABLE_PRODUCE_BATCH.ORDER_NUM_FIELDNAME,DBConstant.TABLE_PRODUCE_BATCH.ID_FIELDNAME)
+                        .orderByDesc(DBConstant.TABLE_PRODUCE_BATCH.CREATED_FIELDNAME,DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME)
 
         );
     }
@@ -139,5 +139,15 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     @Override
     public List<ProduceBatch> listDelay() {
         return this.produceBatchMapper.listDelay();
+    }
+
+    @Override
+    public List<ProduceBatch> listByOutDateDataDate(String outDate, String dataDate) {
+        return this.produceBatchMapper.listByOutDateDataDate(outDate,dataDate);
+    }
+
+    @Override
+    public List<ProduceBatch> listByOutDateIsNullWithDataDate(String dataDate) {
+        return this.produceBatchMapper.listByOutDateIsNullWithDataDate(dataDate);
     }
 }

@@ -101,4 +101,5 @@ public class ProduceBatch extends BaseEntity {
     @TableField(exist = false)
     private Integer seq;
 
+
 }

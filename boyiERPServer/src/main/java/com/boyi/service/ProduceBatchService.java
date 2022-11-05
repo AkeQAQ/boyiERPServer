@@ -44,4 +44,8 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
     List<ProduceBatch> listByMaterialNameIsNull();
 
     List<ProduceBatch> listDelay();
+
+    List<ProduceBatch> listByOutDateDataDate(String outDate, String dataDate);
+
+    List<ProduceBatch> listByOutDateIsNullWithDataDate(String dataDate);
 }

@@ -163,7 +163,7 @@ public class ProduceBatchController extends BaseController {
     @PreAuthorize("hasAuthority('produce:batch:list')")
     public ResponseResult list(Principal principal,@RequestBody Map<String,Object> params) {
         Object searchQueryOutDateStr = params.get("searchQueryOutDateStr");
-        Object searchQueryMaterialName = params.get("searchQueryMaterialName");
+        Object searchQueryStartDateStr = params.get("searchQueryStartDateStr");
         List<ProduceBatch> progresses= new ArrayList<>();
         List<ProduceBatch> delays = new ArrayList<>();
 
@@ -183,11 +183,17 @@ public class ProduceBatchController extends BaseController {
                 ownSeqs.add(type.getSeq());
             }
         }
+        boolean outDateIsNull = searchQueryOutDateStr==null || searchQueryOutDateStr.toString().trim().equals("");
+        boolean dataDateIsNull = searchQueryStartDateStr==null || searchQueryStartDateStr.toString().trim().equals("");
 
-        if(searchQueryOutDateStr!=null && !searchQueryOutDateStr.toString().trim().equals("")){
+        if(!outDateIsNull && dataDateIsNull){
             progressesLists = this.produceBatchService.listByOutDate(searchQueryOutDateStr.toString());
-        }else {
+        }else if(outDateIsNull && dataDateIsNull){
             progressesLists = this.produceBatchService.listByOutDateIsNull();
+        } else if(!outDateIsNull && !dataDateIsNull){
+            progressesLists = this.produceBatchService.listByOutDateDataDate(searchQueryOutDateStr.toString(),searchQueryStartDateStr.toString());
+        }else if(outDateIsNull && !dataDateIsNull){
+            progressesLists = this.produceBatchService.listByOutDateIsNullWithDataDate(searchQueryStartDateStr.toString());
         }
 
         // 将同batchId的去除,并且将-1这种消除
@@ -558,6 +564,13 @@ public class ProduceBatchController extends BaseController {
                     return ResponseResult.fail("【产品订单】不存在该订单号:"+produceBatch.getOrderNum());
                 }
             produceBatchService.save(produceBatch);
+                // 修改同批次号的创建时间
+            List<ProduceBatch> batches = produceBatchService.listByLikeRightBatchId(produceBatch.getBatchId().split("-")[0]);
+            for(ProduceBatch pb : batches){
+                pb.setCreated(now);
+            }
+            produceBatchService.updateBatchById(batches);
+
             return ResponseResult.succ("新增成功");
         }
         catch (DuplicateKeyException e2){
@@ -950,9 +963,9 @@ public class ProduceBatchController extends BaseController {
             ArrayList<String> ids = new ArrayList<>();
             HashSet<String> orderNums = new HashSet<>();
 
+            LocalDateTime now = LocalDateTime.now();
 
             for (ProduceBatch batch: batches){
-                LocalDateTime now = LocalDateTime.now();
                 batch.setCreated(now);
                 batch.setUpdated(now);
                 batch.setCreatedUser(principal.getName());
@@ -995,6 +1008,15 @@ public class ProduceBatchController extends BaseController {
                 }
             }
             produceBatchService.saveBatch(batches);
+
+            for(ProduceBatch produceBatch : batches){
+                // 修改同批次号的创建时间
+                List<ProduceBatch> oldBatches = produceBatchService.listByLikeRightBatchId(produceBatch.getBatchId().split("-")[0]);
+                for(ProduceBatch pb : oldBatches){
+                    pb.setCreated(now);
+                }
+                produceBatchService.updateBatchById(oldBatches);
+            }
         }
         catch (Exception e) {
             if( e instanceof  DuplicateKeyException){

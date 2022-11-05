@@ -1103,6 +1103,8 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String ID_FIELDNAME = "id";
         public static final String STATUS_FIELDNAME = "status";
+        public static final String PRE_BATCH_ID_FIELDNAME = "pre_batch_id";
+
 
 
         /**

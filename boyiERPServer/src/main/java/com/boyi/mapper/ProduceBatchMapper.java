@@ -23,7 +23,7 @@ import java.util.List;
 public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
 
     String querySql =
-            " select pb.*,opo.product_num,opo.product_brand" +
+            " select pb.*,opo.product_num,opo.product_brand " +
                     "  from " +
                     "             produce_batch pb inner join order_product_order opo on pb.order_num = opo.order_num" +
                     "            order by created desc";
@@ -41,15 +41,15 @@ public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
 
     @Select("select pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq, opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
             " order_product_order opo on pb.order_num = opo.order_num " +
-            " left join produce_batch_progress pbp " +
-            " on pb.id = pbp.produce_batch_id left join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
+            " inner join produce_batch_progress pbp " +
+            " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
             " where date_format(pbp.out_date,'%Y-%m-%d') = #{searchQueryOutDateStr}")
     List<ProduceBatch> listByOutDate(@Param("searchQueryOutDateStr") String searchQueryOutDateStr);
 
     @Select("select pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq,opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
             " order_product_order opo on pb.order_num = opo.order_num " +
-            " left join produce_batch_progress pbp " +
-            " on pb.id = pbp.produce_batch_id left join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
+            " inner join produce_batch_progress pbp " +
+            " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
             " where pbp.out_date is null")
     List<ProduceBatch> listByOutDateIsNull();
 
@@ -73,4 +73,18 @@ public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
             " left join produce_batch_delay pbd on pb.id = pbd.produce_batch_id" +
             " where pbd.material_name is not null and pbd.date is  null ")
     List<ProduceBatch> listDelay();
+
+    @Select("select pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq, opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
+            " order_product_order opo on pb.order_num = opo.order_num " +
+            " inner join produce_batch_progress pbp " +
+            " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
+            " where date_format(pbp.out_date,'%Y-%m-%d') = #{searchQueryOutDateStr} and date_format(pb.created,'%Y-%m-%d') >= #{dataDate}")
+    List<ProduceBatch> listByOutDateDataDate(@Param("searchQueryOutDateStr") String searchQueryOutDateStr,@Param("dataDate")  String dataDate);
+
+    @Select("select pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq,opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
+            " order_product_order opo on pb.order_num = opo.order_num " +
+            " inner join produce_batch_progress pbp " +
+            " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
+            " where pbp.out_date is null and date_format(pb.created,'%Y-%m-%d') >= #{dataDate}")
+    List<ProduceBatch> listByOutDateIsNullWithDataDate(@Param("dataDate") String dataDate);
 }
