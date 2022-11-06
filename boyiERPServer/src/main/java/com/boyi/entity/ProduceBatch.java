@@ -90,6 +90,10 @@ public class ProduceBatch extends BaseEntity {
     private String costOfLabourTypeName;
 
     @TableField(exist = false)
+    private Long costOfLabourTypeId;
+
+
+    @TableField(exist = false)
     private LocalDateTime outDate;
 
     @TableField(exist = false)

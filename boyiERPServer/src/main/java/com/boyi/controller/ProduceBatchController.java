@@ -222,6 +222,14 @@ public class ProduceBatchController extends BaseController {
                 continue;
             }
 
+            // 查询出库是空的，还要看下该角色，该批次号是否已经有出库日期的记录
+            if(outDateIsNull){
+                Integer count = this.produceBatchProgressService.countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(batchIdPre,pb.getCostOfLabourTypeId());
+                if(count >0){
+                    continue;
+                }
+            }
+
 
             batchId.add(batchIdPre);
             pb.setBatchId(batchIdPre);

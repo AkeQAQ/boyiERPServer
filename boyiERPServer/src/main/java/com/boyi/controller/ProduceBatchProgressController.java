@@ -44,10 +44,15 @@ public class ProduceBatchProgressController extends BaseController {
                 return ResponseResult.fail("id是null，不能接收!");
             }
             ProduceBatchProgress progress = produceBatchProgressService.getById(id);
-            progress.setUpdated(LocalDateTime.now());
-            progress.setUpdateUser(principal.getName());
-            progress.setIsAccept(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.ACCEPT_STATUS_FIELDVALUE_0);
-            produceBatchProgressService.updateById(progress);
+            // 查询该批次号前缀全部的进度表，修改成已接收
+            List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchIdByCostOfLabourTypeId(progress.getProduceBatchId(), progress.getCostOfLabourTypeId());
+            for(ProduceBatchProgress pro : progresses){
+                pro.setUpdated(LocalDateTime.now());
+                pro.setUpdateUser(principal.getName());
+                pro.setIsAccept(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.ACCEPT_STATUS_FIELDVALUE_0);
+                produceBatchProgressService.updateById(pro);
+            }
+
             return ResponseResult.succ("已被接收");
         }catch (Exception e){
             log.error("报错.",e);

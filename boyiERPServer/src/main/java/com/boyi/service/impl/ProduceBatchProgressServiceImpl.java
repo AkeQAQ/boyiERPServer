@@ -84,4 +84,9 @@ public class ProduceBatchProgressServiceImpl extends ServiceImpl<ProduceBatchPro
                 .eq(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.PRODUCE_BATCH_ID_FIELDNAME,id)
                 .eq(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.COST_OF_LABOUR_TYPE_ID_FIELDNAME,costOfLabourTypeId));
     }
+
+    @Override
+    public Integer countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(String batchIdStr,Long coltId) {
+        return this.produceBatchProgressMapper.countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(batchIdStr,coltId);
+    }
 }

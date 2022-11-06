@@ -31,4 +31,7 @@ public interface ProduceBatchProgressService extends IService<ProduceBatchProgre
     Integer countByBatchIdSeqOutDateAccept(String batchIdStr, int i);
 
     List<ProduceBatchProgress> listByProduceBatchIdByCostOfLabourTypeId(Long id,Long costOfLabourTypeId);
+
+    Integer countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(String batchIdStr,Long coltId);
+
 }

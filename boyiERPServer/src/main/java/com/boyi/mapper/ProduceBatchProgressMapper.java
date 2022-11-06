@@ -44,4 +44,14 @@ public interface ProduceBatchProgressMapper extends BaseMapper<ProduceBatchProgr
     @Select("select count(1) from produce_batch_progress pbp,produce_batch pb,cost_of_labour_type colt where" +
             " pbp.produce_batch_id = pb.id and pbp.cost_of_labour_type_id = colt.id and pb.batch_id like CONCAT(#{batchIdStr},'%')  and colt.seq = #{seq} and pbp.is_accept=0 and pbp.out_date is not null ")
     Integer countByBatchIdSeqOutDateAccept(@Param("batchIdStr") String batchIdStr,@Param("seq") int seq);
+
+    @Select("select count(1) from produce_batch pb ," +
+            " produce_batch_progress pbp " +
+            " where pb.id = pbp.produce_batch_id " +
+            " and pb.batch_id like concat(#{batchIdStr},'%')" +
+            " and pbp.cost_of_labour_type_id = #{coltId} " +
+            " and pbp.out_date is not null")
+    Integer countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(@Param("batchIdStr") String batchIdStr,@Param("coltId") Long coltId);
+
+
 }
