@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -149,5 +150,10 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     @Override
     public List<ProduceBatch> listByOutDateIsNullWithDataDate(String dataDate) {
         return this.produceBatchMapper.listByOutDateIsNullWithDataDate(dataDate);
+    }
+
+    @Override
+    public Double sumByBatchIdPres(Set<String> batchIdPres) {
+        return this.produceBatchMapper.sumByBatchIdPres(batchIdPres);
     }
 }

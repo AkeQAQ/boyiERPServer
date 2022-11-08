@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.boyi.entity.RepositoryBuyinDocument;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -87,4 +89,8 @@ public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
             " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
             " where pbp.out_date is null and date_format(pb.created,'%Y-%m-%d') >= #{dataDate}")
     List<ProduceBatch> listByOutDateIsNullWithDataDate(@Param("dataDate") String dataDate);
+
+    @Select("<script> select sum(IFNULL(size34,0)+IFNULL(size35,0)+IFNULL(size36,0)+IFNULL(size37,0)+IFNULL(size38,0)+IFNULL(size39,0)+IFNULL(size40,0)+IFNULL(size41,0)+IFNULL(size42,0)+IFNULL(size43,0)+IFNULL(size44,0)+IFNULL(size45,0)+IFNULL(size46,0)+IFNULL(size47,0)) from produce_batch pb " +
+            "where pb.batch_id in <foreach collection='batchIdPres' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach>  </script> ")
+    Double sumByBatchIdPres(@Param("batchIdPres") Set<String> batchIdPres);
 }

@@ -54,4 +54,20 @@ public interface ProduceBatchProgressMapper extends BaseMapper<ProduceBatchProgr
     Integer countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(@Param("batchIdStr") String batchIdStr,@Param("coltId") Long coltId);
 
 
+    @Select("select distinct(supplier_name) from produce_batch_progress where cost_of_labour_type_id=#{coltId} and supplier_name is not null and created >= #{searchStartDate} and created <= #{searchEndDate}")
+    List<Object> listAllSupplierNamesByColtId(@Param("coltId") int coltId,@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
+
+    @Select("" +
+            " select pb.batch_id  from produce_batch pb " +
+            " where pb.id in" +
+            " (" +
+            " select pbp.produce_batch_id from produce_batch_progress pbp " +
+            " where pbp.cost_of_labour_type_id=#{coltId}  and pbp.supplier_name =#{supplierName} and created >= #{searchStartDate} and created <= #{searchEndDate} " +
+            " )")
+    List<Object> listProgressesBySupplierNameByColtId(@Param("coltId") int coltId,@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate,@Param("supplierName") String supplierName);
+
+    @Select("select pbp.send_foreign_product_date,pbp.back_foreign_product_date from produce_batch_progress pbp  where" +
+            " pbp.cost_of_labour_type_id=#{coltId}  and  pbp.supplier_name =#{supplierName}" +
+            " and created >= #{searchStartDate} and created <= #{searchEndDate} ")
+    List<ProduceBatchProgress> listReturnProgressesBySupplierNameByColtId(@Param("coltId") int coltId,@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate,@Param("supplierName") String supplierName);
 }

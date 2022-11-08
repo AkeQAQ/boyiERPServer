@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.ProduceBatch;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -48,4 +50,6 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
     List<ProduceBatch> listByOutDateDataDate(String outDate, String dataDate);
 
     List<ProduceBatch> listByOutDateIsNullWithDataDate(String dataDate);
+
+    Double sumByBatchIdPres(Set<String> batchIdPres);
 }

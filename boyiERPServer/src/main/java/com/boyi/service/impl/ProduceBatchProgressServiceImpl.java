@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -89,4 +90,20 @@ public class ProduceBatchProgressServiceImpl extends ServiceImpl<ProduceBatchPro
     public Integer countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(String batchIdStr,Long coltId) {
         return this.produceBatchProgressMapper.countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(batchIdStr,coltId);
     }
+
+    @Override
+    public List<Object> listAllSupplierNamesByColtId(int coltId,String searchStartDate,String searchEndDate) {
+        return this.produceBatchProgressMapper.listAllSupplierNamesByColtId(coltId,searchStartDate,searchEndDate);
+    }
+
+    @Override
+    public List<Object> listProgressesBySupplierNameByColtId(int coltId, String searchStartDate, String searchEndDate,String supplierName) {
+        return this.produceBatchProgressMapper.listProgressesBySupplierNameByColtId(coltId,searchStartDate,searchEndDate,supplierName);
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listReturnProgressesBySupplierNameByColtId(int coltId, String searchStartDate, String searchEndDate, String supplierName) {
+        return this.produceBatchProgressMapper.listReturnProgressesBySupplierNameByColtId(coltId,searchStartDate,searchEndDate,supplierName);
+    }
+
 }

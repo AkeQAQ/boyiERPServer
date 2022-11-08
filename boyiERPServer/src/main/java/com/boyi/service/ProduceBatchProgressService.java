@@ -3,6 +3,7 @@ package com.boyi.service;
 import com.boyi.entity.ProduceBatchProgress;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -34,4 +35,9 @@ public interface ProduceBatchProgressService extends IService<ProduceBatchProgre
 
     Integer countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(String batchIdStr,Long coltId);
 
+    List<Object> listAllSupplierNamesByColtId(int coltId,String searchStartDate,String searchEndDate);
+
+    List<Object> listProgressesBySupplierNameByColtId(int coltId, String searchStartDate, String searchEndDate,String supplierName);
+
+    List<ProduceBatchProgress> listReturnProgressesBySupplierNameByColtId(int coltId, String searchStartDate, String searchEndDate, String supplierName);
 }

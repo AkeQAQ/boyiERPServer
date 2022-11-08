@@ -7,12 +7,10 @@ import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.vo.RealDosageVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
-import com.boyi.entity.AnalysisMaterailVO;
-import com.boyi.entity.AnalysisProductOrderVO;
-import com.boyi.entity.AnalysisRequest;
-import com.boyi.entity.OrderProductOrder;
+import com.boyi.entity.*;
 import com.boyi.mapper.RepositoryBuyinDocumentMapper;
 import com.boyi.service.AnalysisRequestService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -38,9 +38,153 @@ import java.util.*;
  */
 @RestController
 @RequestMapping("/analysis")
+@Slf4j
 public class AnalysisController extends BaseController {
+    public static Long over_days = 2L;
 
 
+    @GetMapping("/getProductionProgressDataWithCaiduan")
+    public ResponseResult getProductionProgressDataWithCaiduan(Principal principal,String searchStartDate, String searchEndDate) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+
+        HashMap<String, List<Object>> returnMap = new HashMap<>();
+
+        // 1. 查询裁断外加工的供应商(裁断:1）
+        List<Object> supplierLists = produceBatchProgressService.listAllSupplierNamesByColtId(1,searchStartDate,searchEndDate);
+
+        List<Object> supplierTotalNums = new ArrayList<>(); // 供应商总产量
+        List<Object> supplierOverCounts = new ArrayList<>();
+        List<Object> supplierOverPercents = new ArrayList<>();
+        List<Object> supplierTotalCount = new ArrayList<>();
+        List<Object> supplierAllSendPercents = new ArrayList<>();
+
+        long allTotalCount = 0l;
+
+        List<Object> supplierTotalCost = new ArrayList<>(); // 一个供应商总耗时
+
+        List<Object> supplierAvgCost = new ArrayList<>(); // 一个供应商平均耗时
+        List<Object> supplierAvgCostCount = new ArrayList<>(); // 一个供应商平均耗时有收有回的次数
+
+
+        Map<String, Long> supplier_sendCount = new HashMap<>();
+
+        // 2. 根据供应商名称，获取对应的总产量
+        for(Object supplierName:supplierLists){
+            List<Object> batchIdes = produceBatchProgressService.listProgressesBySupplierNameByColtId(1,searchStartDate,searchEndDate,supplierName.toString());
+            if(batchIdes==null|| batchIdes.isEmpty()){
+                supplierTotalNums.add(0);
+                continue;
+            }
+
+            HashSet<String> batchIdPres = new HashSet<>();
+            // 获得该部门，该 外加工，该时间段内的 批次号。
+            for(Object batchId:batchIdes){
+//                batchIdPres.add(batchId.toString());
+                String batchIdPre = batchId.toString().split("-")[0];
+                batchIdPres.add(batchIdPre);
+            }
+            // 去对这些批次号全部查询，求和
+            Double sum = 0D;
+            for(String batchIdPre : batchIdPres){
+                Long oneBatchIdPreSum = produceBatchService.sumByBatchIdPre(batchIdPre);
+                if(oneBatchIdPreSum!=null){
+                    sum+=oneBatchIdPreSum;
+                }
+            }
+            supplierTotalNums.add(sum);
+        }
+        for(Object supplierName:supplierLists) {
+            List<ProduceBatchProgress> progresses = produceBatchProgressService.listReturnProgressesBySupplierNameByColtId(1,searchStartDate,searchEndDate,supplierName.toString());
+            if(progresses==null||progresses.isEmpty()){
+                supplierOverCounts.add(0);
+                supplierTotalCost.add(0);
+                supplier_sendCount.put(supplierName.toString(),0L);// 求和该供应商，该部门，该时间段的进度表次数
+                continue;
+            }
+            allTotalCount+=progresses.size();
+            Long sendCount = supplier_sendCount.get(supplierName.toString());
+            if(sendCount ==null){
+                sendCount = 0L;
+            }
+
+            supplier_sendCount.put(supplierName.toString(),sendCount+progresses.size());// 求和该供应商，该部门，该时间段的进度表次数
+            Integer overCount =0;
+            long totalUserdTimes = 0l;
+            Integer totalUserdCount = 0;
+            for(ProduceBatchProgress progress: progresses){
+
+                if(progress.getSendForeignProductDate() == null || progress.getBackForeignProductDate()==null){
+                    continue;
+                }
+                totalUserdCount++;
+                totalUserdTimes+=(
+                        progress.getBackForeignProductDate().toInstant(ZoneOffset.of("+8")).toEpochMilli()
+                            - progress.getSendForeignProductDate().toInstant(ZoneOffset.of("+8")).toEpochMilli());
+
+                log.info("供应商:{},progress:{},超期时长:{}",supplierName,progress,progress.getBackForeignProductDate().toInstant(ZoneOffset.of("+8")).toEpochMilli()
+                        - progress.getSendForeignProductDate().toInstant(ZoneOffset.of("+8")).toEpochMilli());
+
+
+                if(progress.getSendForeignProductDate().plusDays(over_days).isBefore(progress.getBackForeignProductDate())){
+                    overCount++;
+                }
+            }
+            supplierTotalCost.add(totalUserdTimes);
+            supplierOverCounts.add(overCount);
+            supplierAvgCostCount.add(totalUserdCount);
+        }
+        for (int i = 0; i < supplierOverCounts.size(); i++) {
+            Object count = supplierOverCounts.get(i);
+
+            Object supplierName = supplierLists.get(i);
+
+            Long totalSendCount = supplier_sendCount.get(supplierName.toString());
+
+            supplierTotalCount.add(totalSendCount);
+
+            if(totalSendCount==0){
+                supplierOverPercents.add(0);
+                supplierAllSendPercents.add(0);
+                continue;
+            }
+
+            // 获得扩大100倍的百分比
+            double percent = BigDecimalUtil.div(BigDecimalUtil.mul(count.toString(), "100").toString(), totalSendCount + "").doubleValue();
+            supplierOverPercents.add(percent);
+
+            double sendPercentAll = BigDecimalUtil.div(BigDecimalUtil.mul(totalSendCount.toString(), "100").toString(), allTotalCount + "").doubleValue();
+
+            supplierAllSendPercents.add(sendPercentAll);
+        }
+        for (int i = 0; i <supplierTotalCost.size(); i++) {
+            Object count = supplierTotalCost.get(i);
+            Object avgCostCount = supplierAvgCostCount.get(i);
+            if(avgCostCount==null || Integer.valueOf(avgCostCount.toString())==0){
+                supplierAvgCost.add(0);
+                continue;
+            }
+            supplierAvgCost.add(BigDecimalUtil.div(BigDecimalUtil.div(count.toString(),avgCostCount+"").doubleValue()+"",24*60*60*1000+"").setScale(2, RoundingMode.HALF_UP).toString());
+
+        }
+        log.info(" size:supplierLists {},supplierTotalNums:{},supplierTotalCounts{},supplierAllSendPercents:{}" +
+                "supplierOverCounts:{},supplierOverPercents:{},supplierAvgCost:{}",supplierLists.size(),supplierTotalNums.size(),
+                supplierTotalCount.size(),supplierAllSendPercents.size(),supplierOverCounts.size(),supplierOverPercents.size(),
+                supplierAvgCost.size());
+
+        returnMap.put("supplierLists",supplierLists);
+        returnMap.put("supplierTotalNums",supplierTotalNums);
+        returnMap.put("supplierTotalCounts",supplierTotalCount);
+        returnMap.put("supplierAllSendPercents",supplierAllSendPercents);
+
+        returnMap.put("supplierOverCounts",supplierOverCounts);
+        returnMap.put("supplierOverPercents",supplierOverPercents);
+        returnMap.put("supplierAvgCost",supplierAvgCost);// 总的外发时长/一天的毫秒数
+
+        return ResponseResult.succ(returnMap);
+    }
 
     /**
      * 产品订单，每日订单数目折线图
