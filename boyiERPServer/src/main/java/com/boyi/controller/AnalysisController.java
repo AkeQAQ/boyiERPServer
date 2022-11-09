@@ -116,7 +116,7 @@ public class AnalysisController extends BaseController {
             Integer totalUserdCount = 0;
             for(ProduceBatchProgress progress: progresses){
 
-                if(progress.getSendForeignProductDate() == null || progress.getBackForeignProductDate()==null){
+                if(progress == null || progress.getSendForeignProductDate() == null || progress.getBackForeignProductDate()==null){
                     continue;
                 }
                 totalUserdCount++;

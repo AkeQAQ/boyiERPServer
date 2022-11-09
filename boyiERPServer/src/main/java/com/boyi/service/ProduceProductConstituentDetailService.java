@@ -26,4 +26,6 @@ public interface ProduceProductConstituentDetailService extends IService<Produce
     int countByMaterialId(String[] ids);
 
     List<OrderProductOrder> listByNumBrand(String productNum, String productBrand);
+
+    List<ProduceProductConstituentDetail> listByForeignIdAnd1101MaterialId(Long id);
 }

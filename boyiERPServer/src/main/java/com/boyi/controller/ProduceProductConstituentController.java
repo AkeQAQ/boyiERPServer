@@ -705,6 +705,32 @@ public class ProduceProductConstituentController extends BaseController {
         }else{
             pageData = produceProductConstituentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap);
         }
+/*
+        for(ProduceProductConstituent ppc: pageData.getRecords()){
+            List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignIdAnd1101MaterialId(ppc.getId());
+            if(details==null || details.isEmpty()){
+                ppc.setCaiduanForeignPriceStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.caiduanForeignPriceStatus_FIELDVALUE_1);
+
+            }else{
+                boolean isAllHasPrice = true;
+                String[] materialIds = new String[details.size()];
+                for (int i = 0; i < details.size(); i++) {
+                    materialIds[i]=details.get(i).getMaterialId();
+                }
+
+                // 看下是否有价格
+                int count = baseSupplierMaterialService.countByMaterialId(materialIds);
+                if(count != details.size()){
+                    isAllHasPrice=false;
+                }
+                if(isAllHasPrice){
+                    ppc.setCaiduanForeignPriceStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.caiduanForeignPriceStatus_FIELDVALUE_0);
+                }else{
+                    ppc.setCaiduanForeignPriceStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.caiduanForeignPriceStatus_FIELDVALUE_2);
+                }
+
+            }
+        }*/
 
 
 

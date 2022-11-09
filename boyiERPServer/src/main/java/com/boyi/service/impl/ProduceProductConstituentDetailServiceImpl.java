@@ -60,4 +60,11 @@ public class ProduceProductConstituentDetailServiceImpl extends ServiceImpl<Prod
     public List<OrderProductOrder> listByNumBrand(String productNum, String productBrand) {
         return produceProductConstituentDetailMapper.listByNumBrand(productNum,productBrand);
     }
+
+    @Override
+    public List<ProduceProductConstituentDetail> listByForeignIdAnd1101MaterialId(Long id) {
+        return this.list(new QueryWrapper<ProduceProductConstituentDetail>()
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.CONSTITUENT_ID_FIELDNAME,id)
+                .likeRight(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.MATERIAL_ID_FIELDNAME,"11.01"));
+    }
 }

@@ -43,6 +43,10 @@ public class ProduceProductConstituent extends BaseEntity {
 
     private Integer status;
 
+    @TableField(exist = false)
+    private Integer caiduanForeignPriceStatus;
+
+
     /**
      *  明细信息 用于接收前端数据
      */
