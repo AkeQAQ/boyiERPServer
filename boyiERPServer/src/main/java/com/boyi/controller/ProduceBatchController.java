@@ -230,18 +230,15 @@ public class ProduceBatchController extends BaseController {
                 }
             }
 
-
+            // 查询该批次号前缀的数量
+            Long totalNum = produceBatchService.sumByBatchIdPre(batchIdPre);
+            pb.setMergeBatchNumber(totalNum+"");
             batchId.add(batchIdPre);
             pb.setBatchId(batchIdPre);
             progresses.add(pb);
         }
 
         List<ProduceBatch> delaysLists = this.produceBatchService.listDelay();
-        /*if(searchQueryMaterialName !=null && !searchQueryMaterialName.toString().trim().equals("")){
-            delaysLists = this.produceBatchService.listByMaterialName(searchQueryMaterialName.toString());
-        }else {
-            delaysLists  = this.produceBatchService.listByMaterialNameIsNull();
-        }*/
 
         for(ProduceBatch pb : delaysLists){
             String batchIdPre = pb.getBatchId().split("-")[0];
