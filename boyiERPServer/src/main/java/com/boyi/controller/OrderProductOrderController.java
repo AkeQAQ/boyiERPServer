@@ -298,6 +298,27 @@ public class OrderProductOrderController extends BaseController {
     }
 
 
+
+    @Transactional
+    @PostMapping("noCancelOrder")
+    @PreAuthorize("hasAuthority('order:productOrder:del')")
+    public ResponseResult noCancelOrder(Principal principal,Long id) throws Exception{
+        try {
+            OrderProductOrder orderProductOrder = new OrderProductOrder();
+            orderProductOrder.setUpdated(LocalDateTime.now());
+            orderProductOrder.setUpdatedUser(principal.getName());
+            orderProductOrder.setId(id);
+            orderProductOrder.setOrderType(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_0);
+            orderProductOrderService.updateById(orderProductOrder);
+            return ResponseResult.succ("订单还原成功!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+
+
     @Transactional
     @PostMapping("cancelOrder")
     @PreAuthorize("hasAuthority('order:productOrder:del')")

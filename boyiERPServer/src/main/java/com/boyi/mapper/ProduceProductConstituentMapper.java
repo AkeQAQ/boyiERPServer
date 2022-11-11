@@ -26,12 +26,7 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
 
 
     String querySql = "" +
-            "select ppc.*," +
-            " (" +
-            " select count(1) from produce_product_constituent_detail ppcd,base_supplier_material bsm " +
-            " where ppcd.constituent_id = ppc.id and ppcd.material_id = bsm.material_id" +
-            " and ppcd.material_id like concat('11.01','%')" +
-            " ) as caiduan_foreign_price_status" +
+            "select ppc.* " +
             " from produce_product_constituent ppc ";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
@@ -53,11 +48,7 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
     ProduceProductConstituent one(@Param("ew") Wrapper queryWrapper);
 
     String query2Sql = "" +
-            " select  ppc.*,bm.name material_name,(" +
-            " select count(1) from produce_product_constituent_detail ppcd2,base_supplier_material bsm " +
-            " where ppcd2.constituent_id = ppc.id and ppcd2.material_id = bsm.material_id" +
-            " and ppcd.material_id  like concat('11.01','%')" +
-            ") as caiduan_foreign_price_status" +
+            " select  ppc.*,bm.name material_name " +
             " from produce_product_constituent ppc,produce_product_constituent_detail ppcd,base_material bm" +
             " where ppc.id = ppcd.constituent_id and ppcd.material_id = bm.id";
     String wrapper2Sql = "SELECT * from ( " + query2Sql + " ) AS q ${ew.customSqlSegment}";
