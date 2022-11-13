@@ -86,7 +86,7 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             "  where  id in"+
             " <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> "  +
             " </script>")
-    void updateBatchIdAppendYearById(@Param("year")int year,@Param("batchIds") List<String> batchIds);
+    void updateBatchIdAppendYearById(@Param("year")String year,@Param("batchIds") List<String> batchIds);
 
     @Select("select rrmd.material_id, cast( sum( rrmd.num )  as decimal(14,5)) totalNum  from " +
             " repository_return_material rrm," +

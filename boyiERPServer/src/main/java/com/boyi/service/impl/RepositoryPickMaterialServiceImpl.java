@@ -68,7 +68,7 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)
                         .ge(StrUtil.isNotBlank(searchStartDate) &&!searchStartDate.equals("null"),DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate) &&!searchEndDate.equals("null"),DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.PICK_DATE_FIELDNAME,searchEndDate)
-                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDNAME,searchStatus)
+                        .in(searchStatus != null && searchStatus.size() > 0,DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.STATUS_FIELDNAME,searchStatus).orderByDesc(DBConstant.TABLE_REPOSITORY_PICK_MATERIAL.ID_FIELDNAME)
 
         );
     }
@@ -112,7 +112,7 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
     }
 
     @Override
-    public void updateBatchIdAppendYearById(int year, List<String> batchIds) {
+    public void updateBatchIdAppendYearById(String year, List<String> batchIds) {
         this.repositoryPickMaterialMapper.updateBatchIdAppendYearById(year,batchIds);
     }
 

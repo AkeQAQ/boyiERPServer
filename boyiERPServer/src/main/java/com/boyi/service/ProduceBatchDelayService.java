@@ -18,4 +18,8 @@ public interface ProduceBatchDelayService extends IService<ProduceBatchDelay> {
     void updateNullByField(String dateFieldname, Long id);
 
     List<ProduceBatchDelay> listByBatchId(Long id);
+
+    List<ProduceBatchDelay> listByBatchIds(List<Long> produceBatchIds);
+
+    List<ProduceBatchDelay> listByProduceBatchId(Long id);
 }

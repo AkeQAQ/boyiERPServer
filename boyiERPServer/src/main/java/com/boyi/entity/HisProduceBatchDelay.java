@@ -2,10 +2,7 @@ package com.boyi.entity;
 
 import java.time.LocalDateTime;
 
-import com.baomidou.mybatisplus.annotation.FieldStrategy;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.entity.base.BaseEntity;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -15,21 +12,18 @@ import lombok.EqualsAndHashCode;
  * </p>
  *
  * @author sunke
- * @since 2022-11-02
+ * @since 2022-11-11
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class ProduceBatchDelay extends BaseEntity {
+public class HisProduceBatchDelay extends BaseEntity {
 
     private static final long serialVersionUID = 1L;
 
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String materialId;
 
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String materialName;
 
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime date;
 
     /**
@@ -37,14 +31,13 @@ public class ProduceBatchDelay extends BaseEntity {
      */
     private Long produceBatchId;
 
-
     private String createdUser;
+
     private String updateUser;
 
     private Long costOfLabourTypeId;
 
     private String costOfLabourTypeName;
-
 
 
 }

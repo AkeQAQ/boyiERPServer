@@ -115,7 +115,7 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
     }
 
     @Override
-    public void updateBatchIdAppendYearById(int year, List<String> batchIds) {
+    public void updateBatchIdAppendYearById(String year, List<String> batchIds) {
         this.repositoryReturnMaterialMapper.updateBatchIdAppendYearById(year,batchIds);
     }
 

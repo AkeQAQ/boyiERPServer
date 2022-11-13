@@ -1,5 +1,6 @@
 package com.boyi.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.ProduceBatchProgress;
@@ -104,6 +105,18 @@ public class ProduceBatchProgressServiceImpl extends ServiceImpl<ProduceBatchPro
     @Override
     public List<ProduceBatchProgress> listReturnProgressesBySupplierNameByColtId(int coltId, String searchStartDate, String searchEndDate, String supplierName) {
         return this.produceBatchProgressMapper.listReturnProgressesBySupplierNameByColtId(coltId,searchStartDate,searchEndDate,supplierName);
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listByBatchIds(List<Long> produceBatchIds) {
+        return this.list(new QueryWrapper<ProduceBatchProgress>()
+                .in(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.PRODUCE_BATCH_ID_FIELDNAME,produceBatchIds));
+    }
+
+    @Override
+    public List<ProduceBatchProgress> listByColtIds(Long[] ids) {
+        return this.list(new QueryWrapper<ProduceBatchProgress>()
+                .in(DBConstant.TABLE_PRODUCE_BATCH_PROGRESS.COST_OF_LABOUR_TYPE_ID_FIELDNAME,ids));
     }
 
 }

@@ -475,6 +475,13 @@ public class BaseMaterialController extends BaseController {
                 return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + progresses.size() + "个生产序号进度表");
             }
 
+            // 2. 查询历史生产进度表
+            List<HisProduceBatchProgress> hisProgresses = hisProduceBatchProgressService.listByMaterialId(baseMaterial.getId());
+
+            if(hisProgresses!=null && !hisProgresses.isEmpty()){
+                return ResponseResult.fail("物料ID[" + baseMaterial.getId() + "]不能修改，存在" + hisProgresses.size() + "个历史生产序号进度表");
+            }
+
 
             // 3. 有入库,退料，领料记录的，不能修改系数
             int buyInCount = repositoryBuyinDocumentDetailService.count(new QueryWrapper<RepositoryBuyinDocumentDetail>().eq(DBConstant.TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
@@ -558,6 +565,13 @@ public class BaseMaterialController extends BaseController {
 
         if(progresses!=null && !progresses.isEmpty()){
             return ResponseResult.fail("物料ID[" + Arrays.asList(ids).toString() + "]不能删除，存在" + progresses.size() + "个生产序号进度表");
+        }
+
+        // 2. 查询历史生产进度表
+        List<HisProduceBatchProgress> hisProgresses = hisProduceBatchProgressService.listByMaterialIds(ids);
+
+        if(hisProgresses!=null && !hisProgresses.isEmpty()){
+            return ResponseResult.fail("物料ID[" + Arrays.asList(ids).toString() + "]不能删除，存在" + progresses.size() + "个历史生产序号进度表");
         }
 
         baseMaterialService.removeByIds(Arrays.asList(ids));

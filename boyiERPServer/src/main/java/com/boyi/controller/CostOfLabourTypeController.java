@@ -123,6 +123,18 @@ public class CostOfLabourTypeController extends BaseController {
     public ResponseResult update(@Validated @RequestBody CostOfLabourType costOfLabourType) {
         costOfLabourType.setUpdated(LocalDateTime.now());
         try {
+            // 看下进度表有没存在
+            List<ProduceBatchProgress> lists = produceBatchProgressService.listByColtIds(new Long[]{costOfLabourType.getId()});
+            if(lists.size() > 0){
+                return ResponseResult.fail("进度表存在关联。条数:"+lists.size());
+            }
+
+            // 看下历史进度表有没存在
+            List<HisProduceBatchProgress> hislists = hisProduceBatchProgressService.listByColtIds(new Long[]{costOfLabourType.getId()});
+            if(hislists.size() > 0){
+                return ResponseResult.fail("进度表存在关联。条数:"+hislists.size());
+            }
+
             CostOfLabourType old = costOfLabourTypeService.getById(costOfLabourType.getId());
             old.setTypeName(costOfLabourType.getTypeName());
             old.setSeq(costOfLabourType.getSeq());
@@ -137,6 +149,24 @@ public class CostOfLabourTypeController extends BaseController {
     @PostMapping("/del")
     @PreAuthorize("hasAuthority('costOfLabour:costOfLabourType:del')")
     public ResponseResult delete(@RequestBody Long[] ids) {
+
+        // 看下进度表有没存在
+        List<ProduceBatchProgress> lists = produceBatchProgressService.listByColtIds(ids);
+        if(lists.size() > 0){
+            return ResponseResult.fail("进度表存在关联。条数:"+lists.size());
+        }
+
+        // 看下历史进度表有没存在
+        List<HisProduceBatchProgress> hislists = hisProduceBatchProgressService.listByColtIds(ids);
+        if(hislists.size() > 0){
+            return ResponseResult.fail("历史进度表存在关联。条数:"+hislists.size());
+        }
+
+        // 看下历史欠料有没存在
+        List<HisProduceBatchDelay> hislists2 = hisProduceBatchDelayService.listByColtIds(ids);
+        if(hislists2.size() > 0){
+            return ResponseResult.fail("历史延期表存在关联。条数:"+hislists2.size());
+        }
 
         costOfLabourTypeService.removeByIds(Arrays.asList(ids));
 

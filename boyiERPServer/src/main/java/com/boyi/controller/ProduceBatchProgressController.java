@@ -86,6 +86,7 @@ public class ProduceBatchProgressController extends BaseController {
      */
     @PostMapping("/updateProgress")
     @PreAuthorize("hasAuthority('produce:progress:update')")
+    @Transactional
     public ResponseResult updateProgress(Principal principal, @RequestBody List<ProduceBatchProgress> progresses) {
         LocalDateTime now = LocalDateTime.now();
         String userName = principal.getName();
@@ -121,7 +122,7 @@ public class ProduceBatchProgressController extends BaseController {
 
             }
 
-                for(ProduceBatchProgress progress : progresses){
+            for(ProduceBatchProgress progress : progresses){
                 if(progress.getCostOfLabourTypeId() ==null || progress.getCostOfLabourTypeName() ==null
                         || progress.getCostOfLabourTypeName().equals("空值")
                        ){
@@ -134,6 +135,13 @@ public class ProduceBatchProgressController extends BaseController {
 
 
                 if(progress.getId()==null){
+                    if((progress.getSupplierId()==null || progress.getSupplierId().isEmpty()) && progress.getSupplierName()!=null&&!progress.getSupplierName().isEmpty()){
+                        throw new RuntimeException("供应商:"+progress.getSupplierName()+"没有选择，请确认");
+                    }
+                    if((progress.getMaterialId()==null || progress.getMaterialId().isEmpty()) && progress.getMaterialName()!=null&&!progress.getMaterialName().isEmpty()){
+                        throw new RuntimeException("物料:"+progress.getMaterialName()+"没有选择，请确认");
+                    }
+
                     String batchIdStr = batchUniqueId_batchIdStr.get(progress.getProduceBatchId());
 
 //                    ProduceBatch pb = produceBatchService.getById(progress.getProduceBatchId());
@@ -150,6 +158,14 @@ public class ProduceBatchProgressController extends BaseController {
                     produceBatchProgressService.save(progress);
 
                 }else{
+                    ProduceBatchProgress old = produceBatchProgressService.getById(progress.getId());
+                    if(old.getSupplierId()!=null &&  !old.getSupplierId().isEmpty() && progress.getSupplierName()!=null && !progress.getSupplierName().isEmpty() && old.getSupplierId().equals(progress.getSupplierId())){
+                        progress.setSupplierName(old.getSupplierName());
+                    }
+                    if(old.getMaterialId()!=null &&  !old.getMaterialId().isEmpty() && progress.getMaterialName()!=null && !progress.getMaterialName().isEmpty() && old.getMaterialId().equals(progress.getMaterialId())){
+                        progress.setMaterialName(old.getMaterialName());
+                    }
+
                     if(progress.getSupplierName()==null||progress.getSupplierName().isEmpty()){
                         progress.setSupplierId(null);
                     }

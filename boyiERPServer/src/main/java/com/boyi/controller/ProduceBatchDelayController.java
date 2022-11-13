@@ -63,20 +63,23 @@ public class ProduceBatchDelayController extends BaseController {
         String userName = principal.getName();
         try {
             for(ProduceBatchDelay delay : delays){
-                if(delay.getMaterialId() ==null
-                        || delay.getMaterialName().equals("空值")
-                        || delay.getMaterialName().isEmpty()){
-                    continue;
-                }
                 CostOfLabourType type = costOfLabourTypeService.getById(delay.getCostOfLabourTypeId());
                 delay.setCostOfLabourTypeName(type.getTypeName());
                 //新增
                 if(delay.getId()==null){
+                    if((delay.getMaterialId()==null || delay.getMaterialId().isEmpty()) && delay.getMaterialName()!=null&&!delay.getMaterialName().isEmpty()){
+                        throw new RuntimeException("物料:"+delay.getMaterialName()+"没有选择，请确认");
+                    }
                     delay.setCreated(now);
                     delay.setCreatedUser(userName);
                     produceBatchDelayService.save(delay);
 
                 }else{
+                    if(delay.getMaterialName()==null||delay.getMaterialName().isEmpty()){
+                        delay.setMaterialId(null);
+                        delay.setMaterialName(null);
+                    }
+
                     delay.setUpdated(now);
                     delay.setUpdateUser(userName);
                     produceBatchDelayService.updateById(delay);

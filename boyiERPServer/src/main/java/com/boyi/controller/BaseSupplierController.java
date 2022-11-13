@@ -215,6 +215,13 @@ public class BaseSupplierController extends BaseController {
                 return ResponseResult.fail("供应商ID[" + baseSupplier.getId() + "]不能修改，存在" + progresses.size() + "个生产序号进度表");
             }
 
+            // 2. 查询生产进度表
+            List<HisProduceBatchProgress> hisProgresses = hisProduceBatchProgressService.listBySupplierId(baseSupplier.getId());
+
+            if(hisProgresses!=null && !hisProgresses.isEmpty()){
+                return ResponseResult.fail("供应商ID[" + baseSupplier.getId() + "]不能修改，存在" + hisProgresses.size() + "个历史生产序号进度表");
+            }
+
             baseSupplierService.updateById(baseSupplier);
             log.info("供应商ID[{}]更新成功，old{},new:{}.",baseSupplier.getId(),oldOne,baseSupplier);
             return ResponseResult.succ("编辑成功");
@@ -252,6 +259,13 @@ public class BaseSupplierController extends BaseController {
 
         if(progresses!=null && !progresses.isEmpty()){
             return ResponseResult.fail("供应商ID[" + Arrays.asList(ids).toString() + "]不能删除，存在" + progresses.size() + "个生产序号进度表");
+        }
+
+        // 2. 查询历史生产进度表
+        List<HisProduceBatchProgress> hisProgresses = hisProduceBatchProgressService.listBySupplierIds(ids);
+
+        if(hisProgresses!=null && !hisProgresses.isEmpty()){
+            return ResponseResult.fail("供应商ID[" + Arrays.asList(ids).toString() + "]不能删除，存在" + hisProgresses.size() + "个历史生产序号进度表");
         }
 
         baseSupplierService.removeByIds(Arrays.asList(ids));

@@ -87,13 +87,19 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
                     like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
                             && StrUtil.isNotBlank(searchField),queryField,searchStr);
         }
+        if(searchDocNum!=null && searchDocNum.length != 0){
+            queryWrapper.and(qw -> {
+                for (Object key : searchDocNum){
+                    qw.or().like(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME, key);
+                }
+            });
+        }
 
         return this.innerQuery(page,
                 queryWrapper
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.DETAIL_STATUS_FIELDNAME,searchStatus)
                         .ge(StrUtil.isNotBlank(searchStartDate)  &&!searchStartDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate)  &&!searchEndDate.equals("null"),DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT.ORDER_DATE_FIELDNAME,searchEndDate)
-                        .in(searchDocNum!=null && searchDocNum.length != 0,DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,searchDocNum)
         );
     }
 

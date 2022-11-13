@@ -366,8 +366,14 @@ public class ProduceBatchController extends BaseController {
                         if(progresses!=null&&progresses.size()>0){
                             return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间进度表记录。不能删除");
                         }
+                        List<ProduceBatchDelay> delays = produceBatchDelayService.listByProduceBatchId(pb.getId());
+                        if(delays!=null&&delays.size()>0){
+                            return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间欠料进度表记录。不能删除");
+                        }
+
                     }
                 }
+
             }
 
 

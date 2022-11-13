@@ -40,4 +40,9 @@ public interface ProduceBatchProgressService extends IService<ProduceBatchProgre
     List<Object> listProgressesBySupplierNameByColtId(int coltId, String searchStartDate, String searchEndDate,String supplierName);
 
     List<ProduceBatchProgress> listReturnProgressesBySupplierNameByColtId(int coltId, String searchStartDate, String searchEndDate, String supplierName);
+
+    List<ProduceBatchProgress> listByBatchIds(List<Long> produceBatchIds);
+
+    List<ProduceBatchProgress> listByColtIds(Long[] ids);
+
 }

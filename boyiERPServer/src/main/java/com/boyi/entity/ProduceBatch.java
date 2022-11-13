@@ -75,6 +75,9 @@ public class ProduceBatch extends BaseEntity {
     private String productBrand;
 
     @TableField(exist = false)
+    private Integer orderType;
+
+    @TableField(exist = false)
     private String mergeBatchId;
 
     @TableField(exist = false)

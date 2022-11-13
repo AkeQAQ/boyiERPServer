@@ -1048,6 +1048,7 @@ public class DBConstant {
         public static final String MATERIAL_NAME_FIELDNAME = "material_name";
         public static final String DATE_FIELDNAME = "date";
         public static final String PRODUCE_BATCH_ID_FIELDNAME = "produce_batch_id";
+        public static final String COST_OF_LABOUR_TYPE_ID_FIELDNAME = "cost_of_labour_type_id";
 
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
