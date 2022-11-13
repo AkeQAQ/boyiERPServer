@@ -159,7 +159,7 @@ public class CostOfLabourController extends BaseController {
                 costOfLabourDetailService.saveBatch(costOfLabour.getRowList());
                 log.info("工价模块-更新内容:{}",costOfLabour);
             }else{
-                return ResponseResult.fail("操作失败，期间detail删除失败");
+                throw new RuntimeException("操作失败，期间detail删除失败");
             }
 
             return ResponseResult.succ("编辑成功");

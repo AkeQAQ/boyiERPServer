@@ -548,7 +548,7 @@ public class ProduceProductConstituentController extends BaseController {
                 produceProductConstituentDetailService.saveBatch(productConstituent.getRowList());
                 log.info("产品组成结构模块-更新内容:{}",productConstituent);
             }else{
-                return ResponseResult.fail("操作失败，期间detail删除失败");
+                throw new RuntimeException("操作失败，期间detail删除失败");
             }
 
             log.info("【补充物料】，组成结构ID：{},删除掉的物料列表：{}",productConstituent.getId(),delMaterialIds);
@@ -576,7 +576,7 @@ public class ProduceProductConstituentController extends BaseController {
             return ResponseResult.succ("编辑成功");
         }
         catch (DuplicateKeyException de){
-            return ResponseResult.fail("货号，品牌不能重复!");
+            throw new RuntimeException("货号，品牌不能重复!");
         }
         catch (Exception e) {
             log.error("供应商，更新异常",e);

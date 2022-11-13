@@ -208,7 +208,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
                 repositoryBuyoutDocumentDetailService.saveBatch(repositoryBuyoutDocument.getRowList());
                 log.info("采购退料模块-更新内容:{}",repositoryBuyoutDocument);
             }else{
-                return ResponseResult.fail("操作失败，期间detail删除失败");
+                throw new RuntimeException("操作失败，期间detail删除失败");
             }
 
             // 4. 减少,添加库存

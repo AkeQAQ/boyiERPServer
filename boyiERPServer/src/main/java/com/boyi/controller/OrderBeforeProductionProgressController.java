@@ -195,8 +195,7 @@ public class OrderBeforeProductionProgressController extends BaseController {
 
         } catch (DuplicateKeyException de){
             return ResponseResult.fail("货号，品牌不能重复!");
-        }
-            catch (Exception e) {
+        } catch (Exception e) {
             log.error("产前沟通确认进度表，插入异常",e);
             throw new RuntimeException(e.getMessage());
         }
@@ -219,6 +218,7 @@ public class OrderBeforeProductionProgressController extends BaseController {
      */
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('order:beforeProductionProgress:valid')")
+    @Transactional
     public ResponseResult statusPass(Principal principal,Long id) {
 
         OrderBeforeProductionProgress old = orderBeforeProductionProgressService.getById(id);
@@ -260,6 +260,7 @@ public class OrderBeforeProductionProgressController extends BaseController {
      */
     @GetMapping("/statusReturn")
     @PreAuthorize("hasAuthority('order:beforeProductionProgress:valid')")
+    @Transactional
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
 
         OrderBeforeProductionProgress old = orderBeforeProductionProgressService.getById(id);

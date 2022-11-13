@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
+import com.boyi.entity.BaseDepartment;
 import com.boyi.entity.ProduceReturnShoes;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -186,6 +187,10 @@ public class ProduceReturnShoesController extends BaseController {
     @PreAuthorize("hasAuthority('produce:returnShoes:list')")
     public ResponseResult queryById(Long id) {
         ProduceReturnShoes produceReturnShoes = produceReturnShoesService.getById(id);
+        if(produceReturnShoes.getDepartmentId()!=null){
+            BaseDepartment bd = baseDepartmentService.getById(produceReturnShoes.getDepartmentId());
+            produceReturnShoes.setDepartmentName(bd.getName());
+        }
         return ResponseResult.succ(produceReturnShoes);
     }
 

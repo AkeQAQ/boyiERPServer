@@ -455,6 +455,15 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
     }
 
+    public static class TABLE_BASE_CUSTOMER{
+        public static final String ID_FIELDNAME = "id";
+        public static final String NAME_FIELDNAME = "name";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
+    }
+
     public static class TABLE_BASE_DEPARTMENT{
         public static final String NAME_FIELDNAME = "name";
         public static final String CREATED_FIELDNAME = "created";

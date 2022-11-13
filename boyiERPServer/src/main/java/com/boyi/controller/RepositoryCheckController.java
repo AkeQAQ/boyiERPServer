@@ -169,7 +169,7 @@ public class RepositoryCheckController extends BaseController {
 
                 log.info("盘点模块-更新内容:{}",repositoryCheck);
             }else{
-                return ResponseResult.fail("操作失败，期间detail删除失败");
+                throw new RuntimeException("操作失败，期间detail删除失败");
             }
 
             return ResponseResult.succ("编辑成功");

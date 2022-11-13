@@ -4,10 +4,13 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.ProduceBatch;
 import com.boyi.entity.ProduceReturnShoes;
+import com.boyi.mapper.ProduceBatchMapper;
 import com.boyi.mapper.ProduceReturnShoesMapper;
 import com.boyi.service.ProduceReturnShoesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,6 +26,14 @@ import java.util.Map;
  */
 @Service
 public class ProduceReturnShoesServiceImpl extends ServiceImpl<ProduceReturnShoesMapper, ProduceReturnShoes> implements ProduceReturnShoesService {
+
+    @Autowired
+    private ProduceReturnShoesMapper produceReturnShoesMapper;
+
+    public Page<ProduceReturnShoes> innerQuery(Page page, QueryWrapper<ProduceReturnShoes> eq) {
+        return produceReturnShoesMapper.page(page,eq);
+    }
+
     @Override
     public Page<ProduceReturnShoes> pageBySearch(Page page, String searchUserName) {
         return this.page(page, new QueryWrapper<ProduceReturnShoes>()
@@ -37,7 +48,7 @@ public class ProduceReturnShoesServiceImpl extends ServiceImpl<ProduceReturnShoe
             queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
                     && StrUtil.isNotBlank(key),key,val);
         }
-        return this.page(page,
+        return this.innerQuery(page,
                 queryWrapper
                         .like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr)

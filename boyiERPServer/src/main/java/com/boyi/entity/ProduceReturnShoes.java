@@ -1,5 +1,6 @@
 package com.boyi.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
@@ -23,23 +24,33 @@ public class ProduceReturnShoes extends BaseEntity {
 
     @ExcelAttribute(sort = 1)
     private String userName;
-    @ExcelAttribute(sort = 2)
-    private String packageNo;
     @ExcelAttribute(sort = 3)
-    private String userArtNo;
+    private String packageNo;
     @ExcelAttribute(sort = 4)
-    private String size;
+    private String userArtNo;
     @ExcelAttribute(sort = 5)
-    private String num;
+    private String size;
     @ExcelAttribute(sort = 6)
-    private String userRequest;
+    private String num;
     @ExcelAttribute(sort = 7)
-    private String dealSituation;
+    private String userRequest;
     @ExcelAttribute(sort = 8)
+    private String dealSituation;
+    @ExcelAttribute(sort = 9)
     private String backPackage;
 
     @ExcelAttribute(sort = 0)
     private LocalDate returnDate;
+
+    @ExcelAttribute(sort = 2)
+    private String region;
+    private Long departmentId;
+
+    @TableField(exist = false)
+    private String departmentName;
+
+
+
 
 
 }

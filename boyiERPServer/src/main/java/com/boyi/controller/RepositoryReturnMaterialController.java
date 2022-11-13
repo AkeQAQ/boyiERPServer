@@ -238,7 +238,7 @@ public class RepositoryReturnMaterialController extends BaseController {
                 repositoryReturnMaterialDetailService.saveBatch(repositoryReturnMaterial.getRowList());
                 log.info("退料模块-更新内容:{}",repositoryReturnMaterial);
             }else{
-                return ResponseResult.fail("操作失败，期间detail删除失败");
+                throw new RuntimeException("操作失败，期间detail删除失败");
             }
 
             return ResponseResult.succ("编辑成功");

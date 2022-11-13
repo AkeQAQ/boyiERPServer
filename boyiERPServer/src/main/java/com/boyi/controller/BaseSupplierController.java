@@ -157,6 +157,7 @@ public class BaseSupplierController extends BaseController {
      */
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('baseData:supplier:save')")
+    @Transactional
     public ResponseResult save(Principal principal, @Validated @RequestBody BaseSupplier baseSupplier) {
         LocalDateTime now = LocalDateTime.now();
         baseSupplier.setCreated(now);
@@ -183,7 +184,7 @@ public class BaseSupplierController extends BaseController {
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",returnMap);
         } catch (DuplicateKeyException e) {
             log.error("供应商，插入异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException("唯一编码重复!");
         }
     }
 
@@ -193,6 +194,7 @@ public class BaseSupplierController extends BaseController {
      */
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('baseData:supplier:update')")
+    @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody BaseSupplier baseSupplier) {
         baseSupplier.setUpdated(LocalDateTime.now());
         baseSupplier.setUpdateUser(principal.getName());
@@ -227,7 +229,9 @@ public class BaseSupplierController extends BaseController {
             return ResponseResult.succ("编辑成功");
         } catch (DuplicateKeyException e) {
             log.error("供应商，更新异常",e);
-            return ResponseResult.fail("唯一编码重复!");
+            throw new RuntimeException("唯一编码重复!");
+        }catch (Exception e){
+            throw new RuntimeException("其他异常!");
         }
     }
 
