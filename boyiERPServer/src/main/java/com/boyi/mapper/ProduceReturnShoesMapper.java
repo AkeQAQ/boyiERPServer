@@ -10,6 +10,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * <p>
  *  Mapper 接口
@@ -33,4 +35,19 @@ public interface ProduceReturnShoesMapper extends BaseMapper<ProduceReturnShoes>
     @Select(wrapperSql)
     Page<ProduceReturnShoes> page(Page page, @Param("ew") Wrapper queryWrapper);
 
+    @Select("select prs.user_name,prs.deal_situation,sum(prs.num) numSum from produce_return_shoes prs " +
+            " where   prs.created >= #{searchStartDate} and prs.created <= #{searchEndDate}" +
+            " group by prs.user_name,prs.deal_situation")
+    List<ProduceReturnShoes> listByGroupUserNameAndTypeBetweenDate(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate")  String searchEndDate);
+
+    @Select(
+            "select t1.*,bd.name department_name from base_department bd ," +
+            " (" +
+            " select  prs.department_id,prs.deal_situation,sum(prs.num) numSum from produce_return_shoes prs " +
+            " where  prs.created >= #{searchStartDate} and prs.created <= #{searchEndDate}" +
+            " group by prs.department_id,prs.deal_situation" +
+            " " +
+            " ) t1 " +
+            " where bd.id = t1.department_id")
+    List<ProduceReturnShoes> listByGroupDepartmentAndTypeBetweenDate(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate")  String searchEndDate);
 }

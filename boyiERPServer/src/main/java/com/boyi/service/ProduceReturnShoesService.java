@@ -19,4 +19,9 @@ public interface ProduceReturnShoesService extends IService<ProduceReturnShoes> 
     Page<ProduceReturnShoes> pageBySearch(Page page, String searchUserName);
 
     Page<ProduceReturnShoes> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<String> searchStatusList, Map<String, String> queryMap);
+
+    List<ProduceReturnShoes> listByGroupUserNameAndTypeBetweenDate(String searchStartDate, String searchEndDate);
+
+    List<ProduceReturnShoes> listByGroupDepartmentAndTypeBetweenDate(String searchStartDate, String searchEndDate);
+
 }

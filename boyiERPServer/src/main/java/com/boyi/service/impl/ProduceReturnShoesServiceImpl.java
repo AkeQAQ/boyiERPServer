@@ -58,4 +58,14 @@ public class ProduceReturnShoesServiceImpl extends ServiceImpl<ProduceReturnShoe
                         .orderByDesc(DBConstant.TABLE_PRODUCE_RETURN_SHOES.CREATED_FIELDNAME)
         );
     }
+
+    @Override
+    public List<ProduceReturnShoes> listByGroupUserNameAndTypeBetweenDate(String searchStartDate, String searchEndDate) {
+        return this.produceReturnShoesMapper.listByGroupUserNameAndTypeBetweenDate(searchStartDate,searchEndDate);
+    }
+
+    @Override
+    public List<ProduceReturnShoes> listByGroupDepartmentAndTypeBetweenDate(String searchStartDate, String searchEndDate) {
+        return this.produceReturnShoesMapper.listByGroupDepartmentAndTypeBetweenDate(searchStartDate,searchEndDate);
+    }
 }

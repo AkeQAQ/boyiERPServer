@@ -50,6 +50,10 @@ public class ProduceReturnShoes extends BaseEntity {
     private String departmentName;
 
 
+    @TableField(exist = false)
+    private Integer numSum;
+
+
 
 
 

@@ -43,6 +43,116 @@ public class AnalysisController extends BaseController {
     public static Long over_days = 2L;
 
 
+
+    @GetMapping("/getProduceReturnShoesWithDepartments")
+    public ResponseResult getProduceReturnShoesWithDepartments(Principal principal,String searchStartDate, String searchEndDate) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+
+        HashMap<String, List<Object>> returnMap = new HashMap<>();
+
+        List<ProduceReturnShoes> lists = produceReturnShoesService.listByGroupDepartmentAndTypeBetweenDate(searchStartDate,searchEndDate);
+
+        HashMap<String, HashMap<String, Integer>> brands_types_sum = new HashMap<>();
+        for(ProduceReturnShoes prs : lists){
+            String departmentName = prs.getDepartmentName();
+            if(departmentName==null){
+                departmentName="未归类";
+            }
+            HashMap<String, Integer> type_sum = brands_types_sum.get(departmentName);
+            if(type_sum==null){
+                type_sum = new HashMap<>();
+                brands_types_sum.put(departmentName,type_sum);
+            }
+            type_sum.put(prs.getDealSituation(),prs.getNumSum());
+        }
+        List<Object> departments = new ArrayList<>();
+        List<Object> productFixDatas = new ArrayList<>();
+        List<Object> productReturnDatas = new ArrayList<>();
+
+        for(Map.Entry<String,HashMap<String,Integer>> entry : brands_types_sum.entrySet()){
+            String department = entry.getKey();
+            departments.add(department);
+
+            HashMap<String, Integer> type_nums = entry.getValue();
+            for(Map.Entry<String,Integer> entry1 : type_nums.entrySet()){
+                if(entry1.getKey().equals("返修")){
+                    productFixDatas.add(entry1.getValue());
+                    if(type_nums.size()==1){
+                        productReturnDatas.add(0);
+                    }
+                }else {
+                    productReturnDatas.add(entry1.getValue());
+                    if(type_nums.size()==1){
+                        productFixDatas.add(0);
+                    }
+                }
+            }
+
+        }
+
+        returnMap.put("departments", departments);
+        returnMap.put("productFixDataByDepartments",productFixDatas);
+        returnMap.put("productReturnDatasByDepartments",productReturnDatas);
+
+        return ResponseResult.succ(returnMap);
+    }
+
+    @GetMapping("/getProduceReturnShoesWithBrands")
+    public ResponseResult getProduceReturnShoesWithBrands(Principal principal,String searchStartDate, String searchEndDate) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+
+        HashMap<String, List<Object>> returnMap = new HashMap<>();
+
+        List<ProduceReturnShoes> lists = produceReturnShoesService.listByGroupUserNameAndTypeBetweenDate(searchStartDate,searchEndDate);
+
+        HashMap<String, HashMap<String, Integer>> brands_types_sum = new HashMap<>();
+        for(ProduceReturnShoes prs : lists){
+            String userName = prs.getUserName();
+            HashMap<String, Integer> type_sum = brands_types_sum.get(userName);
+            if(type_sum==null){
+                type_sum = new HashMap<>();
+                brands_types_sum.put(userName,type_sum);
+            }
+            type_sum.put(prs.getDealSituation(),prs.getNumSum());
+        }
+        List<Object> productBrands = new ArrayList<>();
+        List<Object> productFixDatas = new ArrayList<>();
+        List<Object> productReturnDatas = new ArrayList<>();
+
+        for(Map.Entry<String,HashMap<String,Integer>> entry : brands_types_sum.entrySet()){
+            String brands = entry.getKey();
+            productBrands.add(brands);
+
+            HashMap<String, Integer> type_nums = entry.getValue();
+            for(Map.Entry<String,Integer> entry1 : type_nums.entrySet()){
+                if(entry1.getKey().equals("返修")){
+                    productFixDatas.add(entry1.getValue());
+                    if(type_nums.size()==1){
+                        productReturnDatas.add(0);
+                    }
+                }else {
+                    productReturnDatas.add(entry1.getValue());
+                    if(type_nums.size()==1){
+                        productFixDatas.add(0);
+                    }
+                }
+            }
+
+        }
+
+        returnMap.put("productBrands", productBrands);
+        returnMap.put("productFixDatas",productFixDatas);
+        returnMap.put("productReturnDatas",productReturnDatas);
+
+        return ResponseResult.succ(returnMap);
+    }
+
     @GetMapping("/getProductionProgressDataWithCaiduan")
     public ResponseResult getProductionProgressDataWithCaiduan(Principal principal,String searchStartDate, String searchEndDate) {
 
