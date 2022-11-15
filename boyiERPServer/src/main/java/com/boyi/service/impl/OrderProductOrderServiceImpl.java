@@ -197,4 +197,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.listNoPickMaterials();
     }
 
+    @Override
+    public List<Map<String, Object>> listBySTXMaterial(String searchStartDate, String searchEndDate) {
+        return this.orderProductOrderMapper.listBySTXMaterial(searchStartDate,searchEndDate);
+    }
+
 }

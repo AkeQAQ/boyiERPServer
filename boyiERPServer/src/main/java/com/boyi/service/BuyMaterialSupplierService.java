@@ -1,10 +1,12 @@
 package com.boyi.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.BuyMaterialSupplier;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,4 +23,9 @@ public interface BuyMaterialSupplierService extends IService<BuyMaterialSupplier
     Page<BuyMaterialSupplier> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, Map<String, String> queryMap);
 
     BuyMaterialSupplier isExist(String supplierId, String supplierMaterialId);
+
+    BuyMaterialSupplier isExistNotSelf(String supplierId, String supplierMaterialId,Long id);
+
+    List<BuyMaterialSupplier> listByInnerMaterialId(String materialId);
+
 }

@@ -60,4 +60,6 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
 
     List<ProduceOrderMaterialProgress> groupByMaterialIds();
 
+    Double groupByMaterialIdAndBetweenDateAndOrderIdIsNull(String id, String searchStartDate, String searchEndDate);
+
 }

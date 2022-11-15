@@ -168,6 +168,12 @@ public class BaseController {
     @Autowired
     public BaseCustomerService baseCustomerService;
 
+    @Autowired
+    public BaseMaterialSameGroupService baseMaterialSameGroupService;
+
+    @Autowired
+    public BaseMaterialSameGroupDetailService baseMaterialSameGroupDetailService;
+
     /**
      * 获取页面
      * @return

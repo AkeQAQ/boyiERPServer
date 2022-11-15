@@ -44,4 +44,7 @@ public interface ProduceOrderMaterialProgressComplementMapper extends BaseMapper
      */
     @Select(wrapperSql)
     ProduceOrderMaterialProgress one(@Param("ew") Wrapper queryWrapper);
+
+
+
 }

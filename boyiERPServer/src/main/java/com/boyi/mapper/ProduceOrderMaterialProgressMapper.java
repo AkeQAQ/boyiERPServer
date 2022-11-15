@@ -110,4 +110,14 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             " where t1.material_id = bm.id")
     List<ProduceOrderMaterialProgress> groupByMaterialIds();
 
+
+    @Select(
+            "  select cast(sum(pomp.prepared_num) as DECIMAL(12,5)) prepared_num" +
+            "             from produce_order_material_progress pomp  " +
+            " where pomp.created >= #{searchStartDate} and pomp.created <=#{searchEndDate}" +
+            " and  pomp.order_id is null and material_id=#{id}" +
+            "            " +
+            "            ")
+    Double groupByMaterialIdAndBetweenDateAndOrderIdIsNull(@Param("id") String id,@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
+
 }

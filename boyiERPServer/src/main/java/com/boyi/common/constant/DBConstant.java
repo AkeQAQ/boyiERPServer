@@ -24,6 +24,47 @@ public class DBConstant {
 
     }
 
+
+    public static class TABLE_BASE_MATERIAL_SAME_GROUP_DETAIL{
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String GROUP_ID_FIELDNAME = "group_id";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+    }
+
+
+    public static class TABLE_BASE_MATERIAL_SAME_GROUP{
+        public static final String NAME_FIELDNAME = "name";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+        public static final String STATUS_FIELDNAME = "status";
+
+        public static final String MATERIAL_NAME_FIELDNAME = "material_name";
+
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+
+    }
+
     public static class TABLE_COST_OF_LABOUR_DETAIL{
         public static final String ID_FIELDNAME = "id";
         public static final String FOREIGN_ID_FIELDNAME = "foreign_id";
@@ -870,7 +911,7 @@ public class DBConstant {
     }
 
     public static class TABLE_BUY_MATERIAL_SUPPLIER{
-        public static final String INNERT_MATERIAL_ID_FIELDNAME = "innert_material_id";
+        public static final String INNER_MATERIAL_ID_FIELDNAME = "inner_material_id";
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String SUPPLIER_NAME_FIELDNAME = "supplier_name";
         public static final String SUPPLIER_MATERIAL_ID_FIELDNAME = "supplier_material_id";

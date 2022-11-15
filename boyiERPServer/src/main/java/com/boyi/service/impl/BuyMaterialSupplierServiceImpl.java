@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.BuyMaterialSupplier;
 import com.boyi.entity.ProduceReturnShoes;
 import com.boyi.entity.RepositoryBuyinDocument;
@@ -51,6 +52,25 @@ public class BuyMaterialSupplierServiceImpl extends ServiceImpl<BuyMaterialSuppl
         }else {
             return list.get(0);
         }
+    }
+
+    @Override
+    public BuyMaterialSupplier isExistNotSelf(String supplierId, String supplierMaterialId,Long id) {
+        List<BuyMaterialSupplier> list = this.list(new QueryWrapper<BuyMaterialSupplier>().eq(DBConstant.TABLE_BUY_MATERIAL_SUPPLIER.SUPPLIER_ID_FIELDNAME, supplierId)
+                .eq(DBConstant.TABLE_BUY_MATERIAL_SUPPLIER.SUPPLIER_MATERIAL_ID_FIELDNAME, supplierMaterialId)
+                .ne(DBConstant.TABLE_BUY_MATERIAL_SUPPLIER.ID_FIELDNAME,id));
+        if(list==null || list.size() ==0){
+            return null;
+        }else {
+            return list.get(0);
+        }
+    }
+
+    @Override
+    public List<BuyMaterialSupplier> listByInnerMaterialId(String materialId) {
+
+        return this.list(new QueryWrapper<BuyMaterialSupplier>()
+                .eq(DBConstant.TABLE_BUY_MATERIAL_SUPPLIER.INNER_MATERIAL_ID_FIELDNAME,materialId));
     }
 
     @Autowired

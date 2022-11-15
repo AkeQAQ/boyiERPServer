@@ -785,6 +785,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 if(materialId.startsWith("01.01") || materialId.startsWith("01.02") ||
                         materialId.startsWith("02.01") ||
                         materialId.startsWith("03.01") ||
+                        materialId.startsWith("04.01") ||
                         materialId.startsWith("04.03") || materialId.startsWith("04.04") ||
                         materialId.startsWith("06.05")  ){
                     // 存在则允许，不存在则不允许

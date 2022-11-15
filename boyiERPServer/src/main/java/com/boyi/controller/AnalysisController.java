@@ -23,6 +23,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +43,86 @@ import java.util.*;
 public class AnalysisController extends BaseController {
     public static Long over_days = 2L;
 
+
+
+    @GetMapping("/getSTXMaterial")
+    public ResponseResult getSTXMaterial(Principal principal,String searchStartDate, String searchEndDate) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startD=null;
+        LocalDate endD=null;
+        startD = LocalDate.parse(searchStartDate, timeFormatter);
+        endD = LocalDate.parse(searchEndDate, timeFormatter);
+
+        HashMap<String, List<Object>> returnMap = new HashMap<>();
+
+        // 1. 根据时间段，查询订单数量、组成结构是04.01,04.04 开头的物料，计算订单应备数量
+
+        List<Map<String,Object>> lists = orderProductOrderService.listBySTXMaterial(searchStartDate,searchEndDate);
+
+        if(lists.isEmpty()){
+            return ResponseResult.fail("该时间段沙滩鞋数据为空");
+        }
+
+        List<String> materialIdLists = new ArrayList<>();
+        List<Object> orderNumbers = new ArrayList<>();
+
+        for(Map<String,Object> map : lists){
+            Object order_number = map.get("order_number");
+            String materialId = map.get("material_id").toString();
+            if(materialId==null){
+                throw new RuntimeException("物料有空，异常..");
+            }
+            materialIdLists.add(materialId);
+            if(order_number == null ){
+                orderNumbers.add(0D);
+            }else{
+                orderNumbers.add(order_number);
+            }
+        }
+
+        // 2. 根据物料，查询该时间段的净入库数量
+        List<Object> materialNamesLists = new ArrayList<>();
+        List<Object> netInNums = new ArrayList<>();
+        List<Object> complementNums = new ArrayList<>();
+        List<BaseMaterial> bms = baseMaterialService.listByIds(materialIdLists);
+        for (int i = 0; i < bms.size(); i++) {
+            BaseMaterial bm = bms.get(i);
+            if(i%2!=0){
+                materialNamesLists.add("\n"+bm.getName());
+            }else{
+                materialNamesLists.add(bm.getName());
+            }
+            RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getNetInFromOrderBetweenDate(startD, endD, bm.getId());
+            if(repositoryBuyinDocument==null||repositoryBuyinDocument.getNum()==null){
+                netInNums.add(0D);
+            }else{
+                netInNums.add(repositoryBuyinDocument.getNum());
+            }
+
+            // 3. 根据物料，查询该时间段的补数数量
+            Double num = produceOrderMaterialProgressService.groupByMaterialIdAndBetweenDateAndOrderIdIsNull(bm.getId(),searchStartDate,searchEndDate);
+            if(num == null){
+                complementNums.add(0D);
+            }else{
+                complementNums.add(num);
+            }
+        }
+
+        // 物料列表
+        returnMap.put("materialNamesLists",materialNamesLists);
+        // 物料应备列表
+        returnMap.put("orderNumbers",orderNumbers);
+        // 物料净入库列表
+        returnMap.put("netInNums",netInNums);
+        // 物料补数列表
+        returnMap.put("complementNums",complementNums);
+
+        return ResponseResult.succ(returnMap);
+    }
 
 
     @GetMapping("/getProduceReturnShoesWithDepartments")

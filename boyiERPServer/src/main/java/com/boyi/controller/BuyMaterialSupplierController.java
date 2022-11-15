@@ -3,8 +3,10 @@ package com.boyi.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
+import com.boyi.entity.BaseSupplierMaterial;
 import com.boyi.entity.BuyMaterialSupplier;
 import com.boyi.entity.ProduceReturnShoes;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -30,6 +33,25 @@ import java.util.*;
 @RequestMapping("/baseData/buyMaterialSupplier")
 @Slf4j
 public class BuyMaterialSupplierController extends BaseController {
+
+
+    /**
+     * 查询供应商信息
+     */
+    @GetMapping("/queryMsgsByMaterialId")
+    @PreAuthorize("hasAuthority('baseData:buyMaterialSupplier:list')")
+    public ResponseResult queryMsgsByMaterialId(String materialId) {
+
+        List<BuyMaterialSupplier> list = buyMaterialSupplierService.listByInnerMaterialId(materialId);
+        for(BuyMaterialSupplier bms : list){
+            BaseSupplierMaterial successPrice = baseSupplierMaterialService.getSuccessPrice(bms.getSupplierId(), materialId, LocalDate.now());
+            if(successPrice!=null){
+                bms.setSupplierMaterialPrice(successPrice.getPrice());
+            }
+        }
+        return ResponseResult.succ(list);
+    }
+
 
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('baseData:buyMaterialSupplier:list')")
@@ -51,7 +73,10 @@ public class BuyMaterialSupplierController extends BaseController {
             }else if (searchField.equals("supplierMaterialId")) {
                 queryField = "supplier_material_id";
 
-            } else {
+            } else if (searchField.equals("supplierMaterialName")) {
+                queryField = "supplier_material_name";
+
+            }else {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
@@ -72,6 +97,9 @@ public class BuyMaterialSupplierController extends BaseController {
 
                     }else if (oneField.equals("supplierMaterialId")) {
                         theQueryField = "supplier_material_id";
+
+                    }else if (oneField.equals("supplierMaterialName")) {
+                        theQueryField = "supplier_material_name";
 
                     } else {
                         continue;
@@ -127,7 +155,7 @@ public class BuyMaterialSupplierController extends BaseController {
 
 
         // 判断是否已经存在该供应商，该供应商物料编码的记录，已经存在则代表已经有关联，不能插入
-        BuyMaterialSupplier exist = buyMaterialSupplierService.isExist(buyMaterialSupplier.getSupplierId(),buyMaterialSupplier.getSupplierMaterialId());
+        BuyMaterialSupplier exist = buyMaterialSupplierService.isExistNotSelf(buyMaterialSupplier.getSupplierId(),buyMaterialSupplier.getSupplierMaterialId(),buyMaterialSupplier.getId());
         if(exist!=null){
             return ResponseResult.fail("该供应商，该供应商物料编码已经有对应的内部物料["+exist.getInnerMaterialId()+"]关联");
         }

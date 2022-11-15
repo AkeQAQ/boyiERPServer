@@ -12,6 +12,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -139,4 +140,14 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " ) t3 group by t3.material_id order by num desc")
     List<RepositoryStock> listNoPickMaterials();
 
+    @Select("select sum(opo.order_number*ppcd.dosage) order_number,ppcd.material_id from order_product_order opo ," +
+            " produce_product_constituent ppc ," +
+            " produce_product_constituent_detail ppcd" +
+            " where opo.product_num = ppc.product_num and opo.order_type!=2" +
+            " and opo.product_brand = ppc.product_brand" +
+            " and ppc.id = ppcd.constituent_id" +
+            " and (ppcd.material_id like '04.01%' or ppcd.material_id like '04.04%')" +
+            " and ppc.product_num like '%S%' and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
+            " group by ppcd.material_id")
+    List<Map<String, Object>> listBySTXMaterial(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
 }

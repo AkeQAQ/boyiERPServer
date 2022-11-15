@@ -249,4 +249,9 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
         return produceOrderMaterialProgressMapper.groupByMaterialIds();
     }
 
+    @Override
+    public Double groupByMaterialIdAndBetweenDateAndOrderIdIsNull(String id, String searchStartDate, String searchEndDate) {
+        return produceOrderMaterialProgressMapper.groupByMaterialIdAndBetweenDateAndOrderIdIsNull(id,searchStartDate,searchEndDate);
+    }
+
 }
