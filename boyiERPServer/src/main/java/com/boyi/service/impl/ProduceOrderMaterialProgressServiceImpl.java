@@ -104,7 +104,7 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME,searchStatus)
                         .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME,searchStatus2)
                         .gt(!Boolean.valueOf(searchNoPropread),DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.PREPARED_NUM_FIELDNAME,0)
-                        .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_NUM_FIELDNAME)
+                        .orderByDesc(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ORDER_ID_FIELDNAME)
 
         );
     }

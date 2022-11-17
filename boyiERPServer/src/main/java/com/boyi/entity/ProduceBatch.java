@@ -77,6 +77,10 @@ public class ProduceBatch extends BaseEntity {
     @TableField(exist = false)
     private Integer orderType;
 
+
+    @TableField(exist = false)
+    private String endDate;
+
     @TableField(exist = false)
     private String mergeBatchId;
 
@@ -107,6 +111,8 @@ public class ProduceBatch extends BaseEntity {
 
     @TableField(exist = false)
     private Integer seq;
+
+
 
 
 }

@@ -548,7 +548,6 @@ public class ProduceBatchController extends BaseController {
                 }
             }
             pb.setDelays(ownDelays);
-
         }
 
         return ResponseResult.succ(pageData);

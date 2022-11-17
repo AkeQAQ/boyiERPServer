@@ -120,4 +120,13 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
                 .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME,materialId));
     }
 
+    @Override
+    public List<BaseSupplierMaterial> listByMaterialIdWithSuccessDate(String innerMaterialId, LocalDate buyInDate) {
+        return this.list(new QueryWrapper<BaseSupplierMaterial>()
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, innerMaterialId)
+                .le(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.START_DATE_FIELDNAME,buyInDate)
+                .ge(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.END_DATE_FIELDNAME, buyInDate)
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME, DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0));
+    }
+
 }

@@ -55,6 +55,15 @@ public class ProduceOrderMaterialProgressController extends BaseController {
     public static void main(String[] args) {
         BigDecimal preparedNum = new BigDecimal("1").add(new BigDecimal("2"));
         System.out.println(preparedNum);
+
+        TreeMap<String, String> map = new TreeMap<>();
+        map.put("04.04.1","1");
+        map.put("04.04.2","2");
+        map.put("04.04.2","22");
+
+        map.put("04.04.1","11");
+        System.out.println(map.values());
+
     }
 
     @Value("${poi.orderProductOrderImportDemoPath}")
@@ -63,6 +72,209 @@ public class ProduceOrderMaterialProgressController extends BaseController {
     static {
         replaceMap.put("订单",0);
         replaceMap.put("回单",1);
+    }
+
+
+    /**
+     * 分组显示备料信息
+     */
+    @PostMapping("/showMsgs")
+    @Transactional
+    public ResponseResult showMsgs(Principal principal,Long orderId,@Validated @RequestBody List<ProduceOrderMaterialProgress> materialProgresses) {
+        try {
+
+            HashMap<String, Collection<SupplierMaterialVO>> returnMap = new HashMap<>();
+            TreeMap<String, Collection<SupplierMaterialVO>> zeroOrMoreLists = new TreeMap<>();
+            TreeMap<String, List<SupplierMaterialVO>> oneLists = new TreeMap<>();
+
+
+            Map<String, Map<String,SupplierMaterialVO>> materialSupplier_obj = new HashMap<>();
+
+            // 没有供应商信息的物料
+            List<SupplierMaterialVO> zeroSupplierIdMsgLists = new ArrayList<SupplierMaterialVO>();
+
+
+            // 1. 筛选填了数量的物料
+            // 2. 查询该物料的物料供应商表，查询该物料的价目信息表
+            // 3. 遍历2表，存储对象，map : materialId:List<obj>，物料供应商表设置供应商的编码、供应商名称。价目表设置系统内部审核价格
+            // 4.
+                // 1. 当供应商数为0 ，则分类到0或多个供应商的 集合
+                // 2. 当供应商数为1，则分类到1供应商集合
+                // 3. 当供应商数>1，则分类到0或多个供应商的集合
+
+
+            for (ProduceOrderMaterialProgress process : materialProgresses) {
+                boolean noAddNum =(process.getAddNum() == null || process.getAddNum().isEmpty() || Double.valueOf(process.getAddNum()) <= 0);
+                boolean noAddNums =( process.getAddNums() == null || process.getAddNums().isEmpty() || Double.valueOf(process.getAddNums()) <= 0);
+                if(noAddNum
+                        && noAddNums){
+                    continue;
+                }
+                String addNum = "";
+                if(!noAddNum){
+                    addNum = process.getAddNum();
+                }else{
+                    addNum=process.getAddNums();
+                }
+                String innerMaterialId = process.getMaterialId();
+                BaseMaterial bm = baseMaterialService.getById(innerMaterialId);
+
+                List<Map<String, Object>> details = process.getDetails();
+                HashSet<String> productNumBrandSets = new HashSet<>();
+                if(details!=null && !details.isEmpty() &&orderId==null){
+
+                    for(Map<String,Object> obj : details){
+                        StringBuilder sb = new StringBuilder();
+                        sb.append(obj.get("productNum").toString()).append("_").append(obj.get("productBrand"));
+                        productNumBrandSets.add(sb.toString());
+                    }
+
+                }
+                if(orderId!=null){
+                    OrderProductOrder opo = orderProductOrderService.getById(orderId);
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(opo.getProductNum()).append("_").append(opo.getProductBrand());
+                    productNumBrandSets.add(sb.toString());
+                }
+
+                List<BuyMaterialSupplier> buyMaterialSuppliers = buyMaterialSupplierService.listByInnerMaterialId(innerMaterialId);
+                for(BuyMaterialSupplier buyMaterialSupplier:buyMaterialSuppliers){
+                    String supplierId = buyMaterialSupplier.getSupplierId();
+                    Map<String, SupplierMaterialVO> supplierMaps = materialSupplier_obj.get(innerMaterialId);
+                    if(supplierMaps==null){
+                        supplierMaps = new HashMap<String,SupplierMaterialVO>();
+                        materialSupplier_obj.put(innerMaterialId,supplierMaps);
+                    }
+                    SupplierMaterialVO supplierMaterialVO = supplierMaps.get(supplierId);
+                    if(supplierMaterialVO==null){
+                        supplierMaterialVO = new SupplierMaterialVO();
+                        supplierMaps.put(supplierId,supplierMaterialVO);
+                        supplierMaterialVO.setMaterialInnerName(bm.getName());
+                        supplierMaterialVO.setUnit(bm.getUnit());
+                        supplierMaterialVO.setNum(addNum);
+
+                        if(productNumBrandSets.size()!=0){
+                            StringBuilder sb = new StringBuilder("(备注:");
+                            for(String str:productNumBrandSets){
+                                sb.append(str).append(",");
+                            }
+                            sb.deleteCharAt(sb.length()-1);
+                            sb.append(")");
+                            supplierMaterialVO.setProductNumBrand(sb.toString());
+                        }
+
+                        supplierMaterialVO.setMaterialInnerId(innerMaterialId);
+                        supplierMaterialVO.setSupplierId(supplierId);
+                        BaseSupplier bs = baseSupplierService.getById(supplierId);
+                        supplierMaterialVO.setSupplierName(bs.getName());
+
+                        supplierMaterialVO.setMaterialOutId(buyMaterialSupplier.getSupplierMaterialId());
+                        supplierMaterialVO.setMaterialOutName(buyMaterialSupplier.getSupplierMaterialName());
+                    }
+                }
+
+                List<BaseSupplierMaterial> baseSupplierMaterials = baseSupplierMaterialService.listByMaterialIdWithSuccessDate(innerMaterialId,LocalDate.now());
+                for(BaseSupplierMaterial baseSupplierMaterial : baseSupplierMaterials){
+                    String supplierId = baseSupplierMaterial.getSupplierId();
+                    Map<String, SupplierMaterialVO> supplierMaps = materialSupplier_obj.get(innerMaterialId);
+                    if(supplierMaps==null){
+                        supplierMaps = new HashMap<String,SupplierMaterialVO>();
+                        materialSupplier_obj.put(innerMaterialId,supplierMaps);
+                    }
+                    SupplierMaterialVO supplierMaterialVO = supplierMaps.get(supplierId);
+                    if(supplierMaterialVO==null){
+                        supplierMaterialVO = new SupplierMaterialVO();
+                        supplierMaps.put(supplierId,supplierMaterialVO);
+                        supplierMaterialVO.setMaterialInnerName(bm.getName());
+                        supplierMaterialVO.setUnit(bm.getUnit());
+                        supplierMaterialVO.setNum(addNum);
+                        if(productNumBrandSets.size()!=0){
+                            StringBuilder sb = new StringBuilder("(备注:");
+                            for(String str:productNumBrandSets){
+                                sb.append(str).append(",");
+                            }
+                            sb.deleteCharAt(sb.length()-1);
+                            sb.append(")");
+                            supplierMaterialVO.setProductNumBrand(sb.toString());
+                        }
+
+                        supplierMaterialVO.setMaterialInnerId(innerMaterialId);
+                        supplierMaterialVO.setSupplierId(supplierId);
+                        BaseSupplier bs = baseSupplierService.getById(supplierId);
+                        supplierMaterialVO.setSupplierName(bs.getName());
+
+                        supplierMaterialVO.setPrice(baseSupplierMaterial.getPrice());
+                    }else{
+                        supplierMaterialVO.setPrice(baseSupplierMaterial.getPrice());
+                    }
+
+                }
+                // 假如都是空，则显示物料信息
+                if((buyMaterialSuppliers== null || buyMaterialSuppliers.size() == 0) &&
+                        (baseSupplierMaterials==null || baseSupplierMaterials.size()==0)){
+                    SupplierMaterialVO supplierMaterialVO = new SupplierMaterialVO();
+                    supplierMaterialVO.setMaterialInnerId(innerMaterialId);
+                    supplierMaterialVO.setMaterialInnerName(bm.getName());
+                    supplierMaterialVO.setUnit(bm.getUnit());
+                    supplierMaterialVO.setNum(addNum);
+                    if(productNumBrandSets.size()!=0){
+                        StringBuilder sb = new StringBuilder("(备注:");
+                        for(String str:productNumBrandSets){
+                            sb.append(str).append(",");
+                        }
+                        sb.deleteCharAt(sb.length()-1);
+                        sb.append(")");
+                        supplierMaterialVO.setProductNumBrand(sb.toString());
+                    }
+
+                    zeroSupplierIdMsgLists.add(supplierMaterialVO);
+                }
+            }
+
+            // 遍历
+            for(Map.Entry<String,Map<String,SupplierMaterialVO>> entry : materialSupplier_obj.entrySet()){
+                String materialId = entry.getKey();
+                Map<String, SupplierMaterialVO> suppliers = entry.getValue();
+                if(suppliers.size()==1){
+                    // 按供应商顺序分
+                    for(Map.Entry<String,SupplierMaterialVO> supplier : suppliers.entrySet()){
+                        List<SupplierMaterialVO> supplierMaps = oneLists.get(supplier.getKey());
+                        if(supplierMaps == null){
+                            supplierMaps = new ArrayList<SupplierMaterialVO>();
+                            oneLists.put(supplier.getKey(),supplierMaps);
+                        }
+                        supplierMaps.add(supplier.getValue());
+                    }
+                }else{
+                    // 多个物料的，按物料顺序
+                    zeroOrMoreLists.put(materialId,suppliers.values());
+                }
+
+            }
+
+
+            ArrayList<SupplierMaterialVO> zeroOrMoreAllLists = new ArrayList<>();
+            ArrayList<SupplierMaterialVO> oneAllLists = new ArrayList<>();
+
+
+            for(Map.Entry<String,Collection<SupplierMaterialVO>> entry : zeroOrMoreLists.entrySet()){
+                zeroOrMoreAllLists.addAll(entry.getValue());
+            }
+
+            for(Map.Entry<String,List<SupplierMaterialVO>> entry : oneLists.entrySet()){
+                oneAllLists.addAll(entry.getValue());
+            }
+
+            zeroOrMoreAllLists.addAll(zeroSupplierIdMsgLists);
+            returnMap.put("zeroOrMoreLists",zeroOrMoreAllLists);
+            returnMap.put("oneLists",oneAllLists);
+
+            return ResponseResult.succ(returnMap);
+        }catch (Exception e){
+            log.error("报错",e);
+            throw new RuntimeException(e.getMessage());
+        }
+
     }
 
     /***

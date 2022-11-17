@@ -35,7 +35,8 @@ public class RepositoryCloseController extends BaseController {
     @GetMapping("/list")
     @PreAuthorize("hasAuthority('repository:close:list')")
     public ResponseResult list() {
-        List<RepositoryClose> list = repositoryCloseService.list();
+        List<RepositoryClose> list = repositoryCloseService.list(new QueryWrapper<RepositoryClose>()
+                .orderByDesc(DBConstant.TABLE_REPOSITORY_CLOSE.CLOSE_DATE_FIELDNAME));
         return ResponseResult.succ(list);
     }
 
