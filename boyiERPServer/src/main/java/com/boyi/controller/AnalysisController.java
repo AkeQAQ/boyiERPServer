@@ -45,6 +45,106 @@ public class AnalysisController extends BaseController {
 
 
 
+    /**
+     * 产品订单，订单、回单、回单比例
+     */
+    @GetMapping("/productOrderByOrderType")
+    public ResponseResult productOrderByOrderType(String searchStartDate, String searchEndDate) {
+
+        if(StringUtils.isBlank(searchStartDate) || searchStartDate.equals("null")||StringUtils.isBlank(searchEndDate) || searchEndDate.equals("null")){
+            return ResponseResult.fail("查询开始和截至日期不能为空");
+        }
+
+        HashMap<String, List<Object>> returnMap = new HashMap<>();
+
+        // 1. 先查询该时间段的所有品牌
+        HashMap<String, Map<Integer, Double>> brand_msgs = new HashMap<>();
+        List<AnalysisProductOrderVO> orders = orderProductOrderService.listGroupByProductBrandAndOrderType(searchStartDate,searchEndDate);
+
+        for(AnalysisProductOrderVO vo : orders){
+            String brand = vo.getProductBrand();
+            Integer orderType = vo.getOrderType();
+
+            Map<Integer, Double> msg = brand_msgs.get(brand);
+            if(msg==null){
+                msg = new HashMap<Integer,Double>();
+                brand_msgs.put(brand,msg);
+            }
+            Double sum = msg.get(orderType);
+            if(sum==null){
+                msg.put(orderType,Double.valueOf(vo.getSum()));
+            }else{
+                msg.put(orderType,BigDecimalUtil.add(sum,Double.valueOf(vo.getSum())).doubleValue());
+            }
+        }
+
+        TreeMap<Double, String> rateMap = new TreeMap<>(new Comparator<Double>() {
+            @Override
+            public int compare(Double o1, Double o2) {
+                if(o1 > o2){
+                    return -1;
+                }else{
+                    return 1;
+                }
+            }
+        });
+        for(Map.Entry<String, Map<Integer, Double>> entry : brand_msgs.entrySet()){
+            String brand = entry.getKey();
+            Map<Integer, Double> msg = entry.getValue();
+            Double orderSum = msg.get(0)==null ? 0D : msg.get(0);
+            Double returnSum = msg.get(1) == null ? 0D : msg.get(1);
+
+            Double totalSum = BigDecimalUtil.add(orderSum,returnSum).doubleValue();
+
+            rateMap.put(totalSum,brand);
+        }
+
+        List<Object> productBrandLists = new ArrayList<>();
+        List<Object> productOrders = new ArrayList<>();
+        List<Object> productReturnOrders = new ArrayList<>();
+        List<Object> productOrderTypeRate = new ArrayList<>();
+
+        int count = 1;
+        for(Map.Entry<Double,String> entry : rateMap.entrySet()){
+            String brand = entry.getValue();
+            if(count%2==0){
+                productBrandLists.add("\n"+brand);
+            }else{
+                productBrandLists.add(brand);
+            }
+            count ++;
+
+            Map<Integer, Double> msg = brand_msgs.get(brand);
+            Double orderSum = msg.get(0)==null ? 0D : msg.get(0);
+            Double returnSum = msg.get(1) == null ? 0D : msg.get(1);
+
+            productOrders.add(orderSum);
+
+            productReturnOrders.add(returnSum);
+
+            if(orderSum==0D){
+                productOrderTypeRate.add(100);
+            }else{
+                Double rate = BigDecimalUtil.div(BigDecimalUtil.mul(returnSum,100D).doubleValue(),orderSum).doubleValue();
+                productOrderTypeRate.add(rate);
+            }
+
+
+        }
+
+        // 品牌
+        returnMap.put("productBrandLists",productBrandLists);
+        // 订单数量
+        returnMap.put("productOrders",productOrders);
+        // 回单数量
+        returnMap.put("productReturnOrders",productReturnOrders);
+        // 回单比例
+        returnMap.put("productOrderTypeRate",productOrderTypeRate);
+
+        return ResponseResult.succ(returnMap);
+    }
+
+
     @GetMapping("/getSTXMaterial")
     public ResponseResult getSTXMaterial(Principal principal,String searchStartDate, String searchEndDate) {
 

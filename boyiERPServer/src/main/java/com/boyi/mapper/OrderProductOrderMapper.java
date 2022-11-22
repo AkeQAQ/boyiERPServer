@@ -150,4 +150,9 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " and ppc.product_num like '%S%' and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
             " group by ppcd.material_id")
     List<Map<String, Object>> listBySTXMaterial(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
+
+    @Select("select opo.product_brand,opo.order_type,sum(opo.order_number) sum from order_product_order opo" +
+            " where opo.order_type !=2 " +
+            " group by opo.product_brand,opo.order_type")
+    List<AnalysisProductOrderVO> listGroupByProductBrandAndOrderType(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
 }

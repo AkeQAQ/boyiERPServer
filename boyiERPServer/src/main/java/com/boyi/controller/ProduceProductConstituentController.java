@@ -9,6 +9,7 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.EmailUtils;
 import com.boyi.common.utils.ExcelExportUtil;
+import com.boyi.common.utils.ThreadUtils;
 import com.boyi.common.vo.RealDosageVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.math.BigDecimal;
@@ -509,7 +511,16 @@ public class ProduceProductConstituentController extends BaseController {
 
 
         if(sb.length() > 13){
-            EmailUtils.sendMail(EmailUtils.MODULE_ADDNEW_MATERIAL_NAME,toEmail, csEmails.split(","),sb.toString());
+            ThreadUtils.executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        EmailUtils.sendMail(EmailUtils.MODULE_ADDNEW_MATERIAL_NAME,toEmail, csEmails.split(","),sb.toString());
+                    } catch (MessagingException e) {
+                        log.error("error",e);
+                    }
+                }
+            });
         }
 
 

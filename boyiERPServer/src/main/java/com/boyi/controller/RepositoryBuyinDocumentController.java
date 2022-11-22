@@ -10,6 +10,7 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.EmailUtils;
 import com.boyi.common.utils.ExcelExportUtil;
+import com.boyi.common.utils.ThreadUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
@@ -34,6 +35,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * <p>
@@ -47,6 +50,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping("/repository/buyIn")
 public class RepositoryBuyinDocumentController extends BaseController {
+
+
 
     @Value("${boyi.toEmail}")
     private String toEmail;
@@ -828,15 +833,19 @@ public class RepositoryBuyinDocumentController extends BaseController {
                 }
 
             }
-            try {
-                if(sb.length() > 0){
+
+            if(sb.length() > 0){
+                ThreadUtils.executorService.submit(() -> {
+                try {
                     EmailUtils.sendMail(EmailUtils.MODULE_ADD_MATERIAL_NAME,
                             toEmail,csEmails.split(","), sb.toString());
+                }catch (Exception e){
+                    log.error("发生异常.",e);
                 }
-
-            }catch (Exception e){
-                log.error("发生异常.",e);
+            });
             }
+
+
 
 
 

@@ -36,4 +36,7 @@ public class AnalysisProductOrderVO {
 
     private String productBrand;
 
+    private Integer orderType;
+
+
 }

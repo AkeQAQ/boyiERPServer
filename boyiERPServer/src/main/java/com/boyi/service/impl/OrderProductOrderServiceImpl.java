@@ -202,4 +202,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.listBySTXMaterial(searchStartDate,searchEndDate);
     }
 
+    @Override
+    public List<AnalysisProductOrderVO> listGroupByProductBrandAndOrderType(String searchStartDate, String searchEndDate) {
+        return this.orderProductOrderMapper.listGroupByProductBrandAndOrderType(searchStartDate,searchEndDate);
+    }
+
 }

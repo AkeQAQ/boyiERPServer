@@ -1,5 +1,7 @@
 package com.boyi.common.utils;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -11,6 +13,7 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.util.Properties;
 
+@Slf4j
 public class EmailUtils {
     public static final String MODULE_NAME="【博艺ERP】【物料低预警线】";
     public static final String MODULE_ADDNEW_MATERIAL_NAME="【博艺ERP】【补充物料】";
@@ -24,6 +27,8 @@ public class EmailUtils {
     private static final String EMAIL_OWNER_ADDR_PASS = "sk1447647127";
 
     public static void sendMail(String title, String email,String[] csEmails, String content) throws MessagingException {
+        long start = System.currentTimeMillis();
+
         Properties prop = new Properties();
         prop.put("mail.host", EMAIL_OWNER_ADDR_HOST);
         prop.put("mail.transport.protocol", "smtp");
@@ -87,6 +92,11 @@ public class EmailUtils {
         //5.发送电子邮件
 
         ts.sendMessage(mm, mm.getAllRecipients());
+
+        long end = System.currentTimeMillis();
+
+        log.info("邮件内容:{},发送邮件耗时:{}",content,(end-start)+"ms");
+
     }
 
     public static void main(String[] args) throws MessagingException {

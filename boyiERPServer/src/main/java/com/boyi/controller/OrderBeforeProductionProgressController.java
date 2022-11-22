@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.EmailUtils;
 import com.boyi.common.utils.ExcelExportUtil;
+import com.boyi.common.utils.ThreadUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.OrderBeforeProductionProgress;
@@ -20,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.mail.MessagingException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.security.Principal;
@@ -348,17 +350,37 @@ public class OrderBeforeProductionProgressController extends BaseController {
                 orderBeforeProductionProgressDetailService.updateById(obj);
                 // 发邮件
                 if(detail.getTypeId().equals(DBConstant.TABLE_ORDER_BEFORE_PRODUCT_DETAIL_PROGRESS.TYPE_ID_FIELDVALUE_20)){
-                    EmailUtils.sendMail(EmailUtils.MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMERREQUIRED_NAME
-                                    +"【"+obpp.getProductNum()+"】"+"【"+obpp.getProductBrand()+"】"
-                            ,sureCustomerRequiredEmail,sureCustomerRequiredEmails,detail.getContent()==null?"":detail.getContent());
+                    ThreadUtils.executorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                EmailUtils.sendMail(EmailUtils.MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMERREQUIRED_NAME
+                                                +"【"+obpp.getProductNum()+"】"+"【"+obpp.getProductBrand()+"】"
+                                        ,sureCustomerRequiredEmail,sureCustomerRequiredEmails,detail.getContent()==null?"":detail.getContent());
+                            } catch (MessagingException e) {
+                                log.error("error",e);
+                            }
+                        }
+                    });
+
                 }
                 break;
             }
             if(i== details.size() -1){
                 if(detail.getTypeId().equals(DBConstant.TABLE_ORDER_BEFORE_PRODUCT_DETAIL_PROGRESS.TYPE_ID_FIELDVALUE_30)){
-                    EmailUtils.sendMail(EmailUtils.MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMER_NAME
-                                    +"【"+obpp.getProductNum()+"】"+"【"+obpp.getProductBrand()+"】"
-                            ,sureShoesEmail,sureShoesEmails,detail.getContent()==null?"":detail.getContent());
+                    ThreadUtils.executorService.execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                EmailUtils.sendMail(EmailUtils.MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMER_NAME
+                                                +"【"+obpp.getProductNum()+"】"+"【"+obpp.getProductBrand()+"】"
+                                        ,sureShoesEmail,sureShoesEmails,detail.getContent()==null?"":detail.getContent());
+                            } catch (MessagingException e) {
+                                log.error("error",e);
+                            }
+                        }
+                    });
+
                 }
             }
 

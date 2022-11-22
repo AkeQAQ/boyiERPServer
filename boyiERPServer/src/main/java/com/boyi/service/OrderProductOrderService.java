@@ -60,4 +60,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<RepositoryStock> listNoPickMaterials();
 
     List<Map<String, Object>> listBySTXMaterial(String searchStartDate, String searchEndDate);
+
+    List<AnalysisProductOrderVO> listGroupByProductBrandAndOrderType(String searchStartDate, String searchEndDate);
+
 }
