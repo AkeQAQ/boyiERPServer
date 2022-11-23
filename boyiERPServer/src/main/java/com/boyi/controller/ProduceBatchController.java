@@ -726,6 +726,7 @@ public class ProduceBatchController extends BaseController {
 
                         // 计算用量，
                         theSub.put("needNum",calOneOrderNeedNum(pb,detail.getDosage()));
+
                         subLists.add(theSub);
                     }
                 }
@@ -836,6 +837,7 @@ public class ProduceBatchController extends BaseController {
 
                     // 计算用量，
                     theSub.put("needNum",calOneOrderNeedNum(pb,detail.getDosage()));
+
                     subLists.add(theSub);
                 }
             }
@@ -850,7 +852,7 @@ public class ProduceBatchController extends BaseController {
     }
 
     private String calOneOrderNeedNum(ProduceBatch pb, String dosage) {
-        String theRadio = "0.04";
+        String theRadio = "0";
         BigDecimal bd41 = BigDecimalUtil.mul(
                         BigDecimalUtil.add(dosage,
                                 BigDecimalUtil.mul(theRadio,"1").toString()

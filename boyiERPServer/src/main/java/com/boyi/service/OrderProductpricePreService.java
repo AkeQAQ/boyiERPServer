@@ -3,6 +3,8 @@ package com.boyi.service;
 import com.boyi.entity.OrderProductpricePre;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 新产品成本核算-报价 服务类
@@ -28,4 +30,6 @@ public interface OrderProductpricePreService extends IService<OrderProductpriceP
     void updateStatusReturnReal(String updateUser,Long id);
 
     OrderProductpricePre getByCustomerAndCompanyNumSimple(String productBrand, String productNum);
+
+    List<OrderProductpricePre> listByLikeProductNum(String substring);
 }

@@ -478,6 +478,18 @@ public class ProduceProductConstituentController extends BaseController {
         if(productConstituent.getRowList() ==null || productConstituent.getRowList().size() ==0){
             return ResponseResult.fail("物料信息不能为空");
         }
+
+        // 查看核算表，有没有该货号的记录，没有则不允许录入
+        String productNum = productConstituent.getProductNum();
+        StringBuilder sb2 = new StringBuilder(productNum);
+        String substring = sb2.substring(3);
+
+        List<OrderProductpricePre> lists = orderProductpricePreService.listByLikeProductNum(substring);
+
+        if(lists==null ||lists.size() == 0){
+            return ResponseResult.fail("核算没有该货号:["+substring+"],信息，无法录入!");
+        }
+
         // 1. 假如比老的有多新增01.的物料，邮件通知
         List<ProduceProductConstituentDetail> oldDetails = produceProductConstituentDetailService.listByForeignId(productConstituent.getId());
 
@@ -618,6 +630,16 @@ public class ProduceProductConstituentController extends BaseController {
                 materialIds.add(detail.getMaterialId());
             }
 
+            // 查看核算表，有没有该货号的记录，没有则不允许录入
+            String productNum = productConstituent.getProductNum();
+            StringBuilder sb = new StringBuilder(productNum);
+            String substring = sb.substring(3);
+
+            List<OrderProductpricePre> lists = orderProductpricePreService.listByLikeProductNum(substring);
+
+            if(lists==null ||lists.size() == 0){
+                return ResponseResult.fail("核算没有该货号:["+substring+"],信息，无法录入!");
+            }
 
             produceProductConstituentService.save(productConstituent);
 
@@ -635,7 +657,7 @@ public class ProduceProductConstituentController extends BaseController {
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",productConstituent.getId());
         }
         catch (DuplicateKeyException de){
-            return ResponseResult.fail("货号，品牌不能重复!");
+            throw new RuntimeException("货号，品牌不能重复!");
         }
         catch (Exception e) {
             log.error("产品组成结构单，插入异常",e);

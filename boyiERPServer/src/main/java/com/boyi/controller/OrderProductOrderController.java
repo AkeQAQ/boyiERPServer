@@ -680,7 +680,7 @@ public class OrderProductOrderController extends BaseController {
 
             if(errorMsgs.isEmpty()){
                 HashMap<String, String> errorMsg = new HashMap<>();
-                errorMsg.put("content","导入的EXCEL订单号都存在！");
+                errorMsg.put("content","导入的EXCEL订单号都存在且一致！");
                 errorMsgs.add(errorMsg);
             }
             return ResponseResult.succ(returnMap);

@@ -10,6 +10,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -102,5 +103,12 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
                                 DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.CX_PRICE_FIELDNAME)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,companyNum)
                 .eq(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COSTOMER_FIELDNAME,customer));
+    }
+
+    @Override
+    public List<OrderProductpricePre> listByLikeProductNum(String substring) {
+        return this.list(new QueryWrapper<OrderProductpricePre>()
+                .select(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME)
+                .like(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,substring));
     }
 }
