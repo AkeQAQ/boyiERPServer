@@ -62,6 +62,100 @@ public class OrderProductpricePreController extends BaseController {
     @Value("${orderProductPrice.pre}")
     private String orderProductPricePrePath;
 
+
+    /**
+     * 查询核算外加工价格
+     */
+    @GetMapping("/queryPriceByForeignProduction")
+    public ResponseResult queryPriceByForeignProduction(String productNum) {
+
+        List<Map<String, String>> returnLists = new ArrayList<>();
+
+
+        StringBuilder sb = new StringBuilder(productNum);
+        sb.delete(0,3);
+
+        long start = System.currentTimeMillis();
+        List<OrderProductpricePre> lists = orderProductpricePreService.listByLikeProductNumWithExcelJson(sb.toString());
+        long start2 = System.currentTimeMillis();
+        log.info("db读取耗时:{}",(start2-start)+"ms");
+        for(OrderProductpricePre pre : lists){
+            XSSFWorkbook luckySheetXlsx = LuckeySheetPOIUtils.getLuckySheetXlsx(pre.getExcelJson());
+            long start3 = System.currentTimeMillis();
+            log.info("转换耗时:{}",(start3-start2)+"ms");
+            XSSFSheet sheetAt = luckySheetXlsx.getSheetAt(0);
+
+            StringBuilder returnStr = new StringBuilder();
+
+            XSSFRow row54 = sheetAt.getRow(54);
+            XSSFRow row55 = sheetAt.getRow(55);
+            XSSFRow row56 = sheetAt.getRow(56);
+            XSSFCell row54_cell2 = row54.getCell(2);
+            XSSFCell row55_cell2 = row55.getCell(2);
+            XSSFCell row56_cell2 = row56.getCell(2);
+
+            XSSFCell row54_cell3 = row54.getCell(3);
+            XSSFCell row55_cell3 = row55.getCell(3);
+            XSSFCell row56_cell3 = row56.getCell(3);
+            if(!row54_cell3.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row54_cell2.getStringCellValue()).append(":").append(row54_cell3.getStringCellValue()).append(",");
+            }
+            if(!row55_cell3.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row55_cell2.getStringCellValue()).append(":").append(row55_cell3.getStringCellValue()).append(",");
+            }
+            if(!row56_cell3.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row56_cell2.getStringCellValue()).append(":").append(row56_cell3.getStringCellValue()).append(",");
+            }
+
+            XSSFCell row54_cell4 = row54.getCell(4);
+            XSSFCell row55_cell4 = row55.getCell(4);
+            XSSFCell row56_cell4 = row56.getCell(4);
+
+            XSSFCell row54_cell5 = row54.getCell(5);
+            XSSFCell row55_cell5 = row55.getCell(5);
+            XSSFCell row56_cell5 = row56.getCell(5);
+            if(!row54_cell5.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row54_cell4.getStringCellValue()).append(":").append(row54_cell5.getStringCellValue()).append(",");
+            }
+            if(!row55_cell5.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row55_cell4.getStringCellValue()).append(":").append(row55_cell5.getStringCellValue()).append(",");
+            }
+            if(!row56_cell5.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row56_cell4.getStringCellValue()).append(":").append(row56_cell5.getStringCellValue()).append(",");
+            }
+
+
+            XSSFCell row54_cell6 = row54.getCell(6);
+            XSSFCell row55_cell6 = row55.getCell(6);
+            XSSFCell row56_cell6 = row56.getCell(6);
+
+            XSSFCell row54_cell7 = row54.getCell(7);
+            XSSFCell row55_cell7 = row55.getCell(7);
+            XSSFCell row56_cell7 = row56.getCell(7);
+            if(!row54_cell7.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row54_cell6.getStringCellValue()).append(":").append(row54_cell7.getStringCellValue()).append(",");
+            }
+            if(!row55_cell7.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row55_cell6.getStringCellValue()).append(":").append(row55_cell7.getStringCellValue()).append(",");
+            }
+            if(!row56_cell7.getStringCellValue().trim().isEmpty()){
+                returnStr.append(row56_cell6.getStringCellValue()).append(":").append(row56_cell7.getStringCellValue()).append(",");
+            }
+
+            HashMap<String, String> onePre = new HashMap<>();
+            onePre.put("companyNum",pre.getCompanyNum());
+            onePre.put("customer",pre.getCustomer());
+            onePre.put("foreignMsg",returnStr.toString());
+            returnLists.add(onePre);
+
+        }
+
+
+
+        return ResponseResult.succ(returnLists);
+    }
+
+
     @PostMapping("/export")
     @PreAuthorize("hasAuthority('order:productPricePre:list')")
     public void export(HttpServletResponse response, @RequestBody LuckySheetExportRequestDTO param) {

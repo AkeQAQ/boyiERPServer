@@ -111,4 +111,15 @@ public class OrderProductpricePreServiceImpl extends ServiceImpl<OrderProductpri
                 .select(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME)
                 .like(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,substring));
     }
+
+    @Override
+    public List<OrderProductpricePre> listByLikeProductNumWithExcelJson(String productNum) {
+        return this.list(new QueryWrapper<OrderProductpricePre>()
+                .select(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.ID_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COSTOMER_FIELDNAME,
+                        DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.EXCEL_JSON_FIELDNAME
+                        )
+                .like(DBConstant.TABLE_ORDER_PRODUCTPRICEPRE.COMPANY_NUM_FIELDNAME,productNum));
+    }
 }

@@ -26,6 +26,56 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 public class LuckeySheetPOIUtils {
+
+    public static XSSFWorkbook getLuckySheetXlsx(String excelData)  {
+        JSONArray jsonArray = (JSONArray) JSONObject.parse(excelData);
+        //如果只有一个sheet那就是get(0),有多个那就对应取下标
+//        List<JSONObject> jsonObjects = jsonArray.toJavaList(JSONObject.class);
+        XSSFWorkbook wb = new XSSFWorkbook();
+        for (int i=0 ;i<1;i++){
+            JSONObject jsonObject = (JSONObject) jsonArray.get(i);
+            JSONArray jsonObjectList = jsonObject.getJSONArray("celldata");
+//            JSONObject images = jsonObject.getJSONObject("images");
+//            JSONObject dataVerification = jsonObject.getJSONObject("dataVerification");
+            //默认高
+            short defaultRowHeight = jsonObject.getShort("defaultRowHeight") == null ?20:jsonObject.getShort("defaultRowHeight");
+            //默认宽
+            short defaultColWidth = jsonObject.getShort("defaultColWidth") == null ?74:jsonObject.getShort("defaultColWidth");
+            JSONObject config = jsonObject.getJSONObject("config");
+            //行列冻结
+            JSONObject frozen = jsonObject.getJSONObject("frozen");
+            JSONObject columnlenObject = null;//表格列宽
+            JSONObject rowlenObject = null;//表格行高
+            JSONArray borderInfoObjectList = null;//边框样式
+            if (config != null){
+                columnlenObject = jsonObject.getJSONObject("config").getJSONObject("columnlen");//表格列宽
+                rowlenObject = jsonObject.getJSONObject("config").getJSONObject("rowlen");//表格行高
+//                borderInfoObjectList = jsonObject.getJSONObject("config").getJSONArray("borderInfo");//边框样式
+            }
+            //读取了模板内所有sheet内容
+            XSSFSheet sheet = wb.createSheet(jsonObject.get("name").toString());
+            //如果这行没有了，整个公式都不会有自动计算的效果的
+//            sheet.setForceFormulaRecalculation(false);
+            //固定行列
+            setFreezePane(sheet,frozen);
+            //设置行高列宽
+//            setCellWH(sheet,columnlenObject,rowlenObject);
+            //图片插入
+//            setImages(wb,sheet,images,columnlenObject,rowlenObject,defaultRowHeight,defaultColWidth);
+            //设置单元格值及格式
+            setCellValue(wb,sheet,jsonObjectList,columnlenObject,rowlenObject,defaultRowHeight,defaultColWidth);
+            //设置数据验证
+//            settDataValidation(dataVerification,sheet);
+            /*if (borderInfoObjectList != null){
+                //设置边框
+                setBorder(borderInfoObjectList,sheet);
+            }*/
+        }
+        return wb;
+
+    }
+
+
     public static CellStyle createCellStyle(XSSFSheet sheet, XSSFWorkbook wb, JSONObject jsonObjectValue){
         XSSFCellStyle cellStyle = wb.createCellStyle();
         Map<Integer, String> fontMap = new HashMap<>();

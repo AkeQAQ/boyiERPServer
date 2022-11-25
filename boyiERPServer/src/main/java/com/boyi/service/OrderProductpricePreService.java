@@ -32,4 +32,6 @@ public interface OrderProductpricePreService extends IService<OrderProductpriceP
     OrderProductpricePre getByCustomerAndCompanyNumSimple(String productBrand, String productNum);
 
     List<OrderProductpricePre> listByLikeProductNum(String substring);
+
+    List<OrderProductpricePre> listByLikeProductNumWithExcelJson(String productNum);
 }
