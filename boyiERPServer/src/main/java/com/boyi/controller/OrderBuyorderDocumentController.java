@@ -65,6 +65,37 @@ public class OrderBuyorderDocumentController extends BaseController {
 
     }
 
+    @GetMapping("/getNoPriceForeignMaterialLists")
+    @PreAuthorize("hasAuthority('order:buyOrder:list')")
+    public ResponseResult getNoPriceForeignMaterialLists(){
+        Map<String, List<NoPricePrintVO>> returnMap = new HashMap<>();
+        List<NoPricePrintVO> lists = new ArrayList<>();
+        HashMap<String, List<OrderBuyorderDocumentDetail>> supplier_materials = new HashMap<>();
+
+        List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listNoPriceForeignMaterials();
+
+        //进行分组
+
+        for (OrderBuyorderDocumentDetail detail : details){
+            String supplierName = detail.getSupplierName();
+            List<OrderBuyorderDocumentDetail> baseMaterials = supplier_materials.get(supplierName);
+            if(baseMaterials == null || baseMaterials.size() == 0){
+                baseMaterials = new ArrayList<>();
+                supplier_materials.put(supplierName,baseMaterials);
+            }
+            baseMaterials.add(detail);
+        }
+        for(Map.Entry<String,List<OrderBuyorderDocumentDetail>> entry : supplier_materials.entrySet()){
+            String key = entry.getKey();
+            List<OrderBuyorderDocumentDetail> value = entry.getValue();
+            NoPricePrintVO vo = new NoPricePrintVO();
+            vo.setSupplierName(key);
+            vo.setRowList(value);
+            lists.add(vo);
+        }
+        returnMap.put("content",lists);
+        return ResponseResult.succ(returnMap);
+    }
 
 
     /**

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -44,5 +45,13 @@ public class RepositoryStock {
     @TableField(exist = false)  // 字段数据库忽略
     @ExcelAttribute(sort = 4)
     private String specs;
+
+    @ExcelAttribute(sort = 5)
+    @TableField(exist = false)  // 字段数据库忽略
+    private LocalDate latestPriceDate;
+
+    @ExcelAttribute(sort = 6)
+    @TableField(exist = false)  // 字段数据库忽略
+    private LocalDate latestPickDate;
 
 }

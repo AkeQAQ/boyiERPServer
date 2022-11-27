@@ -108,6 +108,7 @@ public class RepositoryStockController extends BaseController {
         }
 
 
+
         // 库存数量为0的过滤.
         /*List<RepositoryStock> records = pageData.getRecords();
         ArrayList<RepositoryStock> newRecords = new ArrayList<>();

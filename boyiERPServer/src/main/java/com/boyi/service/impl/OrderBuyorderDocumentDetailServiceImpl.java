@@ -10,6 +10,7 @@ import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.OrderBuyorderDocumentDetailMapper;
 import com.boyi.service.OrderBuyorderDocumentDetailService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,6 +26,10 @@ import java.util.List;
  */
 @Service
 public class OrderBuyorderDocumentDetailServiceImpl extends ServiceImpl<OrderBuyorderDocumentDetailMapper, OrderBuyorderDocumentDetail> implements OrderBuyorderDocumentDetailService {
+
+    @Autowired
+    public OrderBuyorderDocumentDetailMapper orderBuyorderDocumentDetailMapper;
+
     @Override
     public boolean delByDocumentIds(Long[] ids) {
         return this.remove(new QueryWrapper<OrderBuyorderDocumentDetail>()
@@ -81,5 +86,10 @@ public class OrderBuyorderDocumentDetailServiceImpl extends ServiceImpl<OrderBuy
                 .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME,materialId)
                 .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_SEQ_FIELDNAME,docNum)
                 .gt(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ORDER_DATE_FIELDNAME,localDate));
+    }
+
+    @Override
+    public List<OrderBuyorderDocumentDetail> listNoPriceForeignMaterials() {
+        return this.orderBuyorderDocumentDetailMapper.listNoPriceForeignMaterials();
     }
 }

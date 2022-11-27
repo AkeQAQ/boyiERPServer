@@ -20,10 +20,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface RepositoryStockMapper extends BaseMapper<RepositoryStock> {
 
-    String querySql = "select m.id material_id,m.name material_name,m.unit unit,m.specs specs," +
-            "s.num num from" +
-            " base_material m ,repository_stock s " +
-            " where m.id = s.material_id and s.num != 0 ";
+    String querySql = "select m.id material_id,m.name material_name,m.unit unit,m.specs specs,s.num num," +
+            " (select max(rbdd.price_date) from repository_buyin_document_detail rbdd where rbdd.material_id = m.id) latest_price_date," +
+            " (select max(rpm.pick_date) from repository_pick_material_detail rpmd,repository_pick_material rpm where rpmd.material_id = m.id" +
+            " and rpm.id = rpmd.document_id ) latest_pick_date" +
+            "" +
+            " from" +
+            "             base_material m ,repository_stock s " +
+            "             where m.id = s.material_id and s.num != 0" +
+            " ";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
     /**
      * 分页查询

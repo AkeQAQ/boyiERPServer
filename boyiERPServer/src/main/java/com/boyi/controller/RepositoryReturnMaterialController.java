@@ -637,9 +637,7 @@ public class RepositoryReturnMaterialController extends BaseController {
             return ResponseResult.fail("状态已被修改.请刷新");
         }
 
-        List<RepositoryReturnMaterialDetail> details = repositoryReturnMaterialDetailService.listByDocumentId(id);
         // 1. 遍历更新 一个物料对应的库存数量
-        repositoryStockService.subNumReturnMaterialId(details);
         RepositoryReturnMaterial repositoryReturnMaterial = new RepositoryReturnMaterial();
         repositoryReturnMaterial.setUpdated(LocalDateTime.now());
         repositoryReturnMaterial.setUpdatedUser(principal.getName());

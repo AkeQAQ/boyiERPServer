@@ -557,6 +557,8 @@ public class OrderProductOrderController extends BaseController {
                 result2.put(item.getMaterialId(),theMaterialIdMaps);
             }
 
+            theMaterialIdMaps.put("addNums",0);
+
             Object materialName = theMaterialIdMaps.get("materialName");
             if(materialName == null ){
                 theMaterialIdMaps.put("materialName",item.getMaterialName());
@@ -586,6 +588,7 @@ public class OrderProductOrderController extends BaseController {
             }else{
                 theMaterialIdMaps.put("preparedNums",BigDecimalUtil.add(preparedNums+"",preparedNum).doubleValue());
             }
+
 
             Object theMaterialIdLists = theMaterialIdMaps.get("details");
 
