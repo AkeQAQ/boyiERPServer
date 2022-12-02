@@ -54,4 +54,19 @@ public class RepositoryStock {
     @TableField(exist = false)  // 字段数据库忽略
     private LocalDate latestPickDate;
 
+
+    @ExcelAttribute(sort = 7)
+    @TableField(exist = false)  // 字段数据库忽略
+    private String needNum;
+
+    @ExcelAttribute(sort = 8)
+    @TableField(exist = false)  // 字段数据库忽略
+    private String noPickNum;
+
+
+    @ExcelAttribute(sort = 9)
+    @TableField(exist = false)  // 字段数据库忽略
+    private String noInNum;
+
+
 }

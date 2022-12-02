@@ -254,4 +254,9 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
         return produceOrderMaterialProgressMapper.groupByMaterialIdAndBetweenDateAndOrderIdIsNull(id,searchStartDate,searchEndDate);
     }
 
+    @Override
+    public List<OrderProductCalVO> listNoInNumsWithMaterialIds(Set<String> keySet) {
+        return produceOrderMaterialProgressMapper.listNoInNumsWithMaterialIds(keySet);
+    }
+
 }

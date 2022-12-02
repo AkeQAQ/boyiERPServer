@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * <p>
@@ -120,4 +121,9 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             "            ")
     Double groupByMaterialIdAndBetweenDateAndOrderIdIsNull(@Param("id") String id,@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
 
+    @Select("<script> select pomp.material_id,cast((sum(pomp.prepared_num)-sum(pomp.in_num)) as DECIMAL(12,1)) no_in_num  from produce_order_material_progress pomp " +
+            "           where pomp.material_id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach>" +
+            " and cast(pomp.prepared_num as DECIMAL(12,5)) > cast(pomp.in_num as DECIMAL(12,5)) " +
+            "           group by pomp.material_id </script>")
+    List<OrderProductCalVO> listNoInNumsWithMaterialIds(@Param("materialIds") Set<String> keySet);
 }

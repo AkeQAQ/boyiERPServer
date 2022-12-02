@@ -623,7 +623,7 @@ public class OrderProductOrderController extends BaseController {
 
 
     /**
-     * 上传校验 订单号是否存在
+     * 上传校验 订单是否一致
      */
     @PostMapping("/uploadValidOrderNum")
     @PreAuthorize("hasAuthority('order:productOrder:import')")
@@ -646,11 +646,44 @@ public class OrderProductOrderController extends BaseController {
             Map<String, Object> returnMap = new HashMap<>();
             returnMap.put("showContent",errorMsgs);
 
-            HashMap<String, OrderProductOrder> validOrders = new HashMap<>();
+            Integer minOrderNum = Integer.MAX_VALUE;
+            Integer maxOrderNum = Integer.MIN_VALUE;
             for (OrderProductOrder order: orderProductOrders){
                 if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
                     continue;
                 }
+                Integer orderNum = Integer.valueOf(order.getOrderNum().split("-")[0]);
+                if(minOrderNum > orderNum){
+                    minOrderNum=orderNum;
+                }
+                if(maxOrderNum < orderNum){
+                    maxOrderNum = orderNum;
+                }
+            }
+            // 查询DB在该时间段全部的订单
+            List<OrderProductOrder> dbOrders = orderProductOrderService.listByOrderNumWithStartAndEnd(minOrderNum,maxOrderNum);
+
+            Set<String> dbOrderNums = new HashSet<>();
+            for(OrderProductOrder opo : dbOrders){
+                dbOrderNums.add(opo.getOrderNum());
+            }
+
+            Set<String> excelOrderNums = new HashSet<>();
+
+            for (OrderProductOrder order: orderProductOrders){
+                if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
+                    continue;
+                }
+                excelOrderNums.add(order.getOrderNum());
+
+                Integer orderNum = Integer.valueOf(order.getOrderNum().split("-")[0]);
+                if(minOrderNum > orderNum){
+                    minOrderNum=orderNum;
+                }
+                if(maxOrderNum < orderNum){
+                    maxOrderNum = orderNum;
+                }
+
                 OrderProductOrder sysOrder = orderProductOrderService.getByOrderNum(order.getOrderNum());
                 if(sysOrder==null){
                     HashMap<String, String> errorMsg = new HashMap<>();
@@ -680,6 +713,16 @@ public class OrderProductOrderController extends BaseController {
                     }*/
                 }
             }
+            if(dbOrderNums.size()!=excelOrderNums.size()){
+                for(String orderNumStr : dbOrderNums){
+                    if(!excelOrderNums.contains(orderNumStr)){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content","最小订单号["+minOrderNum+"]，最大订单号["+maxOrderNum+"]区间内."+"EXCEL不存在订单号:"+orderNumStr+"");
+                        errorMsgs.add(errorMsg);
+                    }
+                }
+            }
+
 
             if(errorMsgs.isEmpty()){
                 HashMap<String, String> errorMsg = new HashMap<>();

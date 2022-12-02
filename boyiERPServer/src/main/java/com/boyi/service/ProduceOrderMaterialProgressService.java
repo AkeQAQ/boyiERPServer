@@ -62,4 +62,5 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
 
     Double groupByMaterialIdAndBetweenDateAndOrderIdIsNull(String id, String searchStartDate, String searchEndDate);
 
+    List<OrderProductCalVO> listNoInNumsWithMaterialIds(Set<String> keySet);
 }

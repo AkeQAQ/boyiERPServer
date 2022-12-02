@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.ProduceOrderMaterialProgress;
 import com.boyi.entity.RepositoryStock;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,4 +64,9 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
     List<AnalysisProductOrderVO> listGroupByProductBrandAndOrderType(String searchStartDate, String searchEndDate);
 
+    List<OrderProductCalVO> calNoProductOrdersWithMaterialIds(Set<String> materialIds);
+
+    List<RepositoryStock> listNoPickMaterialsWithMaterialIds(Set<String> keySet);
+
+    List<OrderProductOrder> listByOrderNumWithStartAndEnd(Integer minOrderNum, Integer maxOrderNum);
 }

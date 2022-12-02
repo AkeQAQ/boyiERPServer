@@ -4,6 +4,7 @@ package com.boyi.controller;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.ExcelExportUtil;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.BaseSupplierMaterial;
@@ -23,6 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -63,15 +65,39 @@ public class RepositoryStockController extends BaseController {
         }
         pageData = repositoryStockService.pageBySearch(page,queryField,searchField,searchStr);
 
-        // 库存数量为0的过滤.
-        /*List<RepositoryStock> records = pageData.getRecords();
-        ArrayList<RepositoryStock> newRecords = new ArrayList<>();
+        // 获取全部的物料
+        HashMap<String, RepositoryStock> materialIds = new HashMap<>();
+
+        List<RepositoryStock> records = pageData.getRecords();
         for (RepositoryStock stock : records){
-            if(stock.getNum() != 0){
-                newRecords.add(stock);
-            }
+            materialIds.put(stock.getMaterialId(),stock);
+            stock.setNeedNum("0");
+            stock.setNoInNum("0");
+            stock.setNoPickNum("0");
+
         }
-        pageData.setRecords(newRecords);*/
+
+        // 获取未投产应需用量
+        List<OrderProductCalVO> noProductionNums = orderProductOrderService.calNoProductOrdersWithMaterialIds(materialIds.keySet());
+        for(OrderProductCalVO vo : noProductionNums){
+            String materialId = vo.getMaterialId();
+            RepositoryStock stock = materialIds.get(materialId);
+            stock.setNeedNum(vo.getNeedNum());
+        }
+        // 获取投产未领数量
+        List<RepositoryStock> noPickMaterials = orderProductOrderService.listNoPickMaterialsWithMaterialIds(materialIds.keySet());
+        for(RepositoryStock vo : noPickMaterials) {
+            String materialId = vo.getMaterialId();
+            RepositoryStock stock = materialIds.get(materialId);
+            stock.setNoPickNum(""+vo.getNum());
+        }
+        // 获取已报未入库数量
+        List<OrderProductCalVO> noInNums = produceOrderMaterialProgressService.listNoInNumsWithMaterialIds(materialIds.keySet());
+        for(OrderProductCalVO vo : noInNums){
+            String materialId = vo.getMaterialId();
+            RepositoryStock stock = materialIds.get(materialId);
+            stock.setNoInNum(vo.getNoInNum());
+        }
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
@@ -102,6 +128,42 @@ public class RepositoryStockController extends BaseController {
         }
         try {
             pageData = repositoryStockService.pageBySearch(getPage(),queryField,searchField,searchStr);
+
+            // 获取全部的物料
+            HashMap<String, RepositoryStock> materialIds = new HashMap<>();
+
+            List<RepositoryStock> records = pageData.getRecords();
+            for (RepositoryStock stock : records){
+                materialIds.put(stock.getMaterialId(),stock);
+                stock.setNeedNum("0");
+                stock.setNoInNum("0");
+                stock.setNoPickNum("0");
+            }
+            if(!materialIds.isEmpty()){
+
+                // 获取未投产应需用量
+                List<OrderProductCalVO> noProductionNums = orderProductOrderService.calNoProductOrdersWithMaterialIds(materialIds.keySet());
+                for(OrderProductCalVO vo : noProductionNums){
+                    String materialId = vo.getMaterialId();
+                    RepositoryStock stock = materialIds.get(materialId);
+                    stock.setNeedNum(vo.getNeedNum());
+                }
+                // 获取投产未领数量
+                List<RepositoryStock> noPickMaterials = orderProductOrderService.listNoPickMaterialsWithMaterialIds(materialIds.keySet());
+                for(RepositoryStock vo : noPickMaterials) {
+                    String materialId = vo.getMaterialId();
+                    RepositoryStock stock = materialIds.get(materialId);
+                    stock.setNoPickNum(""+vo.getNum());
+                }
+                // 获取已报未入库数量
+                List<OrderProductCalVO> noInNums = produceOrderMaterialProgressService.listNoInNumsWithMaterialIds(materialIds.keySet());
+                for(OrderProductCalVO vo : noInNums){
+                    String materialId = vo.getMaterialId();
+                    RepositoryStock stock = materialIds.get(materialId);
+                    stock.setNoInNum(vo.getNoInNum());
+                }
+            }
+
 
         }catch (PersistenceException e){
             return ResponseResult.fail("物料编码请不要输入中文");

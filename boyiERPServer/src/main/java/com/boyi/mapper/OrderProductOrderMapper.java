@@ -11,8 +11,10 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * <p>
@@ -155,4 +157,48 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " where opo.order_type !=2 " +
             " group by opo.product_brand,opo.order_type")
     List<AnalysisProductOrderVO> listGroupByProductBrandAndOrderType(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
+
+    @Select("<script> select t1.material_id,t1.need_num from " +
+            "            (" +
+            "            select opo.order_num,opo.customer_num,opo.product_num,opo.product_brand,opo.product_color,opo.order_number,opo.product_region,opo.comment,ppcd.material_id,bm.name material_name,cast(ppcd.dosage * opo.order_number as DECIMAL (14,1)) need_num from  " +
+            "                        order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd," +
+            "   (select * from base_material where id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> )bm  " +
+            "                         where order_type != 2 and order_num not in( " +
+            "                        select order_num from " +
+            "                        produce_batch  " +
+            "                        ) " +
+            "                        and opo.product_num = ppc.product_num " +
+            "                        and opo.product_brand = ppc.product_brand " +
+            "                        and ppc.id = ppcd.constituent_id " +
+            "                        and ppcd.material_id = bm.id " +
+            "                       " +
+            "                        order by opo.id desc" +
+            "            ) t1 </script>")
+    List<OrderProductCalVO> calNoProductOrdersWithMaterialIds(@Param("materialIds") Set<String> materialIds);
+
+    @Select("<script> select t3.material_id,sum(pickNum) num from  " +
+            "             ( " +
+            "             select t1.product_num,t1.product_brand,t2.*,t1.material_id,bm.`name` material_name,t1.dosage,CAST(t2.batch_number * t1.dosage as decimal(8,1)) pickNum  from  " +
+            "             ( " +
+            "              select opo.order_num,opo.product_num,opo.product_brand,ppcd.material_id,ppcd.dosage from  order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd  " +
+            "              where ppc.id = ppcd.constituent_id and ppcd.material_id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> and opo.product_num = ppc.product_num and opo.product_brand = ppc.product_brand and opo.order_type!=2 " +
+            "             )t1 , " +
+            "             ( " +
+            "             select pb.batch_id,pb.order_num, " +
+            "             (IFNULL(size34,0)+IFNULL(size35,0)+IFNULL(size36,0)+IFNULL(size37,0)+IFNULL(size38,0)+IFNULL(size39,0)+IFNULL(size40,0)+IFNULL(size41,0)+IFNULL(size42,0)+IFNULL(size43,0)+IFNULL(size44,0)+IFNULL(size45,0)+IFNULL(size46,0)+IFNULL(size47,0)) batch_number from produce_batch pb  " +
+            "             where pb.batch_id not in ( " +
+            "             select batch_id from repository_pick_material rpm " +
+            "             where rpm.batch_id != '' " +
+            "             )  " +
+            "             ) t2 ,base_material bm  " +
+            "             where   " +
+            "             t1.order_num = t2.order_num " +
+            "             and t1.material_id = bm.id   and t2.batch_number > 5 " +
+            "             ) t3 group by t3.material_id order by num desc </script>")
+    List<RepositoryStock> listNoPickMaterialsWithMaterialIds(@Param("materialIds") Set<String> keySet);
+
+    @Select("select  opo.order_num from order_product_order opo" +
+            " where opo.order_type!=2 and substring_index(opo.order_num ,'-',1) >= #{minOrderNum} and substring_index(opo.order_num ,'-',1) <= #{maxOrderNum}")
+    List<OrderProductOrder> listByOrderNumWithStartAndEnd(@Param("minOrderNum")Integer minOrderNum,@Param("maxOrderNum") Integer maxOrderNum);
+
 }

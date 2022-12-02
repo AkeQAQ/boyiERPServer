@@ -207,4 +207,19 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.listGroupByProductBrandAndOrderType(searchStartDate,searchEndDate);
     }
 
+    @Override
+    public List<OrderProductCalVO> calNoProductOrdersWithMaterialIds(Set<String> materialIds) {
+        return this.orderProductOrderMapper.calNoProductOrdersWithMaterialIds(materialIds);
+    }
+
+    @Override
+    public List<RepositoryStock> listNoPickMaterialsWithMaterialIds(Set<String> keySet) {
+        return this.orderProductOrderMapper.listNoPickMaterialsWithMaterialIds(keySet);
+    }
+
+    @Override
+    public List<OrderProductOrder> listByOrderNumWithStartAndEnd(Integer minOrderNum, Integer maxOrderNum) {
+        return this.orderProductOrderMapper.listByOrderNumWithStartAndEnd(minOrderNum,maxOrderNum);
+    }
+
 }
