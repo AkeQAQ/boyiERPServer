@@ -2,10 +2,12 @@ package com.boyi.entity;
 
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
+import com.boyi.common.vo.OrderProductCalVO;
 import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -55,18 +57,46 @@ public class RepositoryStock {
     private LocalDate latestPickDate;
 
 
-    @ExcelAttribute(sort = 7)
+    @ExcelAttribute(sort = 9)
     @TableField(exist = false)  // 字段数据库忽略
     private String needNum;
 
-    @ExcelAttribute(sort = 8)
+    @ExcelAttribute(sort = 7)
     @TableField(exist = false)  // 字段数据库忽略
     private String noPickNum;
 
 
-    @ExcelAttribute(sort = 9)
+    @ExcelAttribute(sort = 8)
     @TableField(exist = false)  // 字段数据库忽略
     private String noInNum;
 
+    @TableField(exist = false)
+    private List<OrderProductCalVO> noProductionNums;
 
+
+    @TableField(exist = false)
+    private List<RepositoryStock> noPickNums;
+
+
+    @TableField(exist = false)
+    private List<OrderProductCalVO> noInNums;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String batchNumber;
+
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String orderNum;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String batchId;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String productNum;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String productBrand;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String dosage;
 }

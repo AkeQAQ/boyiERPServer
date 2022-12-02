@@ -49,6 +49,7 @@ public class OrderProductCalVO implements Serializable {
     private String comment;
     private String materialId;
     private String materialName;
+    private String dosage;
 
     private String needNum;
 
@@ -57,6 +58,11 @@ public class OrderProductCalVO implements Serializable {
     private String noInNum;// 备料未到全的数值
 
     private String noPickNum;// 车间未退数量
+
+    private String preparedNum;
+
+
+    private String inNum;
 
 
 }

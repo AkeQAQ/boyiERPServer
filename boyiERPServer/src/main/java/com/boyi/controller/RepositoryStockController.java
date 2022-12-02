@@ -3,6 +3,7 @@ package com.boyi.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.controller.base.BaseController;
@@ -22,10 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.FileInputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * <p>
@@ -74,30 +72,90 @@ public class RepositoryStockController extends BaseController {
             stock.setNeedNum("0");
             stock.setNoInNum("0");
             stock.setNoPickNum("0");
+        }
+        if(!materialIds.isEmpty()){
 
+            // 获取未投产应需用量
+            List<OrderProductCalVO> noProductionNums = orderProductOrderService.calNoProductOrdersWithMaterialIds(materialIds.keySet());
+            HashMap<String, String> noProductionGroupNums = new HashMap<>();
+            HashMap<String, List<OrderProductCalVO>> noProductionGroupDetails = new HashMap<>();
+
+            for(OrderProductCalVO vo : noProductionNums){
+                String materialId = vo.getMaterialId();
+                String theSum = noProductionGroupNums.get(materialId);
+                if(theSum==null || theSum.isEmpty()){
+                    noProductionGroupNums.put(materialId,vo.getNeedNum());
+                    ArrayList<OrderProductCalVO> orderProductCalVOS = new ArrayList<>();
+                    orderProductCalVOS.add(vo);
+                    noProductionGroupDetails.put(materialId,orderProductCalVOS);
+                }else{
+                    noProductionGroupNums.put(materialId, BigDecimalUtil.add(theSum,vo.getNeedNum()).toString());
+                    List<OrderProductCalVO> orderProductCalVOS = noProductionGroupDetails.get(materialId);
+                    orderProductCalVOS.add(vo);
+                }
+            }
+
+            for(Map.Entry<String,String> entry : noProductionGroupNums.entrySet()){
+                String materialId = entry.getKey();
+                String needNum = entry.getValue();
+                RepositoryStock stock = materialIds.get(materialId);
+                stock.setNeedNum(needNum);
+            }
+
+            // 获取投产未领数量
+            List<RepositoryStock> noPickMaterials = orderProductOrderService.listNoPickMaterialsWithMaterialIds(materialIds.keySet());
+            HashMap<String, String> noPickGroupNums = new HashMap<>();
+            HashMap<String, List<RepositoryStock>> noPickDetails = new HashMap<>();
+
+            for(RepositoryStock vo : noPickMaterials){
+                String materialId = vo.getMaterialId();
+                String theSum = noPickGroupNums.get(materialId);
+                if(theSum==null || theSum.isEmpty()){
+                    noPickGroupNums.put(materialId,vo.getNum()+"");
+                    ArrayList<RepositoryStock> objs = new ArrayList<>();
+                    objs.add(vo);
+                    noPickDetails.put(materialId,objs);
+                }else{
+                    noPickGroupNums.put(materialId, BigDecimalUtil.add(theSum,vo.getNum()+"").toString());
+                    List<RepositoryStock> objs = noPickDetails.get(materialId);
+                    objs.add(vo);
+                }
+            }
+
+            for(Map.Entry<String,String> entry : noPickGroupNums.entrySet()){
+                String materialId = entry.getKey();
+                String needNum = entry.getValue();
+                RepositoryStock stock = materialIds.get(materialId);
+                stock.setNoPickNum(needNum);
+            }
+            // 获取已报未入库数量
+            List<OrderProductCalVO> noInNums = produceOrderMaterialProgressService.listNoInNumsWithMaterialIds(materialIds.keySet());
+            HashMap<String, String> noInGroupNums = new HashMap<>();
+            HashMap<String, List<OrderProductCalVO>> noInDetails = new HashMap<>();
+
+            for(OrderProductCalVO vo : noInNums){
+                String materialId = vo.getMaterialId();
+                String theSum = noInGroupNums.get(materialId);
+                if(theSum==null || theSum.isEmpty()){
+                    noInGroupNums.put(materialId,BigDecimalUtil.sub(vo.getPreparedNum(),vo.getInNum()).toString());
+                    ArrayList<OrderProductCalVO> objs = new ArrayList<>();
+                    objs.add(vo);
+                    noInDetails.put(materialId,objs);
+                }else{
+                    noInGroupNums.put(materialId, BigDecimalUtil.add(theSum,BigDecimalUtil.sub(vo.getPreparedNum(),vo.getInNum()).toString()).toString());
+                    List<OrderProductCalVO> objs = noInDetails.get(materialId);
+                    objs.add(vo);
+                }
+            }
+
+            for(Map.Entry<String,String> entry : noInGroupNums.entrySet()){
+                String materialId = entry.getKey();
+                String needNum = entry.getValue();
+                RepositoryStock stock = materialIds.get(materialId);
+                stock.setNoInNum(needNum);
+            }
         }
 
-        // 获取未投产应需用量
-        List<OrderProductCalVO> noProductionNums = orderProductOrderService.calNoProductOrdersWithMaterialIds(materialIds.keySet());
-        for(OrderProductCalVO vo : noProductionNums){
-            String materialId = vo.getMaterialId();
-            RepositoryStock stock = materialIds.get(materialId);
-            stock.setNeedNum(vo.getNeedNum());
-        }
-        // 获取投产未领数量
-        List<RepositoryStock> noPickMaterials = orderProductOrderService.listNoPickMaterialsWithMaterialIds(materialIds.keySet());
-        for(RepositoryStock vo : noPickMaterials) {
-            String materialId = vo.getMaterialId();
-            RepositoryStock stock = materialIds.get(materialId);
-            stock.setNoPickNum(""+vo.getNum());
-        }
-        // 获取已报未入库数量
-        List<OrderProductCalVO> noInNums = produceOrderMaterialProgressService.listNoInNumsWithMaterialIds(materialIds.keySet());
-        for(OrderProductCalVO vo : noInNums){
-            String materialId = vo.getMaterialId();
-            RepositoryStock stock = materialIds.get(materialId);
-            stock.setNoInNum(vo.getNoInNum());
-        }
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
@@ -143,24 +201,85 @@ public class RepositoryStockController extends BaseController {
 
                 // 获取未投产应需用量
                 List<OrderProductCalVO> noProductionNums = orderProductOrderService.calNoProductOrdersWithMaterialIds(materialIds.keySet());
+                HashMap<String, String> noProductionGroupNums = new HashMap<>();
+                HashMap<String, List<OrderProductCalVO>> noProductionGroupDetails = new HashMap<>();
+
                 for(OrderProductCalVO vo : noProductionNums){
                     String materialId = vo.getMaterialId();
-                    RepositoryStock stock = materialIds.get(materialId);
-                    stock.setNeedNum(vo.getNeedNum());
+                    String theSum = noProductionGroupNums.get(materialId);
+                    if(theSum==null || theSum.isEmpty()){
+                        noProductionGroupNums.put(materialId,vo.getNeedNum());
+                        ArrayList<OrderProductCalVO> orderProductCalVOS = new ArrayList<>();
+                        orderProductCalVOS.add(vo);
+                        noProductionGroupDetails.put(materialId,orderProductCalVOS);
+                    }else{
+                        noProductionGroupNums.put(materialId, BigDecimalUtil.add(theSum,vo.getNeedNum()).toString());
+                        List<OrderProductCalVO> orderProductCalVOS = noProductionGroupDetails.get(materialId);
+                        orderProductCalVOS.add(vo);
+                    }
                 }
+
+                for(Map.Entry<String,String> entry : noProductionGroupNums.entrySet()){
+                    String materialId = entry.getKey();
+                    String needNum = entry.getValue();
+                    RepositoryStock stock = materialIds.get(materialId);
+                    stock.setNeedNum(needNum);
+                    stock.setNoProductionNums(noProductionGroupDetails.get(materialId));
+                }
+
                 // 获取投产未领数量
                 List<RepositoryStock> noPickMaterials = orderProductOrderService.listNoPickMaterialsWithMaterialIds(materialIds.keySet());
-                for(RepositoryStock vo : noPickMaterials) {
+                HashMap<String, String> noPickGroupNums = new HashMap<>();
+                HashMap<String, List<RepositoryStock>> noPickDetails = new HashMap<>();
+
+                for(RepositoryStock vo : noPickMaterials){
                     String materialId = vo.getMaterialId();
+                    String theSum = noPickGroupNums.get(materialId);
+                    if(theSum==null || theSum.isEmpty()){
+                        noPickGroupNums.put(materialId,vo.getNum()+"");
+                        ArrayList<RepositoryStock> objs = new ArrayList<>();
+                        objs.add(vo);
+                        noPickDetails.put(materialId,objs);
+                    }else{
+                        noPickGroupNums.put(materialId, BigDecimalUtil.add(theSum,vo.getNum()+"").toString());
+                        List<RepositoryStock> objs = noPickDetails.get(materialId);
+                        objs.add(vo);
+                    }
+                }
+
+                for(Map.Entry<String,String> entry : noPickGroupNums.entrySet()){
+                    String materialId = entry.getKey();
+                    String needNum = entry.getValue();
                     RepositoryStock stock = materialIds.get(materialId);
-                    stock.setNoPickNum(""+vo.getNum());
+                    stock.setNoPickNum(needNum);
+                    stock.setNoPickNums(noPickDetails.get(materialId));
                 }
                 // 获取已报未入库数量
                 List<OrderProductCalVO> noInNums = produceOrderMaterialProgressService.listNoInNumsWithMaterialIds(materialIds.keySet());
+                HashMap<String, String> noInGroupNums = new HashMap<>();
+                HashMap<String, List<OrderProductCalVO>> noInDetails = new HashMap<>();
+
                 for(OrderProductCalVO vo : noInNums){
                     String materialId = vo.getMaterialId();
+                    String theSum = noInGroupNums.get(materialId);
+                    if(theSum==null || theSum.isEmpty()){
+                        noInGroupNums.put(materialId,BigDecimalUtil.sub(vo.getPreparedNum(),vo.getInNum()).toString());
+                        ArrayList<OrderProductCalVO> objs = new ArrayList<>();
+                        objs.add(vo);
+                        noInDetails.put(materialId,objs);
+                    }else{
+                        noInGroupNums.put(materialId, BigDecimalUtil.add(theSum,BigDecimalUtil.sub(vo.getPreparedNum(),vo.getInNum()).toString()).toString());
+                        List<OrderProductCalVO> objs = noInDetails.get(materialId);
+                        objs.add(vo);
+                    }
+                }
+
+                for(Map.Entry<String,String> entry : noInGroupNums.entrySet()){
+                    String materialId = entry.getKey();
+                    String needNum = entry.getValue();
                     RepositoryStock stock = materialIds.get(materialId);
-                    stock.setNoInNum(vo.getNoInNum());
+                    stock.setNoInNum(needNum);
+                    stock.setNoInNums(noInDetails.get(materialId));
                 }
             }
 
