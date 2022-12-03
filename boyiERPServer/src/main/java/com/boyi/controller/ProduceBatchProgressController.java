@@ -4,10 +4,7 @@ package com.boyi.controller;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
-import com.boyi.entity.CostOfLabourType;
-import com.boyi.entity.ProduceBatch;
-import com.boyi.entity.ProduceBatchProgress;
-import com.boyi.entity.RepositoryPickMaterial;
+import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -95,6 +92,8 @@ public class ProduceBatchProgressController extends BaseController {
 
             HashMap<String, Integer> batchIdStr_count = new HashMap<>();
 
+            Map<Long, ProduceBatch> batchUniqueId_pb = new HashMap<>();
+
 
             // 判断一个批次号只能有一个出库日期
             for(ProduceBatchProgress progress : progresses) {
@@ -102,6 +101,8 @@ public class ProduceBatchProgressController extends BaseController {
 
                 if(batchIdStr==null){
                     ProduceBatch pb = produceBatchService.getById(progress.getProduceBatchId());
+                    batchUniqueId_pb.put(progress.getProduceBatchId(),pb);
+
                     batchIdStr = pb.getBatchId().split("-")[0];
                     batchUniqueId_batchIdStr.put(progress.getProduceBatchId(),batchIdStr);
                 }
@@ -176,6 +177,10 @@ public class ProduceBatchProgressController extends BaseController {
                     progress.setUpdateUser(userName);
                     produceBatchProgressService.updateById(progress);
                 }
+                // 假如是裁断部门，则对该品牌、该货号的组成结构进行外加工信息增删改
+                if(type.getSeq() == 1 ) {
+                    changeProduceProductConstituentMaterial(batchUniqueId_pb.get(progress.getProduceBatchId()).getOrderNum(),progress.getMaterialId(),principal.getName());
+                }
 
             }
 
@@ -187,5 +192,35 @@ public class ProduceBatchProgressController extends BaseController {
         }
         return ResponseResult.succ("修改成功");
 
+    }
+
+    private void changeProduceProductConstituentMaterial(String orderNum, String materialId,String name) {
+        if(orderNum.isEmpty()|| materialId==null || materialId.isEmpty()){
+            return;
+        }
+        OrderProductOrder opo = orderProductOrderService.getByOrderNum(orderNum);
+        if(opo==null){
+            return;
+        }
+        ProduceProductConstituent ppc = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
+        if(ppc==null){
+            throw new RuntimeException("没有审核通过的组成结构信息!");
+        }
+        List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(ppc.getId());
+
+        // 假如已经存在该物料，则不新增
+        for(ProduceProductConstituentDetail detail :details){
+            if(detail.getMaterialId().equals(materialId)){
+               return;
+            }
+
+        }
+        ProduceProductConstituentDetail detail2 = new ProduceProductConstituentDetail();
+        detail2.setConstituentId(ppc.getId());
+        detail2.setMaterialId(materialId);
+        detail2.setDosage("1");
+        detail2.setCanShowPrint("0");
+        detail2.setCreatedUser(name);
+        produceProductConstituentDetailService.save(detail2);
     }
 }

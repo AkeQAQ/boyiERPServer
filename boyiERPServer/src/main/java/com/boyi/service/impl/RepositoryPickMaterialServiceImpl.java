@@ -121,4 +121,9 @@ public class RepositoryPickMaterialServiceImpl extends ServiceImpl<RepositoryPic
         return this.repositoryPickMaterialMapper.listGTEndDate(endDate);
     }
 
+    @Override
+    public void updateBatchIdAppendYearByOneId(String year, String batchId) {
+         this.repositoryPickMaterialMapper.updateBatchIdAppendYearByOneId(year,batchId);
+    }
+
 }

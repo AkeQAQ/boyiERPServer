@@ -124,5 +124,10 @@ public class RepositoryReturnMaterialServiceImpl extends ServiceImpl<RepositoryR
         return this.repositoryReturnMaterialMapper.listGTEndDate(endDate);
     }
 
+    @Override
+    public void updateBatchIdAppendYearByOneId(String year, String batchId) {
+        this.repositoryReturnMaterialMapper.updateBatchIdAppendYearByOneId(year,batchId);
+    }
+
 
 }

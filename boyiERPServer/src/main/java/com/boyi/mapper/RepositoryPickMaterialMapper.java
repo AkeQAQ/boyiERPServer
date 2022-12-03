@@ -100,4 +100,12 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
             " and rpm.pick_date > #{endDate}" +
             " group by rpmd.material_id")
     List<RepositoryPickMaterial> listGTEndDate(@Param("endDate") String endDate);
+
+    @Update("" +
+            " update " +
+            "repository_pick_material  set batch_id =  CONCAT(#{year},batch_id)" +
+            "  where  batch_id =#{batchId}"+
+            "  "  +
+            " ")
+    void updateBatchIdAppendYearByOneId(@Param("year")String year,@Param("batchId") String batchId);
 }

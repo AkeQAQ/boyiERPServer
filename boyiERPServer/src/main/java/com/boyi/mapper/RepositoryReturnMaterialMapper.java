@@ -83,7 +83,7 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
     @Update("<script>" +
             " update " +
             "repository_return_material  set batch_id =  CONCAT(#{year},batch_id)" +
-            "  where  id in"+
+            "  where  batch_id in"+
             " <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> "  +
             " </script>")
     void updateBatchIdAppendYearById(@Param("year")String year,@Param("batchIds") List<String> batchIds);
@@ -96,4 +96,12 @@ public interface RepositoryReturnMaterialMapper extends BaseMapper<RepositoryRet
             " and rrm.return_date > #{endDate}" +
             " group by rrmd.material_id")
     List<RepositoryReturnMaterial> listGTEndDate(@Param("endDate") String endDate);
+
+    @Update("" +
+            " update " +
+            "repository_return_material  set batch_id =  CONCAT(#{year},batch_id)" +
+            "  where  batch_id = #{batchId}"+
+            " ")
+    void updateBatchIdAppendYearByOneId(@Param("year")String year,@Param("batchId") String batchId);
+
 }

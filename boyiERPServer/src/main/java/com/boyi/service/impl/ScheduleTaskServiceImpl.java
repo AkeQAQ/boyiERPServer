@@ -2,6 +2,7 @@ package com.boyi.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.EmailUtils;
 import com.boyi.entity.*;
 import com.boyi.mapper.OtherMapper;
@@ -88,25 +89,25 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     @Transactional
     public void changeProduceBatchTranService() {
         try{
-            LocalDate now = LocalDate.now();
-            int m = now.getMonthValue();
-            int d = now.getDayOfMonth();
-            String md = m+""+d;
+            LocalDate now = LocalDate.now().plusDays(-300);
+
+            String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
             // 3. 移动生产序号表
-            List<ProduceBatch> batches = produceBatchService.listByMonthAndDay(md);
+            List<ProduceBatch> batches = produceBatchService.listByMonthAndDay(dateStr);
             if(batches==null || batches.size() ==0){
+                log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】日期:{}数据为空",dateStr);
                 return;
             }
-            LocalDateTime createdDate = batches.get(0).getCreated();
-            String year = createdDate.getYear()+"";
-            log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【开始........】数据:{},year:{}",batches,year);
-            addBatchHisAndRemove(batches,year);
+
+
+            log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【开始........】日期:{}数据:{}",dateStr,batches);
+            addBatchHisAndRemove(batches);
             log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【结束........】");
 
             log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【开始........】");
             // 修改领料表，退料表得生产序号，加上日期
-            updatePickReturnBatchId(batches,year);
+            updatePickReturnBatchId(batches);
             log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【结束........】");
 
             log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【开始........】");
@@ -120,7 +121,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             log.info("【定时任务】【移动produceBatch】【移动车间进度表】【结束........】");
 
         }catch (Exception e){
-            log.error("发生异常..");
+            log.error("发生异常..",e);
             try{
                 EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动produceBatch】报错..");
             }catch (Exception e2){
@@ -131,17 +132,38 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     }
 
+    /**
+     *  年份的判断： 获取创建日期的月份，假如月份是1月，并且 批次号是12开头的,并且长度是6的，则年份是创建日期年份-1
+     *                              假如月份是12月份的，并且批次号是1开头的，并且长度是5的，则年份是创建日期+1
+     *                              其他的返回创建日期的年份。
+     * @param pb
+     * @return
+     */
+    private String getYearFromBatch(ProduceBatch pb) {
+        LocalDateTime created = pb.getCreated();
+        int year = created.getYear();
+        int month = created.getDayOfMonth();
+        String batchId = pb.getBatchId().split("-")[0];
+        // 0. 假如月份是12月份的，并且批次号是1开头的，并且长度是5的，则年份是创建日期+1
+        if((month==12) && batchId.trim().length()==5&&(batchId.startsWith("1"))){
+            return (year+1)+"";
+        }
+        if(month==1 && batchId.length() == 6 && (batchId.startsWith("12"))   ){
+            return (year-1)+"";
+        }
+        return year+"";
+    }
+
     @Transactional
     @Override
     public void changeProductOrderAndProgress() {
         try {
-            LocalDate now = LocalDate.now();
-            int m = now.getMonthValue();
-            int d = now.getDayOfMonth();
-            String md = m+""+d;
+            LocalDate now = LocalDate.now().plusDays(-300);
+
+            String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
             // 1. 获取老的产品订单表
-            List<OrderProductOrder> lists =orderProductOrderService.listByMonthAndDay(md);
-            log.info("【定时任务】获取月日%{},去年创建的产品订单数据{}",md,lists);
+            List<OrderProductOrder> lists =orderProductOrderService.listByMonthAndDay(dateStr);
+            log.info("【定时任务】获取年月日%{},去年创建的产品订单数据{}",dateStr,lists);
             if(lists.isEmpty()){
                 return;
             }
@@ -153,16 +175,14 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderIds(orderIds);
             log.info("【定时任务】获取采购进度，订单号{}",orderIds);
 
-            String year = lists.get(0).getCreated().getYear()+"";
-
-            log.info("【定时任务】添加产品订单历史表{}，删除产品订单表.year:{}",lists,year);
+            log.info("【定时任务】添加产品订单历史表{}，删除产品订单表",lists);
             // 3. 添加到历史表，并且移除原表
-            addOrderHisAndRemove(lists,year);
+            addOrderHisAndRemove(lists);
 
             log.info("【定时任务】添加进度表{}，删除进度表",progresses);
             addProgressHisAndRemove(progresses);
         }catch (Exception e){
-            log.error("发生异常..");
+            log.error("发生异常..",e);
             try{
                 EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动ProductOrderAndProgress】报错..");
             }catch (Exception e2){
@@ -171,6 +191,28 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             throw e;
         }
 
+    }
+
+    /**
+     *  年份的判断： 获取创建日期的月份，假如月份是1月、2月、3月，并且 订单号是12,11,10开头的,并且长度是7的，则年份是创建日期年份-1
+     *                              假如月份是12月份的，并且订单号是1，2开头的，并且长度是6的，则年份是创建日期+1
+     *                              其他的返回创建日期的年份。
+     * @param opo
+     * @return
+     */
+    private String getYearFromOrderProductOrder(OrderProductOrder opo) {
+        LocalDateTime created = opo.getCreated();
+        int year = created.getYear();
+        int month = created.getDayOfMonth();
+        String orderNum = opo.getOrderNum();
+        // 0. 假如月份是12月份的，并且订单号是1，2开头的，并且长度是6的，则年份是创建日期+1
+        if((month==12) && orderNum.trim().length()==6&&(orderNum.startsWith("1") || orderNum.startsWith("2"))){
+            return (year+1)+"";
+        }
+        if(month<=3 && orderNum.length() == 7 && (orderNum.startsWith("12") || orderNum.startsWith("11") || orderNum.startsWith("10"))   ){
+            return (year-1)+"";
+        }
+        return year+"";
     }
 
     @Transactional
@@ -218,7 +260,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                 }
             }
         }catch (Exception e){
-            log.error("发生异常..");
+            log.error("发生异常..",e);
             try{
                 EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期修改出入库自增ID的日期】报错..");
             }catch (Exception e2){
@@ -245,7 +287,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         produceOrderMaterialProgressService.removeByIds(removeIds);
     }
 
-    private void addOrderHisAndRemove(List<OrderProductOrder> lists,String year) {
+    private void addOrderHisAndRemove(List<OrderProductOrder> lists) {
 
         // 1. 添加到历史表（订单号加年份）
         ArrayList<HisOrderProductOrder> hisLists = new ArrayList<>();
@@ -255,7 +297,9 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             HisOrderProductOrder hisOrder = new HisOrderProductOrder();
             BeanUtils.copyProperties(order,hisOrder);
             hisOrder.setId(order.getId());
-            hisOrder.setOrderNum(year+hisOrder.getOrderNum());
+            String shouldYear = getYearFromOrderProductOrder(order);
+            hisOrder.setOrderNum(shouldYear+hisOrder.getOrderNum());
+            log.info("【定时任务】【修改orderNum】产品订单:{},老 orderNum:{},新的orderNum:{}",order,order.getOrderNum(),hisOrder.getOrderNum());
             hisLists.add(hisOrder);
             removeIds.add(order.getId());
         }
@@ -263,6 +307,8 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         // 2. 删除原表
         orderProductOrderService.removeByIds(removeIds);
     }
+
+
 
     // 每日库存保存
     private void everyDayStock() {
@@ -293,7 +339,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         }
         List<ProduceBatchProgress> progresses = produceBatchProgressService.listByBatchIds(produceBatchIds);
 
-        // 2. 添加到历史表（订单号,批次号加年份）
+        // 2. 添加到历史表
         List<HisProduceBatchProgress> hisLists = new ArrayList<>();
 
         for(ProduceBatchProgress progress : progresses){
@@ -319,7 +365,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         }
         List<ProduceBatchDelay> delays = produceBatchDelayService.listByBatchIds(produceBatchIds);
 
-        // 2. 添加到历史表（订单号,批次号加年份）
+        // 2. 添加到历史表
         List<HisProduceBatchDelay> hisLists = new ArrayList<>();
 
         for(ProduceBatchDelay delay : delays){
@@ -334,21 +380,21 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         produceBatchDelayService.removeByIds(removeIds);
     }
 
-    private void updatePickReturnBatchId(List<ProduceBatch> batches, String year) {
-        ArrayList<String> batchIds = new ArrayList<>();
+    private void updatePickReturnBatchId(List<ProduceBatch> batches) {
         // 查询生产序号的领料表和退料表
         for(ProduceBatch pb : batches){
-            batchIds.add(pb.getBatchId());
+            String year = getYearFromBatch(pb);
+            // 修改对应的领料表和退料表
+            repositoryPickMaterialService.updateBatchIdAppendYearByOneId(year,pb.getBatchId());
+            repositoryReturnMaterialService.updateBatchIdAppendYearByOneId(year,pb.getBatchId());
+            log.info("【定时任务】【移动produceBatch】修改领料表表，退料表，batchId:{},添加年份:{}",pb.getBatchId(),year);
         }
-        // 修改对应的领料表和退料表
-        repositoryPickMaterialService.updateBatchIdAppendYearById(year,batchIds);
-        repositoryReturnMaterialService.updateBatchIdAppendYearById(year,batchIds);
-        log.info("【定时任务】修改领料表表，退料表，batchIds:{},添加年份:{}",batchIds,year);
+
 
     }
 
 
-    private void addBatchHisAndRemove(List<ProduceBatch> batches, String year) {
+    private void addBatchHisAndRemove(List<ProduceBatch> batches) {
 
         // 1. 添加到历史表（订单号,批次号加年份）
         ArrayList<HisProduceBatch> hisLists = new ArrayList<>();
@@ -358,8 +404,11 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             HisProduceBatch hisBatch = new HisProduceBatch();
             BeanUtils.copyProperties(batch,hisBatch);
             hisBatch.setId(batch.getId());
+            String year = getYearFromBatch(batch);
             hisBatch.setOrderNum(year+hisBatch.getOrderNum());
             hisBatch.setBatchId(year+hisBatch.getBatchId());
+            log.info("【定时任务】【移动produceBatch】【修改批次号】pb:{},老的orderNum:{},新的orderNum:{},老的batchId:{},新的batchId:{}",batch,
+                    batch.getOrderNum(),hisBatch.getOrderNum(),batch.getBatchId(),hisBatch.getBatchId());
 
             hisLists.add(hisBatch);
             removeIds.add(batch.getId());
