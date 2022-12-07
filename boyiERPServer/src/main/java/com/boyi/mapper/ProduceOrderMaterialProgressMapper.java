@@ -124,6 +124,11 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
     @Select("<script> select pomp.material_id,pomp.prepared_num,in_num,opo.product_num,opo.product_brand,opo.order_num,opo.order_number  from produce_order_material_progress pomp,order_product_order opo " +
             "           where pomp.order_id=opo.id and pomp.material_id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach>" +
             " and cast(pomp.prepared_num as DECIMAL(12,5)) > cast(pomp.in_num as DECIMAL(12,5)) " +
+            " union all " +
+            "" +
+            " select pomp2.material_id,pomp2.prepared_num,pomp2.in_num,'补数备料',null,null,null  from " +
+            " produce_order_material_progress pomp2 where pomp2.order_id is null and pomp2.material_id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach>" +
+            "             and cast(pomp2.prepared_num as DECIMAL(12,5)) > cast(pomp2.in_num as DECIMAL(12,5)) " +
             "            </script>")
     List<OrderProductCalVO> listNoInNumsWithMaterialIds(@Param("materialIds") Set<String> keySet);
 }
