@@ -36,7 +36,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     UserDetailsServiceImpl userDetailService;
 
     public static final String[] URL_WHITELIST = {"/webjars/**", "/favicon.ico", "/captcha", "/login", "/logout","/test/**"
-            ,"/*.png","/*.jpg"
+            ,"/*.png","/*.jpg","/*.mp4"
 
             };
 

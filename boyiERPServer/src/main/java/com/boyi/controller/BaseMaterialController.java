@@ -26,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,9 +51,68 @@ public class BaseMaterialController extends BaseController {
     @Value("${picture.craftPath}")
     private String pictureCraftPath;
     private final String  picPrefix = "baseDataMaterial-";
+    private final String  videoPrefix = "baseDataMaterialVideo-";
 
     @Value("${poi.baseDataMaterialDemoPath}")
     private String poiDemoPath;
+
+
+    @RequestMapping(value = "/removeVideoPath", method = RequestMethod.GET)
+    public ResponseResult removeVideoPath(String id) {
+        if(id==null || id.isEmpty()){
+            return ResponseResult.fail("没有ID");
+        }
+        BaseMaterial bm = baseMaterialService.getById(id);
+        String fileName = bm.getVideoUrl();
+
+        // 删除视频
+        File delFile = new File(pictureCraftPath, fileName);
+        if(delFile.exists()){
+            delFile.delete();
+        }else{
+            return ResponseResult.fail("文件["+fileName+"] 不存在,无法删除");
+        }
+        baseMaterialService.updateNullWithField(bm,DBConstant.TABLE_BASE_MATERIAL.VIDEO_URL_FIELDNAME);
+
+        return ResponseResult.succ("删除视频成功!");
+    }
+
+
+
+    @RequestMapping(value = "/uploadVideo", method = RequestMethod.POST)
+    public ResponseResult uploadVideo(String id,@RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
+        if(id==null || id.isEmpty()){
+            return ResponseResult.fail("没有ID");
+        }
+        // 一个ID只能允许传一个视频
+        BaseMaterial bm = baseMaterialService.getById(id);
+
+        if(bm.getVideoUrl()!=null && !bm.getVideoUrl().isEmpty()){
+            return ResponseResult.fail("一个物料，只能允许上传一个视频");
+        }
+
+        String path = "";
+        for (int i = 0; i < files.length; i++) {
+            log.info("文件内容:{}",files[i]);
+            MultipartFile file = files[i];
+            try (InputStream fis = file.getInputStream();){
+                String originalFilename = file.getOriginalFilename();
+                String[] split = originalFilename.split("\\.");
+                String suffix = split[split.length - 1];// 获取后缀
+
+                String fileName = videoPrefix +id+ "_" + System.currentTimeMillis() + "." + suffix;
+                FileUtils.writeFile(fis,pictureCraftPath,fileName);
+                path =  fileName;
+                bm.setVideoUrl(path);
+                baseMaterialService.updateById(bm);
+            }catch (Exception e){
+                log.error("error:",e);
+
+            }
+        }
+        return ResponseResult.succ(path);
+    }
+
 
     /**
      * 分页导出

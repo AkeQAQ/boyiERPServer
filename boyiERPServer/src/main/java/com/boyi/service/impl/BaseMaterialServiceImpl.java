@@ -37,7 +37,8 @@ public class BaseMaterialServiceImpl extends ServiceImpl<BaseMaterialMapper, Bas
     @Override
     public Page<BaseMaterial> pageBySearch(Page page,String queryField, String searchStr) {
         return this.page(page, new QueryWrapper<BaseMaterial>()
-                .like(StrUtil.isNotBlank(searchStr), queryField, searchStr));
+                .like(StrUtil.isNotBlank(searchStr), queryField, searchStr)
+                .orderByDesc(DBConstant.TABLE_BASE_MATERIAL.CREATED_FIELDNAME));
     }
 
     @Override
@@ -87,5 +88,12 @@ public class BaseMaterialServiceImpl extends ServiceImpl<BaseMaterialMapper, Bas
                 .eq(DBConstant.TABLE_BASE_MATERIAL.UNIT_FIELDNAME,unit)
                 .eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME,groupCode)
                 .ne(DBConstant.TABLE_BASE_MATERIAL.ID,id));
+    }
+
+    @Override
+    public void updateNullWithField(BaseMaterial baseMaterial ,String videoUrlFieldname) {
+        this.update(new UpdateWrapper<BaseMaterial>()
+                .set(videoUrlFieldname,null)
+                .eq(DBConstant.TABLE_BASE_MATERIAL.ID,baseMaterial.getId()));
     }
 }

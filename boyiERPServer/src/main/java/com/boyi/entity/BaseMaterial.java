@@ -88,5 +88,7 @@ public class BaseMaterial  {
     @ExcelAttribute(sort = 7)
     private Double lowWarningLine;
 
+    private String videoUrl;
+
 
 }

@@ -293,6 +293,7 @@ public class DBConstant {
         public static final String UPDATED_USER_FIELDNAME = "update_user";
         public static final String STATUS_FIELDNAME = "status";
         public static final String LOW_WARNING_LINE_FIELDNAME = "low_warning_line";
+        public static final String VIDEO_URL_FIELDNAME = "video_url";
 
 
         /**

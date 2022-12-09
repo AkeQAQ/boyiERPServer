@@ -33,4 +33,7 @@ public interface BaseMaterialService extends IService<BaseMaterial> {
     List<BaseMaterial> listSame(String name, String unit, String groupCode);
 
     List<BaseMaterial> listSameExcludSelf(String name, String unit, String groupCode, String id);
+
+    void updateNullWithField(BaseMaterial bm,String videoUrlFieldname);
+
 }

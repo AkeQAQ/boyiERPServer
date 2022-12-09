@@ -149,7 +149,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " and opo.product_brand = ppc.product_brand" +
             " and ppc.id = ppcd.constituent_id" +
             " and (ppcd.material_id like '04.01%' or ppcd.material_id like '04.04%')" +
-            " and ppc.product_num like '%S%' and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
+            " and (ppc.product_num like '%S%' or ppc.product_num like '%L%'  )    and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
             " group by ppcd.material_id")
     List<Map<String, Object>> listBySTXMaterial(@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
 
