@@ -60,6 +60,7 @@ poi:
 
 picture:
   craftPath: D:/鞋业/互联网相关/ERP/boyiERPServer/target/classes/public
+  constituentPath: D:/鞋业/互联网相关/ERP/boyiERPServer/target/classes/public
 
 
 orderProductPrice:

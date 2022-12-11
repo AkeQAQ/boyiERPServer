@@ -43,6 +43,8 @@ public class ProduceProductConstituent extends BaseEntity {
 
     private Integer status;
 
+    private String videoUrl;
+
     @TableField(exist = false)
     private Integer caiduanForeignPriceStatus;
 

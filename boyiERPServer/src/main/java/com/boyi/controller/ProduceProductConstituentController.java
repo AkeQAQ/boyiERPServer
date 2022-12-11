@@ -6,10 +6,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
-import com.boyi.common.utils.BigDecimalUtil;
-import com.boyi.common.utils.EmailUtils;
-import com.boyi.common.utils.ExcelExportUtil;
-import com.boyi.common.utils.ThreadUtils;
+import com.boyi.common.fileFilter.MaterialPicFileFilter;
+import com.boyi.common.utils.*;
 import com.boyi.common.vo.RealDosageVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -21,10 +19,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.mail.MessagingException;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -52,6 +54,130 @@ public class ProduceProductConstituentController extends BaseController {
 
     @Value("${poi.realDosageDemoPath}")
     private String poiDemoPath;
+
+    @Value("${picture.constituentPath}")
+    private String pictureConstituentPath;
+    private final String  picPrefix = "produceProductConstituentPic-";
+    private final String  videoPrefix = "produceProductConstituentVideo-";
+
+
+    @RequestMapping(value = "/removeVideoPath", method = RequestMethod.GET)
+    public ResponseResult removeVideoPath(String id) {
+        if(id==null || id.isEmpty()){
+            return ResponseResult.fail("没有ID");
+        }
+        ProduceProductConstituent ppc = produceProductConstituentService.getById(id);
+        String fileName = ppc.getVideoUrl();
+
+        // 删除视频
+        File delFile = new File(pictureConstituentPath, fileName);
+        if(delFile.exists()){
+            delFile.delete();
+        }else{
+            return ResponseResult.fail("文件["+fileName+"] 不存在,无法删除");
+        }
+        produceProductConstituentService.updateNullWithField(ppc,DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.VIDEO_URL_FIELDNAME);
+        return ResponseResult.succ("删除视频成功!");
+    }
+
+
+
+    @RequestMapping(value = "/uploadVideo", method = RequestMethod.POST)
+    public ResponseResult uploadVideo(String id,@RequestParam("file") MultipartFile[] files, HttpServletRequest request) {
+        if(id==null || id.isEmpty()){
+            return ResponseResult.fail("没有ID");
+        }
+        // 一个ID只能允许传一个视频
+        ProduceProductConstituent ppc = produceProductConstituentService.getById(id);
+
+        if(ppc.getVideoUrl()!=null && !ppc.getVideoUrl().isEmpty()){
+            return ResponseResult.fail("一个组成结构，只能允许上传一个视频");
+        }
+
+        String path = "";
+        for (int i = 0; i < files.length; i++) {
+            log.info("文件内容:{}",files[i]);
+            MultipartFile file = files[i];
+            try (InputStream fis = file.getInputStream();){
+                String originalFilename = file.getOriginalFilename();
+                String[] split = originalFilename.split("\\.");
+                String suffix = split[split.length - 1];// 获取后缀
+
+                String fileName = videoPrefix +id+ "_" + System.currentTimeMillis() + "." + suffix;
+                FileUtils.writeFile(fis,pictureConstituentPath,fileName);
+                path =  fileName;
+                ppc.setVideoUrl(path);
+                produceProductConstituentService.updateById(ppc);
+            }catch (Exception e){
+                log.error("error:",e);
+
+            }
+        }
+        return ResponseResult.succ(path);
+    }
+
+
+    @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)
+    public ResponseResult getPicturesById( String id) {
+        // 根据ID 查询照片的路径和名字
+        File directory = new File(pictureConstituentPath);
+        MaterialPicFileFilter craftPicFileFilter = new MaterialPicFileFilter(picPrefix+id);
+        File[] files = directory.listFiles(craftPicFileFilter);
+
+        ArrayList<File> files1 = new ArrayList<>();
+        if(files!=null && files.length != 0){
+            for (int i = 0; i < files.length; i++) {
+                files1.add(files[i]);
+            }
+        }
+
+        Collections.sort(files1, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
+        });
+        ArrayList<String> names = new ArrayList<>();
+        for (int i = 0; i < files1.size(); i++) {
+            File oneFile = files1.get(i);
+            String name = oneFile.getName();
+            names.add(name);
+        }
+        return ResponseResult.succ(names);
+    }
+
+    @RequestMapping(value = "/delPic", method = RequestMethod.GET)
+    public ResponseResult delPic(String fileName) {
+        File delFile = new File(pictureConstituentPath, fileName);
+        if(delFile.exists()){
+            delFile.delete();
+        }else{
+            return ResponseResult.fail("文件["+fileName+"] 不存在,无法删除");
+        }
+        return ResponseResult.succ("删除成功");
+    }
+
+    @RequestMapping(value = "/uploadPic", method = RequestMethod.POST)
+    public ResponseResult uploadFile(String id, MultipartFile[] files) {
+        if(id==null || id.isEmpty()){
+            return ResponseResult.fail("没有ID");
+        }
+        for (int i = 0; i < files.length; i++) {
+            log.info("文件内容:{}",files[i]);
+            MultipartFile file = files[i];
+            try (InputStream fis = file.getInputStream();){
+                String originalFilename = file.getOriginalFilename();
+                String[] split = originalFilename.split("\\.");
+                String suffix = split[split.length - 1];// 获取后缀
+
+                FileUtils.writeFile(fis,pictureConstituentPath,picPrefix+id+"_"+System.currentTimeMillis()+"."+suffix);
+            }catch (Exception e){
+
+            }
+        }
+        return ResponseResult.succ("");
+    }
+
 
     /**
      * 获取全部

@@ -2,9 +2,11 @@ package com.boyi.service.impl;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.vo.RealDosageVO;
+import com.boyi.entity.BaseMaterial;
 import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.entity.RepositoryReturnMaterial;
 import com.boyi.mapper.ProduceProductConstituentMapper;
@@ -114,5 +116,12 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
     @Override
     public List<ProduceProductConstituent> listDistinctProductNum() {
         return produceProductConstituentMapper.listDistinctProductNum();
+    }
+
+    @Override
+    public void updateNullWithField(ProduceProductConstituent ppc, String videoUrlFieldname) {
+        this.update(new UpdateWrapper<ProduceProductConstituent>()
+                .set(videoUrlFieldname,null)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.ID_FIELDNAME,ppc.getId()));
     }
 }

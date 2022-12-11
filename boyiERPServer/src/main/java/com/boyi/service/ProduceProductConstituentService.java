@@ -39,4 +39,6 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
 
     List<ProduceProductConstituent> listDistinctProductNum();
 
+    void updateNullWithField(ProduceProductConstituent ppc, String videoUrlFieldname);
+
 }
