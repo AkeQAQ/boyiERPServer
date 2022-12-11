@@ -21,6 +21,10 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.mail.MessagingException;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -145,6 +149,51 @@ public class SaticScheduleTask {
         this.scheduleTaskService.changeProduceBatchTranService();
     }
 
+    @Scheduled(cron = "0 0 9 * * ?")
+    private void monitorDisk(){
+        InputStream in = null;
+        InputStreamReader isr=null;
+        BufferedReader read = null;
+        try {
+            String[] cmds = {"/bin/sh","-c","df -h"};
+            Process pro = Runtime.getRuntime().exec(cmds);
+//            pro.waitFor(); 较长时间需要
+             in = pro.getInputStream();
+             isr = new InputStreamReader(in);
+             read = new BufferedReader(isr);
+            String line = null;
+            StringBuilder sb = new StringBuilder();
+
+            while((line = read.readLine())!=null){
+                sb.append(line);
+                sb.append("<br>");
+            }
+            EmailUtils.sendMail(EmailUtils.MONITOR_NAME, "244454526@qq.com",new String[]{}, sb.toString());
+
+            read.close();
+            isr.close();
+            in.close();
+        }catch (IOException ioe){
+            try {
+            log.error("IO报错,",ioe);
+            if(read!=null){
+                read.close();
+            }
+            if(isr!=null){
+                isr.close();
+            }
+            if(in!=null){
+                in.close();
+            }
+            EmailUtils.sendMail(EmailUtils.MONITOR_NAME, "244454526@qq.com",new String[]{}, ioe.getMessage());
+            } catch (Exception e) {
+                log.error("报错.",e);
+            }
+        }catch (Exception e){
+            log.error("报错,",e);
+        }
+
+    }
 
 }
 

@@ -142,6 +142,9 @@ public class ProduceBatchProgressController extends BaseController {
                     if((progress.getMaterialId()==null || progress.getMaterialId().isEmpty()) && progress.getMaterialName()!=null&&!progress.getMaterialName().isEmpty()){
                         throw new RuntimeException("物料:"+progress.getMaterialName()+"没有选择，请确认");
                     }
+                    if(progress.getMaterialId()!=null && type.getSeq()==1 && !progress.getMaterialId().startsWith("11.01")){
+                        throw new RuntimeException(type.getTypeName()+",物料:"+progress.getMaterialName()+"，不是11.01分组下的，不能使用");
+                    }
 
                     String batchIdStr = batchUniqueId_batchIdStr.get(progress.getProduceBatchId());
 
@@ -173,6 +176,10 @@ public class ProduceBatchProgressController extends BaseController {
                     if(progress.getMaterialName()==null||progress.getMaterialName().isEmpty()){
                         progress.setMaterialId(null);
                     }
+                    if(progress.getMaterialId()!=null && type.getSeq()==1 && !progress.getMaterialId().startsWith("11.01")){
+                        throw new RuntimeException(type.getTypeName()+",物料:"+progress.getMaterialName()+"，不是11.01分组下的，不能使用");
+                    }
+
                     progress.setUpdated(now);
                     progress.setUpdateUser(userName);
                     produceBatchProgressService.updateById(progress);

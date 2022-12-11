@@ -1045,8 +1045,13 @@ public class RepositoryBuyinDocumentController extends BaseController {
             BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
         }else{
+            long start = System.currentTimeMillis();
             pageData = repositoryBuyinDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
+            long start2 = System.currentTimeMillis();
+            log.info("入库list查询,page 耗时:{}",(start2-start)+"ms");
             Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmount(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
+            long start3 = System.currentTimeMillis();
+            log.info("入库list查询,allPageTotalAmount 耗时:{}",(start3-start2)+"ms");
             BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
         }

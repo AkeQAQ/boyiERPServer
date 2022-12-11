@@ -16,6 +16,7 @@ import java.util.Properties;
 @Slf4j
 public class EmailUtils {
     public static final String MODULE_NAME="【博艺ERP】【物料低预警线】";
+    public static final String MONITOR_NAME="【博艺ERP】【系统监控】";
     public static final String MODULE_ADDNEW_MATERIAL_NAME="【博艺ERP】【补充物料】";
     public static final String MODULE_ADD_MATERIAL_NAME="【博艺ERP】【入库皮料】";
 
