@@ -147,13 +147,16 @@ public class ProduceProductConstituentController extends BaseController {
     }
 
     @RequestMapping(value = "/delPic", method = RequestMethod.GET)
-    public ResponseResult delPic(String fileName) {
+    public ResponseResult delPic(String fileName,String id) {
         File delFile = new File(pictureConstituentPath, fileName);
         if(delFile.exists()){
             delFile.delete();
         }else{
             return ResponseResult.fail("文件["+fileName+"] 不存在,无法删除");
         }
+
+        ProduceProductConstituent ppc = produceProductConstituentService.getById(id);
+        produceProductConstituentService.updateNullWithField(ppc,DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PIC_URL_FIELDNAME);
         return ResponseResult.succ("删除成功");
     }
 
@@ -162,6 +165,7 @@ public class ProduceProductConstituentController extends BaseController {
         if(id==null || id.isEmpty()){
             return ResponseResult.fail("没有ID");
         }
+        ProduceProductConstituent ppc = produceProductConstituentService.getById(id);
         for (int i = 0; i < files.length; i++) {
             log.info("文件内容:{}",files[i]);
             MultipartFile file = files[i];
@@ -170,7 +174,10 @@ public class ProduceProductConstituentController extends BaseController {
                 String[] split = originalFilename.split("\\.");
                 String suffix = split[split.length - 1];// 获取后缀
 
-                FileUtils.writeFile(fis,pictureConstituentPath,picPrefix+id+"_"+System.currentTimeMillis()+"."+suffix);
+                String s = picPrefix + id + "_" + System.currentTimeMillis() + "." + suffix;
+                FileUtils.writeFile(fis,pictureConstituentPath,s);
+                ppc.setPicUrl(s);
+                produceProductConstituentService.updateById(ppc);
             }catch (Exception e){
 
             }
@@ -531,12 +538,22 @@ public class ProduceProductConstituentController extends BaseController {
     public ResponseResult delete(@RequestBody Long[] ids) throws Exception{
         try {
 
+            List<ProduceProductConstituent> olds = produceProductConstituentService.listByIds(Arrays.asList(ids));
+            for(ProduceProductConstituent old : olds){
+                // 假如有照片和视频的，也不能反审核
+                if( old.getPicUrl()!=null || !old.getPicUrl().isEmpty() || old.getVideoUrl()!=null || !old.getVideoUrl().isEmpty()){
+                    return ResponseResult.fail(old.getId()+" 编号,已有照片和视频资料，不能反，请先删除照片和视频");
+                }
+            }
+
+
             boolean flag = produceProductConstituentService.removeByIds(Arrays.asList(ids));
 
             log.info("删除产品组成结构表信息,ids:{},是否成功：{}",ids,flag?"成功":"失败");
             if(!flag){
                 return ResponseResult.fail("产品组成结构删除失败");
             }
+
              produceProductConstituentDetailService.delByDocumentIds(ids);
 
             return ResponseResult.succ("删除成功");
@@ -989,6 +1006,7 @@ public class ProduceProductConstituentController extends BaseController {
 
             }
         }
+
 
 
         ProduceProductConstituent produceProductConstituent = new ProduceProductConstituent();

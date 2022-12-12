@@ -948,6 +948,7 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String ID_FIELDNAME = "id";
         public static final String VIDEO_URL_FIELDNAME = "video_url";
+        public static final String PIC_URL_FIELDNAME = "pic_url";
 
 
 
