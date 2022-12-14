@@ -1258,6 +1258,10 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrder.setUpdated(LocalDateTime.now());
         orderProductOrder.setUpdatedUser(principal.getName());
         try {
+            OrderProductOrder old = orderProductOrderService.getById(orderProductOrder.getId());
+            if(old.getOrderNumber().intValue() > orderProductOrder.getOrderNumber()){
+                return ResponseResult.fail("新的订单数目["+orderProductOrder.getOrderNumber().intValue()+"] 不允许比老的订单数目["+old.getOrderNumber()+"] 少");
+            }
 
             orderProductOrderService.updateById(orderProductOrder);
 
