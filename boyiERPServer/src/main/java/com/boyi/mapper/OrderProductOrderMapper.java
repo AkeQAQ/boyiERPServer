@@ -201,4 +201,19 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " where opo.order_type!=2 and substring_index(opo.order_num ,'-',1) >= #{minOrderNum} and substring_index(opo.order_num ,'-',1) <= #{maxOrderNum}")
     List<OrderProductOrder> listByOrderNumWithStartAndEnd(@Param("minOrderNum")Integer minOrderNum,@Param("maxOrderNum") Integer maxOrderNum);
 
+    @Select("" +
+            "" +
+            " select ppcd.material_id,cast(sum((" +
+            " ((IFNULL(pb.size34,0)+IFNULL(pb.size35,0)+IFNULL(pb.size36,0)+IFNULL(pb.size37,0)+IFNULL(pb.size38,0)+IFNULL(pb.size39,0)+IFNULL(pb.size40,0)+IFNULL(pb.size41,0)+IFNULL(pb.size42,0)+IFNULL(pb.size43,0)+IFNULL(pb.size44,0)+IFNULL(pb.size45,0)+IFNULL(pb.size46,0)+IFNULL(pb.size47,0)))" +
+            " *ppcd.dosage)) as DECIMAL(12,5)) cal_num from order_product_order opo," +
+            " produce_product_constituent ppc," +
+            " produce_product_constituent_detail ppcd ," +
+            " produce_batch pb " +
+            " where opo.product_num = ppc.product_num " +
+            " and opo.product_brand = ppc.product_brand" +
+            " and ppc.id = ppcd.constituent_id" +
+            " and pb.id = #{pbId} and (ppcd.material_id like '04.%' or ppcd.material_id like '06.%') " +
+            " and pb.order_num = opo.order_num " +
+            " group by ppcd.material_id")
+    List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(@Param("pbId")Long pbId);
 }

@@ -25,7 +25,7 @@ import java.util.Set;
 public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
 
     String querySql =
-            " select pb.*,opo.product_num,opo.product_brand,opo.order_type,opo.end_date " +
+            " select pb.*,opo.product_num,opo.product_brand,opo.order_type,opo.end_date,(select rpm.id from repository_pick_material rpm where rpm.batch_id = pb.batch_id and rpm.department_id=4) zc_pick_id " +
                     "  from " +
                     "             produce_batch pb inner join order_product_order opo on pb.order_num = opo.order_num" +
                     "            order by created desc";

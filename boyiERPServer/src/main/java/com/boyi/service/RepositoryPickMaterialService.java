@@ -31,7 +31,7 @@ public interface RepositoryPickMaterialService extends IService<RepositoryPickMa
 
     List<RepositoryPickMaterial> countLTByCloseDate(LocalDate closeDate);
 
-    List<RepositoryPickMaterial> getSameBatch(Long id,String comment);
+    List<RepositoryPickMaterial> getSameBatch(Long id,String comment,Long departmentId);
 
     List<RepositoryPickMaterial> listByBatchIds(ArrayList<String> batchIds);
 

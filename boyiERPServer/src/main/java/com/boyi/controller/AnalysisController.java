@@ -43,6 +43,31 @@ import java.util.*;
 public class AnalysisController extends BaseController {
     public static Long over_days = 2L;
 
+    public static void main(String[] args) {
+        // 对成型工价按产量计算工价最优解
+        String dxNumber = "10000"; //  单鞋月数量
+        String stxNumber = "10000"; // 沙滩月鞋数量
+        String monthDays = "30";
+
+        String upLimitPerson = "500"; // 每人每日工作量上限
+        HashMap<String, String> price_layout = new HashMap<>(); // 工价分布，1人：工价。2人：工价
+        price_layout.put("1","0.96");// 1人单价0.96一双
+        price_layout.put("2","0.48");// 2人单价0.48一双（因为双数按总的量来计算，也就是每人工作量其实只有250双）
+        price_layout.put("3","0.32");
+        price_layout.put("4","0.24");
+
+        // 计算复底数量怎么安排
+        // 1. 按月数量计算天数量
+        String totalNumber = BigDecimalUtil.add(dxNumber, stxNumber).toString();
+
+
+
+
+        HashMap<String, Map<String, String>> fudi = new HashMap<>();// 复底的。key：工序，value：
+
+
+
+    }
 
 
     /**

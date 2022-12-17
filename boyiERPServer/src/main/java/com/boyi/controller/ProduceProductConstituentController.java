@@ -647,7 +647,11 @@ public class ProduceProductConstituentController extends BaseController {
         }
 
         Set<String> materialIds = new HashSet<>();
-        StringBuilder sb = new StringBuilder("产品组成ID:").append(productConstituent.getId());
+        StringBuilder sb = new StringBuilder("产品组成ID:").append(productConstituent.getId())
+                .append(",")
+                .append(productConstituent.getProductNum())
+                .append(":")
+                .append(productConstituent.getProductBrand());
 
         for (ProduceProductConstituentDetail detail: productConstituent.getRowList()){
             if(materialIds.contains(detail.getMaterialId())){

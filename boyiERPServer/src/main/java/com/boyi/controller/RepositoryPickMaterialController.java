@@ -323,6 +323,50 @@ public class RepositoryPickMaterialController extends BaseController {
         }
     }
 
+
+    /**
+     * 查询生产序号ID
+     */
+    @GetMapping("/queryByProduceBatchInId")
+    @PreAuthorize("hasAuthority('repository:buyIn:list')")
+    public ResponseResult queryByProduceBatchInId( Long id) {
+
+
+        ProduceBatch pb = produceBatchService.getById(id);
+
+        List<OrderProductOrder> lists = orderProductOrderService.listByOrderNumsWithZCMaterialIds(id);
+
+        Double totalNum = 0D;
+        RepositoryPickMaterial pick = new RepositoryPickMaterial();
+        pick.setStatus(1);
+        pick.setDepartmentId(4L);
+        BaseDepartment bd = baseDepartmentService.getById(4L);
+        pick.setDepartmentName(bd.getName());
+        pick.setBatchId(pb.getBatchId());
+        ArrayList<RepositoryPickMaterialDetail> pickDetails = new ArrayList<>();
+
+
+        for (OrderProductOrder opo : lists){
+            BaseMaterial material = baseMaterialService.getById(opo.getMaterialId());
+
+            RepositoryPickMaterialDetail pickDetail = new RepositoryPickMaterialDetail();
+            pickDetail.setMaterialName(material.getName());
+            pickDetail.setMaterialId(opo.getMaterialId());
+            pickDetail.setUnit(material.getUnit());
+            pickDetail.setSpecs(material.getSpecs());
+
+            pickDetail.setNum(Double.valueOf(opo.getCalNum()));
+            totalNum += Double.valueOf(opo.getCalNum());
+            pickDetails.add(pickDetail);
+        }
+
+
+        pick.setTotalNum(totalNum);
+
+        pick.setRowList(pickDetails);
+        return ResponseResult.succ(pick);
+    }
+
     /**
      * 查询BuyinId
      */
@@ -418,9 +462,9 @@ public class RepositoryPickMaterialController extends BaseController {
                 return ResponseResult.fail("日期请设置在关账日之后.");
             }
             if(repositoryPickMaterial.getBatchId()!=null && !repositoryPickMaterial.getBatchId().isEmpty()){
-                List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId());
+                List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId(), repositoryPickMaterial.getDepartmentId());
                 if(pickM!=null && pickM.size()>0){
-                    return ResponseResult.fail("生产序号不能重复!.");
+                    return ResponseResult.fail("同部门下生产序号不能重复!.");
                 }
                 ProduceBatch pb = produceBatchService.getByPassedBatchId(repositoryPickMaterial.getBatchId());
                 if( pb== null){
@@ -626,9 +670,9 @@ public class RepositoryPickMaterialController extends BaseController {
             }
 
             if(repositoryPickMaterial.getBatchId()!=null && !repositoryPickMaterial.getBatchId().isEmpty()){
-                List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId());
+                List<RepositoryPickMaterial> pickM = repositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId(), repositoryPickMaterial.getDepartmentId());
                 if(pickM!=null && pickM.size()>0){
-                    return ResponseResult.fail("生产序号不能重复!.");
+                    return ResponseResult.fail("同部门下生产序号不能重复!.");
                 }
                 ProduceBatch pb = produceBatchService.getByPassedBatchId(repositoryPickMaterial.getBatchId());
                 if( pb== null){

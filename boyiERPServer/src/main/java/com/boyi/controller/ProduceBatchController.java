@@ -48,8 +48,6 @@ public class ProduceBatchController extends BaseController {
     @Value("${poi.produceBatchImportDemoPath}")
     private String poiImportDemoPath;
 
-
-
     @PostMapping("/push")
     @PreAuthorize("hasAuthority('produce:batch:push')")
     @Transactional
@@ -294,7 +292,7 @@ public class ProduceBatchController extends BaseController {
             }
 
 
-            List<RepositoryPickMaterial> picks = repositoryPickMaterialService.getSameBatch(null, batch.getBatchId());
+            List<RepositoryPickMaterial> picks = repositoryPickMaterialService.getSameBatch(null, batch.getBatchId(),null);
 
             if(picks.size() > 0){
                 StringBuilder sb = new StringBuilder();
@@ -420,7 +418,7 @@ public class ProduceBatchController extends BaseController {
             }
 
 
-            List<RepositoryPickMaterial> picks = repositoryPickMaterialService.getSameBatch(null, batch.getBatchId());
+            List<RepositoryPickMaterial> picks = repositoryPickMaterialService.getSameBatch(null, batch.getBatchId(),null);
 
             if(picks.size() > 0){
                 StringBuilder sb = new StringBuilder();

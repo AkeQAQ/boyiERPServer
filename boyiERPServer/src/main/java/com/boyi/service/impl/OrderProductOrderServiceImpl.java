@@ -222,4 +222,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.listByOrderNumWithStartAndEnd(minOrderNum,maxOrderNum);
     }
 
+    @Override
+    public List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(Long pbId) {
+        return this.orderProductOrderMapper.listByOrderNumsWithZCMaterialIds(pbId);
+    }
+
 }

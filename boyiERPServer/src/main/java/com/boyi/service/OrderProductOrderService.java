@@ -69,4 +69,6 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<RepositoryStock> listNoPickMaterialsWithMaterialIds(Set<String> keySet);
 
     List<OrderProductOrder> listByOrderNumWithStartAndEnd(Integer minOrderNum, Integer maxOrderNum);
+
+    List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(Long pbId);
 }
