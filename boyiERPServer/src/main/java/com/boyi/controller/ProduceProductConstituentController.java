@@ -647,6 +647,7 @@ public class ProduceProductConstituentController extends BaseController {
         }
 
         Set<String> materialIds = new HashSet<>();
+        Boolean flagSend = false;
         StringBuilder sb = new StringBuilder("产品组成ID:").append(productConstituent.getId())
                 .append(",")
                 .append(productConstituent.getProductNum())
@@ -659,6 +660,7 @@ public class ProduceProductConstituentController extends BaseController {
             }
             materialIds.add(detail.getMaterialId());
             if(!oldMaterialIds.contains(detail.getMaterialId()) && detail.getMaterialId().startsWith("01.")){
+                flagSend = true;
                 sb.append(",新增01分组物料:").append(detail.getMaterialId()).append("-").append(detail.getMaterialName()).append("<br>");
             }
         }
@@ -669,7 +671,7 @@ public class ProduceProductConstituentController extends BaseController {
         delMaterialIds.removeAll(materialIds);
 
 
-        if(sb.length() > 13){
+        if(flagSend){
             ThreadUtils.executorService.execute(new Runnable() {
                 @Override
                 public void run() {
