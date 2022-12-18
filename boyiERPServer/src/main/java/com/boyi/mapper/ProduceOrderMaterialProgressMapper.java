@@ -131,4 +131,5 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             "             and cast(pomp2.prepared_num as DECIMAL(12,5)) > cast(pomp2.in_num as DECIMAL(12,5)) " +
             "            </script>")
     List<OrderProductCalVO> listNoInNumsWithMaterialIds(@Param("materialIds") Set<String> keySet);
+
 }

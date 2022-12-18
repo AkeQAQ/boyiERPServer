@@ -166,7 +166,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " repository_buyin_document rbd," +
             " repository_buyin_document_detail rbdd" +
             " where rbd.id = rbdd.document_id" +
-            " and rbd.buy_in_date >= #{startDate} and rbd.buy_in_date <= #{endDate}"+
+            " and rbd.buy_in_date >= #{startDate} and rbd.buy_in_date < #{endDate}"+
             " and rbdd.material_id=#{materialId}" +
             "" +
             " ) -" +
@@ -176,7 +176,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " repository_buyout_document rbd," +
             " repository_buyout_document_detail rbdd" +
             " where rbd.id = rbdd.document_id" +
-            " and rbd.buy_out_date >= #{startDate} and rbd.buy_out_date <= #{endDate}"+
+            " and rbd.buy_out_date >= #{startDate} and rbd.buy_out_date < #{endDate}"+
             " and rbdd.material_id=#{materialId}" +
             "" +
             ")"+

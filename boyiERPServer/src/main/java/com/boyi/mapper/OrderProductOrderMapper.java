@@ -216,4 +216,14 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " and pb.order_num = opo.order_num " +
             " group by ppcd.material_id")
     List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(@Param("pbId")Long pbId);
+
+    @Select("select sum(opo.order_number*ppcd.dosage) order_number,ppcd.material_id from order_product_order opo ," +
+            " produce_product_constituent ppc ," +
+            " produce_product_constituent_detail ppcd" +
+            " where opo.product_num = ppc.product_num and opo.order_type!=2" +
+            " and opo.product_brand = ppc.product_brand" +
+            " and ppc.id = ppcd.constituent_id" +
+            "    and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
+            " group by ppcd.material_id")
+    List<Map<String, Object>> listByCalMaterial(@Param("searchStartDate") String startDate,@Param("searchEndDate") String endDate);
 }

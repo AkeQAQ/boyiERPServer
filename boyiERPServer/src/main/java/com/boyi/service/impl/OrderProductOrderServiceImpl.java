@@ -227,4 +227,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.listByOrderNumsWithZCMaterialIds(pbId);
     }
 
+    @Override
+    public List<Map<String, Object>> listByCalMaterial(String startDate, String endDate) {
+        return this.orderProductOrderMapper.listByCalMaterial(startDate,endDate);
+    }
+
 }

@@ -501,7 +501,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                         // 数目需要增加的，并且 存在备料计划则允许，
                         if(needAddMap.containsKey(materialId)  && produceOrderMaterialProgressService.countByMaterialIdAndPreparedNumGtInNum(materialId) == 0){
-                            return ResponseResult.fail("物料["+materialId+"] 不存在已备数目>入库数目的备料计划,不允许入库");
+                            throw new RuntimeException("物料["+materialId+"] 不存在已备数目>入库数目的备料计划,不允许入库") ;
                         }
                     }
 

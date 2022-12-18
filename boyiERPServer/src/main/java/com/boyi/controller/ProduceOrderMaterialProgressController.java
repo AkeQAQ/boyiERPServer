@@ -284,11 +284,90 @@ public class ProduceOrderMaterialProgressController extends BaseController {
      */
 
     @PostMapping("/groupMaterialView")
-    public ResponseResult groupMaterialView(Principal principal)throws Exception {
+    public ResponseResult groupMaterialView(Principal principal,String startDate,String endDate)throws Exception {
 
-        List<ProduceOrderMaterialProgress> allList = produceOrderMaterialProgressService.groupByMaterialIds();
+        if(startDate==null || startDate.isEmpty() || startDate.equals("null")){
+            startDate = "2021-01-01";
+        }
+        if(endDate ==null || endDate.isEmpty() || startDate.equals("null")){
+            endDate = "2100-01-01";
+        }
 
-        return ResponseResult.succ(allList);
+
+        List<Map<String,Object>> lists = orderProductOrderService.listByCalMaterial(startDate,endDate);
+
+        if(lists.isEmpty()){
+            return ResponseResult.fail("该时间段订单数据为空");
+        }
+        Map<String,ProduceOrderMaterialProgress> materialIdLists = new TreeMap<>();
+        TreeMap<Double, ProduceOrderMaterialProgress> returnMap = new TreeMap<>(new Comparator<Double>() {
+            @Override
+            public int compare(Double o1, Double o2) {
+                if(o1>o2){
+                    return 1;
+                }else {
+                    return -1;
+                }
+            }
+        });
+
+        for(Map<String,Object> map : lists){
+            Object order_number = map.get("order_number");
+            String materialId = map.get("material_id").toString();
+            if(materialId==null){
+                throw new RuntimeException("物料有空，异常..");
+            }
+            ProduceOrderMaterialProgress pomp = new ProduceOrderMaterialProgress();
+            pomp.setMaterialId(materialId);
+            BaseMaterial bm = baseMaterialService.getById(materialId);
+            if(bm==null){
+                throw new RuntimeException("物料"+materialId+"，没有物料信息。异常..");
+            }
+            pomp.setMaterialName(bm.getName());
+            materialIdLists.put(materialId,pomp);
+            if(order_number == null ){
+                pomp.setCalNum("0");
+            }else{
+                pomp.setCalNum(new BigDecimal(order_number.toString()).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue()+"");
+            }
+        }
+
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        LocalDate startD=null;
+        LocalDate endD=null;
+        LocalDate beforeD = LocalDate.parse("2020-01-01", timeFormatter);
+
+        startD = LocalDate.parse(startDate, timeFormatter);
+        endD = LocalDate.parse(endDate, timeFormatter);
+
+        // 2. 再对应时间段内的每个物料，净入库数量
+        for(Map.Entry<String,ProduceOrderMaterialProgress> entry : materialIdLists.entrySet()){
+
+            String materialId = entry.getKey();
+            ProduceOrderMaterialProgress pomp = entry.getValue();
+
+            RepositoryBuyinDocument repositoryBuyinDocument = repositoryBuyinDocumentService.getNetInFromOrderBetweenDate(startD, endD,materialId);
+            if(repositoryBuyinDocument==null||repositoryBuyinDocument.getNum()==null){
+                pomp.setInNum("0");
+            }else{
+                pomp.setInNum(new BigDecimal(repositoryBuyinDocument.getNum()).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue()+"");
+            }
+            if(startDate !=null && !startDate.isEmpty()){
+                RepositoryBuyinDocument beforeRbi = repositoryBuyinDocumentService.getNetInFromOrderBetweenDate(beforeD, startD,materialId);
+                if(beforeRbi==null||beforeRbi.getNum()==null){
+                    pomp.setPreparedNum("0");
+                }else{
+                    pomp.setPreparedNum(new BigDecimal(beforeRbi.getNum()).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue()+"");
+                }
+            }else{
+                pomp.setPreparedNum("0");
+            }
+            returnMap.put(Double.valueOf(pomp.getPreparedNum()),pomp);
+
+        }
+
+
+        return ResponseResult.succ(returnMap.values());
     }
 
     /**
@@ -648,7 +727,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
      */
     @PostMapping("/list")
     @PreAuthorize("hasAuthority('dataAnalysis:orderProgress:list')")
-    public ResponseResult list( String searchField, String searchStatus, String searchStatus2,String searchNoPropread,
+    public ResponseResult list( String searchField,String searchStartDate, String searchEndDate, String searchStatus, String searchStatus2,String searchNoPropread,
                                 @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -721,7 +800,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
             return ResponseResult.fail("备料状态不能为空");
         }
 
-        pageData = produceOrderMaterialProgressService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap,searchNoPropread);
+        pageData = produceOrderMaterialProgressService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,searchStatusList2,queryMap,searchNoPropread,searchStartDate,searchEndDate);
 
 
 

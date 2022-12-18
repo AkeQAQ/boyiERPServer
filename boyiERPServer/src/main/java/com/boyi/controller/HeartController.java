@@ -42,7 +42,7 @@ public class HeartController extends BaseController {
         long now = System.currentTimeMillis();
         String remoteIp = request.getRemoteAddr();
         onlineMap.put(remoteIp+":"+principal.getName()+KEY_SPERATOR+jwt,now);
-        log.warn("【心跳】:key:{},now time:{}",principal.getName()+"_"+jwt, new Date(now));
+        log.debug("【心跳】:key:{},now time:{}",principal.getName()+"_"+jwt, new Date(now));
         return ResponseResult.succ("");
     }
 

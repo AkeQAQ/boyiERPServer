@@ -39,7 +39,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
-        log.info("jwt 校验 filter");
         String jwt = request.getHeader(jwtUtils.getHeader());
         if (StrUtil.isBlankOrUndefined(jwt)) {
             chain.doFilter(request, response);
@@ -53,7 +52,6 @@ public class JwtAuthenticationFilter extends BasicAuthenticationFilter {
             throw new JwtException("token已过期");
         }
         String username = claim.getSubject();
-        log.info("用户-{}，发起请求！", username);
 
         SysUser sysUser = sysUserService.getByUsername(username);
         List<GrantedAuthority> grantedAuthorities = userDetailsService.getUserAuthority(sysUser);
