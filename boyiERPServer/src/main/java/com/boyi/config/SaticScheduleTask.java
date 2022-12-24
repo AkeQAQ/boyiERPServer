@@ -138,13 +138,13 @@ public class SaticScheduleTask {
     }
 
     // 因为产品订单的订单号每年会重复，因此在每天的初始，就去把去年同日期的移动到历史表。把订单号加上年份，存储
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 * * * ?")
     private void changeProductOrderAndProgress() {
         this.scheduleTaskService.changeProductOrderAndProgress();
 
     }
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 2 * * * ?")
     private void changeProduceBatch() {
         this.scheduleTaskService.changeProduceBatchTranService();
     }

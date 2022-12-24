@@ -1060,6 +1060,10 @@ public class ProduceBatchController extends BaseController {
         System.out.println(pattern.matcher(str2).matches());
         System.out.println(pattern.matcher(str3).matches());
 
+        LocalDate now = LocalDate.now().plusDays(-300);
+
+        System.out.println(now);
+
     }
 
 }

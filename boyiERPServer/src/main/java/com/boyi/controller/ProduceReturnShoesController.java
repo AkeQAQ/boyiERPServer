@@ -177,9 +177,15 @@ public class ProduceReturnShoesController extends BaseController {
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('produce:returnShoes:save')")
     public ResponseResult save(@Validated @RequestBody ProduceReturnShoes produceReturnShoes) {
+        boolean validIsClose = validIsClose(produceReturnShoes.getReturnDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+
         LocalDateTime now = LocalDateTime.now();
         produceReturnShoes.setCreated(now);
         produceReturnShoes.setUpdated(now);
+
         produceReturnShoesService.save(produceReturnShoes);
         return ResponseResult.succ("新增成功");
     }
@@ -198,6 +204,11 @@ public class ProduceReturnShoesController extends BaseController {
     @PostMapping("/update")
     @PreAuthorize("hasAuthority('produce:returnShoes:update')")
     public ResponseResult update(@Validated @RequestBody ProduceReturnShoes produceReturnShoes) {
+        boolean validIsClose = validIsClose(produceReturnShoes.getReturnDate());
+        if(!validIsClose){
+            return ResponseResult.fail("日期请设置在关账日之后.");
+        }
+
         produceReturnShoes.setUpdated(LocalDateTime.now());
         produceReturnShoesService.updateById(produceReturnShoes);
         return ResponseResult.succ("编辑成功");
@@ -208,6 +219,13 @@ public class ProduceReturnShoesController extends BaseController {
     @PreAuthorize("hasAuthority('produce:returnShoes:del')")
     public ResponseResult delete(@RequestBody Long[] ids) {
 
+        List<ProduceReturnShoes> dels = produceReturnShoesService.listByIds(Arrays.asList(ids));
+        for(ProduceReturnShoes shoes : dels){
+            boolean validIsClose = validIsClose(shoes.getReturnDate());
+            if(!validIsClose){
+                return ResponseResult.fail("日期请设置在关账日之后.");
+            }
+        }
         produceReturnShoesService.removeByIds(Arrays.asList(ids));
 
         return ResponseResult.succ("删除成功");
