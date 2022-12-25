@@ -98,7 +98,6 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                         .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME)
 
         );
-        String targetSql = queryWrapper.getTargetSql();
 
         return page2;
     }

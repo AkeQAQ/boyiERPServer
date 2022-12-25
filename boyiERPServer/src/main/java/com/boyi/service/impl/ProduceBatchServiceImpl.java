@@ -89,8 +89,8 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     }
 
     @Override
-    public ProduceBatch getByOrderNum(String orderNum) {
-        return this.getOne(new QueryWrapper<ProduceBatch>()
+    public List<ProduceBatch> getByOrderNum(String orderNum) {
+        return this.list(new QueryWrapper<ProduceBatch>()
                 .eq(DBConstant.TABLE_PRODUCE_BATCH.ORDER_NUM_FIELDNAME,orderNum));
     }
 

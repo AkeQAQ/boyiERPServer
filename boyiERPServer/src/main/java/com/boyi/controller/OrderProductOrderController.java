@@ -1215,7 +1215,7 @@ public class OrderProductOrderController extends BaseController {
             for (Long id : ids){
                 OrderProductOrder order = orderProductOrderService.getById(id);
 
-                ProduceBatch pb = produceBatchService.getByOrderNum(order.getOrderNum());
+                List<ProduceBatch> pb = produceBatchService.getByOrderNum(order.getOrderNum());
                 if(pb != null){
                     return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum());
                 }
@@ -1430,18 +1430,16 @@ public class OrderProductOrderController extends BaseController {
         for(OrderProductOrder opo :pageData.getRecords()){
             ProduceProductConstituent productConsi = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
             opo.setHasProductConstituent(productConsi !=null); // 标记是否有组成结构
-//            if(productConsi !=null){
-//                newRecords.addFirst(opo);
-//            }else{
-//                newRecords.add(opo);
-//            }
 
             int count = produceProductConstituentService.countProductNum(opo.getProductNum());
 
             opo.setHasProductNum(count > 0);
 
+            // 标识是否已经投产
+            List<ProduceBatch> pb = produceBatchService.getByOrderNum(opo.getOrderNum());
+            opo.setHasProduction(pb!=null && pb.size() > 0);
+
         }
-//        pageData.setRecords(newRecords);
 
         return ResponseResult.succ(pageData);
     }

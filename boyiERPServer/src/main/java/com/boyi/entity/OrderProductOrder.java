@@ -111,8 +111,11 @@ public class OrderProductOrder extends BaseEntity {
     @TableField(exist = false)
     private Boolean hasProductNum;
 
-
     @TableField(exist = false)
     private String canShowPrint;
+
+
+    @TableField(exist = false)
+    private Boolean hasProduction;
 
 }

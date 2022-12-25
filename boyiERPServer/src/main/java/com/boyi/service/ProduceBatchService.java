@@ -27,7 +27,7 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
 
     ProduceBatch getByPassedBatchId(String batchId);
 
-    ProduceBatch getByOrderNum(String orderNum);
+    List<ProduceBatch> getByOrderNum(String orderNum);
 
     List<ProduceBatch> listByMonthAndDay(String md);
 
