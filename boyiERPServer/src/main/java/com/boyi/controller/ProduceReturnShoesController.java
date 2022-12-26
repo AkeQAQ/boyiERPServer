@@ -55,6 +55,9 @@ public class ProduceReturnShoesController extends BaseController {
             }else if (searchField.equals("userArtNo")) {
                 queryField = "user_art_no";
 
+            }else if (searchField.equals("region")) {
+                queryField = "region";
+
             }
         }
 
@@ -75,7 +78,10 @@ public class ProduceReturnShoesController extends BaseController {
                     }else if (oneField.equals("userArtNo")) {
                         theQueryField = "user_art_no";
 
-                    } else {
+                    } else if (oneField.equals("region")) {
+                        theQueryField = "region";
+
+                    }else {
                         continue;
                     }
                     queryMap.put(theQueryField,oneStr);
@@ -125,7 +131,10 @@ public class ProduceReturnShoesController extends BaseController {
             }else if (searchField.equals("userArtNo")) {
                 queryField = "user_art_no";
 
-            } else {
+            } else if (searchField.equals("region")) {
+                queryField = "region";
+
+            }else {
                 return ResponseResult.fail("搜索字段不存在");
             }
         }
@@ -146,6 +155,9 @@ public class ProduceReturnShoesController extends BaseController {
 
                     }else if (oneField.equals("userArtNo")) {
                         theQueryField = "user_art_no";
+
+                    }else if (oneField.equals("region")) {
+                        theQueryField = "region";
 
                     } else {
                         continue;

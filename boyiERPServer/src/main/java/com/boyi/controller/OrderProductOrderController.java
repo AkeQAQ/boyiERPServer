@@ -1358,6 +1358,9 @@ public class OrderProductOrderController extends BaseController {
             else if (searchField.equals("orderNum")) {
                 queryField = "order_num";
 
+            }else if (searchField.equals("customerNum")) {
+                queryField = "customer_num";
+
             }else {
                 return ResponseResult.fail("搜索字段不存在");
             }
@@ -1379,6 +1382,9 @@ public class OrderProductOrderController extends BaseController {
                     }
                     else if (oneField.equals("orderNum")) {
                         theQueryField = "order_num";
+
+                    }else if (oneField.equals("customerNum")) {
+                        theQueryField = "customer_num";
 
                     }else {
                         continue;
