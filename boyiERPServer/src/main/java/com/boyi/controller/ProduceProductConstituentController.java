@@ -541,7 +541,7 @@ public class ProduceProductConstituentController extends BaseController {
             List<ProduceProductConstituent> olds = produceProductConstituentService.listByIds(Arrays.asList(ids));
             for(ProduceProductConstituent old : olds){
                 // 假如有照片和视频的，也不能反审核
-                if( old.getPicUrl()!=null || !old.getPicUrl().isEmpty() || old.getVideoUrl()!=null || !old.getVideoUrl().isEmpty()){
+                if( (old.getPicUrl()!=null && !old.getPicUrl().isEmpty()) || (old.getVideoUrl()!=null && !old.getVideoUrl().isEmpty())){
                     return ResponseResult.fail(old.getId()+" 编号,已有照片和视频资料，不能反，请先删除照片和视频");
                 }
             }
