@@ -142,7 +142,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     private String getYearFromBatch(ProduceBatch pb) {
         LocalDateTime created = pb.getCreated();
         int year = created.getYear();
-        int month = created.getDayOfMonth();
+        int month = created.getMonthValue();
         String batchId = pb.getBatchId().split("-")[0];
         // 0. 假如月份是12月份的，并且批次号是1开头的，并且长度是5的，则年份是创建日期+1
         if((month==12) && batchId.trim().length()==5&&(batchId.startsWith("1"))){
@@ -203,7 +203,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     private String getYearFromOrderProductOrder(OrderProductOrder opo) {
         LocalDateTime created = opo.getCreated();
         int year = created.getYear();
-        int month = created.getDayOfMonth();
+        int month = created.getMonthValue();
         String orderNum = opo.getOrderNum();
         // 0. 假如月份是12月份的，并且订单号是1，2开头的，并且长度是6的，则年份是创建日期+1
         if((month==12) && orderNum.trim().length()==6&&(orderNum.startsWith("1") || orderNum.startsWith("2"))){
