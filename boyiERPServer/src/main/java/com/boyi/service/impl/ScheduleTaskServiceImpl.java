@@ -30,6 +30,10 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     private Set<String> tables = new HashSet<>();
 
+    private boolean executeFlagChangeProductOrder = false;
+    private boolean executeFlagChangeBatch = false;
+
+
     {
         tables.add("repository_buyin_document");
         tables.add("repository_buyout_document");
@@ -89,36 +93,59 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     @Transactional
     public void changeProduceBatchTranService() {
         try{
-            LocalDate now = LocalDate.now().plusDays(-300);
-
-            String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-
-            // 3. 移动生产序号表
-            List<ProduceBatch> batches = produceBatchService.listByMonthAndDay(dateStr);
-            if(batches==null || batches.size() ==0){
-                log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】日期:{}数据为空",dateStr);
+            if(executeFlagChangeBatch){
                 return;
             }
+            try{
+                EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动produceBatch】今日开始执行");
+            }catch (Exception e2){
+                log.error("邮件发送失败..");
+            }
+            long start = System.currentTimeMillis();
+            for (int i = 0; i < 45; i++) {
+
+                LocalDate now = LocalDate.now().plusDays(-300-i);
+
+                String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+
+                // 3. 移动生产序号表
+                List<ProduceBatch> batches = produceBatchService.listByMonthAndDay(dateStr);
+                if(batches==null || batches.size() ==0){
+                    log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】日期:{}数据为空",dateStr);
+
+                    continue;
+                }
 
 
-            log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【开始........】日期:{}数据:{}",dateStr,batches);
-            addBatchHisAndRemove(batches);
-            log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【结束........】");
+                log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【开始........】日期:{}数据:{}",dateStr,batches);
+                addBatchHisAndRemove(batches);
+                log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【结束........】");
 
-            log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【开始........】");
-            // 修改领料表，退料表得生产序号，加上日期
-            updatePickReturnBatchId(batches);
-            log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【结束........】");
+                log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【开始........】");
+                // 修改领料表，退料表得生产序号，加上日期
+                updatePickReturnBatchId(batches);
+                log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【结束........】");
 
-            log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【开始........】");
-            // 移动车间延期信息表
-            addBatchDelayHisAndRemove(batches);
-            log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【结束........】");
+                log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【开始........】");
+                // 移动车间延期信息表
+                addBatchDelayHisAndRemove(batches);
+                log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【结束........】");
 
-            log.info("【定时任务】【移动produceBatch】【移动车间进度表】【开始........】");
-            // 移动车间进度表
-            addBatchProgressHisAndRemove(batches);
-            log.info("【定时任务】【移动produceBatch】【移动车间进度表】【结束........】");
+                log.info("【定时任务】【移动produceBatch】【移动车间进度表】【开始........】");
+                // 移动车间进度表
+                addBatchProgressHisAndRemove(batches);
+                log.info("【定时任务】【移动produceBatch】【移动车间进度表】【结束........】");
+                try{
+                    EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动produceBatch】日期:"+dateStr+",数据迁移成功");
+                }catch (Exception e2){
+                    log.error("邮件发送失败..");
+                }
+                long end2 = System.currentTimeMillis();
+                log.info("【定时任务】【移动produceBatch】日期:{} 耗时:{} ms",dateStr,(end2-start));
+            }
+            long end = System.currentTimeMillis();
+            log.info("【定时任务】【移动produceBatch】全部耗时:{} ms",(end-start));
+            executeFlagChangeBatch=true;
 
         }catch (Exception e){
             log.error("发生异常..",e);
@@ -127,6 +154,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             }catch (Exception e2){
                 log.error("邮件发送失败..");
             }
+            executeFlagChangeBatch=true;
             throw e;
         }
 
@@ -158,29 +186,57 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
     @Override
     public void changeProductOrderAndProgress() {
         try {
-            LocalDate now = LocalDate.now().plusDays(-300);
-
-            String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-            // 1. 获取老的产品订单表
-            List<OrderProductOrder> lists =orderProductOrderService.listByMonthAndDay(dateStr);
-            log.info("【定时任务】获取年月日%{},去年创建的产品订单数据{}",dateStr,lists);
-            if(lists.isEmpty()){
+            if(executeFlagChangeProductOrder){
                 return;
             }
-            // 2. 获取老的进度表
-            Set<Long> orderIds = new HashSet<>();
-            for(OrderProductOrder order : lists){
-                orderIds.add(order.getId());
+            try{
+                EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动ProductOrderAndProgress】今日开始执行");
+            }catch (Exception e2){
+                log.error("邮件发送失败..changeProductOrderAndProgress isEmpty");
             }
-            List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderIds(orderIds);
-            log.info("【定时任务】获取采购进度，订单号{}",orderIds);
+            long start = System.currentTimeMillis();
 
-            log.info("【定时任务】添加产品订单历史表{}，删除产品订单表",lists);
-            // 3. 添加到历史表，并且移除原表
-            addOrderHisAndRemove(lists);
+            // 往前多查45天的结果，（避免放假导致没处理的情况）
+            for (int i = 0; i <= 45; i++) {
 
-            log.info("【定时任务】添加进度表{}，删除进度表",progresses);
-            addProgressHisAndRemove(progresses);
+                LocalDate now = LocalDate.now().plusDays(-300-i);
+
+                String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                // 1. 获取老的产品订单表
+                List<OrderProductOrder> lists =orderProductOrderService.listByMonthAndDay(dateStr);
+                log.info("【定时任务】【changeProductOrderAndProgress】获取年月日%{},去年创建的产品订单数据{}",dateStr,lists);
+                if(lists.isEmpty()){
+
+                    continue;
+                }
+                // 2. 获取老的进度表
+                Set<Long> orderIds = new HashSet<>();
+                for(OrderProductOrder order : lists){
+                    orderIds.add(order.getId());
+                }
+                List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderIds(orderIds);
+                log.info("【定时任务】【changeProductOrderAndProgress】获取采购进度，订单号{}",orderIds);
+
+                log.info("【定时任务】【changeProductOrderAndProgress】添加产品订单历史表{}，删除产品订单表",lists);
+                // 3. 添加到历史表，并且移除原表
+                addOrderHisAndRemove(lists);
+
+                log.info("【定时任务】【changeProductOrderAndProgress】添加进度表{}，删除进度表",progresses);
+                if(progresses!=null && !progresses.isEmpty()){
+                    addProgressHisAndRemove(progresses);
+                }
+                try{
+                    EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动ProductOrderAndProgress】日期:"+dateStr+"的产品订单数据迁移成功");
+                }catch (Exception e2){
+                    log.error("邮件发送失败..changeProductOrderAndProgress success");
+                }
+                long end2 = System.currentTimeMillis();
+                log.info("【定时任务】【changeProductOrderAndProgress】该日期:{} 耗时:{} ms",dateStr,(end2-start));
+            }
+            long end = System.currentTimeMillis();
+            log.info("【定时任务】【changeProductOrderAndProgress】全部耗时:{} ms",(end-start));
+
+            executeFlagChangeProductOrder=true;
         }catch (Exception e){
             log.error("发生异常..",e);
             try{
@@ -188,6 +244,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             }catch (Exception e2){
                 log.error("邮件发送失败..");
             }
+            executeFlagChangeProductOrder=true;
             throw e;
         }
 
