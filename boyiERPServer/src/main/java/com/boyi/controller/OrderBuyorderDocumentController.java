@@ -343,6 +343,12 @@ public class OrderBuyorderDocumentController extends BaseController {
 
         // 假如没有价格也不能下推
         for (OrderBuyorderDocumentDetail item : details) {
+
+            // 假如是裁断外加工的，没有价格也能下推
+            if(item.getSupplierId().startsWith("10.")){
+                continue;
+            }
+
             BaseSupplierMaterial successPrice = baseSupplierMaterialService.getSuccessPrice(item.getSupplierId(), item.getMaterialId(), item.getOrderDate());
             if(successPrice == null || successPrice.getPrice()==null || successPrice.getPrice()==0D){
                 return ResponseResult.fail("供应商:"+item.getSupplierId()+",物料:"+item.getMaterialId()+",没有价格，不能下推");

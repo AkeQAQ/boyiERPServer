@@ -640,6 +640,8 @@ public class ProduceProductConstituentController extends BaseController {
 
         Map<String, ProduceProductConstituentDetail> oldDetailsObj = new HashMap<>();
 
+        Map<String, ProduceProductConstituentDetail> newDetailsObj = new HashMap<>();
+
 
         for(ProduceProductConstituentDetail old : oldDetails){
             oldMaterialIds.add(old.getMaterialId());
@@ -658,6 +660,7 @@ public class ProduceProductConstituentController extends BaseController {
             if(materialIds.contains(detail.getMaterialId())){
                 return ResponseResult.fail("物料编码"+detail.getMaterialId()+"重复");
             }
+            newDetailsObj.put(detail.getMaterialId(),detail);
             materialIds.add(detail.getMaterialId());
             if(!oldMaterialIds.contains(detail.getMaterialId()) && detail.getMaterialId().startsWith("01.")){
                 flagSend = true;
@@ -743,6 +746,32 @@ public class ProduceProductConstituentController extends BaseController {
             if(!removeIds.isEmpty()){
                 produceOrderMaterialProgressService.removeByIds(removeIds);
                 log.info("【补充物料】【删除修改物料的进度表内容】,物料{},进度表ID：{}",delMaterialIds,removeIds);
+            }
+
+            // 修改了用量的，对历史进度表的应报数量重新赋值
+            for(String oldMaterialId: oldMaterialIds){
+                if(materialIds.contains(oldMaterialId)){
+                    ProduceProductConstituentDetail newDetailObj = newDetailsObj.get(oldMaterialId);
+                    ProduceProductConstituentDetail oldDetailObj = oldDetailsObj.get(oldMaterialId);
+
+                    if(newDetailObj.getDosage().equals(oldDetailObj.getDosage())){
+                        continue;
+                    }
+                    List<OrderProductOrder> orders = orderProductOrderService.getByNumBrand(productConstituent.getProductNum(), productConstituent.getProductBrand());
+                    for (int i = 0; i < orders.size(); i++) {
+                        OrderProductOrder order = orders.get(i);
+                        Long[] orderIds = new Long[]{order.getId()};
+                        // 查出历史进度表的记录，进行应报数量重新计算
+                        List<ProduceOrderMaterialProgress> oldProduceOrderMaterialProgresses = produceOrderMaterialProgressService.listByOrderIdsAndMaterialId(orderIds, oldMaterialId);
+                        for(ProduceOrderMaterialProgress pomp : oldProduceOrderMaterialProgresses){
+                            String newCalNum = BigDecimalUtil.mul(newDetailObj.getDosage(), order.getOrderNumber() + "").toString();
+                            log.info("【补充物料】【修改物料用量的进度表内容】,物料{},老进度表：{},修改后的calNum:{}",oldMaterialId,pomp,newCalNum);
+                            pomp.setCalNum(newCalNum);
+                        }
+                        produceOrderMaterialProgressService.updateBatchById(oldProduceOrderMaterialProgresses);
+                    }
+
+                }
             }
 
             return ResponseResult.succ("编辑成功");

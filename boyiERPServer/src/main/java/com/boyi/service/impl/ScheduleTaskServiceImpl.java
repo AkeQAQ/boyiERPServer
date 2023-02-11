@@ -116,7 +116,6 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                     continue;
                 }
 
-
                 log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【开始........】日期:{}数据:{}",dateStr,batches);
                 addBatchHisAndRemove(batches);
                 log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【结束........】");
@@ -356,7 +355,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             hisOrder.setId(order.getId());
             String shouldYear = getYearFromOrderProductOrder(order);
             hisOrder.setOrderNum(shouldYear+hisOrder.getOrderNum());
-            log.info("【定时任务】【修改orderNum】产品订单:{},老 orderNum:{},新的orderNum:{}",order,order.getOrderNum(),hisOrder.getOrderNum());
+            log.info("【定时任务】【修改orderNum】产品订单:{},【老 orderNum:{},新的orderNum:{}】",order,order.getOrderNum(),hisOrder.getOrderNum());
             hisLists.add(hisOrder);
             removeIds.add(order.getId());
         }
@@ -396,6 +395,11 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         }
         List<ProduceBatchProgress> progresses = produceBatchProgressService.listByBatchIds(produceBatchIds);
 
+        if(progresses==null || progresses.isEmpty()){
+            return;
+        }
+        log.info("【定时任务】【移动produceBatch】【移动车间进度表】进度表迁移数据:{}",progresses);
+
         // 2. 添加到历史表
         List<HisProduceBatchProgress> hisLists = new ArrayList<>();
 
@@ -421,6 +425,11 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             produceBatchIds.add(batch.getId());
         }
         List<ProduceBatchDelay> delays = produceBatchDelayService.listByBatchIds(produceBatchIds);
+
+        if(delays==null || delays.isEmpty()){
+            return;
+        }
+        log.info("【定时任务】【移动produceBatch】【移动车间进度表】开始迁移延期数据:{}",delays);
 
         // 2. 添加到历史表
         List<HisProduceBatchDelay> hisLists = new ArrayList<>();
