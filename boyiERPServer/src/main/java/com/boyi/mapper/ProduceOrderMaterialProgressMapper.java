@@ -25,7 +25,7 @@ import java.util.Set;
 public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOrderMaterialProgress> {
 
     String querySql = "" +
-            "select pomg.*," +
+            "select pomg.*,(pomg.in_num*100 / pomg.prepared_num ) as in_percent," +
             "o.order_number,o.status,o.prepared,o.order_num,o.product_num,o.product_brand,o.product_color," +
             "bm.name material_name,bm.unit " +
             " from order_product_order o," +

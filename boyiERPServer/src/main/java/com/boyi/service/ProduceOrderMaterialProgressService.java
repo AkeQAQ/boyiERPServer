@@ -33,7 +33,7 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
 
     Page<ProduceOrderMaterialProgress> innerQuery(Page page, QueryWrapper<ProduceOrderMaterialProgress> like);
 
-    Page<ProduceOrderMaterialProgress> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String,String> otherSearch,String searchNoPropread,String searchStart,String searchEnd);
+    Page<ProduceOrderMaterialProgress> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String,String> otherSearch,String searchNoPropread,String searchStart,String searchEnd,String searchNoAllIn);
 
 
     List<ProduceOrderMaterialProgress> listByMaterialIdCreatedAscNotOver(String materialId);

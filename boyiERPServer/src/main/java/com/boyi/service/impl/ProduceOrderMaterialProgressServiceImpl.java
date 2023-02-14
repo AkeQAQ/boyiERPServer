@@ -90,7 +90,7 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
     }
 
     @Override
-    public Page<ProduceOrderMaterialProgress> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String, String> otherSearch,String searchNoPropread,String searchStartDate,String searchEndDate) {
+    public Page<ProduceOrderMaterialProgress> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> searchStatus2, Map<String, String> otherSearch,String searchNoPropread,String searchStartDate,String searchEndDate,String searchNoAllIn) {
         QueryWrapper<ProduceOrderMaterialProgress> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
             String val = otherSearch.get(key);
@@ -106,6 +106,7 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME,searchStatus)
                         .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME,searchStatus2)
                         .gt(!Boolean.valueOf(searchNoPropread),DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.PREPARED_NUM_FIELDNAME,0)
+                        .lt(Boolean.valueOf(searchNoAllIn),DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.IN_PERCENT_FIELDNAME,100)
                         .orderByDesc(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ORDER_ID_FIELDNAME)
 
         );

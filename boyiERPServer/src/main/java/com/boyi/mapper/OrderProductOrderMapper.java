@@ -168,6 +168,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             "                        produce_batch  " +
             "                        ) " +
             "                        and opo.product_num = ppc.product_num " +
+            "                        and ppc.status = 0 " +
             "                        and opo.product_brand = ppc.product_brand " +
             "                        and ppc.id = ppcd.constituent_id " +
             "                        and ppcd.material_id = bm.id " +

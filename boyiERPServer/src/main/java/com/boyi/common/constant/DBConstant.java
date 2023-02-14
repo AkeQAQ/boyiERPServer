@@ -1074,6 +1074,8 @@ public class DBConstant {
         public static final String CAL_NUM_FIELDNAME = "cal_num";
         public static final String PROGRESS_PERCENT_NUM_FIELDNAME = "progress_percent";
 
+        public static final String IN_PERCENT_FIELDNAME = "in_percent";
+
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "updated_user";
         public static final String CREATED_FIELDNAME = "created";

@@ -97,6 +97,14 @@ public class ProduceOrderMaterialProgress extends BaseEntity {
     private String materialName;
 
 
+    /**
+     * 是否已有投产
+     */
+    @TableField(exist = false)
+    private Boolean isHasProduceBatch;
+
+    @TableField(exist = false)
+    private Double inPercent;
 
     /**
      *  批量备料接受参数用
