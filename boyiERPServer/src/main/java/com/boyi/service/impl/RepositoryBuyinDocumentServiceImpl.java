@@ -12,6 +12,7 @@ import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.RepositoryBuyinDocumentMapper;
 import com.boyi.service.RepositoryBuyinDocumentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,7 @@ import java.util.Map;
  * @since 2021-08-26
  */
 @Service
+@Slf4j
 public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBuyinDocumentMapper, RepositoryBuyinDocument> implements RepositoryBuyinDocumentService {
     @Autowired
     RepositoryBuyinDocumentMapper repositoryBuyinDocumentMapper;
@@ -183,8 +185,8 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
 
     @Override
     public Double getAllPageTotalAmount(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String, String> otherSearch) {
+
         QueryWrapper<RepositoryBuyinDocument> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("amount");
         for (String key : otherSearch.keySet()){
             if(key.equals("price")){
                 String val = otherSearch.get(key);
@@ -193,13 +195,21 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
                 }else{
                     queryWrapper.eq( !val.equals("null"),key,val);
                 }
-            }else{
+            }else if(key.equals("supplier_name")){
+                String val = otherSearch.get(key);
+
+                queryWrapper.eq(StrUtil.isNotBlank(val) && !val.equals("null")
+                        && StrUtil.isNotBlank(key),key,val);
+            }
+
+            else{
                 String val = otherSearch.get(key);
                 queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
                         && StrUtil.isNotBlank(key),key,val);
             }
 
         }
+
         if(queryField.equals("price")){
             if(searchStr.isEmpty()){
                 queryWrapper.isNull("price");
@@ -209,7 +219,13 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
                                 && StrUtil.isNotBlank(searchField),queryField,searchStr);
             }
 
-        }else{
+        }else if(queryField.equals("supplier_name")){
+            queryWrapper.
+                    eq(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
+                            && StrUtil.isNotBlank(searchField),queryField,searchStr);
+        }
+
+        else{
             queryWrapper.
                     like(StrUtil.isNotBlank(searchStr)  &&!searchStr.equals("null")
                             && StrUtil.isNotBlank(searchField),queryField,searchStr);
