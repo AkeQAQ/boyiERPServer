@@ -34,9 +34,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 /**
  * <p>
@@ -1045,15 +1043,31 @@ public class RepositoryBuyinDocumentController extends BaseController {
             BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
         }else{
+            final Map<String, Double> valMap = new HashMap<>();
+            final String queryFieldTmp = queryField;
+            Future<?> submit = ThreadUtils.executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    long start2 = System.currentTimeMillis();
+                    Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmount(searchField, queryFieldTmp, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
+                    long start3 = System.currentTimeMillis();
+                    log.info("入库list查询,allPageTotalAmount 耗时:{}",(start3-start2)+"ms");
+                    double value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP).doubleValue();
+                    valMap.put("value",value);
+
+                }
+            });
             long start = System.currentTimeMillis();
             pageData = repositoryBuyinDocumentService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
             long start2 = System.currentTimeMillis();
             log.info("入库list查询,page 耗时:{}",(start2-start)+"ms");
-            Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmount(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
-            long start3 = System.currentTimeMillis();
-            log.info("入库list查询,allPageTotalAmount 耗时:{}",(start3-start2)+"ms");
-            BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);
-            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,value.doubleValue()+"",pageData);
+
+            try {
+                submit.get();
+            }  catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            return ResponseResult.succ(ResponseResult.SUCCESS_CODE,valMap.get("value")+"",pageData);
         }
 
 

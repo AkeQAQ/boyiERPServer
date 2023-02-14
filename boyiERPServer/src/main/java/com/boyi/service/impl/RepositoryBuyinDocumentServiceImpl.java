@@ -184,6 +184,7 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     @Override
     public Double getAllPageTotalAmount(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String, String> otherSearch) {
         QueryWrapper<RepositoryBuyinDocument> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("amount");
         for (String key : otherSearch.keySet()){
             if(key.equals("price")){
                 String val = otherSearch.get(key);

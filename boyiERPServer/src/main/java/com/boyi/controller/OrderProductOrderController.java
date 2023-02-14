@@ -1216,7 +1216,7 @@ public class OrderProductOrderController extends BaseController {
                 OrderProductOrder order = orderProductOrderService.getById(id);
 
                 List<ProduceBatch> pb = produceBatchService.getByOrderNum(order.getOrderNum());
-                if(pb != null){
+                if(pb != null && pb.size()>0 ){
                     return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum());
                 }
             }
