@@ -436,7 +436,7 @@ public class ProduceBatchController extends BaseController {
                 for(ProduceBatch pb : pbs){
                     List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
                     if(progresses!=null&&progresses.size()>0){
-                        return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间进度表记录。不能删除");
+                        return ResponseResult.fail("相关联的生产序号："+pb.getBatchId()+"已有车间进度表记录。不能反审核");
                     }
                 }
             }
@@ -716,7 +716,7 @@ public class ProduceBatchController extends BaseController {
                 for (OrderProductOrder detail : details){
                     String materialId = detail.getMaterialId();
                     // 筛选皮料，
-                    if(materialId.startsWith("01.")){
+                    if(materialId.startsWith("01.") && detail.getCanShowPrint().equals("0")){
                         HashMap<String, String> theSub = new HashMap<>();
                         theSub.put("materialId",materialId);
                         theSub.put("materialName",detail.getMaterialName());
@@ -731,6 +731,346 @@ public class ProduceBatchController extends BaseController {
 
                 theMap.put("rowList",onePageLists);
             }
+            return ResponseResult.succ(theMap);
+        }catch (Exception e){
+            log.error("报错",e);
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
+
+    @PostMapping("/queryZhenChePrintByIds")
+    @PreAuthorize("hasAuthority('produce:batch:list')")
+    public ResponseResult queryZhenChePrintByIds(@RequestBody Long[] ids ) {
+
+        try{
+            HashMap<String, Object> theMap = new HashMap<>();
+            List<HashMap<String, Object>> onePageLists = new ArrayList<>();
+
+            // 重复的批次号不打印
+            HashSet<String> existBatchIdPre = new HashSet<>();
+
+            for(Long id : ids){
+                ProduceBatch pb = produceBatchService.getById(id);
+
+                String batchIdPre = pb.getBatchId().split("-")[0];
+
+                if(existBatchIdPre.contains(batchIdPre)){
+                    continue;
+                }
+                existBatchIdPre.add(batchIdPre);
+
+                HashMap<String, Object> onePage = new HashMap<>();
+
+                ArrayList<HashMap<String, String>> subLists = new ArrayList<>();
+
+                onePageLists.add(onePage);
+                onePage.put("subList",subLists);
+
+
+
+                // 1. 查询订单信息
+                OrderProductOrder order = orderProductOrderService.getByOrderNum(pb.getOrderNum());
+                if(pb.getSize40()==null||pb.getSize40().isEmpty()){
+                    pb.setSize40("0");
+                }
+                if(pb.getSize41()==null||pb.getSize41().isEmpty()){
+                    pb.setSize41("0");
+                }
+                if(pb.getSize42()==null||pb.getSize42().isEmpty()){
+                    pb.setSize42("0");
+                }if(pb.getSize43()==null||pb.getSize43().isEmpty()){
+                    pb.setSize43("0");
+                }if(pb.getSize44()==null||pb.getSize44().isEmpty()){
+                    pb.setSize44("0");
+                }if(pb.getSize45()==null||pb.getSize45().isEmpty()){
+                    pb.setSize45("0");
+                }if(pb.getSize46()==null||pb.getSize46().isEmpty()){
+                    pb.setSize46("0");
+                }if(pb.getSize47()==null||pb.getSize47().isEmpty()){
+                    pb.setSize47("0");
+                }if(pb.getSize40()==null||pb.getSize40().isEmpty()){
+                    pb.setSize40("0");
+                }if(pb.getSize39()==null||pb.getSize39().isEmpty()){
+                    pb.setSize39("0");
+                }if(pb.getSize38()==null||pb.getSize38().isEmpty()){
+                    pb.setSize38("0");
+                }if(pb.getSize37()==null||pb.getSize37().isEmpty()){
+                    pb.setSize37("0");
+                }if(pb.getSize36()==null||pb.getSize36().isEmpty()){
+                    pb.setSize36("0");
+                }if(pb.getSize35()==null||pb.getSize35().isEmpty()){
+                    pb.setSize35("0");
+                }if(pb.getSize34()==null||pb.getSize34().isEmpty()){
+                    pb.setSize34("0");
+                }
+                List<ProduceBatch> batches = produceBatchService.listByLikeRightBatchId(batchIdPre);
+                for(ProduceBatch onePb : batches){
+                    // 对当前pb 进行其他同batchId的，进行累加
+                    if(onePb.getId().equals(pb.getId())){
+                        continue;
+                    }
+                    if(onePb.getSize40()!=null && !onePb.getSize40().isEmpty()){
+                        pb.setSize40(BigDecimalUtil.add(pb.getSize40(),onePb.getSize40()).toString() );
+                    }
+                    if(onePb.getSize41()!=null && !onePb.getSize41().isEmpty()){
+                        pb.setSize41(BigDecimalUtil.add(pb.getSize41(),onePb.getSize41()).toString() );
+                    }
+                    if(onePb.getSize42()!=null && !onePb.getSize42().isEmpty()){
+                        pb.setSize42(BigDecimalUtil.add(pb.getSize42(),onePb.getSize42()).toString() );
+                    }
+                    if(onePb.getSize43()!=null && !onePb.getSize43().isEmpty()){
+                        pb.setSize43(BigDecimalUtil.add(pb.getSize43(),onePb.getSize43()).toString() );
+                    }
+                    if(onePb.getSize44()!=null && !onePb.getSize44().isEmpty()){
+                        pb.setSize44(BigDecimalUtil.add(pb.getSize44(),onePb.getSize44()).toString() );
+                    }
+                    if(onePb.getSize45()!=null && !onePb.getSize45().isEmpty()){
+                        pb.setSize45(BigDecimalUtil.add(pb.getSize45(),onePb.getSize45()).toString() );
+                    }
+                    if(onePb.getSize46()!=null && !onePb.getSize46().isEmpty()){
+                        pb.setSize46(BigDecimalUtil.add(pb.getSize46(),onePb.getSize46()).toString() );
+                    }
+                    if(onePb.getSize47()!=null && !onePb.getSize47().isEmpty()){
+                        pb.setSize47(BigDecimalUtil.add(pb.getSize47(),onePb.getSize47()).toString() );
+                    }
+                    if(onePb.getSize34()!=null && !onePb.getSize34().isEmpty()){
+                        pb.setSize34(BigDecimalUtil.add(pb.getSize34(),onePb.getSize34()).toString() );
+                    }
+                    if(onePb.getSize35()!=null && !onePb.getSize35().isEmpty()){
+                        pb.setSize35(BigDecimalUtil.add(pb.getSize35(),onePb.getSize35()).toString() );
+                    }
+                    if(onePb.getSize36()!=null && !onePb.getSize36().isEmpty()){
+                        pb.setSize36(BigDecimalUtil.add(pb.getSize36(),onePb.getSize36()).toString() );
+                    }
+                    if(onePb.getSize37()!=null && !onePb.getSize37().isEmpty()){
+                        pb.setSize37(BigDecimalUtil.add(pb.getSize37(),onePb.getSize37()).toString() );
+                    }
+                    if(onePb.getSize38()!=null && !onePb.getSize38().isEmpty()){
+                        pb.setSize38(BigDecimalUtil.add(pb.getSize38(),onePb.getSize38()).toString() );
+                    }
+                    if(onePb.getSize39()!=null && !onePb.getSize39().isEmpty()){
+                        pb.setSize39(BigDecimalUtil.add(pb.getSize39(),onePb.getSize39()).toString() );
+                    }
+
+                }
+                pb.setBatchId(batchIdPre);
+
+                onePage.put("productNum",order.getProductNum());
+                onePage.put("productBrand",order.getProductBrand());
+                onePage.put("productColor",order.getProductColor());
+
+                onePage.put("batchId",pb.getBatchId());
+                onePage.put("customerNum",order.getCustomerNum());
+                onePage.put("size34",pb.getSize34());
+                onePage.put("size35",pb.getSize35());
+                onePage.put("size36",pb.getSize36());
+                onePage.put("size37",pb.getSize37());
+                onePage.put("size38",pb.getSize38());
+                onePage.put("size39",pb.getSize39());
+                onePage.put("size40",pb.getSize40());
+                onePage.put("size41",pb.getSize41());
+                onePage.put("size42",pb.getSize42());
+                onePage.put("size43",pb.getSize43());
+                onePage.put("size44",pb.getSize44());
+                onePage.put("size45",pb.getSize45());
+                onePage.put("size46",pb.getSize46());
+                onePage.put("size47",pb.getSize47());
+                BigDecimal theTotalNum = new BigDecimal(pb.getSize34()).add(new BigDecimal(pb.getSize35())).add(new BigDecimal(pb.getSize36()))
+                        .add(new BigDecimal(pb.getSize37())).add(new BigDecimal(pb.getSize38())).add(new BigDecimal(pb.getSize39()))
+                        .add(new BigDecimal(pb.getSize40())).add(new BigDecimal(pb.getSize41())).add(new BigDecimal(pb.getSize42()))
+                        .add(new BigDecimal(pb.getSize43())).add(new BigDecimal(pb.getSize44())).add(new BigDecimal(pb.getSize45()))
+                        .add(new BigDecimal(pb.getSize46())).add(new BigDecimal(pb.getSize47()));
+                onePage.put("totalNum",theTotalNum.toString());
+
+
+                // 2. 查询组成结构
+                List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+                for (OrderProductOrder detail : details){
+                    String materialId = detail.getMaterialId();
+
+                    // 筛选物料分组
+                    if((materialId.startsWith("04.01") || materialId.startsWith("06.05")) && detail.getCanShowPrint().equals("0")){
+                        HashMap<String, String> theSub = new HashMap<>();
+                        theSub.put("materialId",materialId);
+                        theSub.put("materialName",detail.getMaterialName());
+                        theSub.put("dosage",detail.getDosage());
+                        theSub.put("materialUnit",detail.getMaterialUnit());
+
+                        // 计算用量，
+                        theSub.put("needNum",calOneOrderNeedNum(pb,detail.getDosage()));
+
+                        subLists.add(theSub);
+                    }
+                }
+
+                theMap.put("rowList",onePageLists);
+            }
+            return ResponseResult.succ(theMap);
+        }catch (Exception e){
+            log.error("报错",e);
+            throw new RuntimeException(e.getMessage());
+        }
+
+    }
+
+
+    @GetMapping("/queryZhenChePrintById")
+    @PreAuthorize("hasAuthority('produce:batch:list')")
+    public ResponseResult queryZhenChePrintById(Long id ) {
+
+        try{
+            HashMap<String, Object> theMap = new HashMap<>();
+
+            List<HashMap<String, Object>> onePageLists = new ArrayList<>();
+
+            HashMap<String, Object> onePage = new HashMap<>();
+
+            ArrayList<HashMap<String, String>> subLists = new ArrayList<>();
+
+            onePageLists.add(onePage);
+            onePage.put("subList",subLists);
+
+
+
+            ProduceBatch pb = produceBatchService.getById(id);
+
+            // 1. 查询订单信息
+            OrderProductOrder order = orderProductOrderService.getByOrderNum(pb.getOrderNum());
+            if(pb.getSize40()==null||pb.getSize40().isEmpty()){
+                pb.setSize40("0");
+            }
+            if(pb.getSize41()==null||pb.getSize41().isEmpty()){
+                pb.setSize41("0");
+            }
+            if(pb.getSize42()==null||pb.getSize42().isEmpty()){
+                pb.setSize42("0");
+            }if(pb.getSize43()==null||pb.getSize43().isEmpty()){
+                pb.setSize43("0");
+            }if(pb.getSize44()==null||pb.getSize44().isEmpty()){
+                pb.setSize44("0");
+            }if(pb.getSize45()==null||pb.getSize45().isEmpty()){
+                pb.setSize45("0");
+            }if(pb.getSize46()==null||pb.getSize46().isEmpty()){
+                pb.setSize46("0");
+            }if(pb.getSize47()==null||pb.getSize47().isEmpty()){
+                pb.setSize47("0");
+            }if(pb.getSize40()==null||pb.getSize40().isEmpty()){
+                pb.setSize40("0");
+            }if(pb.getSize39()==null||pb.getSize39().isEmpty()){
+                pb.setSize39("0");
+            }if(pb.getSize38()==null||pb.getSize38().isEmpty()){
+                pb.setSize38("0");
+            }if(pb.getSize37()==null||pb.getSize37().isEmpty()){
+                pb.setSize37("0");
+            }if(pb.getSize36()==null||pb.getSize36().isEmpty()){
+                pb.setSize36("0");
+            }if(pb.getSize35()==null||pb.getSize35().isEmpty()){
+                pb.setSize35("0");
+            }if(pb.getSize34()==null||pb.getSize34().isEmpty()){
+                pb.setSize34("0");
+            }
+
+            List<ProduceBatch> batches = produceBatchService.listByLikeRightBatchId(pb.getBatchId().split("-")[0]);
+            for(ProduceBatch onePb : batches){
+                // 对当前pb 进行其他同batchId的，进行累加
+                if(onePb.getId().equals(pb.getId())){
+                    continue;
+                }
+                if(onePb.getSize40()!=null && !onePb.getSize40().isEmpty()){
+                    pb.setSize40(BigDecimalUtil.add(pb.getSize40(),onePb.getSize40()).toString() );
+                }
+                if(onePb.getSize41()!=null && !onePb.getSize41().isEmpty()){
+                    pb.setSize41(BigDecimalUtil.add(pb.getSize41(),onePb.getSize41()).toString() );
+                }
+                if(onePb.getSize42()!=null && !onePb.getSize42().isEmpty()){
+                    pb.setSize42(BigDecimalUtil.add(pb.getSize42(),onePb.getSize42()).toString() );
+                }
+                if(onePb.getSize43()!=null && !onePb.getSize43().isEmpty()){
+                    pb.setSize43(BigDecimalUtil.add(pb.getSize43(),onePb.getSize43()).toString() );
+                }
+                if(onePb.getSize44()!=null && !onePb.getSize44().isEmpty()){
+                    pb.setSize44(BigDecimalUtil.add(pb.getSize44(),onePb.getSize44()).toString() );
+                }
+                if(onePb.getSize45()!=null && !onePb.getSize45().isEmpty()){
+                    pb.setSize45(BigDecimalUtil.add(pb.getSize45(),onePb.getSize45()).toString() );
+                }
+                if(onePb.getSize46()!=null && !onePb.getSize46().isEmpty()){
+                    pb.setSize46(BigDecimalUtil.add(pb.getSize46(),onePb.getSize46()).toString() );
+                }
+                if(onePb.getSize47()!=null && !onePb.getSize47().isEmpty()){
+                    pb.setSize47(BigDecimalUtil.add(pb.getSize47(),onePb.getSize47()).toString() );
+                }
+                if(onePb.getSize34()!=null && !onePb.getSize34().isEmpty()){
+                    pb.setSize34(BigDecimalUtil.add(pb.getSize34(),onePb.getSize34()).toString() );
+                }
+                if(onePb.getSize35()!=null && !onePb.getSize35().isEmpty()){
+                    pb.setSize35(BigDecimalUtil.add(pb.getSize35(),onePb.getSize35()).toString() );
+                }
+                if(onePb.getSize36()!=null && !onePb.getSize36().isEmpty()){
+                    pb.setSize36(BigDecimalUtil.add(pb.getSize36(),onePb.getSize36()).toString() );
+                }
+                if(onePb.getSize37()!=null && !onePb.getSize37().isEmpty()){
+                    pb.setSize37(BigDecimalUtil.add(pb.getSize37(),onePb.getSize37()).toString() );
+                }
+                if(onePb.getSize38()!=null && !onePb.getSize38().isEmpty()){
+                    pb.setSize38(BigDecimalUtil.add(pb.getSize38(),onePb.getSize38()).toString() );
+                }
+                if(onePb.getSize39()!=null && !onePb.getSize39().isEmpty()){
+                    pb.setSize39(BigDecimalUtil.add(pb.getSize39(),onePb.getSize39()).toString() );
+                }
+
+            }
+            pb.setBatchId(pb.getBatchId().split("-")[0]);
+
+            onePage.put("productNum",order.getProductNum());
+            onePage.put("productBrand",order.getProductBrand());
+            onePage.put("productColor",order.getProductColor());
+
+            onePage.put("batchId",pb.getBatchId());
+            onePage.put("customerNum",order.getCustomerNum());
+            onePage.put("size34",pb.getSize34());
+            onePage.put("size35",pb.getSize35());
+            onePage.put("size36",pb.getSize36());
+            onePage.put("size37",pb.getSize37());
+            onePage.put("size38",pb.getSize38());
+            onePage.put("size39",pb.getSize39());
+            onePage.put("size40",pb.getSize40());
+            onePage.put("size41",pb.getSize41());
+            onePage.put("size42",pb.getSize42());
+            onePage.put("size43",pb.getSize43());
+            onePage.put("size44",pb.getSize44());
+            onePage.put("size45",pb.getSize45());
+            onePage.put("size46",pb.getSize46());
+            onePage.put("size47",pb.getSize47());
+            BigDecimal theTotalNum = new BigDecimal(pb.getSize34()).add(new BigDecimal(pb.getSize35())).add(new BigDecimal(pb.getSize36()))
+                    .add(new BigDecimal(pb.getSize37())).add(new BigDecimal(pb.getSize38())).add(new BigDecimal(pb.getSize39()))
+                    .add(new BigDecimal(pb.getSize40())).add(new BigDecimal(pb.getSize41())).add(new BigDecimal(pb.getSize42()))
+                    .add(new BigDecimal(pb.getSize43())).add(new BigDecimal(pb.getSize44())).add(new BigDecimal(pb.getSize45()))
+                    .add(new BigDecimal(pb.getSize46())).add(new BigDecimal(pb.getSize47()));
+            onePage.put("totalNum",theTotalNum.toString());
+
+
+            // 2. 查询组成结构
+            List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+            for (OrderProductOrder detail : details){
+                String materialId = detail.getMaterialId();
+                // 筛选物料分组
+                if((materialId.startsWith("04.01") || materialId.startsWith("06.05")) && detail.getCanShowPrint().equals("0")){
+                    HashMap<String, String> theSub = new HashMap<>();
+                    theSub.put("materialId",materialId);
+                    theSub.put("materialName",detail.getMaterialName());
+                    theSub.put("dosage",detail.getDosage());
+                    theSub.put("materialUnit",detail.getMaterialUnit());
+                    // 计算用量，
+                    theSub.put("needNum",calOneOrderNeedNum(pb,detail.getDosage()));
+
+                    subLists.add(theSub);
+                }
+            }
+
+            theMap.put("rowList",onePageLists);
             return ResponseResult.succ(theMap);
         }catch (Exception e){
             log.error("报错",e);
