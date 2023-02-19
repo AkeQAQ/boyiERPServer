@@ -891,7 +891,7 @@ public class ProduceBatchController extends BaseController {
                     String materialId = detail.getMaterialId();
 
                     // 筛选物料分组
-                    if((materialId.startsWith("04.01") || materialId.startsWith("06.05")) && detail.getCanShowPrint().equals("0")){
+                    if((materialId.startsWith("04.01")  || materialId.startsWith("04.04") || materialId.startsWith("06.05")) && detail.getCanShowPrint().equals("0")){
                         HashMap<String, String> theSub = new HashMap<>();
                         theSub.put("materialId",materialId);
                         theSub.put("materialName",detail.getMaterialName());
@@ -1057,7 +1057,7 @@ public class ProduceBatchController extends BaseController {
             for (OrderProductOrder detail : details){
                 String materialId = detail.getMaterialId();
                 // 筛选物料分组
-                if((materialId.startsWith("04.01") || materialId.startsWith("06.05")) && detail.getCanShowPrint().equals("0")){
+                if((materialId.startsWith("04.01") || materialId.startsWith("04.04")  || materialId.startsWith("06.05")) && detail.getCanShowPrint().equals("0")){
                     HashMap<String, String> theSub = new HashMap<>();
                     theSub.put("materialId",materialId);
                     theSub.put("materialName",detail.getMaterialName());
