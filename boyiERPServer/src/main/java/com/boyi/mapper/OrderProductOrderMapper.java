@@ -227,4 +227,14 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             "    and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
             " group by ppcd.material_id")
     List<Map<String, Object>> listByCalMaterial(@Param("searchStartDate") String startDate,@Param("searchEndDate") String endDate);
+
+    @Select("select * from (" +
+            " select opo.id,opo.product_num,opo.product_brand,opo.order_number" +
+            " ,(select ppc.id from produce_product_constituent ppc where ppc.product_num=opo.product_num and ppc.product_brand=opo.product_brand) ppc_id" +
+            "  from order_product_order  opo" +
+            " where opo.order_type !=2 and opo.status = 0 and opo.id not in (" +
+            " select DISTINCT(order_id) from produce_order_material_progress pomp where pomp.order_id is not null" +
+            " ) " +
+            " ) t1 where t1.ppc_id is not null " )
+    List<OrderProductOrder> listNoExistProgressOrdersByHasPPC();
 }

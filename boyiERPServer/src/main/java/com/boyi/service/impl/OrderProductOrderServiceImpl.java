@@ -231,4 +231,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.listByCalMaterial(startDate,endDate);
     }
 
+    @Override
+    public List<OrderProductOrder> listNoExistProgressOrdersByHasPPC() {
+        return this.orderProductOrderMapper.listNoExistProgressOrdersByHasPPC();
+    }
+
 }

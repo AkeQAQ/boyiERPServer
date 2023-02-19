@@ -16,4 +16,7 @@ public interface ScheduleTaskService  {
     void changeProduceBatchTranService();
     void changeProductOrderAndProgress();
     void configureTasks();
+
+    void addProduceOrderMaterialProgressByNull();
+
 }

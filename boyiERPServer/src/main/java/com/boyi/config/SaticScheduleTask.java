@@ -44,9 +44,11 @@ public class SaticScheduleTask {
     @Autowired
     private BaseMaterialService baseMaterialService;
 
-
     @Autowired
     private ScheduleTaskService scheduleTaskService;
+
+
+
 
     private Long heartInterval = 30000L;
 
@@ -195,6 +197,16 @@ public class SaticScheduleTask {
             log.error("报错,",e);
         }
 
+    }
+
+
+    /***
+     *  针对有订单、且有组成结构的，且没有任何一条采购进度表内容的进行数据填充，备料数量为0
+     */
+    @Scheduled(cron = "0 0 9 * * ?")
+    private void addProduceOrderMaterialProgressByNull(){
+
+        this.scheduleTaskService.addProduceOrderMaterialProgressByNull();
     }
 
 }

@@ -43,6 +43,10 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     }
 
+
+    @Autowired
+    private OrderProductOrderService orderProductOrderService;
+
     @Autowired
     private OtherMapper otherMapper;
 
@@ -51,10 +55,6 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     @Autowired
     private RepositoryStockHistoryService repositoryStockHistoryService;
-
-
-    @Autowired
-    private OrderProductOrderService orderProductOrderService;
 
     @Autowired
     private ProduceOrderMaterialProgressService produceOrderMaterialProgressService;
@@ -88,6 +88,12 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     @Autowired
     private HisProduceBatchProgressService hisProduceBatchProgressService;
+
+    @Autowired
+    private ProduceProductConstituentDetailService produceProductConstituentDetailService;
+
+    @Autowired
+    private BaseMaterialService baseMaterialService;
 
     @Override
     @Transactional
@@ -319,6 +325,58 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
             log.error("发生异常..",e);
             try{
                 EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期修改出入库自增ID的日期】报错..");
+            }catch (Exception e2){
+                log.error("邮件发送失败..");
+            }
+            throw e;
+        }
+    }
+
+    @Transactional
+    @Override
+    public void addProduceOrderMaterialProgressByNull() {
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            log.info("【定时任务】执行静态定时任务时间: {}" , now);
+
+            // 有组成结构、不是取消订单、没有在进度表存在的全部订单
+            List<OrderProductOrder> orders = this.orderProductOrderService.listNoExistProgressOrdersByHasPPC();
+
+            if(orders==null || orders.size()<=0){
+                log.info("【定时任务】【定期补充进度表】补充为空.");
+                return;
+            }
+            List<ProduceOrderMaterialProgress> saveBatchPOMP = new ArrayList<>();
+
+            for(OrderProductOrder opo : orders){
+                List<ProduceProductConstituentDetail> theConsitituentDetails = produceProductConstituentDetailService.listByForeignId(opo.getPpcId());
+                // 计算数目 * 每个物料的用量
+                for (ProduceProductConstituentDetail item : theConsitituentDetails){
+
+                    ProduceOrderMaterialProgress pomp = new ProduceOrderMaterialProgress();
+                    pomp.setOrderId(opo.getId());
+                    pomp.setMaterialId(item.getMaterialId());
+                    pomp.setPreparedNum("0");
+                    pomp.setProgressPercent(0);
+
+                    pomp.setCreated(now);
+                    pomp.setUpdated(now);
+                    pomp.setInNum("0");
+                    pomp.setCalNum(BigDecimalUtil.mul(item.getDosage(),opo.getOrderNumber()+"").toString());
+                    saveBatchPOMP.add(pomp);
+                }
+
+            }
+            if(saveBatchPOMP.size()>0){
+                log.info("【定时任务】【定期补充进度表】补充条数:{}数据内容:{}",saveBatchPOMP.size(),saveBatchPOMP);
+                produceOrderMaterialProgressService.saveBatch(saveBatchPOMP);
+            }
+
+
+        }catch (Exception e){
+            log.error("发生异常..",e);
+            try{
+                EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期补充进度表】报错..");
             }catch (Exception e2){
                 log.error("邮件发送失败..");
             }

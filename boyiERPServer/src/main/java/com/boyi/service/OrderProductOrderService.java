@@ -73,4 +73,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(Long pbId);
 
     List<Map<String, Object>> listByCalMaterial(String startDate, String endDate);
+
+    List<OrderProductOrder> listNoExistProgressOrdersByHasPPC();
+
 }

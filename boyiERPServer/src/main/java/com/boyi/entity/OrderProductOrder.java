@@ -118,4 +118,7 @@ public class OrderProductOrder extends BaseEntity {
     @TableField(exist = false)
     private Boolean hasProduction;
 
+    @TableField(exist = false)
+    private Long ppcId;
+
 }
