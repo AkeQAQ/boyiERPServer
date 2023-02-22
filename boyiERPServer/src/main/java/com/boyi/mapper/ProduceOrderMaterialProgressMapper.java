@@ -113,13 +113,13 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
 
 
     @Select(
-            "  select cast(sum(pomp.prepared_num) as DECIMAL(12,5)) prepared_num" +
+            "  select material_id,cast(sum(pomp.prepared_num) as DECIMAL(12,5)) prepared_num,cast(sum(pomp.in_num) as DECIMAL(12,5)) in_num" +
             "             from produce_order_material_progress pomp  " +
             " where pomp.created >= #{searchStartDate} and pomp.created <=#{searchEndDate}" +
             " and  pomp.order_id is null and material_id=#{id}" +
             "            " +
             "            ")
-    Double groupByMaterialIdAndBetweenDateAndOrderIdIsNull(@Param("id") String id,@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
+    ProduceOrderMaterialProgress groupByMaterialIdAndBetweenDateAndOrderIdIsNull(@Param("id") String id,@Param("searchStartDate") String searchStartDate,@Param("searchEndDate") String searchEndDate);
 
     @Select("<script> select pomp.material_id,pomp.prepared_num,in_num,opo.product_num,opo.product_brand,opo.order_num,opo.order_number  from produce_order_material_progress pomp,order_product_order opo " +
             "           where pomp.order_id=opo.id and pomp.material_id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach>" +

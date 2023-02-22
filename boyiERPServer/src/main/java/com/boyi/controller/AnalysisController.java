@@ -229,11 +229,11 @@ public class AnalysisController extends BaseController {
             }
 
             // 3. 根据物料，查询该时间段的补数数量
-            Double num = produceOrderMaterialProgressService.groupByMaterialIdAndBetweenDateAndOrderIdIsNull(bm.getId(),searchStartDate,searchEndDate);
-            if(num == null){
+            ProduceOrderMaterialProgress num = produceOrderMaterialProgressService.groupByMaterialIdAndBetweenDateAndOrderIdIsNull(bm.getId(),searchStartDate,searchEndDate);
+            if(num == null || num.getPreparedNum() == null ){
                 complementNums.add(0D);
             }else{
-                complementNums.add(num);
+                complementNums.add(num.getPreparedNum());
             }
         }
 

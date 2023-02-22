@@ -970,6 +970,11 @@ public class OrderProductOrderController extends BaseController {
                         errorMsg.put("content",order.getOrderNum()+":"+"系统订单数目:"+sysOrder.getOrderNumber()+"，EXCEL订单数目:"+order.getOrderNumber());
                         errorMsgs.add(errorMsg);
                     }
+                    if(sysOrder.getOrderType()!=null && sysOrder.getOrderType().equals(2)){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",order.getOrderNum()+":"+"系统订单状态是取消!!");
+                        errorMsgs.add(errorMsg);
+                    }
 
                     /*if(!order.getEndDate().equals(sysOrder.getEndDate())){
                         HashMap<String, String> errorMsg = new HashMap<>();

@@ -730,6 +730,9 @@ public class ProduceOrderMaterialProgressController extends BaseController {
     public ResponseResult list( String searchField,String searchStartDate, String searchEndDate, String searchStatus,
                                 String searchStatus2,String searchNoPropread,String searchNoAllIn,
                                 @RequestBody Map<String,Object> params) {
+        // 是否需要查询补数进度表数据
+        String  complementMaterialName = "";
+
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
         String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
@@ -747,6 +750,9 @@ public class ProduceOrderMaterialProgressController extends BaseController {
             }
             else if (searchField.equals("materialName")) {
                 queryField = "material_name";
+                if(!searchStr.equals("")){
+                    complementMaterialName = searchStr;
+                }
 
             }
             else {
@@ -770,6 +776,9 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                     }
                     else if (oneField.equals("materialName")) {
                         theQueryField = "material_name";
+                        if(!oneStr.equals("")){
+                            complementMaterialName = oneStr;
+                        }
 
                     }else {
                         continue;
@@ -805,6 +814,11 @@ public class ProduceOrderMaterialProgressController extends BaseController {
 
         // 遍历查询是否已有投产
         List<ProduceOrderMaterialProgress> records = pageData.getRecords();
+        if(records==null || records.size() == 0){
+            records = new ArrayList<ProduceOrderMaterialProgress>();
+            pageData.setRecords(records) ;
+        }
+
         HashMap<String,Boolean> queryOrderNum = new HashMap<String,Boolean>();
 
         for(ProduceOrderMaterialProgress progress : records){
@@ -818,6 +832,35 @@ public class ProduceOrderMaterialProgressController extends BaseController {
             List<ProduceBatch> batches = produceBatchService.listByOrderNum(orderNum);
             queryOrderNum.put(orderNum,(batches!=null && batches.size() != 0)  );
             progress.setIsHasProduceBatch((batches!=null && batches.size() != 0));
+        }
+
+        // 搜索字段是物料名称的，查询补数数量是该物料的查询出来，显示物料ID，物料名称，已报、已入库信息
+        if (!complementMaterialName.equals("")) {
+            String startDate = "1900-01-01";
+            String endDate = "2100-01-01";
+            if(searchStartDate!=null && !searchStartDate.isEmpty()){
+                startDate = searchStartDate;
+            }
+            if(searchEndDate!=null && !searchEndDate.isEmpty()){
+                endDate = searchStartDate;
+            }
+            List<BaseMaterial> bms = baseMaterialService.list(new QueryWrapper<BaseMaterial>()
+                    .like(DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME, complementMaterialName));
+            if(bms.size() > 0){
+                for(BaseMaterial bm : bms){
+                    ProduceOrderMaterialProgress progress = produceOrderMaterialProgressService.groupByMaterialIdAndBetweenDateAndOrderIdIsNull(bm.getId(),startDate,endDate);
+                    if(progress!=null){
+                        progress.setMaterialName(bm.getName());
+                        records.add(progress);
+                    }
+
+                }
+
+            }
+
+
+
+
         }
 
 

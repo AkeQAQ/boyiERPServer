@@ -1341,9 +1341,13 @@ public class ProduceBatchController extends BaseController {
                 return ResponseResult.fail("没查到任何订单号");
             }else{
                 Set<String> dbOrderNums = new HashSet<>();
+                StringBuilder sb = new StringBuilder();
 
                 for (OrderProductOrder order : orders){
                     dbOrderNums.add(order.getOrderNum());
+                    if(order.getOrderType().equals(2)){
+                        sb.append("订单号:").append(order.getOrderNum()).append("是取消类型！");
+                    }
                 }
                 for (String uploadOrderNum : orderNums){
                     if(!dbOrderNums.contains(uploadOrderNum)){
@@ -1351,6 +1355,11 @@ public class ProduceBatchController extends BaseController {
                         errorMsg.put("content","订单号："+uploadOrderNum+"不存在");
                         errorMsgs.add(errorMsg);
                     }
+                }
+                if(sb.toString().length()>0){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content",sb.toString());
+                    errorMsgs.add(errorMsg);
                 }
 
                 if(errorMsgs.size() > 0){
