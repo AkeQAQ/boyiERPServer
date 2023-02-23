@@ -1180,6 +1180,11 @@ public class OrderProductOrderController extends BaseController {
                 if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
                     continue;
                 }
+                if(order.getOrderType()==null){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","订单号："+order.getOrderNum()+"的订单类型不能为空!");
+                    errorMsgs.add(errorMsg);
+                }
                 LocalDateTime now = LocalDateTime.now();
                 order.setCreated(now);
                 order.setUpdated(now);
@@ -1198,6 +1203,8 @@ public class OrderProductOrderController extends BaseController {
                     errorMsg.put("content","订单号："+existOne.getOrderNum()+"已存在");
                     errorMsgs.add(errorMsg);
                 }
+            }
+            if(errorMsgs.size() > 0){
                 return ResponseResult.succ(errorMsgs);
             }
             orderProductOrderService.saveBatch(saveOrders);

@@ -67,10 +67,11 @@ public class ProduceBatch extends BaseEntity {
     private String size47;
     private Integer push;
 
-
+    @ExcelAttribute(sort = 3)
     @TableField(exist = false)
     private String productNum;
 
+    @ExcelAttribute(sort = 4)
     @TableField(exist = false)
     private String productBrand;
 

@@ -1315,6 +1315,10 @@ public class ProduceBatchController extends BaseController {
 
             LocalDateTime now = LocalDateTime.now();
 
+            // excel 的批次号数据
+            HashMap<String, List<ProduceBatch>> excelOrderNum_pb = new HashMap<>();
+
+
             for (ProduceBatch batch: batches){
                 batch.setCreated(now);
                 batch.setUpdated(now);
@@ -1324,6 +1328,13 @@ public class ProduceBatchController extends BaseController {
 
                 ids.add(batch.getBatchId());
                 orderNums.add(batch.getOrderNum());
+
+                List<ProduceBatch> orderNum_pbs = excelOrderNum_pb.get(batch.getOrderNum());
+                if(orderNum_pbs==null){
+                    orderNum_pbs = new ArrayList<ProduceBatch>();
+                    excelOrderNum_pb.put(batch.getOrderNum(),orderNum_pbs);
+                }
+                orderNum_pbs.add(batch);
             }
 
             List<ProduceBatch> exist = produceBatchService.list(new QueryWrapper<ProduceBatch>().in(DBConstant.TABLE_PRODUCE_BATCH.BATCH_ID_FIELDNAME, ids));
@@ -1348,6 +1359,48 @@ public class ProduceBatchController extends BaseController {
                     if(order.getOrderType().equals(2)){
                         sb.append("订单号:").append(order.getOrderNum()).append("是取消类型！");
                     }
+
+                    // 1. 校验系统的订单和生产序号的工厂货号、品牌是否一致
+                    List<ProduceBatch> pbs = excelOrderNum_pb.get(order.getOrderNum());
+                    ProduceBatch pb = pbs.get(0);
+                    String batchIdPre = pb.getBatchId().split("-")[0];
+
+                    if(!pb.getProductNum().equals(order.getProductNum()) ||
+                    !pb.getProductBrand().equals(order.getProductBrand())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content","订单号："+order.getOrderNum()+",进度表货号:"+pb.getProductNum()
+                        +"，品牌:"+pb.getProductBrand()+"。与订单的货号:"+order.getProductNum()+",品牌:"+order.getProductBrand()
+                        +"。存在不一致!!!请注意！");
+                        errorMsgs.add(errorMsg);
+                    }
+
+                    // 2. 校验订单和生产序号的数量是否一致。
+
+                    // 2.1 先查询db中，该生产序号开头的全部批次号，db的数量
+                    List<ProduceBatch> dbBatches = produceBatchService.listByLikeRightBatchId(batchIdPre);
+                    Double dbNum = 0D;
+                    for(ProduceBatch dbPb:dbBatches){
+                        Double oneDbPbTotalNum = dbPbTotalNum(dbPb);
+                        dbNum+=oneDbPbTotalNum;
+                    }
+
+                    // 2.2. 再查询excel中，该生产序号开头的全部批次号，excel的数量。和DB求和，跟订单表的总数量进行对比
+                    Double excelNum = 0D;
+                    for(ProduceBatch excelPb : pbs){
+                        Double oneDbPbTotalNum = dbPbTotalNum(excelPb);
+                        excelNum+=oneDbPbTotalNum;
+
+                    }
+                    Integer produceBatchTotalNumber = BigDecimalUtil.add(dbNum, excelNum).intValue();
+                    if(!produceBatchTotalNumber.equals(order.getOrderNumber()) ){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content","订单号："+order.getOrderNum()+",订单数量:"+order.getOrderNumber()
+                                +"  != 批次号:"+batchIdPre+"。数据库已存在数量:"+dbNum+",新导入生管进度表数量:"+excelNum
+                                +",求和："+produceBatchTotalNumber+"...请注意!!!");
+                        errorMsgs.add(errorMsg);
+
+                    }
+
                 }
                 for (String uploadOrderNum : orderNums){
                     if(!dbOrderNums.contains(uploadOrderNum)){
@@ -1356,6 +1409,8 @@ public class ProduceBatchController extends BaseController {
                         errorMsgs.add(errorMsg);
                     }
                 }
+
+
                 if(sb.toString().length()>0){
                     HashMap<String, String> errorMsg = new HashMap<>();
                     errorMsg.put("content",sb.toString());
@@ -1398,6 +1453,46 @@ public class ProduceBatchController extends BaseController {
         FileInputStream fis = new FileInputStream(new File(poiImportDemoPath));
         FileCopyUtils.copy(fis,response.getOutputStream());
         return ResponseResult.succ("下载成功");
+    }
+
+    public static Double dbPbTotalNum(ProduceBatch pb){
+        if(pb.getSize40()==null||pb.getSize40().isEmpty()){
+            pb.setSize40("0");
+        }
+        if(pb.getSize41()==null||pb.getSize41().isEmpty()){
+            pb.setSize41("0");
+        }
+        if(pb.getSize42()==null||pb.getSize42().isEmpty()){
+            pb.setSize42("0");
+        }if(pb.getSize43()==null||pb.getSize43().isEmpty()){
+            pb.setSize43("0");
+        }if(pb.getSize44()==null||pb.getSize44().isEmpty()){
+            pb.setSize44("0");
+        }if(pb.getSize45()==null||pb.getSize45().isEmpty()){
+            pb.setSize45("0");
+        }if(pb.getSize46()==null||pb.getSize46().isEmpty()){
+            pb.setSize46("0");
+        }if(pb.getSize47()==null||pb.getSize47().isEmpty()){
+            pb.setSize47("0");
+        }if(pb.getSize39()==null||pb.getSize39().isEmpty()){
+            pb.setSize39("0");
+        }if(pb.getSize38()==null||pb.getSize38().isEmpty()){
+            pb.setSize38("0");
+        }if(pb.getSize37()==null||pb.getSize37().isEmpty()){
+            pb.setSize37("0");
+        }if(pb.getSize36()==null||pb.getSize36().isEmpty()){
+            pb.setSize36("0");
+        }if(pb.getSize35()==null||pb.getSize35().isEmpty()){
+            pb.setSize35("0");
+        }if(pb.getSize34()==null||pb.getSize34().isEmpty()){
+            pb.setSize34("0");
+        }
+        BigDecimal theTotalNum = new BigDecimal(pb.getSize34()).add(new BigDecimal(pb.getSize35())).add(new BigDecimal(pb.getSize36()))
+                .add(new BigDecimal(pb.getSize37())).add(new BigDecimal(pb.getSize38())).add(new BigDecimal(pb.getSize39()))
+                .add(new BigDecimal(pb.getSize40())).add(new BigDecimal(pb.getSize41())).add(new BigDecimal(pb.getSize42()))
+                .add(new BigDecimal(pb.getSize43())).add(new BigDecimal(pb.getSize44())).add(new BigDecimal(pb.getSize45()))
+                .add(new BigDecimal(pb.getSize46())).add(new BigDecimal(pb.getSize47()));
+        return theTotalNum.doubleValue();
     }
 
     public static void main(String[] args) {
