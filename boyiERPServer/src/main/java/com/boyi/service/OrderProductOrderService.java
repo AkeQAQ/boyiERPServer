@@ -76,4 +76,5 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
     List<OrderProductOrder> listNoExistProgressOrdersByHasPPC();
 
+    List<OrderProductOrder> listByEndDate(String sevenDateStr, String nowDateStr);
 }

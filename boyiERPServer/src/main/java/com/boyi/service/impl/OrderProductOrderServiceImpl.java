@@ -236,4 +236,10 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         return this.orderProductOrderMapper.listNoExistProgressOrdersByHasPPC();
     }
 
+    @Override
+    public List<OrderProductOrder> listByEndDate(String sevenDateStr, String nowDateStr) {
+        return this.list(new QueryWrapper<OrderProductOrder>()
+                .between(DBConstant.TABLE_ORDER_PRODUCT_ORDER.END_DATE_FIELDNAME,sevenDateStr,nowDateStr));
+    }
+
 }

@@ -70,9 +70,114 @@ public class AnalysisController extends BaseController {
     }
 
 
+
     /**
-     * 产品订单，订单、回单、回单比例
+     * 物料死亡线视图
      */
+    @GetMapping("/materialDeadLineView")
+    public ResponseResult materialDeadLineView() {
+
+        // 1. 先查询7天内货期的订单
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        String nowDateStr = now.format(dtf);
+
+        LocalDate sevenDayBeforeDate = LocalDate.now().plusDays(-7);
+        String sevenDateStr = sevenDayBeforeDate.format(dtf);
+
+        List<OrderProductOrder> orders = orderProductOrderService.listByEndDate(sevenDateStr,nowDateStr);
+
+        // 2. 对该些订单，有组成结构的进行物料计算，保留订单物料明细内容，
+        Map<String,ProduceProductConstituent> product_brand_ppc = new HashMap<String,ProduceProductConstituent>();// 货号_品牌
+
+        Map<String,List<ProduceProductConstituentDetail>> product_brand_ppcd = new HashMap<String,List<ProduceProductConstituentDetail>>();// 货号_品牌
+
+
+        HashMap<String, Map<String, Object>> returnMap = new HashMap<>();
+
+        for(OrderProductOrder opo : orders){
+            Integer orderNumber = opo.getOrderNumber();
+            String num_brand = opo.getProductNum() + "_" + opo.getProductBrand();
+
+            ProduceProductConstituent ppc = product_brand_ppc.get(num_brand);
+            if(ppc == null){
+                ppc = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
+                if(ppc==null){
+                    continue;
+                }
+                product_brand_ppc.put(num_brand,ppc);
+
+                List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(ppc.getId());
+                product_brand_ppcd.put(num_brand,details);
+            }
+            // 订单和物料进行计算，存在returnMap中。
+            List<ProduceProductConstituentDetail> details = product_brand_ppcd.get(num_brand);
+            for(ProduceProductConstituentDetail detail : details){
+                String materialId = detail.getMaterialId();
+                String dosage = detail.getDosage();
+                String oneOrderOneMaterialNeedNum = BigDecimalUtil.mul(dosage, orderNumber+"").toString();
+                Map<String, Object> oneMaterialMsg = returnMap.get(materialId);
+                if(oneMaterialMsg==null){
+                    oneMaterialMsg = new HashMap<>();
+                    returnMap.put(materialId,oneMaterialMsg);
+                }
+                Object needNum = oneMaterialMsg.get("needNum");
+                if(needNum==null){
+                    oneMaterialMsg.put("needNum",oneOrderOneMaterialNeedNum);
+                }else{
+                    oneMaterialMsg.put("needNum",BigDecimalUtil.add(needNum.toString(),oneOrderOneMaterialNeedNum));
+                }
+                Object detailList = oneMaterialMsg.get("details");
+                if(detailList==null){
+                    List<OrderProductOrder> detailListOrders = new ArrayList<>();
+                    detailListOrders.add(opo);
+                    oneMaterialMsg.put("details",detailListOrders);
+                }else{
+                    List<OrderProductOrder> detailListOrders = (List)oneMaterialMsg.get("details");
+                    detailListOrders.add(opo);
+                }
+            }
+
+
+        }
+
+        // 3. 对上述的物料ID，查询库存数量
+
+        ArrayList<Map<String, Object>> returnLists = new ArrayList<>();
+
+        for(String materialId : returnMap.keySet()){
+            RepositoryStock stock = repositoryStockService.getByMaterialId(materialId);
+            Double stockNum = 0D;
+            if(stock!=null && stock.getNum()!=null ){
+                stockNum = stock.getNum();
+            }
+
+            Map<String, Object> msg = returnMap.get(materialId);
+            String needNum = msg.get("needNum").toString();
+
+            if(Double.valueOf(needNum) > stockNum){
+                msg.put("materialId",materialId);
+                msg.put("stockNum",stockNum);
+                BaseMaterial bm = baseMaterialService.getById(materialId);
+                msg.put("materialName",bm.getName());
+                msg.put("unit",bm.getUnit());
+
+                returnLists.add(msg);
+            }
+
+        }
+        // 4. 对物料ID进行判断，假如 需要数量> 库存数量的。则保留
+
+        // 5. 返回对象包含信息字段：物料ID，物料名称，需要数量，库存数量,单位 ,明细列表
+
+        return ResponseResult.succ(returnLists);
+
+    }
+
+
+        /**
+         * 产品订单，订单、回单、回单比例
+         */
     @GetMapping("/productOrderByOrderType")
     public ResponseResult productOrderByOrderType(String searchStartDate, String searchEndDate) {
 

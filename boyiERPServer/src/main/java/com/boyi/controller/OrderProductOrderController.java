@@ -934,6 +934,8 @@ public class OrderProductOrderController extends BaseController {
             }
 
             Set<String> excelOrderNums = new HashSet<>();
+            ArrayList<OrderProductOrder> updateOrders = new ArrayList<>();
+
 
             for (OrderProductOrder order: orderProductOrders){
                 if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
@@ -975,6 +977,14 @@ public class OrderProductOrderController extends BaseController {
                         errorMsg.put("content",order.getOrderNum()+":"+"系统订单状态是取消!!");
                         errorMsgs.add(errorMsg);
                     }
+                    // 把excel的货期，修改到db对象中
+                    String excelEndDate = order.getEndDate();
+                    String dbEndDate = sysOrder.getEndDate();
+                    if(excelEndDate!=null && !excelEndDate.equals(dbEndDate)){
+                        sysOrder.setEndDate(excelEndDate);
+                        updateOrders.add(sysOrder);
+                    }
+
 
                     /*if(!order.getEndDate().equals(sysOrder.getEndDate())){
                         HashMap<String, String> errorMsg = new HashMap<>();
@@ -993,6 +1003,10 @@ public class OrderProductOrderController extends BaseController {
                 }
             }
 
+            // 修改订单信息。（目前货期不一致，在这里修改）
+            if(updateOrders.size() > 0){
+                orderProductOrderService.updateBatchById(updateOrders);
+            }
 
             if(errorMsgs.isEmpty()){
                 HashMap<String, String> errorMsg = new HashMap<>();

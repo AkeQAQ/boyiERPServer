@@ -1008,6 +1008,7 @@ public class DBConstant {
         public static final String PRODUCT_REGION_FIELDNAME = "product_region";
         public static final String ORDER_TYPE_FIELDNAME = "order_type";
         public static final String COMMENT_FIELDNAME = "comment";
+        public static final String END_DATE_FIELDNAME = "end_date";
 
 
         public static final String PRODUCT_NUM_FIELDNAME = "product_num";
