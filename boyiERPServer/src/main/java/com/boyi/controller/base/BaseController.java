@@ -174,6 +174,12 @@ public class BaseController {
     @Autowired
     public BaseMaterialSameGroupDetailService baseMaterialSameGroupDetailService;
 
+    @Autowired
+    public FinanceSupplierPayshoesService financeSupplierPayshoesService;
+
+    @Autowired
+    public FinanceSupplierPayshoesDetailsService financeSupplierPayshoesDetailsService;
+
     /**
      * 获取页面
      * @return
