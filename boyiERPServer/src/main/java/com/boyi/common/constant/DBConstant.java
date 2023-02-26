@@ -1348,4 +1348,213 @@ public class DBConstant {
 
 
     }
+
+
+    public static class TABLE_FINANCE_SUPPLIER_CHANGE_DETAILS{
+
+        public static final String ID_FIELDNAME = "id";
+
+        public static final String CHANGE_ID_FIELDNAME = "change_id";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String NUM_FIELDNAME = "num";
+        public static final String CHANGE_PRICE_FIELDNAME = "change_price";
+        public static final String CHANGE_AMOUNT_FIELDNAME = "change_amount";
+        public static final String COMMENT_FIELDNAME = "comment";
+
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+
+
+        /**
+         *  0:代表 大货
+         */
+        public static final Integer PAY_TYPE_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 残鞋
+         */
+        public static final Integer PAY_TYPE_FIELDVALUE_1 = 1;
+
+    }
+
+    public static class TABLE_FINANCE_SUPPLIER_CHANGE{
+        public static final Map<Integer,String> statusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String CHANGE_DATE_FIELDNAME = "change_date";
+        public static final String STATUS_FIELDNAME = "status";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+    }
+
+
+    public static class TABLE_FINANCE_SUPPLIER_ROUND_DOWN{
+        public static final Map<Integer,String> statusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String ROUND_DOWN_DATE_FIELDNAME = "round_down_date";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String ROUND_DOWN_AMOUNT_FIELDNAME = "round_down_amount";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+    }
+
+
+    public static class TABLE_FINANCE_SUPPLIER_FINE{
+        public static final Map<Integer,String> statusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final String PIC_URL_FIELDNAME = "pic_url";
+
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String FINE_DATE_FIELDNAME = "fine_date";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String FINE_AMOUNT_FIELDNAME = "fine_amount";
+        public static final String FINE_REASON_FIELDNAME = "fine_reason";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+    }
+
+
+    public static class TABLE_FINANCE_SUPPLIER_TEST{
+        public static final Map<Integer,String> statusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String TEST_DATE_FIELDNAME = "test_date";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String TEST_AMOUNT_FIELDNAME = "test_amount";
+        public static final String DOCUMENT_NUM_FIELDNAME = "document_num";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+    }
 }

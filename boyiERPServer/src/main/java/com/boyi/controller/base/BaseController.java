@@ -14,6 +14,10 @@ import java.time.format.DateTimeFormatter;
 public class BaseController {
     public DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
+
+    @Autowired
+    public FinanceSupplierTestService financeSupplierTestService;
+
     @Autowired
     public HttpServletRequest req;
 
@@ -179,6 +183,18 @@ public class BaseController {
 
     @Autowired
     public FinanceSupplierPayshoesDetailsService financeSupplierPayshoesDetailsService;
+
+    @Autowired
+    public FinanceSupplierChangeService financeSupplierChangeService;
+
+    @Autowired
+    public FinanceSupplierChangeDetailsService financeSupplierChangeDetailsService;
+
+    @Autowired
+    public FinanceSupplierRoundDownService financeSupplierRoundDownService;
+
+    @Autowired
+    public FinanceSupplierFineService financeSupplierFineService;
 
     /**
      * 获取页面
