@@ -16,6 +16,10 @@ public class BaseController {
 
 
     @Autowired
+    public FinanceSupplierTaxDeductionService financeSupplierTaxDeductionService;
+    @Autowired
+    public FinanceSupplierTaxSupplementService financeSupplierTaxSupplementService;
+    @Autowired
     public FinanceSupplierTestService financeSupplierTestService;
 
     @Autowired

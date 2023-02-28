@@ -1557,4 +1557,130 @@ public class DBConstant {
         public static final Integer STATUS_FIELDVALUE_3 = 3;
 
     }
+
+
+    public static class TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT{
+        public static final Map<Integer,String> statusMap;
+        public static final Map<Integer,String> payStatusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+
+            Map<Integer,String> statusMap = new HashMap<Integer,String>();
+            statusMap.put(0,"已付");
+            statusMap.put(1,"未付");
+            payStatusMap = statusMap;
+        }
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+
+        public static final String DOCUMENT_DATE_FIELDNAME = "document_date";
+        public static final String DOCUMENT_NUM_FIELDNAME = "document_num";
+        public static final String PIC_URL_FIELDNAME = "pic_url";
+        public static final String FINE_REASON_FIELDNAME = "tax_supplement_amount";
+        public static final String TAX_SUPPLEMENT_AMOUNT_FIELDNAME = "tax_supplement_amount";
+        public static final String TAX_POINT_FIELDNAME = "tax_point";
+        public static final String DOCUMENT_AMOUNT_FIELDNAME = "document_amount";
+        public static final String PAY_STATUS_FIELDNAME = "pay_status";
+        public static final String PAY_DATE_FIELDNAME = "pay_date";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String ID_FIELDNAME = "id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+
+        public static final Integer PAY_STATUS_FIELDVALUE_0 = 0;
+
+        public static final Integer PAY_STATUS_FIELDVALUE_1 = 1;
+
+    }
+
+
+    public static class TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION{
+        public static final Map<Integer,String> statusMap;
+        public static final Map<Integer,String> payStatusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+
+            Map<Integer,String> statusMap = new HashMap<Integer,String>();
+            statusMap.put(0,"已付");
+            statusMap.put(1,"未付");
+            payStatusMap = statusMap;
+        }
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+
+        public static final String DOCUMENT_DATE_FIELDNAME = "document_date";
+        public static final String DOCUMENT_NUM_FIELDNAME = "document_num";
+        public static final String PIC_URL_FIELDNAME = "pic_url";
+        public static final String DEDUCTION_AMOUNT_FIELDNAME = "deduction_amount";
+        public static final String TAX_POINT_FIELDNAME = "tax_point";
+        public static final String DOCUMENT_AMOUNT_FIELDNAME = "document_amount";
+        public static final String PAY_STATUS_FIELDNAME = "pay_status";
+        public static final String PAY_DATE_FIELDNAME = "pay_date";
+        public static final String TAX_CAL_AMOUNT_FIELDNAME = "tax_cal_amount";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String ID_FIELDNAME = "id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+
+        public static final Integer PAY_STATUS_FIELDVALUE_0 = 0;
+
+        public static final Integer PAY_STATUS_FIELDVALUE_1 = 1;
+
+    }
 }
