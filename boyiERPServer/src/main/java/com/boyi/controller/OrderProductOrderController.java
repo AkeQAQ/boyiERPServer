@@ -53,6 +53,46 @@ public class OrderProductOrderController extends BaseController {
     }
 
 
+    @Transactional
+    @PostMapping("buyInMove")
+    @PreAuthorize("hasAuthority('order:productOrder:del')")
+    public ResponseResult buyInMove(Principal principal,Long id) throws Exception{
+        try {
+            // 1. 查询该订单的采购采购进度表，筛选入库记录不为0的数据
+
+            List<ProduceOrderMaterialProgress> pomp = produceOrderMaterialProgressService.listByOrderId(id);
+            if(pomp==null || pomp.isEmpty()){
+                return ResponseResult.fail("该订单没有进度表信息");
+            }
+            for(ProduceOrderMaterialProgress one:pomp){
+                if(one.getInNum()==null || one.getInNum().isEmpty() || one.getInNum().equals("0")){
+                    continue;
+                }
+                String materialId = one.getMaterialId();
+                // 假如进度表的该物料，只有一条数据，不能进行迁移
+                if(produceOrderMaterialProgressService.countHasPreparedByMaterialIdExcludeSelf(materialId,one.getId())==0){
+                    return ResponseResult.fail("该订单的物料:"+materialId+",进度表仅有当前一条有备料数量>0的信息，无法迁移,请先删除入库记录!");
+                }
+                // 2. 对物料进行查询，进行消单处理。该订单的进度表设置为0
+
+                ProduceOrderMaterialProgress theLatest = produceOrderMaterialProgressService.getByTheLatestByMaterialIdCreatedDescExcludeSelf(materialId,one.getId());
+
+                produceOrderMaterialProgressService.updateInNum(theLatest.getId(),BigDecimalUtil.add(theLatest.getInNum(),one.getInNum()).toString());
+
+                one.setInNum("0");
+                one.setUpdated(LocalDateTime.now());
+                one.setUpdatedUser(principal.getName());
+                produceOrderMaterialProgressService.updateById(one);
+            }
+
+            return ResponseResult.succ("订单入库消单迁移成功!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+
     @PostMapping("/mergerOrders")
     @PreAuthorize("hasAuthority('order:productOrder:save')")
     @Transactional

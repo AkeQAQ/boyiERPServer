@@ -262,5 +262,19 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
         return produceOrderMaterialProgressMapper.listNoInNumsWithMaterialIds(keySet);
     }
 
+    @Override
+    public int countHasPreparedByMaterialIdExcludeSelf(String materialId,Long id) {
+        return this.count(new QueryWrapper<ProduceOrderMaterialProgress>()
+                .eq(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.MATERIAL_ID_FIELDNAME,materialId)
+                .ne(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.PREPARED_NUM_FIELDNAME,"0")
+                .ne(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ID_FIELDNAME,id)
+        );
+    }
+
+    @Override
+    public ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDescExcludeSelf(String materialId, Long id) {
+        return this.produceOrderMaterialProgressMapper.getByTheLatestByMaterialIdCreatedDescExcludeSelf(materialId,id);
+    }
+
 
 }

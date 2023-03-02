@@ -132,4 +132,10 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             "            </script>")
     List<OrderProductCalVO> listNoInNumsWithMaterialIds(@Param("materialIds") Set<String> keySet);
 
+    @Select(
+            "select * from produce_order_material_progress" +
+            " pomp " +
+            " where material_id = #{materialId} and prepared_num > 0 and id !=#{id}" +
+            " order by pomp.created desc limit 1")
+    ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDescExcludeSelf(@Param("materialId") String materialId,@Param("id") Long id);
 }

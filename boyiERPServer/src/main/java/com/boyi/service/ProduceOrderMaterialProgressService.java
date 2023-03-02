@@ -64,4 +64,7 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
 
     List<OrderProductCalVO> listNoInNumsWithMaterialIds(Set<String> keySet);
 
+    int countHasPreparedByMaterialIdExcludeSelf(String materialId,Long id);
+
+    ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDescExcludeSelf(String materialId, Long id);
 }
