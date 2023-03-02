@@ -61,6 +61,64 @@ public class ProduceProductConstituentController extends BaseController {
     private final String  videoPrefix = "produceProductConstituentVideo-";
 
 
+
+    /**
+     * 查询入库
+     */
+    @GetMapping("/updateNumAndBrand")
+    @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
+    public ResponseResult updateNumAndBrand(Long id) {
+        ProduceProductConstituent productConstituent = produceProductConstituentService.getById(id);
+
+        return ResponseResult.succ(productConstituent);
+    }
+
+
+    @RequestMapping(value = "/updateNumBrandSubmit", method = RequestMethod.POST)
+    @Transactional
+    @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
+    public ResponseResult updateNumBrandSubmit(Principal principal,@RequestBody ProduceProductConstituent ppc) {
+        // 0. 看下新的货号、品牌是否有重复，重复不能修改
+
+        ProduceProductConstituent isNewExist = produceProductConstituentService.getByNumBrand(ppc.getProductNum(),ppc.getProductBrand());
+        if(isNewExist!=null){
+            return ResponseResult.fail("修改后会有重复的品牌和货号，不允许修改");
+        }
+        ProduceProductConstituent old = produceProductConstituentService.getById(ppc.getId());
+
+        if(old.getProductBrand().equals(ppc.getProductBrand()) && old.getProductNum().equals(ppc.getProductNum())){
+            return ResponseResult.fail("没有任何修改，不修改!");
+        }
+        // 1. 允许修改的，把老的货号、品牌的订单信息，都一并改成新的货号、品牌、包括历史订单表。
+
+        List<OrderProductOrder> oldOrders = orderProductOrderService.getByNumBrand(old.getProductNum(), old.getProductBrand());
+        for(OrderProductOrder order : oldOrders){
+            order.setProductNum(ppc.getProductNum());
+            order.setProductBrand(ppc.getProductBrand());
+        }
+        if(!oldOrders.isEmpty()){
+            orderProductOrderService.updateBatchById(oldOrders);
+        }
+
+        List<HisOrderProductOrder> oldHisOrders = hisOrderProductOrderService.getByNumBrand(old.getProductNum(), old.getProductBrand());
+        for(HisOrderProductOrder order : oldHisOrders){
+            order.setProductNum(ppc.getProductNum());
+            order.setProductBrand(ppc.getProductBrand());
+        }
+        if(!oldHisOrders.isEmpty()){
+            hisOrderProductOrderService.updateBatchById(oldHisOrders);
+        }
+
+        old.setProductNum(ppc.getProductNum());
+        old.setProductBrand(ppc.getProductBrand());
+        old.setUpdated(LocalDateTime.now());
+        old.setUpdatedUser(principal.getName());
+        produceProductConstituentService.updateById(old);
+
+        return ResponseResult.succ("修改货号、品牌成功！");
+    }
+
+
     @RequestMapping(value = "/removeVideoPath", method = RequestMethod.GET)
     public ResponseResult removeVideoPath(String id) {
         if(id==null || id.isEmpty()){

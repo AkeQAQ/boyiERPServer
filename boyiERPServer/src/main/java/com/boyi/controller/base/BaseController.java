@@ -16,6 +16,9 @@ public class BaseController {
 
 
     @Autowired
+    public HisOrderProductOrderService hisOrderProductOrderService;
+
+    @Autowired
     public FinanceSupplierTaxDeductionService financeSupplierTaxDeductionService;
     @Autowired
     public FinanceSupplierTaxSupplementService financeSupplierTaxSupplementService;

@@ -124,4 +124,14 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
                 .set(videoUrlFieldname,null)
                 .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.ID_FIELDNAME,ppc.getId()));
     }
+
+    @Override
+    public ProduceProductConstituent getByNumBrand(String productNum, String productBrand) {
+        QueryWrapper<ProduceProductConstituent> queryWrapper = new QueryWrapper<>();
+        queryWrapper
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_NUM_FIELDNAME,productNum)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_BRAND_FIELDNAME,productBrand);
+
+        return this.getOne(queryWrapper);
+    }
 }
