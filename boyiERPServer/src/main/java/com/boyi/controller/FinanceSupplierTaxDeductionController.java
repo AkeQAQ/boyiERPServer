@@ -9,6 +9,7 @@ import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.BaseSupplier;
+import com.boyi.entity.FinanceSupplierPayshoes;
 import com.boyi.entity.FinanceSupplierTaxDeduction;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.InputStream;
 import java.security.Principal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -198,8 +201,13 @@ public class FinanceSupplierTaxDeductionController extends BaseController {
 
         fsp.setUpdated(LocalDateTime.now());
         fsp.setUpdateUser(principal.getName());
-        fsp.setStatus( DBConstant.TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION.STATUS_FIELDVALUE_2);
+        if(!fsp.getStatus().equals(0)){
+            fsp.setStatus( DBConstant.TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION.STATUS_FIELDVALUE_2);
+        }
         try {
+            if(fsp.getPayDate()==null){
+                financeSupplierTaxDeductionService.updateNullWithField(fsp,DBConstant.TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION.PAY_DATE_FIELDNAME);
+            }
             financeSupplierTaxDeductionService.updateById(fsp);
 
             return ResponseResult.succ("编辑成功");
