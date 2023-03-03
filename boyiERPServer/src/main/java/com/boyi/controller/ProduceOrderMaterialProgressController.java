@@ -730,8 +730,10 @@ public class ProduceOrderMaterialProgressController extends BaseController {
     public ResponseResult list( String searchField,String searchStartDate, String searchEndDate, String searchStatus,
                                 String searchStatus2,String searchNoPropread,String searchNoAllIn,
                                 @RequestBody Map<String,Object> params) {
+        HashMap<String, Object> returnMap = new HashMap<>();
         // 是否需要查询补数进度表数据
         String  complementMaterialName = "";
+        String  complementMaterialId = "";
 
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -747,6 +749,12 @@ public class ProduceOrderMaterialProgressController extends BaseController {
             else if (searchField.equals("productBrand")) {
                 queryField = "product_brand";
 
+            }
+            else if (searchField.equals("materialId")) {
+                queryField = "material_id";
+                if(!searchStr.equals("")){
+                    complementMaterialId = searchStr;
+                }
             }
             else if (searchField.equals("materialName")) {
                 queryField = "material_name";
@@ -773,6 +781,12 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                     else if (oneField.equals("productBrand")) {
                         theQueryField = "product_brand";
 
+                    }
+                    else if (oneField.equals("materialId")) {
+                        theQueryField = "material_id";
+                        if(!oneStr.equals("")){
+                            complementMaterialId = oneStr;
+                        }
                     }
                     else if (oneField.equals("materialName")) {
                         theQueryField = "material_name";
@@ -835,7 +849,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
         }
 
         // 搜索字段是物料名称的，查询补数数量是该物料的查询出来，显示物料ID，物料名称，已报、已入库信息
-        if (!complementMaterialName.equals("")) {
+        if (!complementMaterialName.equals("") || !complementMaterialId.equals("")) {
             String startDate = "1900-01-01";
             String endDate = "2100-01-01";
             if(searchStartDate!=null && !searchStartDate.isEmpty()){
@@ -844,8 +858,16 @@ public class ProduceOrderMaterialProgressController extends BaseController {
             if(searchEndDate!=null && !searchEndDate.isEmpty()){
                 endDate = searchStartDate;
             }
-            List<BaseMaterial> bms = baseMaterialService.list(new QueryWrapper<BaseMaterial>()
-                    .like(DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME, complementMaterialName));
+            List<BaseMaterial> bms = new ArrayList<>();
+            if(!complementMaterialName.equals("")){
+                 bms = baseMaterialService.list(new QueryWrapper<BaseMaterial>()
+                        .like(DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME, complementMaterialName));
+            }
+            else{
+                bms = baseMaterialService.list(new QueryWrapper<BaseMaterial>()
+                        .like(DBConstant.TABLE_BASE_MATERIAL.ID, complementMaterialId));
+            }
+
             if(bms.size() > 0){
                 for(BaseMaterial bm : bms){
                     ProduceOrderMaterialProgress progress = produceOrderMaterialProgressService.groupByMaterialIdAndBetweenDateAndOrderIdIsNull(bm.getId(),startDate,endDate);
@@ -858,13 +880,43 @@ public class ProduceOrderMaterialProgressController extends BaseController {
 
             }
 
-
-
-
         }
 
+        // 1. 根据返回结果，根据物料编码，分组求和信息（应报数量、已报备数量、入库数量）
+        Map<String, Map<String, String>> groupMap = new TreeMap<>();
+        String needTotalNumKey = "needTotalNum";
+        String preparedTotalNumKey = "preparedTotalNum";
+        String inTotalNumKey = "inTotalNum";
+        String materialIdKey = "materialId";
+        String materialNameKey = "materialName";
 
-        return ResponseResult.succ(pageData);
+        for(ProduceOrderMaterialProgress pomp : records){
+            String materialId = pomp.getMaterialId();
+            Map<String, String> totalMap = groupMap.get(materialId);
+            if(totalMap==null){
+                totalMap = new HashMap<String,String>();
+                totalMap.put(needTotalNumKey,"0");
+                totalMap.put(preparedTotalNumKey,"0");
+                totalMap.put(inTotalNumKey,"0");
+
+                groupMap.put(materialId,totalMap);
+            }
+            if(pomp.getCalNum()!=null){
+                totalMap.put(needTotalNumKey,BigDecimalUtil.add(totalMap.get(needTotalNumKey),pomp.getCalNum()).toString());
+            }
+            if(pomp.getPreparedNum()!=null){
+                totalMap.put(preparedTotalNumKey,BigDecimalUtil.add(totalMap.get(preparedTotalNumKey),pomp.getPreparedNum()).toString());
+            }if(pomp.getInNum()!=null){
+                totalMap.put(inTotalNumKey,BigDecimalUtil.add(totalMap.get(inTotalNumKey),pomp.getInNum()).toString());
+            }
+            totalMap.put(materialIdKey,pomp.getMaterialId());
+            totalMap.put(materialNameKey,pomp.getMaterialName());
+        }
+        returnMap.put("materialGroupMap",groupMap.values());
+
+        returnMap.put("pageData",pageData);
+
+        return ResponseResult.succ(returnMap);
     }
 
     /**
