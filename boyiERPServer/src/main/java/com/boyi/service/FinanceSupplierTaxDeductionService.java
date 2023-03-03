@@ -6,6 +6,7 @@ import com.boyi.entity.FinanceSupplierTaxDeduction;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.FinanceSupplierTaxSupplement;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -23,4 +24,6 @@ public interface FinanceSupplierTaxDeductionService extends IService<FinanceSupp
     Page<FinanceSupplierTaxDeduction> innerQuery(Page page, QueryWrapper<FinanceSupplierTaxDeduction> eq) ;
 
     Page<FinanceSupplierTaxDeduction> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList, Map<String, String> queryMap, String searchStartDate, String searchEndDate, List<Long> searchPayStatusList);
+
+    List<FinanceSupplierTaxDeduction> countLTByCloseDate(LocalDate closeDate);
 }

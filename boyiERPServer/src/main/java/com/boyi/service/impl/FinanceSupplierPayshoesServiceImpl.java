@@ -8,12 +8,14 @@ import com.boyi.common.constant.DBConstant;
 import com.boyi.entity.FinanceSupplierPayshoes;
 import com.boyi.entity.ProduceProductConstituent;
 import com.boyi.entity.ProduceProductConstituentDetail;
+import com.boyi.entity.RepositoryBuyinDocument;
 import com.boyi.mapper.FinanceSupplierPayshoesMapper;
 import com.boyi.service.FinanceSupplierPayshoesService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +67,14 @@ public class FinanceSupplierPayshoesServiceImpl extends ServiceImpl<FinanceSuppl
         this.update(new UpdateWrapper<FinanceSupplierPayshoes>()
                 .set(picName,null)
                 .eq(DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES.ID_FIELDNAME,ppc.getId()));
+    }
+
+    @Override
+    public List<FinanceSupplierPayshoes> countLTByCloseDate(LocalDate closeDate) {
+        return this.list(new QueryWrapper<FinanceSupplierPayshoes>()
+                .le(DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES.PAY_DATE_FIELDNAME, closeDate)
+                .ne(DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES.STATUS_FIELDNAME,
+                        DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES.STATUS_FIELDVALUE_0));
     }
 
 }

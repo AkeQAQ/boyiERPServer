@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.entity.FinanceSupplierFine;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -23,4 +24,5 @@ public interface FinanceSupplierFineService extends IService<FinanceSupplierFine
 
     void updateNullWithField(FinanceSupplierFine ppc, String picUrlFieldname);
 
+    List<FinanceSupplierFine> countLTByCloseDate(LocalDate closeDate);
 }

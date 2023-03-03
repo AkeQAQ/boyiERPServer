@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,14 @@ public class FinanceSupplierTaxSupplementServiceImpl extends ServiceImpl<Finance
                         .orderByDesc(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.ID_FIELDNAME)
 
         );
+    }
+
+    @Override
+    public List<FinanceSupplierTaxSupplement> countLTByCloseDate(LocalDate closeDate) {
+        return this.list(new QueryWrapper<FinanceSupplierTaxSupplement>()
+                .le(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.DOCUMENT_DATE_FIELDNAME, closeDate)
+                .ne(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.STATUS_FIELDNAME,
+                        DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.STATUS_FIELDVALUE_0));
     }
 
     @Override

@@ -14,6 +14,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -56,6 +57,14 @@ public class FinanceSupplierChangeServiceImpl extends ServiceImpl<FinanceSupplie
     public Page<FinanceSupplierChange> innerQuery(Page page, QueryWrapper<FinanceSupplierChange> eq) {
         return financeSupplierChangeMapper.page(page,eq);
 
+    }
+
+    @Override
+    public List<FinanceSupplierChange> countLTByCloseDate(LocalDate closeDate) {
+        return this.list(new QueryWrapper<FinanceSupplierChange>()
+                .le(DBConstant.TABLE_FINANCE_SUPPLIER_CHANGE.CHANGE_DATE_FIELDNAME, closeDate)
+                .ne(DBConstant.TABLE_FINANCE_SUPPLIER_CHANGE.STATUS_FIELDNAME,
+                        DBConstant.TABLE_FINANCE_SUPPLIER_CHANGE.STATUS_FIELDVALUE_0));
     }
 
 }

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
+import com.boyi.entity.FinanceSupplierChange;
 import com.boyi.entity.FinanceSupplierFine;
 import com.boyi.entity.FinanceSupplierFine;
 import com.boyi.entity.FinanceSupplierPayshoes;
@@ -15,6 +16,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -64,5 +66,13 @@ public class FinanceSupplierFineServiceImpl extends ServiceImpl<FinanceSupplierF
         this.update(new UpdateWrapper<FinanceSupplierFine>()
                 .set(picName,null)
                 .eq(DBConstant.TABLE_FINANCE_SUPPLIER_FINE.ID_FIELDNAME,ppc.getId()));
+    }
+
+    @Override
+    public List<FinanceSupplierFine> countLTByCloseDate(LocalDate closeDate) {
+        return this.list(new QueryWrapper<FinanceSupplierFine>()
+                .le(DBConstant.TABLE_FINANCE_SUPPLIER_FINE.FINE_DATE_FIELDNAME, closeDate)
+                .ne(DBConstant.TABLE_FINANCE_SUPPLIER_FINE.STATUS_FIELDNAME,
+                        DBConstant.TABLE_FINANCE_SUPPLIER_FINE.STATUS_FIELDVALUE_0));
     }
 }

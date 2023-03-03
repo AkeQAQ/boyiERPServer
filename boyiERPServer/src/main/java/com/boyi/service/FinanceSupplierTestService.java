@@ -6,6 +6,7 @@ import com.boyi.entity.FinanceSupplierRoundDown;
 import com.boyi.entity.FinanceSupplierTest;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -22,4 +23,6 @@ public interface FinanceSupplierTestService extends IService<FinanceSupplierTest
     Page<FinanceSupplierTest> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList, Map<String, String> queryMap, String searchStartDate, String searchEndDate);
 
     Page<FinanceSupplierTest> innerQuery(Page page, QueryWrapper<FinanceSupplierTest> eq);
+
+    List<FinanceSupplierTest> countLTByCloseDate(LocalDate closeDate);
 }

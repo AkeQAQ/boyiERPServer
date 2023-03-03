@@ -881,6 +881,17 @@ public class DBConstant {
 
     }
 
+
+    public static class TABLE_FINANCE_CLOSE{
+        public static final String ID_FIELDNAME = "id";
+        public static final String CLOSE_DATE_FIELDNAME = "close_date";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+
+    }
+
     public static class TABLE_REPOSITORY_INOUT_DETAIL{
         static{
             Map<Integer,String> statusMap2 = new HashMap<Integer,String>();

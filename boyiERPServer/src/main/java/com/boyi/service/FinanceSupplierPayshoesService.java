@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.boyi.entity.ProduceProductConstituent;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -26,4 +27,5 @@ public interface FinanceSupplierPayshoesService extends IService<FinanceSupplier
 
     void updateNullWithField(FinanceSupplierPayshoes ppc, String picUrlFieldname);
 
+    List<FinanceSupplierPayshoes> countLTByCloseDate(LocalDate closeDate);
 }
