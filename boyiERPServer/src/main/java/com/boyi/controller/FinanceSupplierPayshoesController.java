@@ -47,12 +47,127 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/finance/supplierPayshoes")
 public class FinanceSupplierPayshoesController extends BaseController {
 
+    @Value("${poi.financePayShoesDemoPath}")
+    private String poiDemoPath;
+
     @Value("${picture.financePayShoesPath}")
     private String financePayShoesPath;
     private final String  picPrefix = "financeSupplierPayShoesPic-";
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
 
+
+    /**
+     * 获取采购入库 分页导出
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('finance:payShoes:save')")
+    public void export(HttpServletResponse response, String searchField, String searchStatus,String takeStatus,String payTypeStatus,
+                       String searchStartDate,String searchEndDate,
+                       @RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
+        Page<FinanceSupplierPayshoes> pageData = null;
+        List<String> ids = new ArrayList<>();
+        String queryField = "";
+        if (searchField != "") {
+            if (searchField.equals("supplierName")) {
+                queryField = "supplier_name";
+            }
+            else if (searchField.equals("customerNum")) {
+                queryField = "customer_num";
+
+            }
+            else if (searchField.equals("documentNum")) {
+                queryField = "document_num";
+
+            }
+            else {
+                return ;
+            }
+        }
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("customerNum")) {
+                        theQueryField = "customer_num";
+
+                    }
+                    else if (oneField.equals("documentNum")) {
+                        theQueryField = "document_num";
+
+                    }
+                    else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ;
+        }
+
+        List<Long> takeStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(takeStatus)){
+            String[] split = takeStatus.split(",");
+            for (String statusVal : split){
+                takeStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(takeStatusList.size() == 0){
+            return ;
+        }
+
+        List<Long> payTypeStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(payTypeStatus)){
+            String[] split = payTypeStatus.split(",");
+            for (String statusVal : split){
+                payTypeStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(payTypeStatusList.size() == 0){
+            return ;
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        pageData = financeSupplierPayshoesService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,takeStatusList,payTypeStatusList,queryMap,searchStartDate,searchEndDate);
+
+
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(FinanceSupplierPayshoes.class,1,0).export("id","",response,fis,pageData.getRecords(),"报表.xlsx",
+                    DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES.statusMap,
+                    DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES_DETAILS.payTypeMap,DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES.takeStatusMap);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
 
     /**
      * 修改拿走状态

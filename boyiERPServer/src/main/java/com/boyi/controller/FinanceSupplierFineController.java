@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.fileFilter.MaterialPicFileFilter;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -19,7 +20,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -39,12 +42,89 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/finance/supplierFine")
 public class FinanceSupplierFineController extends BaseController {
 
+
+    @Value("${poi.financeFineDemoPath}")
+    private String poiDemoPath;
+
     @Value("${picture.financePayShoesPath}")
     private String financePayShoesPath;
 
     private final String  picPrefix = "financeSupplierFinePic-";
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
+
+
+
+    /**
+     * 获取采购入库 分页导出
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('finance:fine:save')")
+    public void export(HttpServletResponse response, String searchField, String searchStatus,
+                       String searchStartDate, String searchEndDate,
+                       @RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
+        Page<FinanceSupplierFine> pageData = null;
+        List<String> ids = new ArrayList<>();
+        String queryField = "";
+        if (searchField != "") {
+            if (searchField.equals("supplierName")) {
+                queryField = "supplier_name";
+            }
+            else {
+                return ;
+            }
+        }
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            return ;
+        }
+
+
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        pageData = financeSupplierFineService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap,searchStartDate,searchEndDate);
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(FinanceSupplierFine.class,1,0).export("id","",response,fis,pageData.getRecords(),"报表.xlsx",
+                    DBConstant.TABLE_FINANCE_SUPPLIER_FINE.statusMap);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
 
 
     @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)

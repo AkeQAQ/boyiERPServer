@@ -31,6 +31,7 @@ public class FinanceSupplierPayshoes  extends BaseEntity{
     /**
      * 单据编号
      */
+    @ExcelAttribute(sort = 0)
     private String documentNum;
     /**
      * 供应商ID
@@ -40,11 +41,13 @@ public class FinanceSupplierPayshoes  extends BaseEntity{
     /**
      * 罚款日期
      */
+    @ExcelAttribute(sort = 1)
     private LocalDate payDate;
 
     /**
      * 状态。0：已拿, 1: 未拿
      */
+    @ExcelAttribute(sort = 3)
     private Integer takeStatus;
 
     /**
@@ -59,19 +62,25 @@ public class FinanceSupplierPayshoes  extends BaseEntity{
     /**
      * 0：已审核、1:暂存、2：审核中、3：重新审核
      */
+    @ExcelAttribute(sort = 4)
     private Integer status;
 
 
     @TableField(exist = false)
+    @ExcelAttribute(sort = 2)
     private String supplierName;
 
     @TableField(exist = false)
+    @ExcelAttribute(sort = 5)
     private String customerNum;
     @TableField(exist = false)
+    @ExcelAttribute(sort = 7)
     private BigDecimal payAmount;
     @TableField(exist = false)
+    @ExcelAttribute(sort = 6)
     private BigDecimal payNumber;
     @TableField(exist = false)
+    @ExcelAttribute(sort = 8)
     private Integer payType;
 
     @TableField(exist = false)

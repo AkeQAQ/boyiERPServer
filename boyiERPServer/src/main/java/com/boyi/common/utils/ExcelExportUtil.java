@@ -44,6 +44,71 @@ public class ExcelExportUtil<T> {
     /**
      * 基于注解导出
      */
+    public void export(String addPrefixField,String addPreContent,HttpServletResponse response, InputStream is, List<T> objs, String fileName, Map<Integer,String> statusMap,Map<Integer,String> payStatusMap,Map<Integer,String> takeStatusMap) throws Exception {
+
+        XSSFWorkbook workbook = new XSSFWorkbook(is);
+        Sheet sheet = workbook.getSheetAt(0);
+
+        CellStyle[] styles = getTemplateStyles(sheet.getRow(styleIndex));
+
+        AtomicInteger datasAi = new AtomicInteger(rowIndex);
+        for (T t : objs) {
+            Row row = sheet.createRow(datasAi.getAndIncrement());
+            for(int i=0;i<styles.length;i++) {
+                Cell cell = row.createCell(i);
+                cell.setCellStyle(styles[i]);
+                for (Field field : fields) {
+                    if(field.isAnnotationPresent(ExcelAttribute.class)){
+                        field.setAccessible(true);
+                        ExcelAttribute ea = field.getAnnotation(ExcelAttribute.class);
+                        if(i == ea.sort()) { //列序号
+                            try{
+                                Object f = field.get(t);
+                                if("status".equals(field.getName()) && statusMap!=null){
+                                    cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }
+                                else if("payType".equals(field.getName())&& payStatusMap!=null){
+                                    cell.setCellValue(payStatusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }
+                                else if("takeStatus".equals(field.getName())&& takeStatusMap!=null){
+                                    cell.setCellValue(takeStatusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }
+                                else if("detailStatus".equals(field.getName())&& statusMap!=null){
+                                    cell.setCellValue(statusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }
+                                else if("amount".equals(field.getName())){
+                                    if(f != null){
+                                        BigDecimal bd = new BigDecimal(field.get(t).toString());
+                                        bd = bd.setScale(2, BigDecimal.ROUND_HALF_UP);
+                                        cell.setCellValue(bd.doubleValue());
+
+                                    }else {
+                                        cell.setCellValue("");
+                                    }
+                                }
+                                else{
+                                    cell.setCellValue(f ==null ? "":field.get(t).toString());
+                                }
+                                if(StringUtils.isNotBlank(addPrefixField) && field.getName().equals(addPrefixField)){
+                                    cell.setCellValue(addPreContent+cell.getStringCellValue());
+                                }
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        fileName = URLEncoder.encode(fileName, "UTF-8");
+        response.setContentType("application/octet-stream");
+        response.setHeader("content-disposition", "attachment;filename=" + new String(fileName.getBytes("ISO8859-1")));
+        response.setHeader("filename", fileName);
+        workbook.write(response.getOutputStream());
+    }
+    /**
+     * 基于注解导出
+     */
     public void export(String addPrefixField,String addPreContent,HttpServletResponse response, InputStream is, List<T> objs, String fileName, Map<Integer,String> statusMap) throws Exception {
 
         XSSFWorkbook workbook = new XSSFWorkbook(is);

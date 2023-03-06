@@ -1513,6 +1513,7 @@ public class DBConstant {
             takeMap.put(0,"已拿");
             takeMap.put(1,"未拿");
             takeStatusMap = takeMap;
+
         }
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String PAY_DATE_FIELDNAME = "pay_date";
