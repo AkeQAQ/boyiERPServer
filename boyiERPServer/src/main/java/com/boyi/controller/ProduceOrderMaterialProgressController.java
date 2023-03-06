@@ -125,7 +125,8 @@ public class ProduceOrderMaterialProgressController extends BaseController {
 
                     for(Map<String,Object> obj : details){
                         StringBuilder sb = new StringBuilder();
-                        sb.append(obj.get("productNum").toString());
+                        String productNum = obj.get("productNum").toString();
+                        sb.append(productNum.substring(3,productNum.length()));
                         productNumBrandSets.add(sb.toString());
                     }
 
@@ -133,7 +134,8 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                 if(orderId!=null){
                     OrderProductOrder opo = orderProductOrderService.getById(orderId);
                     StringBuilder sb = new StringBuilder();
-                    sb.append(opo.getProductNum());
+                    String productNum = opo.getProductNum();
+                    sb.append(productNum.substring(3,productNum.length()));
                     productNumBrandSets.add(sb.toString());
                 }
 

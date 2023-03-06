@@ -27,9 +27,15 @@
         alter table order_buyorder_document AUTO_INCREMENT = #{increment}
     </select>
 
-    <select id="alertAutoIncrement" >
-        alter table #{dbName} AUTO_INCREMENT = #{increment}
-    </select>
 
+    <select id="alertEABuyInAutoIncrement" >
+        alter table external_account_repository_buyin_document AUTO_INCREMENT = #{increment}
+    </select>
+    <select id="alertEAPickMaterialAutoIncrement" >
+        alter table external_account_repository_pick_material AUTO_INCREMENT = #{increment}
+    </select>
+    <select id="alertEASendOutGoodsAutoIncrement" >
+        alter table external_account_repository_send_out_goods AUTO_INCREMENT = #{increment}
+    </select>
 
 </mapper>

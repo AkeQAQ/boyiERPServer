@@ -256,8 +256,27 @@ public class DBConstant {
         public static final String PRIORITY_FIELDNAME = "priority";
 
     }
+    public static class TABLE_EA_BASE_UNIT{
+        public static final String NAME_FIELDNAME ="name";
+        public static final String CODE_FIELDNAME ="code";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String PRIORITY_FIELDNAME = "priority";
+
+    }
 
     public static class TABLE_BASE_MATERIAL_GROUP{
+        public static final String PARENT_ID_FIELDNAME ="parent_id";
+        public static final String NAME_FIELDNAME ="name";
+        public static final String CODE_FIELDNAME ="code";
+        public static final String AUTO_SUB_ID_FIELDNAME ="auto_sub_id";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+    }
+
+
+    public static class TABLE_EA_BASE_MATERIAL_GROUP{
         public static final String PARENT_ID_FIELDNAME ="parent_id";
         public static final String NAME_FIELDNAME ="name";
         public static final String CODE_FIELDNAME ="code";
@@ -275,6 +294,38 @@ public class DBConstant {
 
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
+
+    }
+
+
+    public static class TABLE_EA_BASE_MATERIAL{
+        public static final String ID = "id";
+        public static final String NAME_FIELDNAME = "name";
+        public static final String GROUP_CODE_FIELDNAME = "group_code";
+        public static final String UNIT_FIELDNAME = "unit";
+        public static final String SPECS_FIELDNAME = "specs";
+        public static final String PIC_URL_FIELDNAME = "pic_url";
+        public static final String SUB_ID_FIELDNAME = "sub_id";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String LOW_WARNING_LINE_FIELDNAME = "low_warning_line";
+        public static final String VIDEO_URL_FIELDNAME = "video_url";
+
+
+        /**
+         *  null:代表 启用
+         */
+        public static final Integer STATUS_FIELDVALUE_NULL = null;
+
+        /**
+         *  -1:代表 禁用
+         */
+        public static final Integer STATUS_FIELDVALUE_F1 = -1;
+
 
     }
 
@@ -308,7 +359,41 @@ public class DBConstant {
 
 
     }
+
     public static class TABLE_BASE_SUPPLIER_MATERIAL{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"审核通过");
+            statusMap2.put(1,"待审核");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String PRICE_FIELDNAME = "price";
+        public static final String START_DATE_FIELDNAME = "start_date";
+        public static final String END_DATE_FIELDNAME = "end_date";
+        public static final String COMMENT_FIELDNAME = "comment";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 待审核
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+    }
+
+    public static class TABLE_EA_BASE_SUPPLIER_MATERIAL{
         static{
             Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
             statusMap2.put(0,"审核通过");
@@ -396,7 +481,78 @@ public class DBConstant {
         public static final Integer SOURCE_TYPE_FIELDVALUE_1 = 1;
     }
 
+
+    public static class TABLE_EA_REPOSITORY_BUYIN_DOCUMENT{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String SUPPLIER_DOCUMENT_NUM_FIELDNAME = "supplier_document_num";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String BUY_IN_DATE_FIELDNAME = "buy_in_date";
+        public static final String PRICE_DATE_FIELDNAME = "price_date";
+        public static final String ORDER_ID_FIELDNAME = "order_id";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+
+        public static final String SOURCE_TYPE_FIELDNAME = "source_type";
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+        /**
+         *  0:代表 采购入库
+         */
+        public static final Integer SOURCE_TYPE_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 订单入库
+         */
+        public static final Integer SOURCE_TYPE_FIELDVALUE_1 = 1;
+    }
+
     public static class TABLE_REPOSITORY_BUYIN_DOCUMENT_DETAIL{
+        public static final String ID_FIELDNAME = "id";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String DOCUMENT_ID_FIELDNAME = "document_id";
+        public static final String NUM_FIELDNAME = "num";
+        public static final String COMMENT_FIELDNAME = "comment";
+        public static final String ORDER_SEQ_FIELDNAME = "order_seq";
+        public static final String ORDER_ID_FIELDNAME = "order_id";
+        public static final String ORDER_DETAIL_ID_FIELDNAME = "order_detail_id";
+
+        public static final String PRICE_DATE_FIELDNAME = "price_date";
+
+    }
+
+    public static class TABLE_EA_REPOSITORY_BUYIN_DOCUMENT_DETAIL{
         public static final String ID_FIELDNAME = "id";
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
@@ -497,6 +653,21 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
     }
 
+
+    public static class TABLE_EA_BASE_SUPPLIER{
+        public static final String NAME_FIELDNAME = "name";
+        public static final String GROUP_CODE_FIELDNAME = "group_code";
+        public static final String SUB_ID_FIELDNAME = "sub_id";
+        public static final String GROUP_NAME_FIELDNAME = "group_name";
+        public static final String ADDRESS_FIELDNAME = "address";
+        public static final String MOBILE_FIELDNAME = "mobile";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+    }
+
     public static class TABLE_BASE_CUSTOMER{
         public static final String ID_FIELDNAME = "id";
         public static final String NAME_FIELDNAME = "name";
@@ -512,7 +683,20 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
     }
 
+    public static class TABLE_EA_BASE_DEPARTMENT{
+        public static final String NAME_FIELDNAME = "name";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+    }
+
     public static class TABLE_REPOSITORY_STOCK{
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String NUM_FIELDNAME = "num";
+
+    }
+    public static class TABLE_EA_REPOSITORY_STOCK{
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String UPDATED_FIELDNAME = "updated";
@@ -565,7 +749,60 @@ public class DBConstant {
         public static final Integer STATUS_FIELDVALUE_3 = 3;
     }
 
+    public static class TABLE_EA_REPOSITORY_PICK_MATERIAL{
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID_FIELDNAME = "id";
+        public static final String STATUS_FIELDNAME = "status";
+        public static final String DEPARTMENT_ID_FIELDNAME = "department_id";
+        public static final String PICK_DATE_FIELDNAME = "pick_date";
+        public static final String PICK_USER_FIELDNAME = "pick_user";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String COMMENT_FIELDNAME = "comment";
+        public static final String BATCH_ID_FIELDNAME = "batch_id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+    }
+
     public static class TABLE_REPOSITORY_PICK_MATERIAL_DETAIL{
+        public static final String ID_FIELDNAME = "id";
+        public static final String DOCUMENT_ID_FIELDNAME = "document_id";
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String NUM_FIELDNAME = "num";
+
+    }
+
+
+    public static class TABLE_EA_REPOSITORY_PICK_MATERIAL_DETAIL{
         public static final String ID_FIELDNAME = "id";
         public static final String DOCUMENT_ID_FIELDNAME = "document_id";
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
@@ -1361,6 +1598,28 @@ public class DBConstant {
     }
 
 
+    public static class TABLE_EXTERNAL_ACCOUNT_REPOSITORY_SEND_OUT_GOODS_DETAILS{
+
+        public static final String ID_FIELDNAME = "id";
+
+        public static final String SEND_ID_FIELDNAME = "send_id";
+        public static final String PRODUCT_NUM_FIELDNAME = "product_num";
+        public static final String NUM_FIELDNAME = "num";
+        public static final String PRICE_FIELDNAME = "price";
+        public static final String AMOUNT_FIELDNAME = "amount";
+        public static final String PRODUCT_NAME_FIELDNAME = "product_name";
+
+        public static final String UNIT_FIELDNAME = "unit";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+
+
+    }
+
+
     public static class TABLE_FINANCE_SUPPLIER_CHANGE_DETAILS{
 
         public static final String ID_FIELDNAME = "id";
@@ -1408,6 +1667,49 @@ public class DBConstant {
 
         public static final String CREATED_USER_FIELDNAME = "created_user";
         public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+    }
+
+
+    public static class TABLE_EXTERNAL_ACCOUNT_REPOSITORY_SEND_OUT_GOODS{
+        public static final Map<Integer,String> statusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final String CUSTOMER_NAME_FIELDNAME = "customer_name";
+        public static final String SEND_DATE_FIELDNAME = "send_date";
+        public static final String STATUS_FIELDNAME = "status";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "update_user";
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String ID_FIELDNAME = "id";

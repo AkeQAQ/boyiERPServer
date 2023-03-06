@@ -1,6 +1,8 @@
 package com.boyi.controller.base;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.entity.ExternalAccountBaseSupplierGroup;
+import com.boyi.entity.ExternalAccountRepositoryStock;
 import com.boyi.entity.RepositoryClose;
 import com.boyi.service.*;
 import com.boyi.service.impl.BaseSupplierMaterialServiceImpl;
@@ -13,6 +15,45 @@ import java.time.format.DateTimeFormatter;
 
 public class BaseController {
     public DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    @Autowired
+    public ExternalAccountRepositorySendOutGoodsService externalAccountRepositorySendOutGoodsService;
+
+    @Autowired
+    public ExternalAccountRepositorySendOutGoodsDetailsService externalAccountRepositorySendOutGoodsDetailsService;
+    @Autowired
+    public ExternalAccountRepositoryStockService externalAccountRepositoryStockService;
+    @Autowired
+    public ExternalAccountBaseUnitService externalAccountBaseUnitService;
+    @Autowired
+    public ExternalAccountBaseSupplierGroupService externalAccountBaseSupplierGroupService;
+    @Autowired
+    public ExternalAccountBaseDepartmentService externalAccountBaseDepartmentService;
+
+    @Autowired
+    public ExternalAccountBaseMaterialGroupService externalAccountBaseMaterialGroupService;
+
+    @Autowired
+    public ExternalAccountBaseMaterialService externalAccountBaseMaterialService;
+
+    @Autowired
+    public ExternalAccountBaseSupplierService externalAccountBaseSupplierService;
+
+    @Autowired
+    public ExternalAccountBaseSupplierMaterialService externalAccountBaseSupplierMaterialService;
+
+
+    @Autowired
+    public ExternalAccountRepositoryBuyinDocumentService externalAccountRepositoryBuyinDocumentService;
+
+    @Autowired
+    public ExternalAccountRepositoryBuyinDocumentDetailService externalAccountRepositoryBuyinDocumentDetailService;
+
+    @Autowired
+    public ExternalAccountRepositoryPickMaterialService externalAccountRepositoryPickMaterialService;
+
+    @Autowired
+    public ExternalAccountRepositoryPickMaterialDetailService externalAccountRepositoryPickMaterialDetailService;
 
 
     @Autowired

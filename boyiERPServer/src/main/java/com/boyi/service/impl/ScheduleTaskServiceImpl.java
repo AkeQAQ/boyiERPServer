@@ -41,6 +41,10 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         tables.add("repository_return_material");
         tables.add("order_buyorder_document");
 
+        tables.add("external_account_repository_buyin_document");
+        tables.add("external_account_repository_pick_material");
+        tables.add("external_account_repository_send_out_goods");
+
     }
 
 
@@ -312,7 +316,18 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
                     } else if (dbName.equals("order_buyorder_document")) {
                         otherMapper.alertBuyOrderAutoIncrement(increment);
-                    } else {
+                    }
+                    else if (dbName.equals("external_account_repository_buyin_document")) {
+                        otherMapper.alertEABuyInAutoIncrement(increment);
+                    } else if (dbName.equals("external_account_repository_pick_material")) {
+                        otherMapper.alertEAPickMaterialAutoIncrement(increment);
+
+                    } else if (dbName.equals("external_account_repository_send_out_goods")) {
+                        otherMapper.alertEASendOutGoodsAutoIncrement(increment);
+
+                    }
+
+                    else {
                         return;
                     }
 

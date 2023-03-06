@@ -12,5 +12,8 @@ public interface OtherMapper {
     void alertPickMaterialAutoIncrement(Long increment);
     void alertReturnMaterialAutoIncrement(Long increment);
     void alertBuyOrderAutoIncrement(Long increment);
-    void alertAutoIncrement(String dbName,Long increment);
+    void alertEABuyInAutoIncrement(Long increment);
+    void alertEAPickMaterialAutoIncrement(Long increment);
+    void alertEASendOutGoodsAutoIncrement(Long increment);
+
 }
