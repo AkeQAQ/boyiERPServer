@@ -115,7 +115,7 @@ public class FinanceSupplierFineController extends BaseController {
         if(page.getSize()==10 && page.getCurrent() == 1){
             page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
         }
-        pageData = financeSupplierFineService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap,searchStartDate,searchEndDate);
+        pageData = financeSupplierFineService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStatusList,queryMap,searchStartDate,searchEndDate);
 
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){

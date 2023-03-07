@@ -25,4 +25,6 @@ public interface FinanceSupplierFineService extends IService<FinanceSupplierFine
     void updateNullWithField(FinanceSupplierFine ppc, String picUrlFieldname);
 
     List<FinanceSupplierFine> countLTByCloseDate(LocalDate closeDate);
+
+    List<FinanceSupplierFine> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
 }

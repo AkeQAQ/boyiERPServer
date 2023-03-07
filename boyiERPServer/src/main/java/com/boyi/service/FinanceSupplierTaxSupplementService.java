@@ -26,4 +26,6 @@ public interface FinanceSupplierTaxSupplementService extends IService<FinanceSup
     Page<FinanceSupplierTaxSupplement> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList, Map<String, String> queryMap, String searchStartDate, String searchEndDate, List<Long> searchPayStatusList);
 
     List<FinanceSupplierTaxSupplement> countLTByCloseDate(LocalDate closeDate);
+
+    List<FinanceSupplierTaxSupplement> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
 }

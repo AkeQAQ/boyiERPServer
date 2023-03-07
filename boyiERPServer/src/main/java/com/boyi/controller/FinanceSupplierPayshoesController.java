@@ -155,7 +155,7 @@ public class FinanceSupplierPayshoesController extends BaseController {
         if(page.getSize()==10 && page.getCurrent() == 1){
             page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
         }
-        pageData = financeSupplierPayshoesService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,takeStatusList,payTypeStatusList,queryMap,searchStartDate,searchEndDate);
+        pageData = financeSupplierPayshoesService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStatusList,takeStatusList,payTypeStatusList,queryMap,searchStartDate,searchEndDate);
 
 
 

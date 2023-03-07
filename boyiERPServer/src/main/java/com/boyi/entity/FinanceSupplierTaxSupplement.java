@@ -75,4 +75,8 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     private Integer status;
 
 
+    @TableField(exist = false)
+    private Double totalAmount;
+
+
 }

@@ -32,4 +32,6 @@ public interface RepositoryBuyoutDocumentService extends IService<RepositoryBuyo
     List<RepositoryBuyoutDocument> countLTByCloseDate(LocalDate closeDate);
 
     List<RepositoryBuyoutDocument> listGTEndDate(String endDate);
+
+    List<RepositoryBuyoutDocument> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
 }

@@ -28,4 +28,6 @@ public interface FinanceSupplierPayshoesService extends IService<FinanceSupplier
     void updateNullWithField(FinanceSupplierPayshoes ppc, String picUrlFieldname);
 
     List<FinanceSupplierPayshoes> countLTByCloseDate(LocalDate closeDate);
+
+    List<FinanceSupplierPayshoes> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
 }

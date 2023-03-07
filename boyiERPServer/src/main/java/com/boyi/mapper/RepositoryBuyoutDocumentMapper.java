@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -87,4 +88,25 @@ public interface RepositoryBuyoutDocumentMapper extends BaseMapper<RepositoryBuy
             " and rbd.buy_out_date > #{endDate}" +
             " group by rbdd.material_id")
     List<RepositoryBuyoutDocument> listGTEndDate(@Param("endDate") String endDate);
+
+    @Select("select t2.supplier_id,sum(material_amount) total_amount from " +
+            " (" +
+            "" +
+            " select t1.supplier_id,t1.material_id,t1.buy_out_date,t1.total_num,bsm.price," +
+            "  (cast(t1.total_num as decimal(7,2))*(cast(bsm.price as decimal(7,2)) ) )   material_amount from" +
+            "" +
+            " (" +
+            " select rbd.supplier_id,rbdd.material_id,rbd.buy_out_date,sum(rbdd.num) total_num from repository_buyout_document rbd," +
+            " repository_buyout_document_detail rbdd " +
+            " where rbd.id = rbdd.document_id" +
+            " and rbd.buy_out_date >= #{startDate} and rbd.buy_out_date <= #{endDate}" +
+            " group by rbd.supplier_id,rbdd.material_id,rbd.buy_out_date" +
+            " ) t1,base_supplier_material bsm " +
+            " where t1.supplier_id = bsm.supplier_id" +
+            " and t1.material_id = bsm.material_id" +
+            " and t1.buy_out_date >= bsm.start_date " +
+            " and t1.buy_out_date < bsm.end_date" +
+            " ) t2 group by t2.supplier_id ")
+    List<RepositoryBuyoutDocument> getSupplierTotalAmountBetweenDate(@Param("startDate") LocalDate startDateTime,
+                                                                     @Param("endDate")LocalDate endDateTime);
 }

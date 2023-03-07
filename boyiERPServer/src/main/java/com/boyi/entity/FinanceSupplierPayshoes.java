@@ -85,5 +85,7 @@ public class FinanceSupplierPayshoes  extends BaseEntity{
 
     @TableField(exist = false)
     private List<FinanceSupplierPayshoesDetails> rowList;
+    @TableField(exist = false)
+    private Double totalAmount;
 
 }

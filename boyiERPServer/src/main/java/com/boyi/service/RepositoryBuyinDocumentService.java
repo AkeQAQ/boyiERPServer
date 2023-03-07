@@ -9,7 +9,6 @@ import com.boyi.entity.RepositoryBuyinDocument;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -69,4 +68,6 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     List<AnalysisMaterailVO> listMaterialAmountPercentByMaterialType(String searchStartDate, String searchEndDate, String searchField);
 
     List<RepositoryBuyinDocument> listGTEndDate(String endDate);
+
+    List<RepositoryBuyinDocument> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
 }

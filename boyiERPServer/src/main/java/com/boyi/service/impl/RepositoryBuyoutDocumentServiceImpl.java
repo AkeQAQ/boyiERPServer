@@ -90,4 +90,9 @@ public class RepositoryBuyoutDocumentServiceImpl extends ServiceImpl<RepositoryB
         return this.repositoryBuyoutDocumentMapper.listGTEndDate(endDate);
     }
 
+    @Override
+    public List<RepositoryBuyoutDocument> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime) {
+        return this.repositoryBuyoutDocumentMapper.getSupplierTotalAmountBetweenDate(startDateTime,endDateTime);
+    }
+
 }

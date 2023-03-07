@@ -25,6 +25,102 @@ public class DBConstant {
     }
 
 
+    public static class TABLE_FINANCE_SUMMARY{
+        public static final Map<Integer,String> statusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已结账");
+            statusMap2.put(1,"未结账");
+            statusMap = statusMap2;
+
+        }
+        public static final String REMAINING_AMOUNT_FIELDNAME = "remaining_amount";
+
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String SUMMARY_DATE_FIELDNAME = "summary_date";
+        public static final String BUY_NET_IN_AMOUNT_FIELDNAME = "buy_net_in_amount";
+        public static final String PAY_SHOES_AMOUNT_FIELDNAME = "pay_shoes_amount";
+        public static final String FINE_AMOUNT_FIELDNAME = "fine_amount";
+        public static final String TEST_AMOUNT_FIELDNAME = "test_amount";
+        public static final String TAX_SUPPLEMENT_FIELDNAME = "tax_supplement";
+        public static final String TAX_DEDUCTION_FIELDNAME = "tax_deduction";
+        public static final String ROUND_DOWN_FIELDNAME = "round_down";
+        public static final String CHANGE_AMOUNT_FIELDNAME = "change_amount";
+
+        public static final String NEED_PAY_AMOUNT_FIELDNAME = "need_pay_amount";
+
+        public static final String STATUS_FIELDNAME = "status";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+        public static final String PIC_URL_FIELDNAME = "pic_url";
+
+
+        /**
+         *  0:代表 已结账
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 未结账
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+
+    }
+
+
+    public static class TABLE_FINANCE_SUMMARY_DETAILS{
+        public static final Map<Integer,String> payTypeMap;
+
+        static{
+
+            Map<Integer,String> map = new HashMap<Integer,String>();
+            map.put(0,"大货");
+            map.put(1,"残鞋");
+            payTypeMap = map;
+        }
+        public static final String ID_FIELDNAME = "id";
+
+        public static final String SUMMARY_ID_FIELDNAME = "summary_id";
+        public static final String CUSTOMER_NUM_FIELDNAME = "pay_date";
+        public static final String PAY_AMOUNT_FIELDNAME = "pay_amount";
+        public static final String PAY_TYPE_FIELDNAME = "pay_type";
+
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+
+
+        /**
+         *  0:代表 对公转账
+         */
+        public static final Integer PAY_TYPE_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 对公承兑
+         */
+        public static final Integer PAY_TYPE_FIELDVALUE_1 = 1;
+
+
+        /**
+         *  2:代表 对私转账
+         */
+        public static final Integer PAY_TYPE_FIELDVALUE_2 = 2;
+
+
+        /**
+         *  3:代表 对私承兑
+         */
+        public static final Integer PAY_TYPE_FIELDVALUE_3 = 3;
+
+    }
+
     public static class TABLE_BASE_MATERIAL_SAME_GROUP_DETAIL{
         public static final String MATERIAL_ID_FIELDNAME = "material_id";
         public static final String GROUP_ID_FIELDNAME = "group_id";
@@ -1494,6 +1590,7 @@ public class DBConstant {
          */
         public static final Integer PROGRESS_FIELDVALUE_1 = 1;
     }
+
 
 
 

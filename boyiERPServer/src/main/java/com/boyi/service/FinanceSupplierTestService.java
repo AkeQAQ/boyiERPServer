@@ -25,4 +25,6 @@ public interface FinanceSupplierTestService extends IService<FinanceSupplierTest
     Page<FinanceSupplierTest> innerQuery(Page page, QueryWrapper<FinanceSupplierTest> eq);
 
     List<FinanceSupplierTest> countLTByCloseDate(LocalDate closeDate);
+
+    List<FinanceSupplierTest> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
 }

@@ -75,4 +75,9 @@ public class FinanceSupplierFineServiceImpl extends ServiceImpl<FinanceSupplierF
                 .ne(DBConstant.TABLE_FINANCE_SUPPLIER_FINE.STATUS_FIELDNAME,
                         DBConstant.TABLE_FINANCE_SUPPLIER_FINE.STATUS_FIELDVALUE_0));
     }
+
+    @Override
+    public List<FinanceSupplierFine> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime) {
+        return this.financeSupplierFineMapper.getSupplierTotalAmountBetweenDate(startDateTime,endDateTime);
+    }
 }

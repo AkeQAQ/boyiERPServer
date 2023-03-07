@@ -82,4 +82,8 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
 
     private Integer status;
 
+
+    @TableField(exist = false)
+    private Double totalAmount;
+
 }

@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -42,4 +43,9 @@ public interface FinanceSupplierTaxDeductionMapper extends BaseMapper<FinanceSup
      */
     @Select(wrapperSql)
     FinanceSupplierTaxDeduction one(@Param("ew") Wrapper queryWrapper);
+
+    @Select("select m.supplier_id,sum(m.deduction_amount) total_amount from finance_supplier_tax_deduction m" +
+            " where m.document_date >=#{startDate} and m.document_date <= #{endDate}" +
+            " group by m.supplier_id")
+    List<FinanceSupplierTaxDeduction> getSupplierTotalAmountBetweenDate(@Param("startDate") LocalDate startDateTime,@Param("endDate") LocalDate endDateTime);
 }

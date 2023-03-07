@@ -52,6 +52,8 @@ public class FinanceSupplierFine extends BaseEntity {
     @ExcelAttribute(sort = 6)
     private Integer status;
 
+    @TableField(exist = false)
+    private Double totalAmount;
 
 
 }

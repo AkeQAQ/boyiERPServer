@@ -25,4 +25,6 @@ public interface FinanceSupplierChangeService extends IService<FinanceSupplierCh
     Page<FinanceSupplierChange> innerQuery(Page page, QueryWrapper<FinanceSupplierChange> like);
 
     List<FinanceSupplierChange> countLTByCloseDate(LocalDate closeDate);
+
+    List<FinanceSupplierChange> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
 }

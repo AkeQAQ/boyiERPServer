@@ -64,5 +64,8 @@ public class FinanceSupplierChange extends BaseEntity {
     @TableField(exist = false)
     private List<FinanceSupplierChangeDetails> rowList;
 
+    @TableField(exist = false)
+    private Double totalAmount;
+
 
 }

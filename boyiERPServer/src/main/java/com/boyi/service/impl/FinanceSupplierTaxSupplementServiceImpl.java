@@ -62,6 +62,11 @@ public class FinanceSupplierTaxSupplementServiceImpl extends ServiceImpl<Finance
     }
 
     @Override
+    public List<FinanceSupplierTaxSupplement> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime) {
+        return this.FinanceSupplierTaxSupplementMapper.getSupplierTotalAmountBetweenDate(startDateTime,endDateTime);
+    }
+
+    @Override
     public Page<FinanceSupplierTaxSupplement> innerQuery(Page page, QueryWrapper<FinanceSupplierTaxSupplement> eq) {
         return FinanceSupplierTaxSupplementMapper.page(page,eq);
 

@@ -44,4 +44,8 @@ public class FinanceSupplierTest extends BaseEntity {
     private Integer status;
 
 
+    @TableField(exist = false)
+    private Double totalAmount;
+
+
 }

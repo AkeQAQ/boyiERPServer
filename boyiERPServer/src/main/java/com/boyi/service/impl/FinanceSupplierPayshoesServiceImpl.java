@@ -77,4 +77,9 @@ public class FinanceSupplierPayshoesServiceImpl extends ServiceImpl<FinanceSuppl
                         DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES.STATUS_FIELDVALUE_0));
     }
 
+    @Override
+    public List<FinanceSupplierPayshoes> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime) {
+        return this.financeSupplierPayshoesMapper.getSupplierTotalAmountBetweenDate(startDateTime,endDateTime);
+    }
+
 }

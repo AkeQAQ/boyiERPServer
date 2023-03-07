@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -42,4 +43,9 @@ public interface FinanceSupplierTestMapper extends BaseMapper<FinanceSupplierTes
      */
     @Select(wrapperSql)
     FinanceSupplierTest one(@Param("ew") Wrapper queryWrapper);
+
+    @Select("select m.supplier_id,sum(m.test_amount) total_amount from finance_supplier_test m" +
+            " where m.test_date >=#{startDate} and m.test_date <= #{endDate}" +
+            " group by m.supplier_id")
+    List<FinanceSupplierTest> getSupplierTotalAmountBetweenDate(@Param("startDate") LocalDate startDateTime,@Param("endDate") LocalDate endDateTime);
 }

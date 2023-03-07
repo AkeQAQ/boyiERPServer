@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -42,4 +43,10 @@ public interface FinanceSupplierFineMapper extends BaseMapper<FinanceSupplierFin
      */
     @Select(wrapperSql)
     FinanceSupplierFine one(@Param("ew") Wrapper queryWrapper);
+
+    @Select("select fsf.supplier_id,sum(fsf.fine_amount) total_amount from finance_supplier_fine fsf " +
+            " where fsf.fine_date >=#{startDate} and fsf.fine_date <= #{endDate} " +
+            " group by fsf.supplier_id")
+    List<FinanceSupplierFine> getSupplierTotalAmountBetweenDate(@Param("startDate") LocalDate startDateTime,
+                                                                @Param("endDate")LocalDate endDateTime);
 }

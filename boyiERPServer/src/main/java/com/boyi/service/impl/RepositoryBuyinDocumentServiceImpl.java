@@ -17,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -324,6 +323,11 @@ public class RepositoryBuyinDocumentServiceImpl extends ServiceImpl<RepositoryBu
     @Override
     public List<RepositoryBuyinDocument> listGTEndDate(String endDate) {
         return repositoryBuyinDocumentMapper.listGTEndDate(endDate);
+    }
+
+    @Override
+    public List<RepositoryBuyinDocument> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime) {
+        return repositoryBuyinDocumentMapper.getSupplierTotalAmountBetweenDate(startDateTime,endDateTime);
     }
 
     @Override
