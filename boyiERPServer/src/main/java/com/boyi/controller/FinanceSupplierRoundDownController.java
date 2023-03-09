@@ -167,7 +167,7 @@ public class FinanceSupplierRoundDownController extends BaseController {
         Page<FinanceSupplierRoundDown> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }

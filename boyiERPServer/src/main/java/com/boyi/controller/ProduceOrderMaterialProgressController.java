@@ -638,7 +638,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
         Page<ProduceOrderMaterialProgress> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("materialName")) {
                 queryField = "material_name";
             }
@@ -744,7 +744,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
         Page<ProduceOrderMaterialProgress> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("productNum")) {
                 queryField = "product_num";
             }

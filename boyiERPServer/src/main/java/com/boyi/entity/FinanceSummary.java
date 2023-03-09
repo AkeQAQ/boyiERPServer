@@ -38,6 +38,16 @@ public class FinanceSummary extends BaseEntity {
     private BigDecimal buyNetInAmount;
 
     /**
+     * 采购入库
+     */
+    private BigDecimal buyInAmount;
+
+    /**
+     * 采购退料
+     */
+    private BigDecimal buyOutAmount;
+
+    /**
      * 赔鞋金额
      */
     private BigDecimal payShoesAmount;
@@ -66,13 +76,18 @@ public class FinanceSummary extends BaseEntity {
      * 抹零
      */
     @TableField(updateStrategy = FieldStrategy.IGNORED)
-
     private BigDecimal roundDown;
 
     /**
      * 应付金额
      */
     private BigDecimal needPayAmount;
+
+    /**
+     * 扣（补）款小计
+     */
+    @TableField(exist = false)
+    private BigDecimal otherTotalAmount;
 
     private String createdUser;
 

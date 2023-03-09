@@ -49,7 +49,7 @@ public class RepositoryStockController extends BaseController {
         Page<RepositoryStock> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
              if (searchField.equals("materialName")) {
                 queryField = "material_name";
             }else if (searchField.equals("materialId")) {
@@ -174,7 +174,7 @@ public class RepositoryStockController extends BaseController {
         Page<RepositoryStock> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
              if (searchField.equals("materialName")) {
                 queryField = "material_name";
             }else if (searchField.equals("materialId")) {

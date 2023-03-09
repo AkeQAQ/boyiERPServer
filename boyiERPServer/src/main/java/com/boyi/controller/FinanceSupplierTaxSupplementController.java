@@ -261,7 +261,7 @@ public class FinanceSupplierTaxSupplementController extends BaseController {
         Page<FinanceSupplierTaxSupplement> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }else if (searchField.equals("company")) {

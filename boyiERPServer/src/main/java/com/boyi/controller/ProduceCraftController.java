@@ -307,7 +307,7 @@ public class ProduceCraftController extends BaseController {
         Page<ProduceCraft> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("companyNum")) {
                 queryField = "company_num";
             }

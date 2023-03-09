@@ -588,7 +588,7 @@ public class ExternalAccountRepositoryPickMaterialController extends BaseControl
         Page<ExternalAccountRepositoryPickMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("departmentName")) {
                 queryField = "department_name";
             }
@@ -678,7 +678,7 @@ public class ExternalAccountRepositoryPickMaterialController extends BaseControl
         Page<ExternalAccountRepositoryPickMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("departmentName")) {
                 queryField = "department_name";
             }

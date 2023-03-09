@@ -48,7 +48,7 @@ public class ExternalAccountRepositoryStockController extends BaseController {
         Page<ExternalAccountRepositoryStock> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("materialName")) {
                 queryField = "material_name";
             }else if (searchField.equals("materialId")) {
@@ -78,7 +78,7 @@ public class ExternalAccountRepositoryStockController extends BaseController {
         Page<ExternalAccountRepositoryStock> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("materialName")) {
                 queryField = "material_name";
             }else if (searchField.equals("materialId")) {

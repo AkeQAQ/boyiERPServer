@@ -64,7 +64,7 @@ public class BaseMaterialSameGroupController extends BaseController {
         Page<BaseMaterialSameGroup> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("materialName")) {
                 queryField = "material_name";
             }

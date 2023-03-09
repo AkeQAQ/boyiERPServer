@@ -45,7 +45,7 @@ public class ProduceReturnShoesController extends BaseController {
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("userName")) {
                 queryField = "user_name";
             }
@@ -121,7 +121,7 @@ public class ProduceReturnShoesController extends BaseController {
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("userName")) {
                 queryField = "user_name";
             }

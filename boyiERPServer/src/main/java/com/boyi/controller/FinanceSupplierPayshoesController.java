@@ -72,7 +72,7 @@ public class FinanceSupplierPayshoesController extends BaseController {
         Page<FinanceSupplierPayshoes> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -430,7 +430,7 @@ public class FinanceSupplierPayshoesController extends BaseController {
         Page<FinanceSupplierPayshoes> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }

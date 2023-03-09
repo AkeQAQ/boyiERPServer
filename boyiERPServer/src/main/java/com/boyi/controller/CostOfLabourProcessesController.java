@@ -76,7 +76,7 @@ public class CostOfLabourProcessesController extends BaseController {
         Page<CostOfLabourProcesses> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("costOfLabourTypeName")) {
                 queryField = "cost_of_labour_type_name";
             }

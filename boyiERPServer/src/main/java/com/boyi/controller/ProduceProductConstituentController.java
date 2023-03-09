@@ -915,7 +915,7 @@ public class ProduceProductConstituentController extends BaseController {
         Page<ProduceProductConstituent> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("productNum")) {
                 queryField = "product_num";
             }

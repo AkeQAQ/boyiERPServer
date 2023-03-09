@@ -438,7 +438,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         Page<RepositoryBuyoutDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -514,7 +514,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         Page<RepositoryBuyoutDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -687,7 +687,7 @@ public class RepositoryBuyoutDocumentController extends BaseController {
         if(!validIsClose){
             return ResponseResult.fail("日期请设置在关账日之后.");
         }
-        if(old.getStatus()!=DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_0){
+        if(!Objects.equals(old.getStatus(), DBConstant.TABLE_REPOSITORY_BUYOUT_DOCUMENT.STATUS_FIELDVALUE_0)){
             return ResponseResult.fail("状态已被修改.请刷新");
         }
 

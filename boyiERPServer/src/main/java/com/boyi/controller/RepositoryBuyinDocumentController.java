@@ -870,7 +870,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
         Page<RepositoryBuyinDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -957,7 +957,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
         Page<RepositoryBuyinDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }

@@ -613,7 +613,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         Page<OrderBuyorderDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             } else if (searchField.equals("materialName")) {
@@ -692,7 +692,7 @@ public class OrderBuyorderDocumentController extends BaseController {
         Page<OrderBuyorderDocument> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             } else if (searchField.equals("materialName")) {

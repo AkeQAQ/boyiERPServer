@@ -237,7 +237,7 @@ public class ExternalAccountRepositorySendOutGoodsController extends BaseControl
         Page<ExternalAccountRepositorySendOutGoods> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("customerName")) {
                 queryField = "customer_name";
             }

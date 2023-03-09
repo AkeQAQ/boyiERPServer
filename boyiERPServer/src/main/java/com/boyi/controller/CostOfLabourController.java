@@ -213,7 +213,7 @@ public class CostOfLabourController extends BaseController {
         Page<CostOfLabour> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("produceProductConstituentId")) {
                 queryField = "produce_product_constituent_id";
             }
@@ -440,7 +440,7 @@ public class CostOfLabourController extends BaseController {
         Page<RepositoryReturnMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("departmentName")) {
                 queryField = "department_name";
             }

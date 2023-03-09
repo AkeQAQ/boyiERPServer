@@ -1413,7 +1413,7 @@ public class OrderProductOrderController extends BaseController {
         Page<OrderProductOrder> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("productNum")) {
                 queryField = "product_num";
             }

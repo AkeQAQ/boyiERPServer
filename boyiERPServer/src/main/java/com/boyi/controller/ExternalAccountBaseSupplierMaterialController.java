@@ -51,7 +51,7 @@ public class ExternalAccountBaseSupplierMaterialController extends BaseControlle
         Page<ExternalAccountBaseSupplierMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -150,7 +150,7 @@ public class ExternalAccountBaseSupplierMaterialController extends BaseControlle
         Page<ExternalAccountBaseSupplierMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -264,7 +264,7 @@ public class ExternalAccountBaseSupplierMaterialController extends BaseControlle
             ExternalAccountBaseSupplierMaterial old = externalAccountBaseSupplierMaterialService.getById(baseSupplierMaterial.getId());
             Integer oldCount= externalAccountRepositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(old);
             Integer newCount= externalAccountRepositoryBuyinDocumentService.getSupplierMaterialPassBetweenDate(baseSupplierMaterial);
-            if(oldCount != newCount){
+            if(!Objects.equals(oldCount, newCount)){
                 return ResponseResult.fail("该供应商:"+old.getSupplierId()+"，该物料:"+old.getMaterialId()+"，调整时间区将会导致"+(oldCount-newCount)+"条审核通过的采购入库记录，价格变成空");
             }
         }

@@ -550,7 +550,7 @@ public class BaseMaterialController extends BaseController {
             int returnCount = repositoryReturnMaterialDetailService.count(new QueryWrapper<RepositoryReturnMaterialDetail>().eq(DBConstant.TABLE_REPOSITORY_RETURN_MATERIAL_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
             int orderCount = orderBuyorderDocumentDetailService.count(new QueryWrapper<OrderBuyorderDocumentDetail>().eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.MATERIAL_ID_FIELDNAME, baseMaterial.getId()));
 
-            if(oldOne.getUnitRadio() != baseMaterial.getUnitRadio() && (buyInCount>0 ||buyOutCount>0||pickCount>0||returnCount>0||orderCount>0)){
+            if( (!oldOne.getUnitRadio().equals( baseMaterial.getUnitRadio() )) && (buyInCount>0 ||buyOutCount>0||pickCount>0||returnCount>0||orderCount>0)){
                 if(baseMaterial.getLowWarningLine()==null ){
                     baseMaterialService.updateNull(baseMaterial);
                 }

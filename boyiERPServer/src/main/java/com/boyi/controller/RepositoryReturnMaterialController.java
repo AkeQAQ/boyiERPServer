@@ -461,7 +461,7 @@ public class RepositoryReturnMaterialController extends BaseController {
         Page<RepositoryReturnMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("departmentName")) {
                 queryField = "department_name";
             }
@@ -664,7 +664,7 @@ public class RepositoryReturnMaterialController extends BaseController {
         Page<RepositoryReturnMaterial> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("departmentName")) {
                 queryField = "department_name";
             }

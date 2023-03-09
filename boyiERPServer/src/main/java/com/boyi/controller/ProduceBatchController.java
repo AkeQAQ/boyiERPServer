@@ -459,7 +459,7 @@ public class ProduceBatchController extends BaseController {
         Page<ProduceBatch> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("batchId")) {
                 queryField = "batch_id";
             }else if(searchField.equals("productNum")){

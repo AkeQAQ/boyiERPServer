@@ -445,7 +445,7 @@ public class OrderProductpricePreController extends BaseController {
         Page<OrderProductpricePre> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("companyNum")) {
                 queryField = "company_num";
             }

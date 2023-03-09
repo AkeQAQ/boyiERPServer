@@ -80,7 +80,8 @@ public class FinanceSummaryController extends BaseController {
             newRoundDown = new BigDecimal("0");
         }
 
-        fs.setNeedPayAmount(BigDecimalUtil.add(fs.getNeedPayAmount().toString(),oldRounDown.toString()).subtract(   newRoundDown));
+
+        fs.setNeedPayAmount(BigDecimalUtil.sub(fs.getNeedPayAmount().toString(),oldRounDown.toString()).add(   newRoundDown));
 
 
         LocalDateTime now = LocalDateTime.now();
@@ -106,7 +107,7 @@ public class FinanceSummaryController extends BaseController {
         Page<FinanceSummary> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -304,33 +305,40 @@ public class FinanceSummaryController extends BaseController {
             if(buyOut==null){
                 buyOut=new BigDecimal(0);
             }
+            fs.setBuyInAmount(buyIn);// 采购入库 显示付货款
+            fs.setBuyOutAmount(BigDecimalUtil.mul(buyOut.toString(),"-1")); // 采购退料 显示扣货款
             fs.setBuyNetInAmount(buyIn.subtract(buyOut));
 
             BigDecimal payShoes = supplier_amount_payShoes.get(supplierId);
             fs.setPayShoesAmount(payShoes==null ? new BigDecimal(0):payShoes);
+            fs.setPayShoesAmount(BigDecimalUtil.mul(fs.getPayShoesAmount().toString(),"-1"));//显示扣货款
 
             BigDecimal fine = supplier_amount_fine.get(supplierId);
             fs.setFineAmount(fine==null ? new BigDecimal(0):fine);
+            fs.setFineAmount(BigDecimalUtil.mul(fs.getFineAmount().toString(),"-1"));//显示扣货款
 
             BigDecimal test = supplier_amount_test.get(supplierId);
             fs.setTestAmount(test==null ? new BigDecimal(0):test);
+            fs.setTestAmount(BigDecimalUtil.mul(fs.getTestAmount().toString(),"-1"));//显示扣货款
 
             BigDecimal taxS = supplier_amount_taxSupplement.get(supplierId);
             fs.setTaxSupplement(taxS==null ? new BigDecimal(0):taxS);
 
             BigDecimal taxD = supplier_amount_taxDeduction.get(supplierId);
             fs.setTaxDeduction(taxD==null ? new BigDecimal(0):taxD);
+            fs.setTaxDeduction(BigDecimalUtil.mul(fs.getTaxDeduction().toString(),"-1"));//显示扣货款
 
             BigDecimal change = supplier_amount_change.get(supplierId);
             fs.setChangeAmount(change==null ? new BigDecimal(0):change);
 
             BigDecimal needPayAmount = new BigDecimal(0);
+
             BigDecimal next = needPayAmount.add(fs.getBuyNetInAmount())
-                    .subtract(fs.getPayShoesAmount())
-                    .subtract(fs.getFineAmount())
-                    .subtract(fs.getTestAmount())
+                    .add(fs.getPayShoesAmount())
+                    .add(fs.getFineAmount())
+                    .add(fs.getTestAmount())
                     .add(fs.getTaxSupplement())
-                    .subtract(fs.getTaxDeduction())
+                    .add(fs.getTaxDeduction())
                     .add(fs.getChangeAmount());
             fs.setStatus(DBConstant.TABLE_FINANCE_SUMMARY.STATUS_FIELDVALUE_1);
             fs.setCreated(now);
@@ -339,6 +347,7 @@ public class FinanceSummaryController extends BaseController {
             fs.setUpdatedUser(principal.getName());
 
             fs.setNeedPayAmount(next);
+            fs.setRoundDown(new BigDecimal("0"));
 
             // 应付0的不生成
             if(next.doubleValue() ==0){
@@ -603,7 +612,7 @@ public class FinanceSummaryController extends BaseController {
         Page<FinanceSummary> pageData = null;
         List<String> ids = new ArrayList<>();
         String queryField = "";
-        if (searchField != "") {
+        if (!searchField.equals("")) {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
@@ -664,6 +673,16 @@ public class FinanceSummaryController extends BaseController {
         }
 
         pageData = financeSummaryService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,payStatusList,queryMap,searchStartDate,searchEndDate);
+
+        for(FinanceSummary fs : pageData.getRecords()){
+            fs.setOtherTotalAmount(fs.getPayShoesAmount()
+                    .add(fs.getTestAmount())
+                    .add(fs.getFineAmount())
+                    .add(fs.getChangeAmount())
+                    .add(fs.getTaxSupplement())
+                    .add(fs.getTaxDeduction())
+                    .add(fs.getRoundDown()));
+        }
 
         return ResponseResult.succ(pageData);
     }
