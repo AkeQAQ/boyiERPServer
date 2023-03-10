@@ -144,6 +144,14 @@ public class ProduceBatchController extends BaseController {
                 }
 
                 obdd.setOrderSeq(progress.getBatchIdStr());
+
+                String orderSeq = obdd.getOrderSeq();
+                long count = orderBuyorderDocumentService.countBySupplierIdMaterialIdOrderSeqInOneYear(obd.getSupplierId(),
+                        obdd.getMaterialId(),orderSeq);
+                if(count >0 ){
+                    return ResponseResult.fail("供应商:"+obd.getSupplierId()+",物料:"+bm.getName()+",订单号:"+orderSeq+",已经有在近一年内，有重复记录，不能下推!");
+                }
+
                 obdd.setStatus(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.STATUS_FIELDVALUE_1);
                 obdd.setOrderDate(nowDate);
                 obdd.setRadioNum(BigDecimalUtil.mul(obdd.getNum(),bm.getUnitRadio()).doubleValue()  );

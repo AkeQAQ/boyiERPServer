@@ -77,4 +77,10 @@ public interface OrderBuyorderDocumentMapper extends BaseMapper<OrderBuyorderDoc
             " where rbd.status = 0 and rbd.id = rbdd.document_id and rbd.supplier_id = #{supplierId}" +
             " and rbdd.material_id = #{materialId} and rbd.order_date between #{startDate} and #{endDate}")
     Integer getBySupplierMaterial(BaseSupplierMaterial baseSupplierMaterial);
+
+    @Select("select count(1) from order_buyorder_document obd ,order_buyorder_document_detail obdd" +
+            " where obd.id = obdd.document_id and obd.supplier_id=#{supplierId} and obdd.material_id=#{materialId} and obdd.order_seq=#{orderSeq}  and obd.order_date > date_add(now(),interval -200 day) ")
+    long countBySupplierIdMaterialIdOrderSeqInOneYear(@Param("supplierId") String supplierId,
+                                                      @Param("materialId") String materialId,
+                                                      @Param("orderSeq") String orderSeq);
 }

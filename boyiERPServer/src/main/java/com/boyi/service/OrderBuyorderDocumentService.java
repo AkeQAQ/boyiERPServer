@@ -35,4 +35,5 @@ public interface OrderBuyorderDocumentService extends IService<OrderBuyorderDocu
 
     Map<String, Double> getAllPageTotalAmount( String searchField, String queryField, String searchStr, List<Long> searchStatusList, String searchStartDate, String searchEndDate, Map<String, String> otherSearch, Object[] searchDocNum);
 
+    long countBySupplierIdMaterialIdOrderSeqInOneYear(String supplierId, String materialId, String orderSeq);
 }

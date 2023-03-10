@@ -191,4 +191,9 @@ public class OrderBuyorderDocumentServiceImpl extends ServiceImpl<OrderBuyorderD
 
         return returnMap;
     }
+
+    @Override
+    public long countBySupplierIdMaterialIdOrderSeqInOneYear(String supplierId, String materialId, String orderSeq) {
+        return this.orderBuyorderDocumentMapper.countBySupplierIdMaterialIdOrderSeqInOneYear(supplierId,materialId,orderSeq);
+    }
 }
