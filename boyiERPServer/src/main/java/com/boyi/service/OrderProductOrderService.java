@@ -70,7 +70,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
     List<OrderProductOrder> listByOrderNumWithStartAndEnd(Integer minOrderNum, Integer maxOrderNum);
 
-    List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(Long pbId);
+    List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(Long[] pbId);
 
     List<Map<String, Object>> listByCalMaterial(String startDate, String endDate);
 

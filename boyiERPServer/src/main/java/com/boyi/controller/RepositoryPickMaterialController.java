@@ -328,21 +328,23 @@ public class RepositoryPickMaterialController extends BaseController {
      * 查询生产序号ID
      */
     @GetMapping("/queryByProduceBatchInId")
-    @PreAuthorize("hasAuthority('repository:buyIn:list')")
-    public ResponseResult queryByProduceBatchInId( Long id) {
+    @PreAuthorize("hasAuthority('repository:pickMaterial:list')")
+    public ResponseResult queryByProduceBatchInId( Long[] id) {
+        RepositoryPickMaterial pick = new RepositoryPickMaterial();
 
-
-        ProduceBatch pb = produceBatchService.getById(id);
+        if(id.length==1){
+            ProduceBatch pb = produceBatchService.getById(id[0]);
+            pick.setBatchId(pb.getBatchId());
+        }
 
         List<OrderProductOrder> lists = orderProductOrderService.listByOrderNumsWithZCMaterialIds(id);
 
         Double totalNum = 0D;
-        RepositoryPickMaterial pick = new RepositoryPickMaterial();
         pick.setStatus(1);
         pick.setDepartmentId(4L);
         BaseDepartment bd = baseDepartmentService.getById(4L);
         pick.setDepartmentName(bd.getName());
-        pick.setBatchId(pb.getBatchId());
+
         ArrayList<RepositoryPickMaterialDetail> pickDetails = new ArrayList<>();
 
 
@@ -356,7 +358,7 @@ public class RepositoryPickMaterialController extends BaseController {
             pickDetail.setSpecs(material.getSpecs());
 
             pickDetail.setNum(Double.valueOf(opo.getCalNum()));
-            totalNum += Double.valueOf(opo.getCalNum());
+            totalNum = BigDecimalUtil.add(totalNum,Double.valueOf(opo.getCalNum())).doubleValue() ;
             pickDetails.add(pickDetail);
         }
 
@@ -365,13 +367,53 @@ public class RepositoryPickMaterialController extends BaseController {
 
         pick.setRowList(pickDetails);
         return ResponseResult.succ(pick);
+        /*else{
+            RepositoryPickMaterial pick = new RepositoryPickMaterial();
+            pick.setStatus(1);
+            pick.setDepartmentId(4L);
+            BaseDepartment bd = baseDepartmentService.getById(4L);
+            pick.setDepartmentName(bd.getName());
+            ArrayList<RepositoryPickMaterialDetail> pickDetails = new ArrayList<>();
+            Double totalNum = 0D;
+
+            HashMap<String, RepositoryPickMaterialDetail> material_rpd = new HashMap<>();
+
+            for(Long oneId : id){
+                List<OrderProductOrder> lists = orderProductOrderService.listByOrderNumsWithZCMaterialIds(oneId);
+
+                for (OrderProductOrder opo : lists){
+                    String materialId = opo.getMaterialId();
+                    RepositoryPickMaterialDetail rpd = material_rpd.get(materialId);
+                    if(rpd==null){
+                        BaseMaterial material = baseMaterialService.getById(materialId);
+                        rpd  = new RepositoryPickMaterialDetail();
+                        material_rpd.put(materialId,rpd);
+                        rpd.setMaterialId(materialId);
+                        rpd.setMaterialName(material.getName());
+                        rpd.setUnit(material.getUnit());
+                        rpd.setSpecs(material.getSpecs());
+                        rpd.setNum(0D);
+                    }
+
+                    rpd.setNum(BigDecimalUtil.add(rpd.getNum(),Double.valueOf(opo.getCalNum())).doubleValue());
+                    totalNum = BigDecimalUtil.add(rpd.getNum(),Double.valueOf(opo.getCalNum())).doubleValue();
+                }
+
+            }
+
+            pick.setTotalNum(totalNum);
+            pickDetails.addAll(material_rpd.values());
+            pick.setRowList(pickDetails);
+            return ResponseResult.succ(pick);
+        }*/
+
     }
 
     /**
      * 查询BuyinId
      */
     @GetMapping("/queryByBuyInId")
-    @PreAuthorize("hasAuthority('repository:buyIn:list')")
+    @PreAuthorize("hasAuthority('repository:pickMaterial:list')")
     public ResponseResult queryByBuyInId(Long buyInId) {
         List<RepositoryBuyinDocumentDetail> details = repositoryBuyinDocumentDetailService.listByDocumentId(buyInId);
 

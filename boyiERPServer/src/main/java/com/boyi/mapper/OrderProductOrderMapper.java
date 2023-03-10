@@ -196,6 +196,37 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             "             t1.order_num = t2.order_num " +
             "             and t1.material_id = bm.id   and t2.batch_number > 5 " +
             "             ) t3  </script>")
+    /* 这是有针车领料和裁断领料一起共存的时候，解决的代码。 但是目前针车后续不会再 根据批次号领料。那么就用老的方式，关联的表少点。
+    @Select("<script> " +
+            "select * from ("+
+            " select t3.num num,t4.num pick_num,t3.order_num,t3.product_num,t3.product_brand,t3.material_id,t3.material_name,t3.dosage,t3.batch_number,t3.batch_id from  " +
+            " ( " +
+            "                         select t1.product_num,t1.product_brand,t2.*,t1.material_id,bm.`name` material_name,t1.dosage,CAST(t2.batch_number * t1.dosage as decimal(8,1)) num  from  " +
+            "                         ( " +
+            "                          select opo.order_num,opo.product_num,opo.product_brand,ppcd.material_id,ppcd.dosage from  order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd  " +
+            "                          where ppc.id = ppcd.constituent_id and ppcd.material_id in" +
+            " <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> " +
+            " and opo.product_num = ppc.product_num and opo.product_brand = ppc.product_brand and opo.order_type!=2 " +
+            "                         )t1 , " +
+            "                         ( " +
+            "                         select pb.batch_id,pb.order_num, " +
+            "                         (IFNULL(size34,0)+IFNULL(size35,0)+IFNULL(size36,0)+IFNULL(size37,0)+IFNULL(size38,0)+IFNULL(size39,0)+IFNULL(size40,0)+IFNULL(size41,0)+IFNULL(size42,0)+IFNULL(size43,0)+IFNULL(size44,0)+IFNULL(size45,0)+IFNULL(size46,0)+IFNULL(size47,0)) batch_number from produce_batch pb  " +
+            "                         ) t2 ,base_material bm " +
+            "                         where   " +
+            "                         t1.order_num = t2.order_num " +
+            "                         and t1.material_id = bm.id   and t2.batch_number > 5 " +
+            "" +
+            " ) t3" +
+            " left join " +
+            " (" +
+            " select rpm.batch_id,rpmd.material_id,rpmd.num from" +
+            " repository_pick_material rpm,repository_pick_material_detail rpmd" +
+            " where rpm.id = rpmd.document_id and rpmd.material_id in " +
+            " <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> " +
+            " )t4 on t3.batch_id = t4.batch_id and t3.material_id = t4.material_id " +
+            ") t5" +
+            " where t5.pick_num is null"+
+            " </script>")*/
     List<RepositoryStock> listNoPickMaterialsWithMaterialIds(@Param("materialIds") Set<String> keySet);
 
     @Select("select  opo.order_num from order_product_order opo" +
@@ -203,7 +234,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     List<OrderProductOrder> listByOrderNumWithStartAndEnd(@Param("minOrderNum")Integer minOrderNum,@Param("maxOrderNum") Integer maxOrderNum);
 
     @Select("" +
-            "" +
+            "<script>" +
             " select ppcd.material_id,cast(sum((" +
             " ((IFNULL(pb.size34,0)+IFNULL(pb.size35,0)+IFNULL(pb.size36,0)+IFNULL(pb.size37,0)+IFNULL(pb.size38,0)+IFNULL(pb.size39,0)+IFNULL(pb.size40,0)+IFNULL(pb.size41,0)+IFNULL(pb.size42,0)+IFNULL(pb.size43,0)+IFNULL(pb.size44,0)+IFNULL(pb.size45,0)+IFNULL(pb.size46,0)+IFNULL(pb.size47,0)))" +
             " *ppcd.dosage)) as DECIMAL(12,5)) cal_num from order_product_order opo," +
@@ -213,10 +244,10 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " where opo.product_num = ppc.product_num " +
             " and opo.product_brand = ppc.product_brand" +
             " and ppc.id = ppcd.constituent_id" +
-            " and pb.id = #{pbId} and (ppcd.material_id like '04.%' or ppcd.material_id like '06.%') " +
+            " and pb.id in <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> and (ppcd.material_id like '04.%' or ppcd.material_id like '06.%') " +
             " and pb.order_num = opo.order_num " +
-            " group by ppcd.material_id")
-    List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(@Param("pbId")Long pbId);
+            " group by ppcd.material_id </script>")
+    List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(@Param("batchIds")Long[] pbId);
 
     @Select("select sum(opo.order_number*ppcd.dosage) order_number,ppcd.material_id from order_product_order opo ," +
             " produce_product_constituent ppc ," +

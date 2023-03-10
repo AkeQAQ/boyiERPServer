@@ -222,7 +222,7 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     }
 
     @Override
-    public List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(Long pbId) {
+    public List<OrderProductOrder> listByOrderNumsWithZCMaterialIds(Long[] pbId) {
         return this.orderProductOrderMapper.listByOrderNumsWithZCMaterialIds(pbId);
     }
 
