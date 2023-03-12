@@ -103,9 +103,8 @@ public interface RepositoryPickMaterialMapper extends BaseMapper<RepositoryPickM
 
     @Update("" +
             " update " +
-            "repository_pick_material  set batch_id =  CONCAT(#{year},batch_id)" +
+            "repository_pick_material  set batch_id = #{newBatchId}" +
             "  where  batch_id =#{batchId}"+
-            "  "  +
             " ")
-    void updateBatchIdAppendYearByOneId(@Param("year")String year,@Param("batchId") String batchId);
+    void updateBatchIdAppendYearByOneId(@Param("newBatchId")String newBatchId,@Param("batchId") String batchId);
 }

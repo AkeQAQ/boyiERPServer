@@ -579,6 +579,9 @@ public class ProduceBatchController extends BaseController {
                 if(order == null){
                     return ResponseResult.fail("【产品订单】不存在该订单号:"+produceBatch.getOrderNum());
                 }
+            if(produceBatch.getBatchId()!=null && produceBatch.getBatchId().split("-")[0].length() >=9){
+                return ResponseResult.fail("批次号(-)之前的位数不能超过8位!");
+            }
             produceBatchService.save(produceBatch);
                 // 修改同批次号的创建时间
             List<ProduceBatch> batches = produceBatchService.listByLikeRightBatchId(produceBatch.getBatchId().split("-")[0]);
@@ -615,6 +618,9 @@ public class ProduceBatchController extends BaseController {
             OrderProductOrder order = orderProductOrderService.getByOrderNum(produceBatch.getOrderNum());
             if(order == null){
                 return ResponseResult.fail("【产品订单】不存在该订单号:"+produceBatch.getOrderNum());
+            }
+            if(produceBatch.getBatchId()!=null && produceBatch.getBatchId().split("-")[0].length() >=9){
+                return ResponseResult.fail("批次号(-)之前的位数不能超过8位!");
             }
             produceBatchService.updateById(produceBatch);
             return ResponseResult.succ("修改成功");
@@ -1308,6 +1314,9 @@ public class ProduceBatchController extends BaseController {
                     }else{
                         return ResponseResult.fail("批次号ID："+batch.getBatchId()+"不是数字和(0或1个'-')字符的组合");
                     }
+                }
+                if(batch.getBatchId()!=null && batch.getBatchId().split("-")[0].length() >=9){
+                    return ResponseResult.fail("批次号(-)之前的位数不能超过8位!");
                 }
 
             }

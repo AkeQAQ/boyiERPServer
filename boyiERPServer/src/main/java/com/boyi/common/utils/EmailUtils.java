@@ -19,6 +19,8 @@ public class EmailUtils {
     public static final String MONITOR_NAME="【博艺ERP】【系统监控】";
     public static final String MODULE_ADDNEW_MATERIAL_NAME="【博艺ERP】【补充物料】";
     public static final String MODULE_ADD_MATERIAL_NAME="【博艺ERP】【入库皮料】";
+    public static final String SCHEDULE_UPDATE_ORDER_NUM_NAME="【博艺ERP】【定时修改订单】";
+    public static final String SCHEDULE_UPDATE_BATCH_ID_NAME="【博艺ERP】【定时修改批次号】";
 
     public static final String MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMERREQUIRED_NAME="【博艺ERP】【产前沟通确认进度表模块】【客户要求确认】";
     public static final String MODULE_ORDER_BEFORE_PRODUCTION_PROGRESS_SURECUSTOMER_NAME="【博艺ERP】【产前沟通确认进度表模块】【确认鞋确认】";

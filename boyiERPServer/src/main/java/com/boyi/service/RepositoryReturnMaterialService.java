@@ -41,6 +41,6 @@ public interface RepositoryReturnMaterialService extends IService<RepositoryRetu
 
     List<RepositoryReturnMaterial> listGTEndDate(String endDate);
 
-    void updateBatchIdAppendYearByOneId(String year, String batchId);
+    void updateBatchIdAppendYearByOneId(String newBatchId, String batchId);
 
 }

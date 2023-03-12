@@ -666,7 +666,6 @@ public class ProduceProductConstituentController extends BaseController {
         return ResponseResult.succ(productConstituent);
     }
 
-
     /**
      * 修改入库
      */
@@ -731,6 +730,10 @@ public class ProduceProductConstituentController extends BaseController {
         delMaterialIds.addAll(oldMaterialIds);
         delMaterialIds.removeAll(materialIds);
 
+        // 新加的物料列表，对进度表 进行生成
+        Set<String> newMaterialIds = new HashSet<>();
+        newMaterialIds.addAll(materialIds);
+        newMaterialIds.removeAll(oldMaterialIds);
 
         if(flagSend){
             ThreadUtils.executorService.execute(new Runnable() {
@@ -744,7 +747,6 @@ public class ProduceProductConstituentController extends BaseController {
                 }
             });
         }
-
 
         productConstituent.setUpdated(LocalDateTime.now());
         productConstituent.setUpdatedUser(principal.getName());
@@ -831,6 +833,36 @@ public class ProduceProductConstituentController extends BaseController {
 
                 }
             }
+
+            if(!newMaterialIds.isEmpty()){
+                LocalDateTime now = LocalDateTime.now();
+                ArrayList<ProduceOrderMaterialProgress> savePomps = new ArrayList<>();
+                // 假如有对应的订单、则生成进度表信息
+                List<OrderProductOrder> orders = orderProductOrderService.getByNumBrand(productConstituent.getProductNum(),
+                        productConstituent.getProductBrand());
+                if(orders !=null && !orders.isEmpty()){
+                    for(OrderProductOrder order : orders){
+                        for(String newMaterialId : newMaterialIds){
+                            ProduceProductConstituentDetail newDetailObj = newDetailsObj.get(newMaterialId);
+                            double calNum = BigDecimalUtil.mul(order.getOrderNumber() + "", newDetailObj.getDosage()).doubleValue();
+                            ProduceOrderMaterialProgress progress = new ProduceOrderMaterialProgress();
+                            progress.setOrderId(order.getId());
+                            progress.setMaterialId(newMaterialId);
+                            progress.setCreated(now);
+                            progress.setUpdated(now);
+                            progress.setCreatedUser(principal.getName());
+                            progress.setUpdatedUser(principal.getName());
+                            progress.setPreparedNum("0");
+                            progress.setInNum("0");
+                            progress.setProgressPercent(0);
+                            progress.setCalNum(calNum+""); // 设置传进来的计算数量
+                            savePomps.add(progress);
+                        }
+                    }
+                }
+                produceOrderMaterialProgressService.saveBatch(savePomps);
+            }
+
 
             return ResponseResult.succ("编辑成功");
         }

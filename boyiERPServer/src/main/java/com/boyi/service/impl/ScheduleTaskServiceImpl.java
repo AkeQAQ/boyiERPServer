@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.EmailUtils;
+import com.boyi.common.utils.ThreadUtils;
 import com.boyi.entity.*;
 import com.boyi.mapper.OtherMapper;
 import com.boyi.service.*;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -119,31 +121,42 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                 String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
 
                 // 3. 移动生产序号表
-                List<ProduceBatch> batches = produceBatchService.listByMonthAndDay(dateStr);
-                if(batches==null || batches.size() ==0){
-                    log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】日期:{}数据为空",dateStr);
+                List<ProduceBatch> batches1 = produceBatchService.listByMonthAndDay(dateStr);
+                ArrayList<ProduceBatch> batches = new ArrayList<>();
+                for(ProduceBatch pb : batches1){
+                    String batchId = pb.getBatchId().split("-")[0];
+                    if(batchId.startsWith("20") && batchId.length() >=9){
+                        continue;
+                    }
+                    batches.add(pb);
+                }
+                if( batches.size() ==0){
+                    log.info("【定时任务】【移动produceBatch】【修改生产序号表】日期:{}数据为空",dateStr);
 
                     continue;
                 }
 
-                log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【开始........】日期:{}数据:{}",dateStr,batches);
-                addBatchHisAndRemove(batches);
-                log.info("【定时任务】【移动produceBatch】【添加生产序号历史表，删除生产序号表】【结束........】");
+                log.info("【定时任务】【移动produceBatch】【修改生产序号表】【开始........】日期:{}数据:{}",dateStr,batches);
+                Map<String,String> old_newBatchIdMap = addBatchHisAndRemove(batches);
+                log.info("【定时任务】【移动produceBatch】【修改生产序号表】【结束........】");
 
-                log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【开始........】");
-                // 修改领料表，退料表得生产序号，加上日期
-                updatePickReturnBatchId(batches);
-                log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【结束........】");
+                if(old_newBatchIdMap.size() > 0){
+                    log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【开始........】");
+                    // 修改领料表，退料表得生产序号，加上日期
+                    updatePickReturnBatchId(old_newBatchIdMap,batches);
+                    log.info("【定时任务】【移动produceBatch】【修改领料表，退料表】【结束........】");
+/*
+                    log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【开始........】");
+                    // 移动车间延期信息表
+                    addBatchDelayHisAndRemove(batches);
+                    log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【结束........】");
 
-                log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【开始........】");
-                // 移动车间延期信息表
-                addBatchDelayHisAndRemove(batches);
-                log.info("【定时任务】【移动produceBatch】【移动车间延期信息表】【结束........】");
+                    log.info("【定时任务】【移动produceBatch】【移动车间进度表】【开始........】");
+                    // 移动车间进度表
+                    addBatchProgressHisAndRemove(batches);
+                    log.info("【定时任务】【移动produceBatch】【移动车间进度表】【结束........】");*/
+                }
 
-                log.info("【定时任务】【移动produceBatch】【移动车间进度表】【开始........】");
-                // 移动车间进度表
-                addBatchProgressHisAndRemove(batches);
-                log.info("【定时任务】【移动produceBatch】【移动车间进度表】【结束........】");
                 try{
                     EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动produceBatch】日期:"+dateStr+",数据迁移成功");
                 }catch (Exception e2){
@@ -199,7 +212,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
                 return;
             }
             try{
-                EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动ProductOrderAndProgress】今日开始执行");
+                EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期修改OrderProductOrder】今日开始执行");
             }catch (Exception e2){
                 log.error("邮件发送失败..changeProductOrderAndProgress isEmpty");
             }
@@ -212,35 +225,48 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
                 String dateStr = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                 // 1. 获取老的产品订单表
-                List<OrderProductOrder> lists =orderProductOrderService.listByMonthAndDay(dateStr);
+                List<OrderProductOrder> lists1 =orderProductOrderService.listByMonthAndDay(dateStr);
+
+                ArrayList<OrderProductOrder> lists = new ArrayList<>();
+                // 2. 对已经设了年份标记的，进行过滤
+                for(OrderProductOrder opo : lists1){
+                    String orderNum = opo.getOrderNum().split("-")[0];
+                    // 过滤掉已经是迁移过的。
+                    if(orderNum.startsWith("20") && orderNum.length() >=9){
+                        continue;
+                    }
+                    lists.add(opo);
+                }
+
                 log.info("【定时任务】【changeProductOrderAndProgress】获取年月日%{},去年创建的产品订单数据{}",dateStr,lists);
                 if(lists.isEmpty()){
 
                     continue;
                 }
-                // 2. 获取老的进度表
+               /* // 2. 获取老的进度表
                 Set<Long> orderIds = new HashSet<>();
                 for(OrderProductOrder order : lists){
                     orderIds.add(order.getId());
-                }
-                List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderIds(orderIds);
-                log.info("【定时任务】【changeProductOrderAndProgress】获取采购进度，订单号{}",orderIds);
+                }*/
+//                List<ProduceOrderMaterialProgress> progresses = produceOrderMaterialProgressService.listByOrderIds(orderIds);
+//                log.info("【定时任务】【changeProductOrderAndProgress】获取采购进度，订单号{}",orderIds);
 
-                log.info("【定时任务】【changeProductOrderAndProgress】添加产品订单历史表{}，删除产品订单表",lists);
-                // 3. 添加到历史表，并且移除原表
+                log.info("【定时任务】【changeProductOrderAndProgress】添加产品订单历史表{}，修改产品订单表",lists);
+                // 3. 直接修改原表
                 addOrderHisAndRemove(lists);
 
-                log.info("【定时任务】【changeProductOrderAndProgress】添加进度表{}，删除进度表",progresses);
+                /*log.info("【定时任务】【changeProductOrderAndProgress】添加进度表{}，删除进度表",progresses);
                 if(progresses!=null && !progresses.isEmpty()){
                     addProgressHisAndRemove(progresses);
                 }
                 try{
-                    EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动ProductOrderAndProgress】日期:"+dateStr+"的产品订单数据迁移成功");
+                    EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期修改OrderProductOrder】日期:"+dateStr+"的产品订单数据修改成功");
                 }catch (Exception e2){
                     log.error("邮件发送失败..changeProductOrderAndProgress success");
                 }
                 long end2 = System.currentTimeMillis();
                 log.info("【定时任务】【changeProductOrderAndProgress】该日期:{} 耗时:{} ms",dateStr,(end2-start));
+                */
             }
             long end = System.currentTimeMillis();
             log.info("【定时任务】【changeProductOrderAndProgress】全部耗时:{} ms",(end-start));
@@ -249,7 +275,7 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         }catch (Exception e){
             log.error("发生异常..",e);
             try{
-                EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期移动ProductOrderAndProgress】报错..");
+                EmailUtils.sendMail("博艺ERP系统", "244454526@qq.com",new String[]{}, "【定时任务】【定期修改OrderProductOrder】报错..");
             }catch (Exception e2){
                 log.error("邮件发送失败..");
             }
@@ -418,23 +444,57 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
 
     private void addOrderHisAndRemove(List<OrderProductOrder> lists) {
 
-        // 1. 添加到历史表（订单号加年份）
-        ArrayList<HisOrderProductOrder> hisLists = new ArrayList<>();
-        ArrayList<Long> removeIds = new ArrayList<>();
+        // 1. （订单号加年份）
+//        ArrayList<HisOrderProductOrder> hisLists = new ArrayList<>();
+//        ArrayList<Long> removeIds = new ArrayList<>();
 
+        StringBuilder emailSb = new StringBuilder();
         for(OrderProductOrder order : lists){
-            HisOrderProductOrder hisOrder = new HisOrderProductOrder();
-            BeanUtils.copyProperties(order,hisOrder);
-            hisOrder.setId(order.getId());
+//            HisOrderProductOrder hisOrder = new HisOrderProductOrder();
+//            BeanUtils.copyProperties(order,hisOrder);
+//            hisOrder.setId(order.getId());
+            String oldOrderNum = order.getOrderNum();
             String shouldYear = getYearFromOrderProductOrder(order);
-            hisOrder.setOrderNum(shouldYear+hisOrder.getOrderNum());
-            log.info("【定时任务】【修改orderNum】产品订单:{},【老 orderNum:{},新的orderNum:{}】",order,order.getOrderNum(),hisOrder.getOrderNum());
-            hisLists.add(hisOrder);
-            removeIds.add(order.getId());
+            order.setOrderNum(shouldYear+oldOrderNum);
+
+            emailSb.append("老订单号:{"+oldOrderNum+"}，创建时间:[{"+order.getCreated()+"}],修改成新订单号:{"+order.getOrderNum()+"} ");
+            log.info("【定时任务】【修改orderNum】产品订单:{},【老 orderNum:{},新的orderNum:{}】",order,oldOrderNum,order.getOrderNum());
+
+            // 同时修改对应的批次号的orderNum
+            List<ProduceBatch> oldBatches = produceBatchService.listByOrderNum(oldOrderNum);
+
+            if(oldBatches!=null && oldBatches.size()>0){
+                for(ProduceBatch pb : oldBatches){
+                    pb.setOrderNum(order.getOrderNum());
+                    emailSb.append("。对应的生产序号:{"+pb.getBatchId()+"},创建日期:[{"+pb.getCreated()+"}],把老订单号:{"+oldOrderNum+"},修改成新订单号:{"+order.getOrderNum()+"}");
+                }
+                produceBatchService.updateBatchById(oldBatches);
+                log.info("【定时任务】【修改orderNum】生产序号:{},【老 orderNum:{},新的orderNum:{}】",order,oldOrderNum,order.getOrderNum());
+
+            }
+            emailSb.append("<br>");
+
+//            hisLists.add(hisOrder);
+//            removeIds.add(order.getId());
         }
-        hisOrderProductOrderService.saveBatch(hisLists);
+//        hisOrderProductOrderService.saveBatch(hisLists);
         // 2. 删除原表
-        orderProductOrderService.removeByIds(removeIds);
+//        orderProductOrderService.removeByIds(removeIds);
+        orderProductOrderService.updateBatchById(lists);
+        if(emailSb.length() > 0){
+            ThreadUtils.executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        EmailUtils.sendMail(EmailUtils.SCHEDULE_UPDATE_ORDER_NUM_NAME
+                                ,"244454526@qq.com",new String[]{},emailSb.toString());
+                    } catch (MessagingException e) {
+                        log.error("error",e);
+                    }
+                }
+            });
+        }
+
     }
 
 
@@ -519,41 +579,69 @@ public class ScheduleTaskServiceImpl implements ScheduleTaskService {
         produceBatchDelayService.removeByIds(removeIds);
     }
 
-    private void updatePickReturnBatchId(List<ProduceBatch> batches) {
+    private void updatePickReturnBatchId(Map<String, String> old_newBatchIdMap, List<ProduceBatch> batches) {
         // 查询生产序号的领料表和退料表
         for(ProduceBatch pb : batches){
-            String year = getYearFromBatch(pb);
+            String oldBatchId = old_newBatchIdMap.get(pb.getBatchId());
             // 修改对应的领料表和退料表
-            repositoryPickMaterialService.updateBatchIdAppendYearByOneId(year,pb.getBatchId());
-            repositoryReturnMaterialService.updateBatchIdAppendYearByOneId(year,pb.getBatchId());
-            log.info("【定时任务】【移动produceBatch】修改领料表表，退料表，batchId:{},添加年份:{}",pb.getBatchId(),year);
+            repositoryPickMaterialService.updateBatchIdAppendYearByOneId(pb.getBatchId(),oldBatchId);
+            repositoryReturnMaterialService.updateBatchIdAppendYearByOneId(pb.getBatchId(),oldBatchId);
+            log.info("【定时任务】【移动produceBatch】修改领料表表，退料表，新的batchId:{},老的batchId:{}",pb.getBatchId(),oldBatchId);
         }
 
 
     }
 
 
-    private void addBatchHisAndRemove(List<ProduceBatch> batches) {
+    private Map<String,String> addBatchHisAndRemove(List<ProduceBatch> batches) {
 
+        HashMap<String, String> old_newMap = new HashMap<>();
         // 1. 添加到历史表（订单号,批次号加年份）
-        ArrayList<HisProduceBatch> hisLists = new ArrayList<>();
-        ArrayList<Long> removeIds = new ArrayList<>();
+//        ArrayList<HisProduceBatch> hisLists = new ArrayList<>();
+//        ArrayList<Long> removeIds = new ArrayList<>();
+
+        StringBuilder emailSb = new StringBuilder();
 
         for(ProduceBatch batch : batches){
-            HisProduceBatch hisBatch = new HisProduceBatch();
-            BeanUtils.copyProperties(batch,hisBatch);
-            hisBatch.setId(batch.getId());
+//            HisProduceBatch hisBatch = new HisProduceBatch();
+//            BeanUtils.copyProperties(batch,hisBatch);
+//            hisBatch.setId(batch.getId());
+//            String oldOrderNum = batch.getOrderNum();
+            String oldBatchId = batch.getBatchId();
             String year = getYearFromBatch(batch);
-            hisBatch.setOrderNum(year+hisBatch.getOrderNum());
-            hisBatch.setBatchId(year+hisBatch.getBatchId());
-            log.info("【定时任务】【移动produceBatch】【修改批次号】pb:{},老的orderNum:{},新的orderNum:{},老的batchId:{},新的batchId:{}",batch,
-                    batch.getOrderNum(),hisBatch.getOrderNum(),batch.getBatchId(),hisBatch.getBatchId());
+//            batch.setOrderNum(year+oldOrderNum);
+            batch.setBatchId(year+oldBatchId);
 
-            hisLists.add(hisBatch);
-            removeIds.add(batch.getId());
+            old_newMap.put(batch.getBatchId(),oldBatchId);
+
+            emailSb.append("老批次号:{"+oldBatchId+"}，创建时间:[{"+batch.getCreated()+"}],修改成新批次号:{"+batch.getBatchId()+"}. 订单号是:{"+batch.getOrderNum()+"} <br>");
+
+//            hisBatch.setOrderNum(year+hisBatch.getOrderNum());
+//            hisBatch.setBatchId(year+hisBatch.getBatchId());
+            log.info("【定时任务】【移动produceBatch】【修改批次号】pb:{},,老的batchId:{},新的batchId:{}",batch,oldBatchId,batch.getBatchId());
+
+//            hisLists.add(hisBatch);
+//            removeIds.add(batch.getId());
         }
-        hisProduceBatchService.saveBatch(hisLists);
+//        hisProduceBatchService.saveBatch(hisLists);
         // 2. 删除原表
-        produceBatchService.removeByIds(removeIds);
+//        produceBatchService.removeByIds(removeIds);
+
+        if(emailSb.length() > 0){
+            ThreadUtils.executorService.execute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        EmailUtils.sendMail(EmailUtils.SCHEDULE_UPDATE_BATCH_ID_NAME
+                                ,"244454526@qq.com",new String[]{},emailSb.toString());
+                    } catch (MessagingException e) {
+                        log.error("error",e);
+                    }
+                }
+            });
+        }
+
+        produceBatchService.updateBatchById(batches);
+        return old_newMap;
     }
 }

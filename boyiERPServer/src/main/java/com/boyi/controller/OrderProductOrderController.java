@@ -1225,6 +1225,11 @@ public class OrderProductOrderController extends BaseController {
                     errorMsg.put("content","订单号："+order.getOrderNum()+"的订单类型不能为空!");
                     errorMsgs.add(errorMsg);
                 }
+                if(order.getOrderNum().length() >=9){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","订单号："+order.getOrderNum()+"长度不允许超过8个");
+                    errorMsgs.add(errorMsg);
+                }
                 LocalDateTime now = LocalDateTime.now();
                 order.setCreated(now);
                 order.setUpdated(now);
@@ -1324,6 +1329,9 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrder.setUpdated(LocalDateTime.now());
         orderProductOrder.setUpdatedUser(principal.getName());
         try {
+            if(orderProductOrder.getOrderNum()!=null && orderProductOrder.getOrderNum().length() >=9){
+                return ResponseResult.fail("订单号不能超过8位!");
+            }
 //            OrderProductOrder old = orderProductOrderService.getById(orderProductOrder.getId());
             /*if(old.getOrderNumber().intValue() > orderProductOrder.getOrderNumber()){
                 return ResponseResult.fail("新的订单数目["+orderProductOrder.getOrderNumber().intValue()+"] 不允许比老的订单数目["+old.getOrderNumber()+"] 少");
@@ -1357,7 +1365,9 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrder.setUpdatedUser(principal.getName());
         orderProductOrder.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_2);
         try {
-
+            if(orderProductOrder.getOrderNum()!=null && orderProductOrder.getOrderNum().length() >=9){
+                return ResponseResult.fail("订单号不能超过8位!");
+            }
             orderProductOrderService.updateById(orderProductOrder);
 
             log.info("产品订单模块-更新内容:{}",orderProductOrder);
@@ -1386,6 +1396,9 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrder.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
         try {
 
+            if(orderProductOrder.getOrderNum()!=null && orderProductOrder.getOrderNum().length() >=9){
+                return ResponseResult.fail("订单号不能超过8位!");
+            }
             orderProductOrderService.save(orderProductOrder);
 
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",orderProductOrder.getId());

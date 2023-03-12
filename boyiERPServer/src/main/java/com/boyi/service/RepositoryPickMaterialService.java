@@ -41,5 +41,5 @@ public interface RepositoryPickMaterialService extends IService<RepositoryPickMa
 
     List<RepositoryPickMaterial> listGTEndDate(String endDate);
 
-    void updateBatchIdAppendYearByOneId(String year, String batchId);
+    void updateBatchIdAppendYearByOneId(String newBatchId, String batchId);
 }
