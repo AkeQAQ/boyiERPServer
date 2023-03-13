@@ -767,7 +767,13 @@ public class ProduceBatchController extends BaseController {
 
             for(Long id : ids){
                 ProduceBatch pb = produceBatchService.getById(id);
+                OrderProductOrder order = orderProductOrderService.getByOrderNum(pb.getOrderNum());
 
+                if(!order.getProductNum().contains("S") && !order.getProductNum().contains("L")
+                        && !order.getProductNum().contains("s") && !order.getProductNum().contains("l")){
+                    continue;
+                }
+                // 假如对应的货号是单鞋，不需要打印
                 String batchIdPre = pb.getBatchId().split("-")[0];
 
                 if(existBatchIdPre.contains(batchIdPre)){
@@ -785,7 +791,6 @@ public class ProduceBatchController extends BaseController {
 
 
                 // 1. 查询订单信息
-                OrderProductOrder order = orderProductOrderService.getByOrderNum(pb.getOrderNum());
                 if(pb.getSize40()==null||pb.getSize40().isEmpty()){
                     pb.setSize40("0");
                 }
