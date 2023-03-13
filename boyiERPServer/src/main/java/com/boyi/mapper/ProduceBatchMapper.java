@@ -41,14 +41,16 @@ public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
             "where pb.batch_id like CONCAT(#{preBatchId},'%') ")
     Long sumByBatchIdPre(@Param("preBatchId") String preBatchId);
 
-    @Select("select opo.end_date,opo.order_type, pbp.cost_of_labour_type_id,pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq, opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
+    @Select("select opo.end_date,opo.order_type, pbp.cost_of_labour_type_id,pb.id ,pbp.id produce_batch_progress_id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq, opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date,pbp.send_foreign_product_date,pbp.back_foreign_product_date,pbp.supplier_name,pbp.material_name " +
+            " from produce_batch pb inner join" +
             " order_product_order opo on pb.order_num = opo.order_num " +
             " inner join produce_batch_progress pbp " +
             " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
             " where date_format(pbp.out_date,'%Y-%m-%d') = #{searchQueryOutDateStr}")
     List<ProduceBatch> listByOutDate(@Param("searchQueryOutDateStr") String searchQueryOutDateStr);
 
-    @Select("select opo.end_date,opo.order_type,pbp.cost_of_labour_type_id,pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq,opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
+    @Select("select opo.end_date,opo.order_type,pbp.cost_of_labour_type_id,pb.id ,pbp.id produce_batch_progress_id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq,opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date,pbp.send_foreign_product_date,pbp.back_foreign_product_date,pbp.supplier_name,pbp.material_name " +
+            " from produce_batch pb inner join" +
             " order_product_order opo on pb.order_num = opo.order_num " +
             " inner join produce_batch_progress pbp " +
             " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
@@ -76,14 +78,16 @@ public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
             " where pbd.material_name is not null and pbd.date is  null ")
     List<ProduceBatch> listDelay();
 
-    @Select("select opo.end_date,opo.order_type,pbp.cost_of_labour_type_id,pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq, opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
+    @Select("select opo.end_date,opo.order_type,pbp.cost_of_labour_type_id,pb.id ,pbp.id produce_batch_progress_id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq, opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date,pbp.send_foreign_product_date,pbp.back_foreign_product_date,pbp.supplier_name,pbp.material_name " +
+            " from produce_batch pb inner join" +
             " order_product_order opo on pb.order_num = opo.order_num " +
             " inner join produce_batch_progress pbp " +
             " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +
             " where date_format(pbp.out_date,'%Y-%m-%d') = #{searchQueryOutDateStr} and date_format(pb.created,'%Y-%m-%d') >= #{dataDate}")
     List<ProduceBatch> listByOutDateDataDate(@Param("searchQueryOutDateStr") String searchQueryOutDateStr,@Param("dataDate")  String dataDate);
 
-    @Select("select opo.end_date,opo.order_type,pbp.cost_of_labour_type_id, pbp.id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq,opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date from produce_batch pb inner join" +
+    @Select(" select opo.end_date,opo.order_type,pbp.cost_of_labour_type_id, pb.id ,pbp.id produce_batch_progress_id,pbp.is_accept,pbp.cost_of_labour_type_name,colt.seq,opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date,pbp.send_foreign_product_date,pbp.back_foreign_product_date,pbp.supplier_name,pbp.material_name " +
+            " from produce_batch pb inner join" +
             " order_product_order opo on pb.order_num = opo.order_num " +
             " inner join produce_batch_progress pbp " +
             " on pb.id = pbp.produce_batch_id inner join  cost_of_labour_type colt on pbp.cost_of_labour_type_id = colt.id" +

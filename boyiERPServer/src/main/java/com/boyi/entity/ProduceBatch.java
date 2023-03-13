@@ -107,6 +107,18 @@ public class ProduceBatch extends BaseEntity {
     @TableField(exist = false)
     private String materialName;
 
+
+    @TableField(exist = false)
+    private String supplierName;
+
+
+    @TableField(exist = false)
+    private LocalDateTime sendForeignProductDate;
+
+
+    @TableField(exist = false)
+    private LocalDateTime backForeignProductDate;
+
     @TableField(exist = false)
     private Integer isAccept;
 
@@ -117,4 +129,6 @@ public class ProduceBatch extends BaseEntity {
     private String zcPickId;
 
 
+    @TableField(exist = false)
+    private Long produceBatchProgressId;
 }

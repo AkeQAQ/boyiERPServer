@@ -203,7 +203,7 @@ public class CastAop {
             if(arg instanceof Long){
                 Long id = (Long)arg;
                 obj = financeSupplierTestService.getById(id);
-            }else if(arg instanceof FinanceSupplierFine){
+            }else if(arg instanceof FinanceSupplierTest){
                 obj = (FinanceSupplierTest)arg;
             }
             flag = validFinanceIsClosed(close.getCloseDate(), obj.getTestDate());

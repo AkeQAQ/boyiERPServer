@@ -167,7 +167,7 @@ public class ProduceBatchController extends BaseController {
 
     @PostMapping("/progressList")
     @PreAuthorize("hasAuthority('produce:batch:list')")
-    public ResponseResult list(Principal principal,@RequestBody Map<String,Object> params) {
+    public ResponseResult list(Principal principal,Boolean showSendNoBack,@RequestBody Map<String,Object> params) {
         Object searchQueryOutDateStr = params.get("searchQueryOutDateStr");
         Object searchQueryStartDateStr = params.get("searchQueryStartDateStr");
         List<ProduceBatch> progresses= new ArrayList<>();
@@ -202,6 +202,8 @@ public class ProduceBatchController extends BaseController {
             progressesLists = this.produceBatchService.listByOutDateIsNullWithDataDate(searchQueryStartDateStr.toString());
         }
 
+
+
         // 将同batchId的去除,并且将-1这种消除
         HashSet<String> batchId = new HashSet<>();
         for(ProduceBatch pb : progressesLists){
@@ -224,9 +226,9 @@ public class ProduceBatchController extends BaseController {
             }
             String batchIdPre = pb.getBatchId().split("-")[0];
 
-            if(batchId.contains(batchIdPre)  ){
+            /*if(batchId.contains(batchIdPre)  ){
                 continue;
-            }
+            }*/
 
             // 查询出库是空的，还要看下该角色，该批次号是否已经有出库日期的记录
             if(outDateIsNull){
@@ -236,13 +238,55 @@ public class ProduceBatchController extends BaseController {
                 }
             }
 
+
             // 查询该批次号前缀的数量
             Long totalNum = produceBatchService.sumByBatchIdPre(batchIdPre);
             pb.setMergeBatchNumber(totalNum+"");
+            if(batchId.contains(batchIdPre)){
+                pb.setMergeBatchNumber(null);
+            }
             batchId.add(batchIdPre);
             pb.setBatchId(batchIdPre);
             progresses.add(pb);
+            /*// 查出 同批次号ID的进度表，并且ID不为当前的这个
+            List<ProduceBatchProgress> onePbIdProgresses = this.produceBatchProgressService.listByProduceBatchId(pb.getId());
+            for(ProduceBatchProgress pomp : onePbIdProgresses){
+                if(Objects.equals(pomp.getId(), pb.getProduceBatchProgressId()) || !pb.getCostOfLabourTypeId().equals(pb.getCostOfLabourTypeId())){
+                    continue;
+                }
+                ProduceBatch otherPb = new ProduceBatch();
+                otherPb.setOrderNum(pb.getOrderNum());
+                otherPb.setBatchId(pb.getBatchId());
+                otherPb.setProductNum(pb.getProductNum());
+                otherPb.setProductBrand(pb.getProductBrand());
+                otherPb.setOrderType(pb.getOrderType());
+                otherPb.setEndDate(pb.getEndDate());
+//                otherPb.setMergeBatchNumber(pb.getMergeBatchNumber());
+                otherPb.setCostOfLabourTypeId(pomp.getCostOfLabourTypeId());
+                otherPb.setCostOfLabourTypeName(pomp.getCostOfLabourTypeName());
+                otherPb.setSupplierName(pomp.getSupplierName());
+                otherPb.setMaterialName(pomp.getMaterialName());
+                otherPb.setSendForeignProductDate(pomp.getSendForeignProductDate());
+                otherPb.setBackForeignProductDate(pomp.getBackForeignProductDate());
+                otherPb.setOutDate(pomp.getOutDate());
+                otherPb.setIsAccept(pomp.getIsAccept());
+                progresses.add(otherPb);
+            }*/
         }
+        if(showSendNoBack){
+            List<ProduceBatch> returnProgresses= new ArrayList<>();
+            for(ProduceBatch pb : progresses){
+                if(pb.getOutDate()==null && pb.getSendForeignProductDate()!=null && pb.getBackForeignProductDate()==null){
+                    returnProgresses.add(pb);
+                }
+            }
+            progresses = returnProgresses;
+        }
+        StringBuilder sb = new StringBuilder();
+        for(ProduceBatch pb : progresses){
+            sb.append(pb.getBatchId()).append(" ");
+        }
+
 
         List<ProduceBatch> delaysLists = this.produceBatchService.listDelay();
 
@@ -255,7 +299,7 @@ public class ProduceBatchController extends BaseController {
         HashMap<String, Object> returnMap = new HashMap<>();
         returnMap.put("delayData",delays);
         returnMap.put("progressData",progresses);
-
+        returnMap.put("totalBatchId",sb.toString());
         return ResponseResult.succ(returnMap);
 
     }
@@ -730,7 +774,8 @@ public class ProduceBatchController extends BaseController {
                 for (OrderProductOrder detail : details){
                     String materialId = detail.getMaterialId();
                     // 筛选皮料，
-                    if(materialId.startsWith("01.") && detail.getCanShowPrint().equals("0")){
+                    if( (materialId.startsWith("01.") || materialId.startsWith("02.01") || materialId.startsWith("03.01") )
+                            && detail.getCanShowPrint().equals("0")){
                         HashMap<String, String> theSub = new HashMap<>();
                         theSub.put("materialId",materialId);
                         theSub.put("materialName",detail.getMaterialName());
@@ -1186,7 +1231,7 @@ public class ProduceBatchController extends BaseController {
             for (OrderProductOrder detail : details){
                 String materialId = detail.getMaterialId();
                 // 筛选皮料，
-                if(materialId.startsWith("01.") && detail.getCanShowPrint().equals("0")){
+                if((materialId.startsWith("01.") || materialId.startsWith("02.01") || materialId.startsWith("03.01") ) && detail.getCanShowPrint().equals("0")){
                     HashMap<String, String> theSub = new HashMap<>();
                     theSub.put("materialId",materialId);
                     theSub.put("materialName",detail.getMaterialName());
