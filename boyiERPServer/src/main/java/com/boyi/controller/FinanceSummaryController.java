@@ -289,6 +289,17 @@ public class FinanceSummaryController extends BaseController {
         allSupplier.addAll(supplier_amount_taxSupplement.keySet());
         allSupplier.addAll(supplier_amount_taxDeduction.keySet());
         allSupplier.addAll(supplier_amount_change.keySet());
+        log.info("supplier_amount_buyIn:{},size:{}",supplier_amount_buyIn,supplier_amount_buyIn.size());
+        log.info("supplier_amount_buyOut:{},size:{}",supplier_amount_buyOut,supplier_amount_buyOut.size());
+        log.info("supplier_amount_payShoes:{},size:{}",supplier_amount_payShoes,supplier_amount_payShoes.size());
+        log.info("supplier_amount_fine:{},size:{}",supplier_amount_fine,supplier_amount_fine.size());
+        log.info("supplier_amount_test:{},size:{}",supplier_amount_test,supplier_amount_test.size());
+        log.info("supplier_amount_taxSupplement:{},size:{}",supplier_amount_taxSupplement,supplier_amount_taxSupplement.size());
+        log.info("supplier_amount_taxDeduction:{},size:{}",supplier_amount_taxDeduction,supplier_amount_taxDeduction.size());
+        log.info("supplier_amount_change:{},size:{}",supplier_amount_change);
+
+        log.info("allSupplier:{}",allSupplier);
+
 
         ArrayList<FinanceSummary> lists = new ArrayList<>();
         for(String supplierId : allSupplier){
@@ -301,7 +312,7 @@ public class FinanceSummaryController extends BaseController {
             if(buyIn==null){
                 buyIn=new BigDecimal(0);
             }
-            BigDecimal buyOut = supplier_amount_buyIn.get(supplierId);
+            BigDecimal buyOut = supplier_amount_buyOut.get(supplierId);
             if(buyOut==null){
                 buyOut=new BigDecimal(0);
             }

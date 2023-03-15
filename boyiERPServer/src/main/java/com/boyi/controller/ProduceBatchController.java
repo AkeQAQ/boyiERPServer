@@ -240,12 +240,13 @@ public class ProduceBatchController extends BaseController {
 
 
             // 查询该批次号前缀的数量
-            Long totalNum = produceBatchService.sumByBatchIdPre(batchIdPre);
-            pb.setMergeBatchNumber(totalNum+"");
-            if(batchIdPre_number.containsKey(batchIdPre)){
-                pb.setMergeBatchNumber(null);
+            Long totalNum = batchIdPre_number.get(batchIdPre);
+            if(totalNum==null){
+                 totalNum = produceBatchService.sumByBatchIdPre(batchIdPre);
+                batchIdPre_number.put(batchIdPre,totalNum);
             }
-            batchIdPre_number.put(batchIdPre,totalNum);
+
+            pb.setMergeBatchNumber(totalNum+"");
             pb.setBatchId(batchIdPre);
             progresses.add(pb);
             /*// 查出 同批次号ID的进度表，并且ID不为当前的这个
@@ -283,9 +284,15 @@ public class ProduceBatchController extends BaseController {
             progresses = returnProgresses;
         }
         StringBuilder sb = new StringBuilder();
+        String allTotalNum = "0";
+        HashSet<String> isAddFlag = new HashSet<>();
         for(ProduceBatch pb : progresses){
-            pb.setMergeBatchNumber(batchIdPre_number.get(pb.getBatchId())+"");
-            sb.append(pb.getBatchId()).append(" ");
+            String batchId = pb.getBatchId();
+            sb.append(batchId).append(" ");
+            if(!isAddFlag.contains(batchId)){
+                allTotalNum = BigDecimalUtil.add(allTotalNum,pb.getMergeBatchNumber()).toString();
+                isAddFlag.add(batchId);
+            }
         }
 
 
@@ -301,6 +308,8 @@ public class ProduceBatchController extends BaseController {
         returnMap.put("delayData",delays);
         returnMap.put("progressData",progresses);
         returnMap.put("totalBatchId",sb.toString());
+        returnMap.put("allTotalNum",allTotalNum);
+
         return ResponseResult.succ(returnMap);
 
     }
