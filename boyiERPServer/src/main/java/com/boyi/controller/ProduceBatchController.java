@@ -205,7 +205,7 @@ public class ProduceBatchController extends BaseController {
 
 
         // 将同batchId的去除,并且将-1这种消除
-        HashSet<String> batchId = new HashSet<>();
+        HashMap<String, Long> batchIdPre_number = new HashMap<>();
         for(ProduceBatch pb : progressesLists){
 
             boolean isCan = false;
@@ -242,10 +242,10 @@ public class ProduceBatchController extends BaseController {
             // 查询该批次号前缀的数量
             Long totalNum = produceBatchService.sumByBatchIdPre(batchIdPre);
             pb.setMergeBatchNumber(totalNum+"");
-            if(batchId.contains(batchIdPre)){
+            if(batchIdPre_number.containsKey(batchIdPre)){
                 pb.setMergeBatchNumber(null);
             }
-            batchId.add(batchIdPre);
+            batchIdPre_number.put(batchIdPre,totalNum);
             pb.setBatchId(batchIdPre);
             progresses.add(pb);
             /*// 查出 同批次号ID的进度表，并且ID不为当前的这个
@@ -284,6 +284,7 @@ public class ProduceBatchController extends BaseController {
         }
         StringBuilder sb = new StringBuilder();
         for(ProduceBatch pb : progresses){
+            pb.setMergeBatchNumber(batchIdPre_number.get(pb.getBatchId())+"");
             sb.append(pb.getBatchId()).append(" ");
         }
 
@@ -783,7 +784,7 @@ public class ProduceBatchController extends BaseController {
 
                         // 计算用量，
                         theSub.put("needNum",calOneOrderNeedNum(pb,detail.getDosage()));
-
+                        theSub.put("comment",detail.getContent());
                         subLists.add(theSub);
                     }
                 }
@@ -1239,6 +1240,7 @@ public class ProduceBatchController extends BaseController {
 
                     // 计算用量，
                     theSub.put("needNum",calOneOrderNeedNum(pb,detail.getDosage()));
+                    theSub.put("comment",detail.getContent());
 
                     subLists.add(theSub);
                 }

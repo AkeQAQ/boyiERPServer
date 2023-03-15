@@ -121,4 +121,8 @@ public class OrderProductOrder extends BaseEntity {
     @TableField(exist = false)
     private Long ppcId;
 
+    @TableField(exist = false)
+    private String content;
+
+
 }

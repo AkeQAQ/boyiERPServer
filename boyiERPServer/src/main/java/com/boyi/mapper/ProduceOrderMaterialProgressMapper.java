@@ -31,7 +31,7 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             " from order_product_order o," +
             " produce_order_material_progress pomg ," +
             " base_material bm" +
-            " where o.id = pomg.order_id " +
+            " where o.order_type!=2 and o.id = pomg.order_id " +
             " and bm.id = pomg.material_id";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
 

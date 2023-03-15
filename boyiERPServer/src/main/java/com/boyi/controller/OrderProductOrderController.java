@@ -25,6 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.sql.BatchUpdateException;
 import java.time.LocalDate;
@@ -364,12 +365,27 @@ public class OrderProductOrderController extends BaseController {
     @PreAuthorize("hasAuthority('order:productOrder:del')")
     public ResponseResult cancelOrder(Principal principal,Long id) throws Exception{
         try {
+            // 1. 查询进度表是否有入库记录，有入库记录提示
+
+            List<ProduceOrderMaterialProgress> pompes = produceOrderMaterialProgressService.listByOrderId(id);
+            for(ProduceOrderMaterialProgress POMP :pompes){
+                String inNum = POMP.getInNum();
+                if(inNum!=null && !inNum.equals("0")){
+                    return ResponseResult.fail("有入库消单，请先迁移!");
+                }
+                POMP.setPreparedNum("0");
+                POMP.setProgressPercent(0);
+            }
+
             OrderProductOrder orderProductOrder = new OrderProductOrder();
             orderProductOrder.setUpdated(LocalDateTime.now());
             orderProductOrder.setUpdatedUser(principal.getName());
             orderProductOrder.setId(id);
             orderProductOrder.setOrderType(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ORDER_TYPE_FIELDVALUE_2);
             orderProductOrderService.updateById(orderProductOrder);
+
+            // 2. 把进度表的备料信息清空
+            produceOrderMaterialProgressService.updateBatchById(pompes);
             return ResponseResult.succ("订单取消成功!");
         }catch (Exception e){
             log.error("报错.",e);
@@ -1136,6 +1152,18 @@ public class OrderProductOrderController extends BaseController {
                     Integer excelNumber = excelOpo.getOrderNumber();
                     Integer orderNumber = sysOrder.getOrderNumber();
 
+                    if(!excelOpo.getProductNum().equals(sysOrder.getProductNum())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",excelOpo.getOrderNum()+":"+"系统工厂货号:"+sysOrder.getProductNum()+"，EXCEL工厂货号:"+excelOpo.getProductNum());
+                        errorMsgs.add(errorMsg);
+                    }
+                    if(!excelOpo.getProductBrand().equals(sysOrder.getProductBrand())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",excelOpo.getOrderNum()+":"+"系统品牌:"+sysOrder.getProductBrand()+"，EXCEL品牌:"+excelOpo.getProductBrand());
+                        errorMsgs.add(errorMsg);
+                    }
+
+
                     if(excelNumber == null || orderNumber ==null){
                         HashMap<String, String> errorMsg = new HashMap<>();
                         errorMsg.put("content","订单号："+orderNum+"EXCEL或者系统订单数目为空");
@@ -1336,8 +1364,37 @@ public class OrderProductOrderController extends BaseController {
             /*if(old.getOrderNumber().intValue() > orderProductOrder.getOrderNumber()){
                 return ResponseResult.fail("新的订单数目["+orderProductOrder.getOrderNumber().intValue()+"] 不允许比老的订单数目["+old.getOrderNumber()+"] 少");
             }*/
-
+            Long orderId = orderProductOrder.getId();
+            OrderProductOrder oldOrder = orderProductOrderService.getById(orderId);
+            // 1. 假如投产计划单有该订单号的批次号信息，同步修改
+            List<ProduceBatch> orderNum_batches = produceBatchService.listByOrderNum(oldOrder.getOrderNum());
             orderProductOrderService.updateById(orderProductOrder);
+
+            if(orderNum_batches!=null && orderNum_batches.size() > 0){
+                Double totalNum = 0D;
+                for(ProduceBatch pb :orderNum_batches){
+                    pb.setOrderNum(orderProductOrder.getOrderNum());
+                    BigDecimal theTotalNum = new BigDecimal(pb.getSize34()).add(new BigDecimal(pb.getSize35())).add(new BigDecimal(pb.getSize36()))
+                            .add(new BigDecimal(pb.getSize37())).add(new BigDecimal(pb.getSize38())).add(new BigDecimal(pb.getSize39()))
+                            .add(new BigDecimal(pb.getSize40())).add(new BigDecimal(pb.getSize41())).add(new BigDecimal(pb.getSize42()))
+                            .add(new BigDecimal(pb.getSize43())).add(new BigDecimal(pb.getSize44())).add(new BigDecimal(pb.getSize45()))
+                            .add(new BigDecimal(pb.getSize46())).add(new BigDecimal(pb.getSize47()));
+                    totalNum = BigDecimalUtil.add(totalNum,theTotalNum.doubleValue()).doubleValue();
+                }
+                if((totalNum.doubleValue() != oldOrder.getOrderNumber() ) ||
+                        (totalNum.doubleValue() != orderProductOrder.getOrderNumber() )){
+                    if((totalNum.doubleValue() != oldOrder.getOrderNumber() )){
+                        return ResponseResult.fail("批次号数量["+totalNum+"]不等于新订单数量["+orderProductOrder.getOrderNumber()+"]!");
+                    }else {
+                        return ResponseResult.fail("批次号数量["+totalNum+"]不等于老订单数量["+oldOrder.getOrderNumber()+"]!");
+                    }
+                }
+                produceBatchService.updateBatchById(orderNum_batches);
+
+            }
+
+
+
 
             log.info("产品订单模块-更新订单号内容:{}",orderProductOrder);
 
