@@ -65,6 +65,7 @@ poi:
   eaRepositoryPickMaterialImportDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/importDemo.xlsx
   financePayShoesDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financePayShoesDemo.xlsx
   financeFineDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeFineDemo.xlsx
+  financeSummaryDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeSummaryDemo.xlsx
 
 
 picture:

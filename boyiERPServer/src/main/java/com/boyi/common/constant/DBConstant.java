@@ -39,6 +39,7 @@ public class DBConstant {
 
         public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
         public static final String SUMMARY_DATE_FIELDNAME = "summary_date";
+        public static final String SETTLE_DATE_FIELDNAME = "settle_date";
         public static final String BUY_NET_IN_AMOUNT_FIELDNAME = "buy_net_in_amount";
         public static final String PAY_SHOES_AMOUNT_FIELDNAME = "pay_shoes_amount";
         public static final String FINE_AMOUNT_FIELDNAME = "fine_amount";

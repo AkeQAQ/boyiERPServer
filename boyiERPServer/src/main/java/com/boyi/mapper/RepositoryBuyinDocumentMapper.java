@@ -296,7 +296,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " select t2.supplier_id,sum(material_amount) total_amount from " +
             " (" +
             " select t1.supplier_id,t1.material_id,t1.buy_in_date,t1.total_num,bsm.price," +
-            "  (cast(t1.total_num as decimal(7,2))*(cast(bsm.price as decimal(7,2)) ) )   material_amount from" +
+            "  (cast(t1.total_num as decimal(11,4))*(cast(bsm.price as decimal(11,4)) ) )   material_amount from" +
             " (" +
             " select rbd.supplier_id,rbdd.material_id,rbd.buy_in_date,sum(rbdd.num) total_num from repository_buyin_document rbd," +
             " repository_buyin_document_detail rbdd " +
@@ -307,7 +307,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " where t1.supplier_id = bsm.supplier_id" +
             " and t1.material_id = bsm.material_id" +
             " and t1.buy_in_date >= bsm.start_date " +
-            " and t1.buy_in_date < bsm.end_date" +
+            " and t1.buy_in_date <= bsm.end_date" +
             " ) t2 group by t2.supplier_id " +
             "")
     List<RepositoryBuyinDocument> getSupplierTotalAmountBetweenDate(@Param("startDate") LocalDate startDateTime,@Param("endDate") LocalDate endDateTime);

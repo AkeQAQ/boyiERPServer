@@ -20,7 +20,7 @@ import java.util.Map;
  */
 public interface FinanceSummaryService extends IService<FinanceSummary> {
 
-    Page<FinanceSummary> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList,List<Long> payStatusList, Map<String, String> queryMap, String searchStartDate, String searchEndDate);
+    Page<FinanceSummary> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatusList,List<Long> payStatusList, Map<String, String> queryMap, String searchStartDate, String searchEndDate,String searchStartSettleDate,String searchEndSettleDate);
 
     Page<FinanceSummary> innerQuery(Page page, QueryWrapper<FinanceSummary> like);
 

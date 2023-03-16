@@ -13,6 +13,7 @@ import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.poi.ss.formula.functions.Finance;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,6 +56,33 @@ public class FinanceSummaryController extends BaseController {
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
 
 
+    @Value("${poi.financeSummaryDemoPath}")
+    private String poiDemoPath;
+
+
+    /**
+     * 修改拿走状态
+     */
+    @GetMapping("/updateStatus")
+    @PreAuthorize("hasAuthority('finance:summary:valid')")
+    public ResponseResult updateStatus(Principal principal,Long id,Integer status) {
+        FinanceSummary old = financeSummaryService.getById(id);
+        old.setStatus(status);
+        old.setUpdated(LocalDateTime.now());
+        old.setUpdatedUser(principal.getName());
+        String str ="";
+        if(status.equals(DBConstant.TABLE_FINANCE_SUMMARY.STATUS_FIELDVALUE_0)){
+            str = "已结账";
+            old.setSettleDate(LocalDate.now());
+
+        }else {
+            str = "未结账";
+            old.setSettleDate(null);
+        }
+        financeSummaryService.updateById(old);
+        return ResponseResult.succ("修改结账状态成功!目前改成: "+str);
+    }
+
     /**
      * 锁单据
      */
@@ -69,16 +97,13 @@ public class FinanceSummaryController extends BaseController {
 
         // 对老的进行应付货款进行加减 (
         if(roundDown==null){
-            fs.setRoundDown(null);
+            fs.setRoundDown(new BigDecimal("0"));
 
         }else{
             fs.setRoundDown(new BigDecimal(roundDown));
         }
 
         BigDecimal newRoundDown = fs.getRoundDown();
-        if(newRoundDown==null){
-            newRoundDown = new BigDecimal("0");
-        }
 
 
         fs.setNeedPayAmount(BigDecimalUtil.sub(fs.getNeedPayAmount().toString(),oldRounDown.toString()).add(   newRoundDown));
@@ -95,10 +120,11 @@ public class FinanceSummaryController extends BaseController {
     /**
      * 获取采购入库 分页导出
      */
-   /* @PostMapping("/export")
-    @PreAuthorize("hasAuthority('finance:summary:save')")
-    public void export(HttpServletResponse response, String searchField, String searchStatus, String takeStatus, String payTypeStatus,
-                       String searchStartDate, String searchEndDate,
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('finance:summary:list')")
+    public void export(HttpServletResponse response, String searchField, String status,String payStatus,
+                       String searchStartDate,String searchEndDate,
+                       String searchStartSettleDate,String searchEndSettleDate,
                        @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -111,16 +137,13 @@ public class FinanceSummaryController extends BaseController {
             if (searchField.equals("supplierName")) {
                 queryField = "supplier_name";
             }
-            else if (searchField.equals("customerNum")) {
-                queryField = "customer_num";
+            else if (searchField.equals("id")) {
+                queryField = "id";
 
             }
-            else if (searchField.equals("documentNum")) {
-                queryField = "document_num";
 
-            }
             else {
-                return ;
+                 throw new RuntimeException("搜索字段不存在");
             }
         }
         Map<String, String> queryMap = new HashMap<>();
@@ -134,16 +157,12 @@ public class FinanceSummaryController extends BaseController {
                     if (oneField.equals("supplierName")) {
                         theQueryField = "supplier_name";
                     }
-                    else if (oneField.equals("customerNum")) {
-                        theQueryField = "customer_num";
-
-                    }
-                    else if (oneField.equals("documentNum")) {
-                        theQueryField = "document_num";
+                    else if (oneField.equals("id")) {
+                        theQueryField = "id";
 
                     }
                     else {
-                        continue;
+                        throw new RuntimeException("搜索字段不存在");
                     }
                     queryMap.put(theQueryField,oneStr);
                 }
@@ -153,57 +172,51 @@ public class FinanceSummaryController extends BaseController {
         log.info("搜索字段:{},对应ID:{}", searchField,ids);
 
         List<Long> searchStatusList = new ArrayList<Long>();
-        if(StringUtils.isNotBlank(searchStatus)){
-            String[] split = searchStatus.split(",");
+        if(StringUtils.isNotBlank(status)){
+            String[] split = status.split(",");
             for (String statusVal : split){
                 searchStatusList.add(Long.valueOf(statusVal));
             }
         }
         if(searchStatusList.size() == 0){
-            return ;
+            throw new RuntimeException("结账状态不能为空");
         }
 
-        List<Long> takeStatusList = new ArrayList<Long>();
-        if(StringUtils.isNotBlank(takeStatus)){
-            String[] split = takeStatus.split(",");
+        List<Long> payStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(payStatus)){
+            String[] split = payStatus.split(",");
             for (String statusVal : split){
-                takeStatusList.add(Long.valueOf(statusVal));
+                payStatusList.add(Long.valueOf(statusVal));
             }
         }
-        if(takeStatusList.size() == 0){
-            return ;
+        if(payStatusList.size() == 0){
+            throw new RuntimeException("结清状态不能为空");
         }
 
-        List<Long> payTypeStatusList = new ArrayList<Long>();
-        if(StringUtils.isNotBlank(payTypeStatus)){
-            String[] split = payTypeStatus.split(",");
-            for (String statusVal : split){
-                payTypeStatusList.add(Long.valueOf(statusVal));
-            }
-        }
-        if(payTypeStatusList.size() == 0){
-            return ;
-        }
-
-        log.info("搜索字段:{},对应ID:{}", searchField,ids);
         Page page = getPage();
         if(page.getSize()==10 && page.getCurrent() == 1){
             page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
         }
-        pageData = financeSummaryService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,takeStatusList,payTypeStatusList,queryMap,searchStartDate,searchEndDate);
-
-
-
+        pageData = financeSummaryService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStatusList,payStatusList,queryMap,searchStartDate,searchEndDate,searchStartSettleDate,searchEndSettleDate);
+        for(FinanceSummary fs : pageData.getRecords()){
+            fs.setOtherTotalAmount(fs.getPayShoesAmount()
+                    .add(fs.getTestAmount())
+                    .add(fs.getFineAmount())
+                    .add(fs.getChangeAmount())
+                    .add(fs.getTaxSupplement())
+                    .add(fs.getTaxDeduction())
+                    .add(fs.getRoundDown()));
+            fs.setShowId(fs.getSummaryDate()+"-"+fs.getId());
+        }
         //加载模板流数据
         try (FileInputStream fis = new FileInputStream(poiDemoPath);){
             new ExcelExportUtil(FinanceSummary.class,1,0).export("id","",response,fis,pageData.getRecords(),"报表.xlsx",
-                    DBConstant.TABLE_FINANCE_SUMMARY.statusMap,
-                    DBConstant.TABLE_FINANCE_SUPPLIER_PAYSHOES_DETAILS.payTypeMap,DBConstant.TABLE_FINANCE_SUMMARY.takeStatusMap);
+                    DBConstant.TABLE_FINANCE_SUMMARY.statusMap);
         } catch (Exception e) {
             log.error("导出模块报错.",e);
         }
     }
-*/
+
 
     /**
      * 新增月份的对账数据
@@ -279,7 +292,7 @@ public class FinanceSummaryController extends BaseController {
         Map<String, BigDecimal> supplier_amount_change= getChangeAmount(startDateTime,endDateTime);
 
 
-        HashSet<String> allSupplier = new HashSet<>();
+        Set<String> allSupplier = new TreeSet<>();
         allSupplier.addAll(supplier_amount_buyIn.keySet());
         allSupplier.addAll(supplier_amount_buyOut.keySet());
 
@@ -509,8 +522,7 @@ public class FinanceSummaryController extends BaseController {
         }
 
         FinanceSummary ppc = financeSummaryService.getById(id);
-        financeSummaryService.updateNullWithField(ppc,DBConstant.TABLE_FINANCE_SUMMARY.PIC_URL_FIELDNAME);
-        ppc.setStatus(DBConstant.TABLE_FINANCE_SUMMARY.STATUS_FIELDVALUE_1);
+        ppc.setPicUrl(null);
         financeSummaryService.updateById(ppc);
         return ResponseResult.succ("删除成功");
     }
@@ -518,7 +530,7 @@ public class FinanceSummaryController extends BaseController {
     @RequestMapping(value = "/uploadPic", method = RequestMethod.POST)
     public ResponseResult uploadFile(Long id, MultipartFile[] files) {
         if(id==null ){
-            return ResponseResult.fail("没有ID");
+            return ResponseResult.fail("没有ID，请先保存记录");
         }
         FinanceSummary ppc = financeSummaryService.getById(id);
         for (int i = 0; i < files.length; i++) {
@@ -532,7 +544,6 @@ public class FinanceSummaryController extends BaseController {
                 String s = picPrefix + id + "_" + System.currentTimeMillis() + "." + suffix;
                 FileUtils.writeFile(fis,financePayShoesPath,s);
                 ppc.setPicUrl(s);
-                ppc.setStatus(DBConstant.TABLE_FINANCE_SUMMARY.STATUS_FIELDVALUE_0);
                 financeSummaryService.updateById(ppc);
             }catch (Exception e){
                 log.error("报错..",e);
@@ -615,6 +626,7 @@ public class FinanceSummaryController extends BaseController {
     @PreAuthorize("hasAuthority('finance:summary:list')")
     public ResponseResult list( String searchField, String status,String payStatus,
                                 String searchStartDate,String searchEndDate,
+                                String searchStartSettleDate,String searchEndSettleDate,
                                 @RequestBody Map<String,Object> params) {
         Object obj = params.get("manySearchArr");
         List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
@@ -683,7 +695,7 @@ public class FinanceSummaryController extends BaseController {
             return ResponseResult.fail("结清状态不能为空");
         }
 
-        pageData = financeSummaryService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,payStatusList,queryMap,searchStartDate,searchEndDate);
+        pageData = financeSummaryService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,payStatusList,queryMap,searchStartDate,searchEndDate,searchStartSettleDate,searchEndSettleDate);
 
         for(FinanceSummary fs : pageData.getRecords()){
             fs.setOtherTotalAmount(fs.getPayShoesAmount()

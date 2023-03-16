@@ -33,7 +33,8 @@ public class FinanceSummaryServiceImpl extends ServiceImpl<FinanceSummaryMapper,
     public FinanceSummaryMapper financeSummaryMapper;
 
     @Override
-    public Page<FinanceSummary> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> payStatusList, Map<String, String> otherSearch, String searchStartDate, String searchEndDate) {
+    public Page<FinanceSummary> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, List<Long> searchStatus, List<Long> payStatusList, Map<String, String> otherSearch, String searchStartDate, String searchEndDate,
+                                                       String searchStartSettleDate, String searchEndSettleDate) {
         QueryWrapper<FinanceSummary> queryWrapper = new QueryWrapper<>();
         for (String key : otherSearch.keySet()){
             String val = otherSearch.get(key);
@@ -55,6 +56,8 @@ public class FinanceSummaryServiceImpl extends ServiceImpl<FinanceSummaryMapper,
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_FINANCE_SUMMARY.STATUS_FIELDNAME,searchStatus)
                         .ge(StrUtil.isNotBlank(searchStartDate)&& !searchStartDate.equals("null"),DBConstant.TABLE_FINANCE_SUMMARY.SUMMARY_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate)&& !searchEndDate.equals("null"),DBConstant.TABLE_FINANCE_SUMMARY.SUMMARY_DATE_FIELDNAME,searchEndDate)
+                        .ge(StrUtil.isNotBlank(searchStartSettleDate)&& !searchStartSettleDate.equals("null"),DBConstant.TABLE_FINANCE_SUMMARY.SETTLE_DATE_FIELDNAME,searchStartSettleDate)
+                        .le(StrUtil.isNotBlank(searchEndSettleDate)&& !searchEndSettleDate.equals("null"),DBConstant.TABLE_FINANCE_SUMMARY.SETTLE_DATE_FIELDNAME,searchEndSettleDate)
 
                         .orderByDesc(DBConstant.TABLE_FINANCE_SUMMARY.ID_FIELDNAME)
 
