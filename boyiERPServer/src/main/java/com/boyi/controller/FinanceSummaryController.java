@@ -602,6 +602,9 @@ public class FinanceSummaryController extends BaseController {
                 item.setUpdated(LocalDateTime.now());
                 item.setCreatedUser(principal.getName());
                 item.setUpdatedUser(principal.getName());
+                if(item.getDocumentNum()!=null && item.getDocumentNum().isEmpty()){
+                    item.setDocumentNum(null);
+                }
             }
 
             financeSummaryDetailsService.saveBatch(fsp.getRowList());

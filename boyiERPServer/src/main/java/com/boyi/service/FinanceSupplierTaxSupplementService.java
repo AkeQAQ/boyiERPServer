@@ -28,4 +28,6 @@ public interface FinanceSupplierTaxSupplementService extends IService<FinanceSup
     List<FinanceSupplierTaxSupplement> countLTByCloseDate(LocalDate closeDate);
 
     List<FinanceSupplierTaxSupplement> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
+
+    List<FinanceSupplierTaxSupplement> listBySupplierIdDocumentNums(String supplierId);
 }

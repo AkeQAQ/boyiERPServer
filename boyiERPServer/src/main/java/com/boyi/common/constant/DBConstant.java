@@ -2007,6 +2007,11 @@ public class DBConstant {
         public static final String STATUS_FIELDNAME = "status";
         public static final String ID_FIELDNAME = "id";
 
+        public static final String LOST_AMOUNT_FIELDNAME = "lost_amount";
+        public static final String TOTAL_DOCUMENT_PAYED_AMOUNT_FIELDNAME = "total_document_payed_amount";
+        public static final String TOTAL_DOCUEMENT_AMOUNT_FIELDNAME = "total_document_amount";
+
+
 
         /**
          *  0:代表 审核通过

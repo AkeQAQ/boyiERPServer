@@ -69,8 +69,10 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     /**
      * 1:未付、0：已付
      */
+    @TableField(exist = false)
     private Integer payStatus;
 
+    @TableField(exist = false)
     private LocalDate payDate;
     private Integer status;
 
@@ -78,5 +80,21 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     @TableField(exist = false)
     private Double totalAmount;
 
+    @TableField(exist = false)
+    private Double payedAmount;
+
+    @TableField(exist = false)
+    private Double documentTotalAmount;
+
+
+    @TableField(exist = false)
+    private Double totalDocumentPayedAmount;
+
+    @TableField(exist = false)
+    private Double lostAmount;
+
+
+    @TableField(exist = false)
+    private Double payAmount;
 
 }

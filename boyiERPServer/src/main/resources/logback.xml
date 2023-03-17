@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration scan="true" scanPeriod="60 seconds">
 	<property
 		name="formatter"
 		value="%d{ISO8601} %le [%t] %-20lo{20} - %m%n" />
@@ -89,7 +89,7 @@
 
 	<logger
 		name="com.boyi"
-		level="INFO" />
+		level="DEBUG" />
 
 	<logger
 		name="jdbc.audit"

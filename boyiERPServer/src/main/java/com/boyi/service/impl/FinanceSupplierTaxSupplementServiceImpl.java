@@ -40,6 +40,15 @@ public class FinanceSupplierTaxSupplementServiceImpl extends ServiceImpl<Finance
             queryWrapper.like(StrUtil.isNotBlank(val) && !val.equals("null")
                     && StrUtil.isNotBlank(key),key,val);
         }
+        if(searchPayStatus.size() == 1){
+            Long status = searchPayStatus.get(0);
+            if(status.intValue()==(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.PAY_STATUS_FIELDVALUE_0)){
+                // 0的话，已结清，筛选 lostAmount ==0
+                queryWrapper.eq(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.LOST_AMOUNT_FIELDNAME,0);
+            }else{
+                queryWrapper.gt(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.LOST_AMOUNT_FIELDNAME,0);
+            }
+        }
         return this.innerQuery(page,
                 queryWrapper.
                         like(StrUtil.isNotBlank(searchStr) &&!searchStr.equals("null")
@@ -47,7 +56,6 @@ public class FinanceSupplierTaxSupplementServiceImpl extends ServiceImpl<Finance
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.STATUS_FIELDNAME,searchStatus)
                         .ge(StrUtil.isNotBlank(searchStartDate)&& !searchStartDate.equals("null"),DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.DOCUMENT_DATE_FIELDNAME,searchStartDate)
                         .le(StrUtil.isNotBlank(searchEndDate)&& !searchEndDate.equals("null"),DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.DOCUMENT_DATE_FIELDNAME,searchEndDate)
-                        .in(searchPayStatus != null && searchPayStatus.size() > 0, DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.PAY_STATUS_FIELDNAME,searchPayStatus)
                         .orderByDesc(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.ID_FIELDNAME)
 
         );
@@ -64,6 +72,11 @@ public class FinanceSupplierTaxSupplementServiceImpl extends ServiceImpl<Finance
     @Override
     public List<FinanceSupplierTaxSupplement> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime) {
         return this.FinanceSupplierTaxSupplementMapper.getSupplierTotalAmountBetweenDate(startDateTime,endDateTime);
+    }
+
+    @Override
+    public List<FinanceSupplierTaxSupplement> listBySupplierIdDocumentNums(String supplierId) {
+        return this.FinanceSupplierTaxSupplementMapper.listBySupplierIdDocumentNums(supplierId);
     }
 
     @Override

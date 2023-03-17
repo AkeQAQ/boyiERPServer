@@ -50,6 +50,7 @@ public class FinanceSummaryDetails extends BaseEntity {
     private String createdUser;
 
     private String updatedUser;
+    private String documentNum;
 
 
 }

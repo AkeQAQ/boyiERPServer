@@ -1,6 +1,8 @@
 package com.boyi.controller;
 
 
+import cn.hutool.core.map.MapUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
@@ -8,6 +10,7 @@ import com.boyi.common.fileFilter.MaterialPicFileFilter;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
+import com.boyi.entity.BaseMaterial;
 import com.boyi.entity.BaseSupplier;
 import com.boyi.entity.FinanceSupplierTaxDeduction;
 import com.boyi.entity.FinanceSupplierTaxSupplement;
@@ -50,6 +53,26 @@ public class FinanceSupplierTaxSupplementController extends BaseController {
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
 
+
+
+    /**
+     * 用于增量表格搜索输入建议框的数据
+     */
+    @PostMapping("/loadDocumentAll")
+    @PreAuthorize("hasAuthority('finance:taxSupplement:list')")
+    public ResponseResult loadDocumentAll(String supplierId) {
+        List<FinanceSupplierTaxSupplement> lists =financeSupplierTaxSupplementService.listBySupplierIdDocumentNums(supplierId);
+
+        ArrayList<Map<Object, Object>> returnList = new ArrayList<>();
+        lists.forEach(obj -> {
+            Map<Object, Object> returnMap = MapUtil.builder().put(
+                            "value",  obj.getDocumentNum())
+                    .put("obj", obj)
+                    .map();
+            returnList.add(returnMap);
+        });
+        return ResponseResult.succ(returnList);
+    }
 
     @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)
     public ResponseResult getPicturesById(Long id) {
