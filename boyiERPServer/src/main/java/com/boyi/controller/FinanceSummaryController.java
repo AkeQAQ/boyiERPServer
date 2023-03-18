@@ -315,6 +315,16 @@ public class FinanceSummaryController extends BaseController {
 
 
         ArrayList<FinanceSummary> lists = new ArrayList<>();
+
+        // 获取过滤名单，过滤掉
+        List<FinanceSummaryFilters> filters = financeSummaryFiltersService.list();
+        HashSet<String> filterSupplierIds = new HashSet<>();
+        for(FinanceSummaryFilters f : filters){
+            filterSupplierIds.add(f.getSupplierId());
+        }
+
+        allSupplier.removeAll(filterSupplierIds);
+
         for(String supplierId : allSupplier){
             // 生成对账单信息。
             FinanceSummary fs = new FinanceSummary();

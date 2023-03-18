@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.fileFilter.MaterialPicFileFilter;
+import com.boyi.common.utils.BigDecimalUtil;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -26,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -227,9 +229,6 @@ public class FinanceSupplierTaxSupplementController extends BaseController {
             fsp.setStatus( DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.STATUS_FIELDVALUE_2);
         }
         try {
-            if(fsp.getPayDate()==null){
-                financeSupplierTaxSupplementService.updateNullWithField(fsp,DBConstant.TABLE_FINANCE_SUPPLIER_TAX_SUPPLEMENT.PAY_DATE_FIELDNAME);
-            }
             financeSupplierTaxSupplementService.updateById(fsp);
 
             return ResponseResult.succ("编辑成功");
@@ -345,7 +344,31 @@ public class FinanceSupplierTaxSupplementController extends BaseController {
 
         pageData = financeSupplierTaxSupplementService.innerQueryByManySearch(getPage(),searchField,queryField,searchStr,searchStatusList,queryMap,searchStartDate,searchEndDate,searchPayStatusList);
 
-        return ResponseResult.succ(pageData);
+        HashSet<Long> countIds = new HashSet<>();
+        BigDecimal totalDocumentAmount = new BigDecimal("0");
+        BigDecimal suiAmount = new BigDecimal("0");
+
+        for(FinanceSupplierTaxSupplement fs : pageData.getRecords()){
+            Long id = fs.getId();
+            if(countIds.contains(id)){
+                continue;
+            }
+            countIds.add(id);
+            if(fs.getDocumentAmount()!=null){
+                totalDocumentAmount = BigDecimalUtil.add(totalDocumentAmount.toString(),fs.getDocumentAmount().toString());
+            }
+            if(fs.getTaxSupplementAmount()!=null){
+                suiAmount = BigDecimalUtil.add(suiAmount.toString(),fs.getTaxSupplementAmount().toString());
+            }
+
+
+        }
+        HashMap<String, Object> returnMap = new HashMap<>();
+        returnMap.put("pageData",pageData);
+        returnMap.put("documentAmount",totalDocumentAmount.toString());
+        returnMap.put("suiAmount",suiAmount.toString());
+
+        return ResponseResult.succ(returnMap);
     }
 
     /**

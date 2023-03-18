@@ -17,6 +17,9 @@ public class BaseController {
     public DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
+    public FinanceSummaryFiltersService financeSummaryFiltersService;
+
+    @Autowired
     public FinanceSummaryService financeSummaryService;
     @Autowired
     public FinanceSummaryDetailsService financeSummaryDetailsService;
