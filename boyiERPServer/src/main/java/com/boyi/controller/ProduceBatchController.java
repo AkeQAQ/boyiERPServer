@@ -529,6 +529,9 @@ public class ProduceBatchController extends BaseController {
             }else if(searchField.equals("productBrand")){
                 queryField = "product_brand";
             }
+            else if(searchField.equals("orderNum")){
+                queryField = "order_num";
+            }
             else {
                 return ResponseResult.fail("搜索字段不存在");
             }
@@ -549,7 +552,9 @@ public class ProduceBatchController extends BaseController {
                     else if(oneField.equals("productBrand")){
                         theQueryField = "product_brand";
                     }
-
+                    else if(oneField.equals("orderNum")){
+                        theQueryField = "order_num";
+                    }
                     else {
                         continue;
                     }
