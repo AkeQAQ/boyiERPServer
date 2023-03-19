@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -167,9 +168,11 @@ public class ProduceBatchController extends BaseController {
 
     @PostMapping("/progressList")
     @PreAuthorize("hasAuthority('produce:batch:list')")
-    public ResponseResult list(Principal principal,Boolean showSendNoBack,@RequestBody Map<String,Object> params) {
+    public ResponseResult list(Principal principal,Boolean showSendNoBack,Boolean showHasEndDate,@RequestBody Map<String,Object> params) {
         Object searchQueryOutDateStr = params.get("searchQueryOutDateStr");
         Object searchQueryStartDateStr = params.get("searchQueryStartDateStr");
+        String supplierName = params.get("supplierName").toString();
+
         List<ProduceBatch> progresses= new ArrayList<>();
         List<ProduceBatch> delays = new ArrayList<>();
 
@@ -226,10 +229,23 @@ public class ProduceBatchController extends BaseController {
             }
             String batchIdPre = pb.getBatchId().split("-")[0];
 
-            /*if(batchId.contains(batchIdPre)  ){
-                continue;
-            }*/
-
+            // 假如不是该供应商，则过滤
+            if(!supplierName.isEmpty()){
+                String supplierName1 = pb.getSupplierName();
+                if(!supplierName.equals(supplierName1)){
+                    continue;
+                }
+            }
+            if(showHasEndDate){
+                if(pb.getEndDate()==null || pb.getEndDate().isEmpty()){
+                    continue;
+                }
+            }
+            if(showSendNoBack){
+                if( !(pb.getOutDate()==null && pb.getSendForeignProductDate()!=null && pb.getBackForeignProductDate()==null )){
+                    continue;
+                }
+            }
             // 查询出库是空的，还要看下该角色，该批次号是否已经有出库日期的记录
             if(outDateIsNull){
                 Integer count = this.produceBatchProgressService.countByBatchIdStrAndCostOfLabourTypeIdAndOutDateIsNotNull(batchIdPre,pb.getCostOfLabourTypeId());
@@ -237,6 +253,8 @@ public class ProduceBatchController extends BaseController {
                     continue;
                 }
             }
+
+
 
 
             // 查询该批次号前缀的数量
@@ -274,19 +292,38 @@ public class ProduceBatchController extends BaseController {
                 progresses.add(otherPb);
             }*/
         }
-        if(showSendNoBack){
-            List<ProduceBatch> returnProgresses= new ArrayList<>();
-            for(ProduceBatch pb : progresses){
-                if(pb.getOutDate()==null && pb.getSendForeignProductDate()!=null && pb.getBackForeignProductDate()==null){
-                    returnProgresses.add(pb);
-                }
-            }
-            progresses = returnProgresses;
-        }
+
+
         StringBuilder sb = new StringBuilder();
         String allTotalNum = "0";
         HashSet<String> isAddFlag = new HashSet<>();
+        final DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        TreeMap<String, ProduceBatch> orderByEndDateASC = new TreeMap<>(new Comparator<String>() {
+            @Override
+            public int compare(String o1, String o2) {
+                if(o2==null || o2.isEmpty()){
+                    return 1;
+                }
+                if(o1==null || o1.isEmpty()){
+                    return -1;
+                }
+                if(o1.startsWith("4") || o2.startsWith("4")){
+                    return 1;
+                }
+                LocalDateTime o1Date = LocalDateTime.parse(o1, sdf);
+                LocalDateTime o2Date = LocalDateTime.parse(o2, sdf);
+
+                return o1Date
+                        .isBefore(o2Date)
+                        ? -1 : 1;
+            }
+        });
+
         for(ProduceBatch pb : progresses){
+            if(showHasEndDate){
+                orderByEndDateASC.put(pb.getEndDate(),pb);
+            }
             String batchId = pb.getBatchId();
             sb.append(batchId).append(" ");
             if(!isAddFlag.contains(batchId)){
@@ -294,6 +331,7 @@ public class ProduceBatchController extends BaseController {
                 isAddFlag.add(batchId);
             }
         }
+        log.info("progresses:size {}, orderLists size:{}",progresses.size(),orderByEndDateASC.values().size());
 
 
         List<ProduceBatch> delaysLists = this.produceBatchService.listDelay();
@@ -306,7 +344,13 @@ public class ProduceBatchController extends BaseController {
 
         HashMap<String, Object> returnMap = new HashMap<>();
         returnMap.put("delayData",delays);
-        returnMap.put("progressData",progresses);
+        if(showHasEndDate){
+            returnMap.put("progressData",orderByEndDateASC.values());
+
+        }else{
+            returnMap.put("progressData",progresses);
+
+        }
         returnMap.put("totalBatchId",sb.toString());
         returnMap.put("allTotalNum",allTotalNum);
 

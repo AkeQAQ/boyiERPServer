@@ -3,6 +3,7 @@ package com.boyi.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
