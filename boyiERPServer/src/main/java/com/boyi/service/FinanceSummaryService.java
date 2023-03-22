@@ -29,4 +29,6 @@ public interface FinanceSummaryService extends IService<FinanceSummary> {
     List<FinanceSummary> countLTByCloseDate(LocalDate closeDate);
 
     Integer countByDate(String addDate);
+
+    List<FinanceSummary> listByDate(String addDate);
 }

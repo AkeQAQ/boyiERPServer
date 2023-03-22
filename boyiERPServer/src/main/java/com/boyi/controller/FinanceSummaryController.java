@@ -61,6 +61,302 @@ public class FinanceSummaryController extends BaseController {
 
 
     /**
+     * 新增月份的对账数据
+     */
+    @PostMapping("/refreshData")
+    @PreAuthorize("hasAuthority('finance:summary:update')")
+    public ResponseResult refreshData(Principal principal, String addDate)throws Exception {
+        if(addDate==null || addDate.isEmpty()){
+            return ResponseResult.fail("没有选择需要刷新的月份！");
+        }
+        // 根据年月的参数，生成该月份的临界点
+        String[] split = addDate.split("-");
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate localDate = LocalDate.of(Integer.valueOf(split[0]), Integer.valueOf(split[1]), 1);
+
+        LocalDate startDateTime = LocalDate.of(localDate.getYear(), localDate.getMonth(), 1);
+
+        LocalDate endDate = localDate.plusMonths(1);
+        LocalDate endDateTime = LocalDate.of(endDate.getYear(), endDate.getMonthValue(), 1 );
+
+        endDateTime = endDateTime.plusDays(-1);
+        endDate = endDate.plusDays(-1);
+
+        // 判断该月份是否已经关账,比选择的月份晚1个月之后，要有仓库关账、财务关账的记录存在，否则不能生成
+        RepositoryClose rc = repositoryCloseService.listLatestOne();
+        boolean rcClose = rc.getCloseDate().isAfter(endDate);
+        if(!rcClose){
+            if(!rc.getCloseDate().isEqual(endDate)){
+                return ResponseResult.fail("该月份["+addDate+"],仓库最近关账日期["+rc.getCloseDate()+"],汇总月份需要比关账日期的月份小至少一月!! ");
+            }
+        }
+        FinanceClose fc = financeCloseService.listLatestOne();
+        boolean fcClose = fc.getCloseDate().isAfter(endDate);
+        if(!fcClose){
+            if(!fc.getCloseDate().isEqual(endDate)) {
+                return ResponseResult.fail("该月份["+addDate+"],财务最近关账日期["+fc.getCloseDate()+"],汇总月份需要比关账日期的月份小至少一月!! ");
+            }
+        }
+
+        log.info("刷新月份：{}，startDateTime:{},endDateTime:{}",addDate,startDateTime,endDateTime);
+
+
+        // 1. 获取该日期段之间的 全部采购入库、采购退料的供应商净入库金额
+        Map<String, BigDecimal> supplier_amount_buyIn= getBuyInAmount(startDateTime,endDateTime);
+
+        Map<String, BigDecimal> supplier_amount_buyOut= getBuyOutAmount(startDateTime,endDateTime);
+
+        // 2. 获取该日期段之间的，供应商赔鞋金额
+        Map<String, BigDecimal> supplier_amount_payShoes= getPayShoesAmount(startDateTime,endDateTime);
+
+        // 3. 获取该日期段之间的，供应商罚款金额
+        Map<String, BigDecimal> supplier_amount_fine= getFineAmount(startDateTime,endDateTime);
+
+        // 4. 获取该日期段之间的，供应商检测费金额
+        Map<String, BigDecimal> supplier_amount_test= getTestAmount(startDateTime,endDateTime);
+
+        // 5. 获取该日期段之间的，供应商补税点金额
+        Map<String, BigDecimal> supplier_amount_taxSupplement= getTaxSAmount(startDateTime,endDateTime);
+
+        // 6. 获取该日期段之间的，供应商扣税点金额
+        Map<String, BigDecimal> supplier_amount_taxDeduction= getTaxDAmount(startDateTime,endDateTime);
+
+        // 7. 获取该日期段之间的，供应商调整金额
+        Map<String, BigDecimal> supplier_amount_change= getChangeAmount(startDateTime,endDateTime);
+
+
+        Set<String> allSupplier = new TreeSet<>();
+        allSupplier.addAll(supplier_amount_buyIn.keySet());
+        allSupplier.addAll(supplier_amount_buyOut.keySet());
+
+        allSupplier.addAll(supplier_amount_payShoes.keySet());
+        allSupplier.addAll(supplier_amount_fine.keySet());
+        allSupplier.addAll(supplier_amount_test.keySet());
+        allSupplier.addAll(supplier_amount_taxSupplement.keySet());
+        allSupplier.addAll(supplier_amount_taxDeduction.keySet());
+        allSupplier.addAll(supplier_amount_change.keySet());
+        log.info("supplier_amount_buyIn:{},size:{}",supplier_amount_buyIn,supplier_amount_buyIn.size());
+        log.info("supplier_amount_buyOut:{},size:{}",supplier_amount_buyOut,supplier_amount_buyOut.size());
+        log.info("supplier_amount_payShoes:{},size:{}",supplier_amount_payShoes,supplier_amount_payShoes.size());
+        log.info("supplier_amount_fine:{},size:{}",supplier_amount_fine,supplier_amount_fine.size());
+        log.info("supplier_amount_test:{},size:{}",supplier_amount_test,supplier_amount_test.size());
+        log.info("supplier_amount_taxSupplement:{},size:{}",supplier_amount_taxSupplement,supplier_amount_taxSupplement.size());
+        log.info("supplier_amount_taxDeduction:{},size:{}",supplier_amount_taxDeduction,supplier_amount_taxDeduction.size());
+        log.info("supplier_amount_change:{},size:{}",supplier_amount_change);
+
+        log.info("allSupplier:{}",allSupplier);
+
+
+        Map<String,FinanceSummary> map = new HashMap<String,FinanceSummary>();
+
+        // 获取过滤名单，过滤掉
+        List<FinanceSummaryFilters> filters = financeSummaryFiltersService.list();
+        HashSet<String> filterSupplierIds = new HashSet<>();
+        for(FinanceSummaryFilters f : filters){
+            filterSupplierIds.add(f.getSupplierId());
+        }
+
+        allSupplier.removeAll(filterSupplierIds);
+
+        for(String supplierId : allSupplier){
+            // 生成对账单信息。
+            FinanceSummary fs = new FinanceSummary();
+            fs.setSummaryDate(addDate);
+            fs.setSupplierId(supplierId);
+
+            BigDecimal buyIn = supplier_amount_buyIn.get(supplierId);
+            if(buyIn==null){
+                buyIn=new BigDecimal(0);
+            }
+            BigDecimal buyOut = supplier_amount_buyOut.get(supplierId);
+            if(buyOut==null){
+                buyOut=new BigDecimal(0);
+            }
+            fs.setBuyInAmount(buyIn);// 采购入库 显示付货款
+            fs.setBuyOutAmount(BigDecimalUtil.mul(buyOut.toString(),"-1")); // 采购退料 显示扣货款
+            fs.setBuyNetInAmount(buyIn.subtract(buyOut));
+
+            BigDecimal payShoes = supplier_amount_payShoes.get(supplierId);
+            fs.setPayShoesAmount(payShoes==null ? new BigDecimal(0):payShoes);
+            fs.setPayShoesAmount(BigDecimalUtil.mul(fs.getPayShoesAmount().toString(),"-1"));//显示扣货款
+
+            BigDecimal fine = supplier_amount_fine.get(supplierId);
+            fs.setFineAmount(fine==null ? new BigDecimal(0):fine);
+            fs.setFineAmount(BigDecimalUtil.mul(fs.getFineAmount().toString(),"-1"));//显示扣货款
+
+            BigDecimal test = supplier_amount_test.get(supplierId);
+            fs.setTestAmount(test==null ? new BigDecimal(0):test);
+            fs.setTestAmount(BigDecimalUtil.mul(fs.getTestAmount().toString(),"-1"));//显示扣货款
+
+            BigDecimal taxS = supplier_amount_taxSupplement.get(supplierId);
+            fs.setTaxSupplement(taxS==null ? new BigDecimal(0):taxS);
+
+            BigDecimal taxD = supplier_amount_taxDeduction.get(supplierId);
+            fs.setTaxDeduction(taxD==null ? new BigDecimal(0):taxD);
+            fs.setTaxDeduction(BigDecimalUtil.mul(fs.getTaxDeduction().toString(),"-1"));//显示扣货款
+
+            BigDecimal change = supplier_amount_change.get(supplierId);
+            fs.setChangeAmount(change==null ? new BigDecimal(0):change);
+
+            BigDecimal needPayAmount = new BigDecimal(0);
+
+            BigDecimal next = needPayAmount.add(fs.getBuyNetInAmount())
+                    .add(fs.getPayShoesAmount())
+                    .add(fs.getFineAmount())
+                    .add(fs.getTestAmount())
+                    .add(fs.getTaxSupplement())
+                    .add(fs.getTaxDeduction())
+                    .add(fs.getChangeAmount());
+            fs.setStatus(DBConstant.TABLE_FINANCE_SUMMARY.STATUS_FIELDVALUE_1);
+            fs.setCreated(now);
+            fs.setUpdated(now);
+            fs.setCreatedUser(principal.getName());
+            fs.setUpdatedUser(principal.getName());
+
+            fs.setNeedPayAmount(next);
+            fs.setRoundDown(new BigDecimal("0"));
+
+            // 应付0的不生成
+            if(next.doubleValue() ==0){
+                continue;
+            }
+
+            map.put(supplierId,fs);
+        }
+        List<FinanceSummary> updateLists = new ArrayList<>();
+
+        if(map.size() >0){
+            // 对数据库的存在记录，进行对比，刷新内容，老，新内容,有区别的进行记录，并且返回 回显
+            List<FinanceSummary> olds = financeSummaryService.listByDate(addDate);
+
+            if(olds.size()!=map.size()){
+                return ResponseResult.fail("老的供应商数量:["+olds.size()+"]个，刷新后，新的供应商数量:["+map.size()+"] 个。不相等,无法刷新!");
+            }
+            for(FinanceSummary fs : olds){
+                String supplierId = fs.getSupplierId();
+
+                FinanceSummary newFs = map.get(supplierId);
+                ifNotEqualsAddUpdateList(fs,newFs,updateLists);
+            }
+
+            if(updateLists.size()!=0){
+                financeSummaryService.updateBatchById(updateLists);
+                StringBuilder sb = new StringBuilder();
+                for(FinanceSummary obj : updateLists){
+                    sb.append(obj.getSupplierId()).append(",");
+                }
+                return ResponseResult.succ("刷新成功。刷了供应商列表:"+sb.toString());
+            }
+            return ResponseResult.succ("全部一致，没有刷新内容!");
+
+        }else{
+            return ResponseResult.fail("该月份:"+addDate+",没有数据可生成!");
+        }
+
+    }
+
+    private void ifNotEqualsAddUpdateList(FinanceSummary fs, FinanceSummary newFs, List<FinanceSummary> updateLists) {
+        boolean canUpdate = false;
+
+        BigDecimal oldNetIn = fs.getBuyNetInAmount();
+        BigDecimal newNetIn = newFs.getBuyNetInAmount();
+        if(oldNetIn.doubleValue()!=newNetIn.doubleValue()){
+            fs.setBuyNetInAmount(newNetIn);
+            log.info("供应商:{},月份:{},刷新内容oldNetIn:{},newNetIn:{}",fs.getSupplierId(),fs.getSummaryDate(),oldNetIn,newNetIn);
+            canUpdate = true;
+        }
+
+        BigDecimal oldPayShoes = fs.getPayShoesAmount();
+        BigDecimal newPayShoes = newFs.getPayShoesAmount();
+        if(oldPayShoes.doubleValue()!=newPayShoes.doubleValue()){
+            fs.setPayShoesAmount(newPayShoes);
+            log.info("供应商:{},月份:{},刷新内容 oldPayShoes:{},newPayShoes:{}",fs.getSupplierId(),fs.getSummaryDate(),oldPayShoes,newPayShoes);
+
+            canUpdate = true;
+        }
+
+
+        BigDecimal oldFine = fs.getFineAmount();
+        BigDecimal newFine = newFs.getFineAmount();
+        if(oldFine.doubleValue()!=newFine.doubleValue()){
+            fs.setFineAmount(newFine);
+            log.info("供应商:{},月份:{},刷新内容 oldFine:{},newFine:{}",fs.getSupplierId(),fs.getSummaryDate(),oldFine,newFine);
+
+            canUpdate = true;
+        }
+
+
+        BigDecimal oldTest = fs.getTestAmount();
+        BigDecimal newTest = newFs.getTestAmount();
+        if(oldTest.doubleValue()!=newTest.doubleValue()){
+            fs.setTestAmount(newTest);
+            log.info("供应商:{},月份:{},刷新内容 oldTest:{},newTest:{}",fs.getSupplierId(),fs.getSummaryDate(),oldTest,newTest);
+
+            canUpdate = true;
+        }
+
+        BigDecimal oldTaxSup = fs.getTaxSupplement();
+        BigDecimal newTaxSup = newFs.getTaxSupplement();
+        if(oldTaxSup.doubleValue()!=newTaxSup.doubleValue()){
+            fs.setTaxSupplement(newTaxSup);
+            log.info("供应商:{},月份:{},刷新内容 oldTaxSup:{},newTaxSup:{}",fs.getSupplierId(),fs.getSummaryDate(),oldTaxSup,newTaxSup);
+
+            canUpdate = true;
+        }
+
+
+        BigDecimal oldTaxDed = fs.getTaxDeduction();
+        BigDecimal newTaxDed = newFs.getTaxDeduction();
+        if(oldTaxDed.doubleValue()!=newTaxDed.doubleValue()){
+            fs.setTaxDeduction(newTaxDed);
+            log.info("供应商:{},月份:{},刷新内容 oldTaxDed:{},newTaxDed:{}",fs.getSupplierId(),fs.getSummaryDate(),oldTaxDed,newTaxDed);
+
+            canUpdate = true;
+        }
+
+
+        BigDecimal oldChange = fs.getChangeAmount();
+        BigDecimal newChange = newFs.getChangeAmount();
+        if(oldChange.doubleValue()!=newChange.doubleValue()){
+            fs.setChangeAmount(newChange);
+            log.info("供应商:{},月份:{},刷新内容 oldChange:{},newChange:{}",fs.getSupplierId(),fs.getSummaryDate(),oldChange,newChange);
+
+            canUpdate = true;
+        }
+
+
+        BigDecimal oldIn = fs.getBuyInAmount();
+        BigDecimal newIn = newFs.getBuyInAmount();
+        if(oldIn.doubleValue()!=newIn.doubleValue()){
+            fs.setBuyInAmount(newIn);
+            log.info("供应商:{},月份:{},刷新内容 oldIn:{},newIn:{}",fs.getSupplierId(),fs.getSummaryDate(),oldIn,newIn);
+
+            canUpdate = true;
+        }
+
+        BigDecimal oldOut = fs.getBuyOutAmount();
+        BigDecimal newOut = newFs.getBuyOutAmount();
+        if(oldOut.doubleValue()!=newOut.doubleValue()){
+            fs.setBuyOutAmount(newOut);
+            log.info("供应商:{},月份:{},刷新内容 oldOut:{},newOut:{}",fs.getSupplierId(),fs.getSummaryDate(),oldOut,newOut);
+
+            canUpdate = true;
+        }
+
+        // 假如有修改内容的，则加入修改内容队列。假如该修改内容还是已结账的，则报错提示
+        if(canUpdate){
+            if(fs.getSettleDate()!=null){
+                throw new RuntimeException("该供应商:{"+fs.getSupplierId()+"},该月份:{"+fs.getSummaryDate()+"},已经结账了。请先修改结账状态,才能刷新!");
+            }
+            fs.setRoundDown(new BigDecimal("0"));
+            fs.setNeedPayAmount(newFs.getNeedPayAmount());
+            updateLists.add(fs);
+        }
+    }
+
+
+    /**
      * 修改拿走状态
      */
     @GetMapping("/updateStatus")
@@ -76,6 +372,10 @@ public class FinanceSummaryController extends BaseController {
             old.setSettleDate(LocalDate.now());
 
         }else {
+            List<FinanceSummaryDetails> details = financeSummaryDetailsService.listByForeignId(id);
+            if(details!=null && details.size()>0){
+                return ResponseResult.fail("修改结账状态失败！!有付款明细信息，不能修改 ");
+            }
             str = "未结账";
             old.setSettleDate(null);
         }
@@ -393,7 +693,7 @@ public class FinanceSummaryController extends BaseController {
         if(lists.size() >0){
             financeSummaryService.saveBatch(lists);
         }else{
-            ResponseResult.fail("该月份:"+addDate+",没有数据可生成!");
+            return ResponseResult.fail("该月份:"+addDate+",没有数据可生成!");
         }
 
         return ResponseResult.succ("生成成功！");
@@ -590,10 +890,10 @@ public class FinanceSummaryController extends BaseController {
     @Transactional
     public ResponseResult update(Principal principal, @Validated @RequestBody FinanceSummary fsp)
             throws Exception{
-
+/*
         if(fsp.getRowList() ==null || fsp.getRowList().size() ==0){
             return ResponseResult.fail("详情内容不能为空");
-        }
+        }*/
 
         fsp.setUpdated(LocalDateTime.now());
         fsp.setUpdatedUser(principal.getName());
@@ -616,8 +916,10 @@ public class FinanceSummaryController extends BaseController {
                     item.setDocumentNum(null);
                 }
             }
+            if(fsp.getRowList()!=null){
+                financeSummaryDetailsService.saveBatch(fsp.getRowList());
+            }
 
-            financeSummaryDetailsService.saveBatch(fsp.getRowList());
             log.info("对账模块-更新内容:{}",fsp);
 
             return ResponseResult.succ("编辑成功");

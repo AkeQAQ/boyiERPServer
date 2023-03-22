@@ -208,9 +208,15 @@ public class FinanceSupplierTaxDeductionController extends BaseController {
             if(fsp.getPayDate()==null){
                 financeSupplierTaxDeductionService.updateNullWithField(fsp,DBConstant.TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION.PAY_DATE_FIELDNAME);
             }
+            if(fsp.getDocumentNum()==null || fsp.getDocumentNum().isEmpty()){
+                fsp.setDocumentNum(null);
+            }
             financeSupplierTaxDeductionService.updateById(fsp);
 
             return ResponseResult.succ("编辑成功");
+        }
+        catch (DuplicateKeyException de){
+            return ResponseResult.fail("发票号不能重复!");
         }
         catch (Exception e) {
             log.error("更新异常",e);
@@ -233,13 +239,16 @@ public class FinanceSupplierTaxDeductionController extends BaseController {
         fsp.setUpdateUser(principal.getName());
         fsp.setStatus(DBConstant.TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION.STATUS_FIELDVALUE_2);
         try {
+            if(fsp.getDocumentNum()==null || fsp.getDocumentNum().isEmpty()){
+                fsp.setDocumentNum(null);
+            }
 
             financeSupplierTaxDeductionService.save(fsp);
 
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",fsp.getId());
         }
         catch (DuplicateKeyException de){
-            return ResponseResult.fail("单据不能重复!");
+            return ResponseResult.fail("发票号不能重复!");
         }
         catch (Exception e) {
             log.error("扣税点单，插入异常",e);

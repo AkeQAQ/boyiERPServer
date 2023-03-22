@@ -90,4 +90,10 @@ public class FinanceSummaryServiceImpl extends ServiceImpl<FinanceSummaryMapper,
         return this.count(new QueryWrapper<FinanceSummary>()
                 .eq(DBConstant.TABLE_FINANCE_SUMMARY.SUMMARY_DATE_FIELDNAME,addDate));
     }
+
+    @Override
+    public List<FinanceSummary> listByDate(String addDate) {
+        return this.list(new QueryWrapper<FinanceSummary>()
+                .eq(DBConstant.TABLE_FINANCE_SUMMARY.SUMMARY_DATE_FIELDNAME,addDate));
+    }
 }
