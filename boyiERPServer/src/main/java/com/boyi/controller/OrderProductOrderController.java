@@ -66,7 +66,7 @@ public class OrderProductOrderController extends BaseController {
                 return ResponseResult.fail("该订单没有进度表信息");
             }
             for(ProduceOrderMaterialProgress one:pomp){
-                if(one.getInNum()==null || one.getInNum().isEmpty() || one.getInNum().equals("0")){
+                if(one.getInNum()==null || one.getInNum().isEmpty() || one.getInNum().equals("0") || one.getInNum().equals("0.0")){
                     continue;
                 }
                 String materialId = one.getMaterialId();
@@ -370,12 +370,19 @@ public class OrderProductOrderController extends BaseController {
             List<ProduceOrderMaterialProgress> pompes = produceOrderMaterialProgressService.listByOrderId(id);
             for(ProduceOrderMaterialProgress POMP :pompes){
                 String inNum = POMP.getInNum();
-                if(inNum!=null && !inNum.equals("0")){
+                if(inNum!=null && !inNum.equals("0") && !inNum.equals("0.0")){
                     return ResponseResult.fail("有入库消单，请先迁移!");
                 }
                 POMP.setPreparedNum("0");
                 POMP.setProgressPercent(0);
             }
+            OrderProductOrder order = orderProductOrderService.getById(id);
+
+            List<ProduceBatch> pbs = produceBatchService.listByOrderNum(order.getOrderNum());
+            if(pbs != null && pbs.size() > 0){
+                return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum()+",无法删除");
+            }
+            // 2.
 
             OrderProductOrder orderProductOrder = new OrderProductOrder();
             orderProductOrder.setUpdated(LocalDateTime.now());
@@ -995,6 +1002,9 @@ public class OrderProductOrderController extends BaseController {
 
             for (OrderProductOrder order: orderProductOrders){
                 if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content","系统订单号:"+order.getOrderNum()+"，品牌和货号都为空值!");
+                    errorMsgs.add(errorMsg);
                     continue;
                 }
                 excelOrderNums.add(order.getOrderNum());
@@ -1023,7 +1033,14 @@ public class OrderProductOrderController extends BaseController {
                         HashMap<String, String> errorMsg = new HashMap<>();
                         errorMsg.put("content",order.getOrderNum()+":"+"系统品牌:"+sysOrder.getProductBrand()+"，EXCEL品牌:"+order.getProductBrand());
                         errorMsgs.add(errorMsg);
-                    }if(!order.getOrderNumber().equals(sysOrder.getOrderNumber())){
+                    }
+                    if(!order.getProductColor().equals(sysOrder.getProductColor())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",order.getOrderNum()+":"+"系统颜色:"+sysOrder.getProductColor()+"，EXCEL颜色:"+order.getProductColor());
+                        errorMsgs.add(errorMsg);
+                    }
+
+                    if(!order.getOrderNumber().equals(sysOrder.getOrderNumber())){
                         HashMap<String, String> errorMsg = new HashMap<>();
                         errorMsg.put("content",order.getOrderNum()+":"+"系统订单数目:"+sysOrder.getOrderNumber()+"，EXCEL订单数目:"+order.getOrderNumber());
                         errorMsgs.add(errorMsg);
@@ -1112,6 +1129,9 @@ public class OrderProductOrderController extends BaseController {
             HashMap<String, OrderProductOrder> validOrders = new HashMap<>();
             for (OrderProductOrder order: orderProductOrders){
                 if(StringUtils.isBlank(order.getProductNum()) && StringUtils.isBlank(order.getProductBrand())){
+                    HashMap<String, String> errorMsg = new HashMap<>();
+                    errorMsg.put("content",order.getOrderNum()+":"+"EXCEL品牌、货号都为空");
+                    errorMsgs.add(errorMsg);
                     continue;
                 }
                 String orderNum = order.getOrderNum();
@@ -1162,7 +1182,11 @@ public class OrderProductOrderController extends BaseController {
                         errorMsg.put("content",excelOpo.getOrderNum()+":"+"系统品牌:"+sysOrder.getProductBrand()+"，EXCEL品牌:"+excelOpo.getProductBrand());
                         errorMsgs.add(errorMsg);
                     }
-
+                    if(!excelOpo.getProductColor().equals(sysOrder.getProductColor())){
+                        HashMap<String, String> errorMsg = new HashMap<>();
+                        errorMsg.put("content",excelOpo.getOrderNum()+":"+"系统颜色:"+sysOrder.getProductColor()+"，EXCEL颜色:"+excelOpo.getProductColor());
+                        errorMsgs.add(errorMsg);
+                    }
 
                     if(excelNumber == null || orderNumber ==null){
                         HashMap<String, String> errorMsg = new HashMap<>();
@@ -1358,7 +1382,7 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrder.setUpdatedUser(principal.getName());
         try {
             if(orderProductOrder.getOrderNum()!=null && orderProductOrder.getOrderNum().length() >=9){
-                return ResponseResult.fail("订单号不能超过8位!");
+                return ResponseResult.fail("订单号不能空并且超过8位!");
             }
 //            OrderProductOrder old = orderProductOrderService.getById(orderProductOrder.getId());
             /*if(old.getOrderNumber().intValue() > orderProductOrder.getOrderNumber()){
