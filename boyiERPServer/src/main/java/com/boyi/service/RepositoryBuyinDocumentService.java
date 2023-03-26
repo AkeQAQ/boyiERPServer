@@ -70,4 +70,6 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     List<RepositoryBuyinDocument> listGTEndDate(String endDate);
 
     List<RepositoryBuyinDocument> getSupplierTotalAmountBetweenDate(LocalDate startDateTime, LocalDate endDateTime);
+
+    List<RepositoryBuyinDocument> getMaterialTotalAmountByShoeLast();
 }

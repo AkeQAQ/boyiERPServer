@@ -997,7 +997,7 @@ public class OrderProductOrderController extends BaseController {
             }
 
             Set<String> excelOrderNums = new HashSet<>();
-            ArrayList<OrderProductOrder> updateOrders = new ArrayList<>();
+            HashMap<Long, OrderProductOrder> updateOrders = new HashMap<>();
 
 
             for (OrderProductOrder order: orderProductOrders){
@@ -1053,9 +1053,27 @@ public class OrderProductOrderController extends BaseController {
                     // 把excel的货期，修改到db对象中
                     String excelEndDate = order.getEndDate();
                     String dbEndDate = sysOrder.getEndDate();
+
+                    String excelShoeLast = order.getShoeLast();
+                    String dbShoeLast = sysOrder.getShoeLast();
+
                     if(excelEndDate!=null && !excelEndDate.equals(dbEndDate)){
-                        sysOrder.setEndDate(excelEndDate);
-                        updateOrders.add(sysOrder);
+                        OrderProductOrder productOrder = updateOrders.get(sysOrder.getId());
+                        if(productOrder==null){
+                            productOrder = sysOrder;
+                        }
+                        productOrder.setEndDate(excelEndDate);
+
+                        updateOrders.put(sysOrder.getId(),productOrder);
+
+                    }
+                    if(excelShoeLast!=null && !excelShoeLast.equals(dbShoeLast)){
+                        OrderProductOrder productOrder = updateOrders.get(sysOrder.getId());
+                        if(productOrder==null){
+                            productOrder = sysOrder;
+                        }
+                        productOrder.setShoeLast(excelShoeLast);
+                        updateOrders.put(sysOrder.getId(),productOrder);
                     }
 
 
@@ -1078,7 +1096,7 @@ public class OrderProductOrderController extends BaseController {
 
             // 修改订单信息。（目前货期不一致，在这里修改）
             if(updateOrders.size() > 0){
-                orderProductOrderService.updateBatchById(updateOrders);
+                orderProductOrderService.updateBatchById(updateOrders.values());
             }
 
             if(errorMsgs.isEmpty()){

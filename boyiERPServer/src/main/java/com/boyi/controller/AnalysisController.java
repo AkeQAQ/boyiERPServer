@@ -3,7 +3,10 @@ package com.boyi.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.vo.RealDosageVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -12,13 +15,14 @@ import com.boyi.mapper.RepositoryBuyinDocumentMapper;
 import com.boyi.service.AnalysisRequestService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.RestController;
-
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.security.Principal;
@@ -42,6 +46,10 @@ import java.util.*;
 @Slf4j
 public class AnalysisController extends BaseController {
     public static Long over_days = 2L;
+
+    @Value("${poi.shoeLastDemoPath}")
+    private String poiDemoPath;
+
 
     public static void main(String[] args) {
         // 对成型工价按产量计算工价最优解
@@ -70,10 +78,220 @@ public class AnalysisController extends BaseController {
     }
 
 
+    /**
+     * 楦型数据
+     */
+    @PostMapping("/exportShoeLastData")
+    public void exportShoeLastData(HttpServletResponse response, String searchField,
+                                             @RequestBody Map<String,Object> params) {
+
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+        String queryField = "";
+        if (!searchField.equals("")) {
+            if (searchField.equals("shoeLast")) {
+                queryField = DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME;
+            }
+        }
+
+        Page page2 = getPage();
+        if(page2.getSize()==10 && page2.getCurrent() == 1){
+            page2.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+
+        Page<BaseMaterial> page = this.baseMaterialService.page(page2,
+                new QueryWrapper<BaseMaterial>().eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME, "10.01")
+                        .orderByDesc(DBConstant.TABLE_BASE_MATERIAL.CREATED_FIELDNAME)
+                        .like(!queryField.isEmpty(),queryField,searchStr));
+
+        List<RepositoryBuyinDocument> ins = repositoryBuyinDocumentService.getMaterialTotalAmountByShoeLast();
+
+        HashMap<String, RepositoryBuyinDocument> material_obj = new HashMap<>();
+        for(RepositoryBuyinDocument in : ins){
+            material_obj.put(in.getMaterialId(),in);
+        }
+
+        List<OrderProductOrder> orders = orderProductOrderService.groupByShoeLast();
+
+        HashMap<String, OrderProductOrder> shoe_orderNumber = new HashMap<>();
+
+        for(OrderProductOrder opo :orders){
+            shoe_orderNumber.put(opo.getShoeLast(),opo);
+
+        }
+
+        // 查询对应的订单数量、采购入库总金额
+        for(BaseMaterial bm : page.getRecords()){
+            RepositoryBuyinDocument buyIn = material_obj.get(bm.getId());
+
+            Double totalAmount = 0.0D;
+            Double totalNum = 0.0D;
+            if(buyIn!=null){
+                totalAmount = buyIn.getTotalAmount();
+                totalNum = buyIn.getTotalNum();
+            }
+            bm.setShoeLastTotalAmount(totalAmount+"");
+            bm.setShoeLastTotalNum(totalNum+"");
+
+            String name = bm.getName();
+            char[] chars = name.toCharArray();
+            int theSplitIndex = -1;
+            for (int i = 0; i <chars.length; i++) {
+                char one = chars[i];
+                // 假如是字母或者数字或者|字符的，则不是最后的节点
+                if(one>='a' && one <='z' ||(one>='A' && one <='Z') ){
+                    continue;
+                }
+                if(one>=48 && one <=57 ){
+                    continue;
+                }
+                if(one=='-' ){
+                    continue;
+                }
+                theSplitIndex = i;
+                break;
+            }
+            if(theSplitIndex!=-1){
+                name = new StringBuilder(name).substring(0,theSplitIndex).toString();
+            }
+            bm.setShoeLast(name);
+
+
+            OrderProductOrder o = shoe_orderNumber.get(name);
+            if(o!=null ){
+                Integer orderNumber = o.getOrderNumber();
+
+                bm.setOrderNumber(orderNumber+"");
+                bm.setAvgPrice(BigDecimalUtil.div(totalAmount+"",orderNumber+"").toString());
+                bm.setShoeLastTime(o.getCreated());
+            }else{
+                bm.setOrderNumber("0");
+                bm.setAvgPrice("0");
+            }
+
+        }
+
+        ArrayList<ShoeLastExportVO> exportObjs = new ArrayList<>();
+        for(BaseMaterial bm : page.getRecords()){
+            ShoeLastExportVO vo = new ShoeLastExportVO();
+            BeanUtils.copyProperties(bm,vo);
+            exportObjs.add(vo);
+            if(vo.getStatus()==null){
+                vo.setStatus(0);
+            }
+
+        }
+
+
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(ShoeLastExportVO.class,1,0).export("id","",response,fis,exportObjs,"报表.xlsx",DBConstant.TABLE_BASE_MATERIAL.statusMap);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+
+    }
+
+
 
     /**
-     * 物料死亡线视图
+     * 楦型数据
      */
+    @PostMapping("/getShoeLastData")
+    public ResponseResult productOrderByOrderType( String searchField,
+                                                   @RequestBody Map<String,Object> params) {
+
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+        String queryField = "";
+        if (!searchField.equals("")) {
+            if (searchField.equals("shoeLast")) {
+                queryField = DBConstant.TABLE_BASE_MATERIAL.NAME_FIELDNAME;
+            }
+        }
+        Page page1 = getPage();
+        Page<BaseMaterial> page = this.baseMaterialService.page(page1,
+                new QueryWrapper<BaseMaterial>().eq(DBConstant.TABLE_BASE_MATERIAL.GROUP_CODE_FIELDNAME, "10.01")
+                        .like(!queryField.isEmpty(),queryField,searchStr)
+                        .orderByDesc(DBConstant.TABLE_BASE_MATERIAL.CREATED_FIELDNAME)
+                        );
+
+        List<RepositoryBuyinDocument> ins = repositoryBuyinDocumentService.getMaterialTotalAmountByShoeLast();
+
+        HashMap<String, RepositoryBuyinDocument> material_obj = new HashMap<>();
+        for(RepositoryBuyinDocument in : ins){
+            material_obj.put(in.getMaterialId(),in);
+        }
+
+        List<OrderProductOrder> orders = orderProductOrderService.groupByShoeLast();
+
+        HashMap<String, OrderProductOrder> shoe_orderNumber = new HashMap<>();
+
+        for(OrderProductOrder opo :orders){
+            shoe_orderNumber.put(opo.getShoeLast(),opo);
+
+        }
+
+        // 查询对应的订单数量、采购入库总金额
+        for(BaseMaterial bm : page.getRecords()){
+            RepositoryBuyinDocument buyIn = material_obj.get(bm.getId());
+
+            Double totalAmount = 0.0D;
+            Double totalNum = 0.0D;
+            if(buyIn!=null){
+                totalAmount = buyIn.getTotalAmount();
+                totalNum = buyIn.getTotalNum();
+            }
+            bm.setShoeLastTotalAmount(totalAmount+"");
+            bm.setShoeLastTotalNum(totalNum+"");
+
+            String name = bm.getName();
+            char[] chars = name.toCharArray();
+            int theSplitIndex = -1;
+            for (int i = 0; i <chars.length; i++) {
+                char one = chars[i];
+                // 假如是字母或者数字或者|字符的，则不是最后的节点
+                if(one>='a' && one <='z' ||(one>='A' && one <='Z') ){
+                    continue;
+                }
+                if(one>=48 && one <=57 ){
+                    continue;
+                }
+                if(one=='-' ){
+                    continue;
+                }
+                theSplitIndex = i;
+                break;
+            }
+            if(theSplitIndex!=-1){
+                name = new StringBuilder(name).substring(0,theSplitIndex).toString();
+            }
+            bm.setShoeLast(name);
+
+
+            OrderProductOrder o = shoe_orderNumber.get(name);
+            if(o!=null ){
+                Integer orderNumber = o.getOrderNumber();
+
+                bm.setOrderNumber(orderNumber+"");
+                bm.setAvgPrice(BigDecimalUtil.div(totalAmount+"",orderNumber+"").toString());
+                bm.setShoeLastTime(o.getCreated());
+            }else{
+                bm.setOrderNumber("0");
+                bm.setAvgPrice("0");
+            }
+
+
+        }
+        return ResponseResult.succ(page);
+
+
+    }
+
+
+
+        /**
+         * 物料死亡线视图
+         */
     @GetMapping("/materialDeadLineView")
     public ResponseResult materialDeadLineView() {
 

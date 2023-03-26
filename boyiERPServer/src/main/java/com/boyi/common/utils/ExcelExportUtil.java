@@ -3,6 +3,7 @@ package com.boyi.common.utils;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.boyi.entity.RepositoryBuyinDocument;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -24,6 +25,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 * 导出
 **/
 @Data
+@Slf4j
 public class ExcelExportUtil<T> {
 
     private int rowIndex;
@@ -93,7 +95,7 @@ public class ExcelExportUtil<T> {
                                     cell.setCellValue(addPreContent+cell.getStringCellValue());
                                 }
                             }catch (Exception e){
-                                e.printStackTrace();
+                                log.error("报错:{}",e);
                             }
                         }
                     }

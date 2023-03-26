@@ -427,7 +427,15 @@ public class DBConstant {
     }
 
     public static class TABLE_BASE_MATERIAL{
-         public static final String ID = "id";
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"可用");
+            statusMap2.put(-1,"禁用");
+            statusMap = statusMap2;
+        }
+        public static final Map<Integer,String> statusMap;
+
+        public static final String ID = "id";
         public static final String NAME_FIELDNAME = "name";
         public static final String GROUP_CODE_FIELDNAME = "group_code";
         public static final String UNIT_FIELDNAME = "unit";

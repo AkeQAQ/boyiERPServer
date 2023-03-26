@@ -85,6 +85,9 @@ public class OrderProductOrder extends BaseEntity {
     @ExcelAttribute(sort = 20)
     private String endDate;
 
+    @ExcelAttribute(sort = 1)
+    private String shoeLast;
+
 
     /**
      *  批量备料多余字段

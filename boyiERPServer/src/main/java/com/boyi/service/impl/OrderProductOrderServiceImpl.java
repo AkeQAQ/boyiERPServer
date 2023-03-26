@@ -242,4 +242,9 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                 .between(DBConstant.TABLE_ORDER_PRODUCT_ORDER.END_DATE_FIELDNAME,sevenDateStr,nowDateStr));
     }
 
+    @Override
+    public List<OrderProductOrder> groupByShoeLast() {
+        return this.orderProductOrderMapper.groupByShoeLast();
+    }
+
 }

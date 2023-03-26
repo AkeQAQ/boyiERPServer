@@ -268,4 +268,10 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " ) " +
             " ) t1 where t1.ppc_id is not null " )
     List<OrderProductOrder> listNoExistProgressOrdersByHasPPC();
+
+    @Select("select shoe_last,sum(opo.order_number) order_number,max(opo.created) created from order_product_order opo" +
+            " where opo.status !=2 and opo.shoe_last is not null" +
+            " group by opo.shoe_last")
+    List<OrderProductOrder> groupByShoeLast();
+
 }

@@ -89,7 +89,7 @@
 
 	<logger
 		name="com.boyi"
-		level="INFO" />
+		level="DEBUG" />
 
 	<logger
 		name="jdbc.audit"

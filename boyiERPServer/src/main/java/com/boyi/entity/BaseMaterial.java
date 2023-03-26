@@ -90,5 +90,20 @@ public class BaseMaterial  {
 
     private String videoUrl;
 
+    @TableField(exist = false)
+    private String shoeLast;
+    @TableField(exist = false)
+    private String shoeLastTotalAmount;
+    @TableField(exist = false)
+    private String orderNumber;
+    @TableField(exist = false)
+    private String avgPrice;
+
+    @TableField(exist = false)
+    private LocalDateTime shoeLastTime;
+
+    @TableField(exist = false)
+    private String shoeLastTotalNum;
+
 
 }
