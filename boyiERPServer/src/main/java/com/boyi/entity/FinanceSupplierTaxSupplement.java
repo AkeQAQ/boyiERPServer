@@ -5,6 +5,7 @@ import java.time.LocalDate;
 
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -25,17 +26,20 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
 
     private String supplierId;
 
+    @ExcelAttribute(sort = 2)
     @TableField(exist = false)
     private String supplierName;
 
     /**
      * 开票单位
      */
+    @ExcelAttribute(sort = 3)
     private String company;
 
     /**
      * 开票日期
      */
+    @ExcelAttribute(sort = 1)
     private LocalDate documentDate;
 
     private String createdUser;
@@ -45,6 +49,7 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     /**
      * 发票号
      */
+    @ExcelAttribute(sort = 4)
     private String documentNum;
 
     /**
@@ -55,16 +60,19 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     /**
      * 税金额
      */
+    @ExcelAttribute(sort = 7)
     private BigDecimal taxSupplementAmount;
 
     /**
      * 税点
      */
+    @ExcelAttribute(sort = 6)
     private BigDecimal taxPoint;
 
     /**
      * 开票金额
      */
+    @ExcelAttribute(sort = 5)
     private BigDecimal documentAmount;
 
     /**
@@ -75,6 +83,8 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
 
     @TableField(exist = false)
     private LocalDate payDate;
+
+    @ExcelAttribute(sort = 8)
     private Integer status;
 
 
@@ -91,6 +101,7 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     @TableField(exist = false)
     private Double totalDocumentPayedAmount;
 
+    @ExcelAttribute(sort = 9)
     @TableField(exist = false)
     private Double lostAmount;
 

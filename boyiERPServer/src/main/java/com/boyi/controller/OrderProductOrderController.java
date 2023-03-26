@@ -1172,8 +1172,10 @@ public class OrderProductOrderController extends BaseController {
                 sysOrders.put(orderNum,order);
             }
 
+            HashMap<Long, OrderProductOrder> updateOrders = new HashMap<>();
 
             if(sysNoProduct != null && !sysNoProduct.isEmpty()){
+
 
                 for (Map.Entry<String,OrderProductOrder> entry: validOrders.entrySet()){
                     String orderNum = entry.getKey();
@@ -1204,6 +1206,32 @@ public class OrderProductOrderController extends BaseController {
                         HashMap<String, String> errorMsg = new HashMap<>();
                         errorMsg.put("content",excelOpo.getOrderNum()+":"+"系统颜色:"+sysOrder.getProductColor()+"，EXCEL颜色:"+excelOpo.getProductColor());
                         errorMsgs.add(errorMsg);
+                    }
+
+                    // 把excel的货期，修改到db对象中
+                    String excelEndDate = excelOpo.getEndDate();
+                    String dbEndDate = sysOrder.getEndDate();
+
+                    String excelShoeLast = excelOpo.getShoeLast();
+                    String dbShoeLast = sysOrder.getShoeLast();
+
+                    if(excelEndDate!=null && !excelEndDate.equals(dbEndDate)){
+                        OrderProductOrder productOrder = updateOrders.get(sysOrder.getId());
+                        if(productOrder==null){
+                            productOrder = sysOrder;
+                        }
+                        productOrder.setEndDate(excelEndDate);
+
+                        updateOrders.put(sysOrder.getId(),productOrder);
+
+                    }
+                    if(excelShoeLast!=null && !excelShoeLast.equals(dbShoeLast)){
+                        OrderProductOrder productOrder = updateOrders.get(sysOrder.getId());
+                        if(productOrder==null){
+                            productOrder = sysOrder;
+                        }
+                        productOrder.setShoeLast(excelShoeLast);
+                        updateOrders.put(sysOrder.getId(),productOrder);
                     }
 
                     if(excelNumber == null || orderNumber ==null){
@@ -1250,6 +1278,11 @@ public class OrderProductOrderController extends BaseController {
                 HashMap<String, String> errorMsg = new HashMap<>();
                 errorMsg.put("content","校验一致！");
                 errorMsgs.add(errorMsg);
+            }
+
+            // 修改订单信息。（目前货期不一致，在这里修改）
+            if(updateOrders.size() > 0){
+                orderProductOrderService.updateBatchById(updateOrders.values());
             }
             return ResponseResult.succ(returnMap);
 

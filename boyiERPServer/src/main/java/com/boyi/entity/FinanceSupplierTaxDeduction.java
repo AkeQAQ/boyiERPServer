@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,16 +25,19 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
 
     private String supplierId;
     @TableField(exist = false)
+    @ExcelAttribute(sort = 2)
     private String supplierName;
 
     /**
      * 开票单位
      */
+    @ExcelAttribute(sort = 3)
     private String company;
 
     /**
      * 开票日期
      */
+    @ExcelAttribute(sort = 1)
     private LocalDate documentDate;
 
     private String createdUser;
@@ -43,6 +47,7 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
     /**
      * 发票号
      */
+    @ExcelAttribute(sort = 4)
     private String documentNum;
 
     /**
@@ -53,21 +58,25 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
     /**
      * 税额扣款
      */
+    @ExcelAttribute(sort = 8)
     private BigDecimal deductionAmount;
 
     /**
      * 税点
      */
+    @ExcelAttribute(sort = 7)
     private BigDecimal taxPoint;
 
     /**
      * 开票金额
      */
+    @ExcelAttribute(sort = 5)
     private BigDecimal documentAmount;
 
     /**
      * 1:未付、0：已付
      */
+    @ExcelAttribute(sort = 10)
     private Integer payStatus;
 
     /**
@@ -78,8 +87,10 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
     /**
      * 含税未开票金额
      */
+    @ExcelAttribute(sort = 6)
     private BigDecimal taxCalAmount;
 
+    @ExcelAttribute(sort = 9)
     private Integer status;
 
 

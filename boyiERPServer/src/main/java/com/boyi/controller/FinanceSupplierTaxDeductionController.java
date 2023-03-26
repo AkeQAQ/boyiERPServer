@@ -5,12 +5,14 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.fileFilter.MaterialPicFileFilter;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.BaseSupplier;
 import com.boyi.entity.FinanceSupplierPayshoes;
 import com.boyi.entity.FinanceSupplierTaxDeduction;
+import com.boyi.entity.FinanceSupplierTaxSupplement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
@@ -21,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Principal;
 import java.time.LocalDate;
@@ -44,12 +48,107 @@ import java.util.concurrent.ConcurrentHashMap;
 public class FinanceSupplierTaxDeductionController extends BaseController {
 
 
+
+    @Value("${poi.financeTaxDedDemo}")
+    private String poiDemoPath;
+
     @Value("${picture.financePayShoesPath}")
     private String financePayShoesPath;
 
     private final String  picPrefix = "financeSupplierTaxDeductionPic-";
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
+
+
+
+    /**
+     * 获取扣税点 分页全部数据
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('finance:taxDeduction:list')")
+    public void export(HttpServletResponse response, String searchField, String searchStatus, String payStatus,
+                       String searchStartDate, String searchEndDate,
+                       @RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
+        Page<FinanceSupplierTaxDeduction> pageData = null;
+        List<String> ids = new ArrayList<>();
+        String queryField = "";
+        if (!searchField.equals("")) {
+            if (searchField.equals("supplierName")) {
+                queryField = "supplier_name";
+            }else if (searchField.equals("company")) {
+                queryField = "company";
+            }else if (searchField.equals("documentNum")) {
+                queryField = "document_num";
+            }
+            else {
+                throw new RuntimeException("搜索字段不存在");
+            }
+        }
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }else if (oneField.equals("company")) {
+                        theQueryField = "company";
+                    }else if (oneField.equals("documentNum")) {
+                        theQueryField = "document_num";
+                    }
+                    else {
+                        continue;
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+            throw new RuntimeException("审核状态不能为空");
+        }
+
+        List<Long> searchPayStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(payStatus)){
+            String[] split = payStatus.split(",");
+            for (String statusVal : split){
+                searchPayStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchPayStatusList.size() == 0){
+            throw new RuntimeException("付款状态不能为空");
+        }
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        pageData = financeSupplierTaxDeductionService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStatusList,queryMap,searchStartDate,searchEndDate,searchPayStatusList);
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(FinanceSupplierTaxDeduction.class,1,0).export("id","",response,fis,pageData.getRecords(),"报表.xlsx",
+                    DBConstant.TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION.statusMap,
+                    DBConstant.TABLE_FINANCE_SUPPLIER_TAX_DEDUCTION.payStatusMap,null);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
 
 
     @RequestMapping(value = "/getPicturesById", method = RequestMethod.GET)

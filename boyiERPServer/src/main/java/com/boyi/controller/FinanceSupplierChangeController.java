@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.fileFilter.MaterialPicFileFilter;
+import com.boyi.common.utils.ExcelExportUtil;
 import com.boyi.common.utils.FileUtils;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
@@ -12,6 +13,7 @@ import com.boyi.entity.*;
 import com.boyi.entity.FinanceSupplierChange;
 import com.boyi.service.FinanceSupplierChangeService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +22,9 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.security.Principal;
 import java.time.LocalDateTime;
@@ -40,8 +44,84 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/finance/supplierChange")
 public class FinanceSupplierChangeController extends BaseController {
 
+    @Value("${poi.financeChangeDemo}")
+    private String poiDemoPath;
 
     public static final Map<Long,String> locks = new ConcurrentHashMap<>();
+
+
+    /**
+     * 获取物料单价调整 分页全部数据
+     */
+    @PostMapping("/export")
+    @PreAuthorize("hasAuthority('finance:change:list')")
+    public void export(HttpServletResponse response, String searchField, String searchStatus,
+                       String searchStartDate, String searchEndDate,
+                       @RequestBody Map<String,Object> params) {
+        Object obj = params.get("manySearchArr");
+        List<Map<String,String>> manySearchArr = (List<Map<String, String>>) obj;
+        String searchStr = params.get("searchStr")==null?"":params.get("searchStr").toString();
+
+        Page<FinanceSupplierChange> pageData = null;
+        List<String> ids = new ArrayList<>();
+        String queryField = "";
+        if (!searchField.equals("")) {
+            if (searchField.equals("supplierName")) {
+                queryField = "supplier_name";
+            }
+            else if (searchField.equals("materialName")) {
+                queryField = "material_name";
+
+            }
+
+        }
+        Map<String, String> queryMap = new HashMap<>();
+        if(manySearchArr!=null && manySearchArr.size() > 0){
+            for (int i = 0; i < manySearchArr.size(); i++) {
+                Map<String, String> theOneSearch = manySearchArr.get(i);
+                String oneField = theOneSearch.get("selectField");
+                String oneStr = theOneSearch.get("searchStr");
+                String theQueryField = null;
+                if (StringUtils.isNotBlank(oneField)) {
+                    if (oneField.equals("supplierName")) {
+                        theQueryField = "supplier_name";
+                    }
+                    else if (oneField.equals("materialName")) {
+                        theQueryField = "material_name";
+                    }
+                    queryMap.put(theQueryField,oneStr);
+                }
+            }
+        }
+
+        log.info("搜索字段:{},对应ID:{}", searchField,ids);
+
+        List<Long> searchStatusList = new ArrayList<Long>();
+        if(StringUtils.isNotBlank(searchStatus)){
+            String[] split = searchStatus.split(",");
+            for (String statusVal : split){
+                searchStatusList.add(Long.valueOf(statusVal));
+            }
+        }
+        if(searchStatusList.size() == 0){
+             throw new RuntimeException("审核状态不能为空");
+        }
+        Page page = getPage();
+        if(page.getSize()==10 && page.getCurrent() == 1){
+            page.setSize(1000000L); // 导出全部的话，简单改就一页很大一个条数
+        }
+        pageData = financeSupplierChangeService.innerQueryByManySearch(page,searchField,queryField,searchStr,searchStatusList,queryMap,searchStartDate,searchEndDate);
+
+
+
+        //加载模板流数据
+        try (FileInputStream fis = new FileInputStream(poiDemoPath);){
+            new ExcelExportUtil(FinanceSupplierChange.class,1,0).export("id","",response,fis,pageData.getRecords(),"报表.xlsx",
+                    DBConstant.TABLE_FINANCE_SUPPLIER_CHANGE.statusMap);
+        } catch (Exception e) {
+            log.error("导出模块报错.",e);
+        }
+    }
 
     /**
      * 锁单据

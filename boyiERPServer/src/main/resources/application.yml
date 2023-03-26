@@ -67,6 +67,10 @@ poi:
   financeFineDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeFineDemo.xlsx
   financeSummaryDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeSummaryDemo.xlsx
   shoeLastDemoPath: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/shoeLastDemo.xlsx
+  financeChangeDemo: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeChangeDemo.xlsx
+  financeTestDemo: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeTestDemo.xlsx
+  financeTaxSupDemo: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeTaxSupDemo.xlsx
+  financeTaxDedDemo: D:/鞋业/互联网相关/ERP/boyiERPServer/src/main/resources/excelDemo/financeTaxDedDemo.xlsx
 
 
 picture:

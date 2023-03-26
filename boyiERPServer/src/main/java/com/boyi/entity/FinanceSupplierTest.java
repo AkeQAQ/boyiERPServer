@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -24,6 +25,7 @@ public class FinanceSupplierTest extends BaseEntity {
 
     private String supplierId;
 
+    @ExcelAttribute(sort = 2)
     @TableField(exist = false)
     private String supplierName;
 
@@ -31,16 +33,21 @@ public class FinanceSupplierTest extends BaseEntity {
     /**
      * 检测费金额
      */
+    @ExcelAttribute(sort = 3)
+
     private BigDecimal testAmount;
 
+    @ExcelAttribute(sort = 1)
     private LocalDate testDate;
 
     private String createdUser;
 
     private String updateUser;
 
+    @ExcelAttribute(sort = 4)
     private String documentNum;
 
+    @ExcelAttribute(sort = 5)
     private Integer status;
 
 

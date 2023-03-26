@@ -72,6 +72,9 @@ public class ExcelExportUtil<T> {
                                 else if("payType".equals(field.getName())&& payStatusMap!=null){
                                     cell.setCellValue(payStatusMap.get(Integer.valueOf(field.get(t).toString())));
                                 }
+                                else if("payStatus".equals(field.getName())&& payStatusMap!=null){
+                                    cell.setCellValue(payStatusMap.get(Integer.valueOf(field.get(t).toString())));
+                                }
                                 else if("takeStatus".equals(field.getName())&& takeStatusMap!=null){
                                     cell.setCellValue(takeStatusMap.get(Integer.valueOf(field.get(t).toString())));
                                 }
