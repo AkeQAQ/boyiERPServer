@@ -320,10 +320,32 @@ public class ProduceBatchController extends BaseController {
             }
         });
 
+        TreeMap<LocalDateTime, ProduceBatch> orderBySendDateASC = new TreeMap<>(new Comparator<LocalDateTime>() {
+            @Override
+            public int compare(LocalDateTime o1, LocalDateTime o2) {
+                if(o2==null ){
+                    return 1;
+                }
+                if(o1==null ){
+                    return -1;
+                }
+
+                return o1
+                        .isBefore(o2)
+                        ? -1 : 1;
+            }
+        });
+
         for(ProduceBatch pb : progresses){
             if(showHasEndDate){
                 orderByEndDateASC.put(pb.getEndDate(),pb);
+            }else {
+                // 假如是没筛选货期，而是还行了外发未回的。按外发时间排序
+                if(showSendNoBack){
+                    orderBySendDateASC.put(pb.getSendForeignProductDate(),pb);
+                }
             }
+
             String batchId = pb.getBatchId();
             sb.append(batchId).append(" ");
             if(!isAddFlag.contains(batchId)){
@@ -348,7 +370,11 @@ public class ProduceBatchController extends BaseController {
             returnMap.put("progressData",orderByEndDateASC.values());
 
         }else{
-            returnMap.put("progressData",progresses);
+            if(showSendNoBack){
+                returnMap.put("progressData",orderBySendDateASC.values());
+            }else{
+                returnMap.put("progressData",progresses);
+            }
 
         }
         returnMap.put("totalBatchId",sb.toString());
