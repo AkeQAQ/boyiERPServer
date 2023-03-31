@@ -80,7 +80,7 @@ public interface FinanceSupplierTaxSupplementMapper extends BaseMapper<FinanceSu
             " select IFNULL( sum(fsd.pay_amount) ,0)from finance_summary_details fsd where fsd.document_num = fsts.document_num" +
             " ) payed_amount " +
             " from finance_supplier_tax_supplement fsts " +
-            " where fsts.supplier_id =#{supplierId}" +
+            " where fsts.supplier_id =#{supplierId} " +
             " ) t where (t.document_amount - t.payed_amount) >0")
     List<FinanceSupplierTaxSupplement> listBySupplierIdDocumentNums(@Param("supplierId") String supplierId);
 }

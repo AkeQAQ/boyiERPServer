@@ -60,13 +60,13 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     /**
      * 税金额
      */
-    @ExcelAttribute(sort = 7)
+    @ExcelAttribute(sort = 8)
     private BigDecimal taxSupplementAmount;
 
     /**
      * 税点
      */
-    @ExcelAttribute(sort = 6)
+    @ExcelAttribute(sort = 7)
     private BigDecimal taxPoint;
 
     /**
@@ -74,6 +74,13 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
      */
     @ExcelAttribute(sort = 5)
     private BigDecimal documentAmount;
+
+
+    /**
+     * 不含税开票金额
+     */
+    @ExcelAttribute(sort = 6)
+    private BigDecimal documentNoTaxAmount;
 
     /**
      * 1:未付、0：已付
@@ -84,7 +91,7 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     @TableField(exist = false)
     private LocalDate payDate;
 
-    @ExcelAttribute(sort = 8)
+    @ExcelAttribute(sort = 9)
     private Integer status;
 
 
@@ -101,7 +108,7 @@ public class FinanceSupplierTaxSupplement extends BaseEntity {
     @TableField(exist = false)
     private Double totalDocumentPayedAmount;
 
-    @ExcelAttribute(sort = 9)
+    @ExcelAttribute(sort = 10)
     @TableField(exist = false)
     private Double lostAmount;
 

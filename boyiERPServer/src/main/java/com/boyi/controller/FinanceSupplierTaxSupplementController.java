@@ -465,6 +465,7 @@ public class FinanceSupplierTaxSupplementController extends BaseController {
         HashSet<Long> countIds = new HashSet<>();
         BigDecimal totalDocumentAmount = new BigDecimal("0");
         BigDecimal suiAmount = new BigDecimal("0");
+        BigDecimal totalDocumentNoTaxAmount = new BigDecimal("0");
 
         for(FinanceSupplierTaxSupplement fs : pageData.getRecords()){
             Long id = fs.getId();
@@ -478,6 +479,9 @@ public class FinanceSupplierTaxSupplementController extends BaseController {
             if(fs.getTaxSupplementAmount()!=null){
                 suiAmount = BigDecimalUtil.add(suiAmount.toString(),fs.getTaxSupplementAmount().toString());
             }
+            if(fs.getDocumentNoTaxAmount()!=null){
+                totalDocumentNoTaxAmount = BigDecimalUtil.add(totalDocumentNoTaxAmount.toString(),fs.getDocumentNoTaxAmount().toString());
+            }
 
 
         }
@@ -485,6 +489,7 @@ public class FinanceSupplierTaxSupplementController extends BaseController {
         returnMap.put("pageData",pageData);
         returnMap.put("documentAmount",totalDocumentAmount.toString());
         returnMap.put("suiAmount",suiAmount.toString());
+        returnMap.put("documentNoTaxAmount",totalDocumentNoTaxAmount.toString());
 
         return ResponseResult.succ(returnMap);
     }
