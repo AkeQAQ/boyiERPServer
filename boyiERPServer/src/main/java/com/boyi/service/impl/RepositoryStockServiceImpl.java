@@ -285,4 +285,9 @@ public class RepositoryStockServiceImpl extends ServiceImpl<RepositoryStockMappe
     public List<RepositoryStock> listStockNumLTZero() {
         return this.list(new QueryWrapper<RepositoryStock>().lt(DBConstant.TABLE_REPOSITORY_STOCK.NUM_FIELDNAME,0));
     }
+
+    @Override
+    public List<RepositoryStock> listBy01MaterialIds() {
+        return repositoryStockMapper.listBy01MaterialIds();
+    }
 }

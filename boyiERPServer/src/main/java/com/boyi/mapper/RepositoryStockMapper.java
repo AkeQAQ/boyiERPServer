@@ -9,6 +9,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * <p>
  * 库存表 Mapper 接口
@@ -35,4 +37,8 @@ public interface RepositoryStockMapper extends BaseMapper<RepositoryStock> {
      */
     @Select(wrapperSql)
     Page<RepositoryStock> page(Page page, @Param("ew") Wrapper queryWrapper);
+
+    @Select("select * from repository_stock s where (s.material_id like '01.01.%' or s.material_id like '01.02.%') and s.num!=0    ")
+    List<RepositoryStock> listBy01MaterialIds();
+
 }

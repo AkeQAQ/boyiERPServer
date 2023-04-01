@@ -276,5 +276,10 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
         return this.produceOrderMaterialProgressMapper.getByTheLatestByMaterialIdCreatedDescExcludeSelf(materialId,id);
     }
 
+    @Override
+    public ProduceOrderMaterialProgress groupByMaterialId(String materialId) {
+        return this.produceOrderMaterialProgressMapper.groupByMaterialId(materialId);
+    }
+
 
 }

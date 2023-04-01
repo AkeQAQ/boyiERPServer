@@ -813,7 +813,25 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
                 String materialId = item.getMaterialId();
                 if(materialId.startsWith("01.01") || materialId.startsWith("01.02")){
-                    sb.append("物料["+item.getMaterialId()+","+item.getMaterialName()+"]单价:"+item.getPrice()+".入库数量:"+item.getRadioNum()).append("<br>");
+                    ProduceOrderMaterialProgress pomp = produceOrderMaterialProgressService.groupByMaterialId(item.getMaterialId());
+                    sb.append("物料["+item.getMaterialId()+","+item.getMaterialName()+"]单价:"+item.getPrice()+",入库数量:"+item.getRadioNum())
+                            ;
+                    if(pomp!=null){
+                        String calNum = pomp.getCalNum();
+                        String inNum = pomp.getInNum();
+                        double totalInNum = BigDecimalUtil.add(inNum, item.getRadioNum() + "").doubleValue();
+
+                        sb.append("。应报数量:"+ calNum)
+                                .append(",已报备数量:"+pomp.getPreparedNum())
+                                .append(",总入库数量:"+ totalInNum);
+                        // 假如入库超过备料信息，多添加文字警告
+                        if(Double.valueOf(calNum) < totalInNum){
+                            sb.append(".【警告】:总入库["+totalInNum+"] > 应报数量["+calNum+"]");
+                        }
+                    }
+                    sb.append("<br>");
+
+
                 }
             }
 

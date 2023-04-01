@@ -44,4 +44,6 @@ public interface BaseSupplierMaterialService extends IService<BaseSupplierMateri
     List<BaseSupplierMaterial> listByMaterialId(String materialId);
 
     List<BaseSupplierMaterial> listByMaterialIdWithSuccessDate(String innerMaterialId, LocalDate now);
+
+    BaseSupplierMaterial getSuccessPriceByLatestPrice(String materialId);
 }

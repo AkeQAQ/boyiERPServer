@@ -254,6 +254,9 @@ public class BaseController {
     @Autowired
     public FinanceSupplierFineService financeSupplierFineService;
 
+    @Autowired
+    public RepositoryStockLostService repositoryStockLostService;
+
     /**
      * 获取页面
      * @return

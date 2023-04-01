@@ -42,4 +42,6 @@ public interface RepositoryStockService extends IService<RepositoryStock> {
 
     List<RepositoryStock> listStockNumLTZero();
 
+    List<RepositoryStock> listBy01MaterialIds();
+
 }

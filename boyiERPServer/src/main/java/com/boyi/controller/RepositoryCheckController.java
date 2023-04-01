@@ -5,10 +5,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
 import com.boyi.common.utils.BigDecimalUtil;
+import com.boyi.common.utils.EmailUtils;
+import com.boyi.common.utils.ThreadUtils;
+import com.boyi.common.vo.OrderProductCalVO;
 import com.boyi.controller.base.BaseController;
 import com.boyi.controller.base.ResponseResult;
 import com.boyi.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
@@ -273,12 +277,141 @@ public class RepositoryCheckController extends BaseController {
     @PreAuthorize("hasAuthority('repository:check:valid')")
     public ResponseResult statusPass(Principal principal,Long id)throws Exception {
 
+        LocalDateTime now2 = LocalDateTime.now();
+        LocalDate now = LocalDate.now();
         RepositoryCheck repositoryCheck = new RepositoryCheck();
-        repositoryCheck.setUpdated(LocalDateTime.now());
+        repositoryCheck.setUpdated(now2);
         repositoryCheck.setUpdatedUser(principal.getName());
         repositoryCheck.setId(id);
         repositoryCheck.setStatus(DBConstant.TABLE_REPOSITORY_CHECK.STATUS_FIELDVALUE_0);
         repositoryCheckService.updateById(repositoryCheck);
+
+        ThreadUtils.executorService.submit(() -> {
+            try {
+
+
+                // 盘点时，生成该月份截止的大皮物料废库存数量（库存-未投数量-投产未领），废库存金额（以最近单价）。
+
+                List<RepositoryStock> stocks = repositoryStockService.listBy01MaterialIds();
+
+                HashMap<String, RepositoryStock> materialIds = new HashMap<>();
+
+                StringBuilder sb = new StringBuilder();
+                for(RepositoryStock stock : stocks){
+                    materialIds.put(stock.getMaterialId(),stock);
+                    stock.setNeedNum("0");
+                    stock.setNoInNum("0");
+                    stock.setNoPickNum("0");
+                }
+                if(!materialIds.isEmpty()){
+
+                    // 获取未投产应需用量
+                    List<OrderProductCalVO> noProductionNums = orderProductOrderService.calNoProductOrdersWithMaterialIds(materialIds.keySet());
+                    HashMap<String, String> noProductionGroupNums = new HashMap<>();
+                    HashMap<String, List<OrderProductCalVO>> noProductionGroupDetails = new HashMap<>();
+
+                    for(OrderProductCalVO vo : noProductionNums){
+                        String materialId = vo.getMaterialId();
+                        String theSum = noProductionGroupNums.get(materialId);
+                        if(theSum==null || theSum.isEmpty()){
+                            noProductionGroupNums.put(materialId,vo.getNeedNum());
+                            ArrayList<OrderProductCalVO> orderProductCalVOS = new ArrayList<>();
+                            orderProductCalVOS.add(vo);
+                            noProductionGroupDetails.put(materialId,orderProductCalVOS);
+                        }else{
+                            noProductionGroupNums.put(materialId, BigDecimalUtil.add(theSum,vo.getNeedNum()).toString());
+                            List<OrderProductCalVO> orderProductCalVOS = noProductionGroupDetails.get(materialId);
+                            orderProductCalVOS.add(vo);
+                        }
+                    }
+
+                    for(Map.Entry<String,String> entry : noProductionGroupNums.entrySet()){
+                        String materialId = entry.getKey();
+                        String needNum = entry.getValue();
+                        RepositoryStock stock = materialIds.get(materialId);
+                        stock.setNeedNum(needNum);
+                    }
+
+                    // 获取投产未领数量
+                    List<RepositoryStock> noPickMaterials = orderProductOrderService.listNoPickMaterialsWithMaterialIds(materialIds.keySet());
+                    HashMap<String, String> noPickGroupNums = new HashMap<>();
+                    HashMap<String, List<RepositoryStock>> noPickDetails = new HashMap<>();
+
+                    for(RepositoryStock vo : noPickMaterials){
+                        String materialId = vo.getMaterialId();
+                        String theSum = noPickGroupNums.get(materialId);
+                        if(theSum==null || theSum.isEmpty()){
+                            noPickGroupNums.put(materialId,vo.getNum()+"");
+                            ArrayList<RepositoryStock> objs = new ArrayList<>();
+                            objs.add(vo);
+                            noPickDetails.put(materialId,objs);
+                        }else{
+                            noPickGroupNums.put(materialId, BigDecimalUtil.add(theSum,vo.getNum()+"").toString());
+                            List<RepositoryStock> objs = noPickDetails.get(materialId);
+                            objs.add(vo);
+                        }
+                    }
+
+                    for(Map.Entry<String,String> entry : noPickGroupNums.entrySet()){
+                        String materialId = entry.getKey();
+                        String needNum = entry.getValue();
+                        RepositoryStock stock = materialIds.get(materialId);
+                        stock.setNoPickNum(needNum);
+                    }
+
+                    // 假如库存-未投-投产未领 >0 的，进行保存
+
+
+                    List<RepositoryStockLost> stockLists = new ArrayList<>();
+                    Double totalAmount = 0.0D;
+                    Double totalNum = 0.0D;
+
+                    for(RepositoryStock stock : stocks) {
+                        Double stockNum = stock.getNum();
+                        String needNum = stock.getNeedNum();
+                        String noPickNum = stock.getNoPickNum();
+
+                        RepositoryStockLost lost = new RepositoryStockLost();
+                        lost.setMaterialId(stock.getMaterialId());
+                        lost.setNum(stock.getNum());
+                        lost.setNeedNum(new BigDecimal(stock.getNeedNum()));
+                        lost.setNoPickNum(new BigDecimal(stock.getNoPickNum()));
+
+                        BeanUtils.copyProperties(stock,lost);
+                        double lostNum = BigDecimalUtil.sub(stockNum + "", needNum).subtract(new BigDecimal(noPickNum)).doubleValue();
+                        if(lostNum<=0){
+                            continue;
+                        }
+
+                        lost.setCreated(now2);
+                        lost.setUpdated(now2);
+                        lost.setCreatedDate(now);
+                        lost.setLostNum(new BigDecimal(lostNum).setScale(2,   BigDecimal.ROUND_HALF_UP));
+                        BaseSupplierMaterial bsm = baseSupplierMaterialService.getSuccessPriceByLatestPrice(stock.getMaterialId());
+                        if(bsm!=null){
+                            lost.setLatestPrice(new BigDecimal(bsm.getPrice()));
+                        }else{
+                            lost.setLatestPrice(new BigDecimal("0"));
+                        }
+                        BaseMaterial bm = baseMaterialService.getById(stock.getMaterialId());
+                        sb.append("物料ID："+stock.getMaterialId()+",物料名称:"+bm.getName()+",库存数量:["+lost.getNum()+"],未投数量:["+lost.getNeedNum()+"],未领数量:["+lost.getNoPickNum()+"],废库存数量:["+lost.getLostNum()+"],最近单价:["+lost.getLatestPrice()+"] <br>");
+                        totalAmount = BigDecimalUtil.add(totalAmount,BigDecimalUtil.mul(lost.getNum(),lost.getLatestPrice().doubleValue()).doubleValue()).doubleValue();
+                        totalNum = BigDecimalUtil.add(totalNum,lost.getNum()).doubleValue();
+                        stockLists.add(lost);
+                    }
+                    sb.append(",总废库存数量:["+totalNum+"],总金额:["+totalAmount+"]");
+
+                    if(!stockLists.isEmpty()){
+                        repositoryStockLostService.saveBatch(stockLists);
+                    }
+
+                }
+                EmailUtils.sendMail(EmailUtils.MODULE_LOST_MATERIAL_NAME,
+                        "244454526@qq.com",new String[]{}, sb.toString());
+            }catch (Exception e){
+                log.error("发生异常.",e);
+            }
+        });
 
 
         log.info("仓库模块-盘点模块-审核通过内容:{}",repositoryCheck);

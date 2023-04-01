@@ -129,4 +129,17 @@ public class BaseSupplierMaterialServiceImpl extends ServiceImpl<BaseSupplierMat
                 .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME, DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0));
     }
 
+    @Override
+    public BaseSupplierMaterial getSuccessPriceByLatestPrice(String materialId) {
+        List<BaseSupplierMaterial> list = this.list(new QueryWrapper<BaseSupplierMaterial>()
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, materialId)
+                .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDNAME,DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.STATUS_FIELDVALUE_0)
+                .orderByDesc(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.CREATED_FIELDNAME));
+        if(list==null || list.size()==0){
+            return null;
+        }
+        return list.get(0);
+    }
+
+
 }

@@ -138,4 +138,12 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             " where material_id = #{materialId} and prepared_num > 0 and id !=#{id}" +
             " order by pomp.created desc limit 1")
     ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDescExcludeSelf(@Param("materialId") String materialId,@Param("id") Long id);
+
+    @Select("select sum(IFNULL(cal_num,0)) calNum,sum(prepared_num) preparedNum,sum(in_num) inNum from produce_order_material_progress pomp ," +
+            "order_product_order opo" +
+            " where" +
+            " opo.id = pomp.order_id" +
+            " and opo.order_type!=2" +
+            " and material_id = #{materialId}  " )
+    ProduceOrderMaterialProgress groupByMaterialId(@Param("materialId")String materialId);
 }
