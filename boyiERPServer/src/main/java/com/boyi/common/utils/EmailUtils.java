@@ -18,7 +18,7 @@ public class EmailUtils {
     public static final String MODULE_NAME="【博艺ERP】【物料低预警线】";
     public static final String MONITOR_NAME="【博艺ERP】【系统监控】";
     public static final String MODULE_ADDNEW_MATERIAL_NAME="【博艺ERP】【补充物料】";
-    public static final String MODULE_ADD_MATERIAL_NAME="【博艺ERP】【入库皮料】";
+    public static final String MODULE_ADD_MATERIAL_NAME="【博艺ERP】【入库提示】";
     public static final String MODULE_LOST_MATERIAL_NAME="【博艺ERP】【废库存大皮】";
 
     public static final String SCHEDULE_UPDATE_ORDER_NUM_NAME="【博艺ERP】【定时修改订单】";

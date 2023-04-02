@@ -139,11 +139,21 @@ public interface ProduceOrderMaterialProgressMapper extends BaseMapper<ProduceOr
             " order by pomp.created desc limit 1")
     ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDescExcludeSelf(@Param("materialId") String materialId,@Param("id") Long id);
 
-    @Select("select sum(IFNULL(cal_num,0)) calNum,sum(prepared_num) preparedNum,sum(in_num) inNum from produce_order_material_progress pomp ," +
-            "order_product_order opo" +
-            " where" +
-            " opo.id = pomp.order_id" +
-            " and opo.order_type!=2" +
-            " and material_id = #{materialId}  " )
+    @Select(
+            "select (t1.calNum + IFNULL(t2.calNum,0) ) calNum,(t1.preparedNum + IFNULL(t2.preparedNum,0) ) preparedNum,(t1.inNum + IFNULL(t2.inNum,0)) inNum from " +
+            " (" +
+            " select sum(IFNULL(cal_num,0)) calNum,sum(prepared_num) preparedNum,sum(in_num) inNum from produce_order_material_progress pomp ," +
+            "            order_product_order opo" +
+            "             where" +
+            "             opo.id = pomp.order_id" +
+            "             and opo.order_type!=2" +
+            "             and material_id = #{materialId}" +
+            " ) t1," +
+            " (" +
+            " select sum(IFNULL(cal_num,0)) calNum,sum(prepared_num) preparedNum,sum(in_num) inNum from produce_order_material_progress  " +
+            "             where " +
+            "              order_id is null" +
+            "             and material_id = #{materialId}" +
+            " ) t2 " )
     ProduceOrderMaterialProgress groupByMaterialId(@Param("materialId")String materialId);
 }

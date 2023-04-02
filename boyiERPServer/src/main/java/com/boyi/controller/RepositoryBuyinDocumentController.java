@@ -800,6 +800,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
             }
             repositoryBuyinDocumentService.save(repositoryBuyinDocument);
             StringBuilder sb = new StringBuilder();
+            LocalDateTime gengzhongDate = LocalDateTime.of(2022, 12, 1, 0, 0, 0);
 
 
             for (RepositoryBuyinDocumentDetail item : repositoryBuyinDocument.getRowList()){
@@ -830,7 +831,26 @@ public class RepositoryBuyinDocumentController extends BaseController {
                         }
                     }
                     sb.append("<br>");
-
+                }else {
+                    // 假如是创建日期在2022-12-01号开始的物料，则进行跟踪
+                    BaseMaterial bm = baseMaterialService.getById(materialId);
+                    if(bm!=null && bm.getCreated() != null && bm.getCreated().isAfter(gengzhongDate)){
+                        ProduceOrderMaterialProgress pomp = produceOrderMaterialProgressService.groupByMaterialId(item.getMaterialId());
+                        if(pomp!=null){
+                            String calNum = pomp.getCalNum();
+                            String inNum = pomp.getInNum();
+                            double totalInNum = BigDecimalUtil.add(inNum, item.getRadioNum() + "").doubleValue();
+                            sb.append("物料["+item.getMaterialId()+","+item.getMaterialName()+"]单价:"+item.getPrice()+",入库数量:"+item.getRadioNum());
+                            sb.append("。应报数量:"+ calNum)
+                                    .append(",已报备数量:"+pomp.getPreparedNum())
+                                    .append(",总入库数量:"+ totalInNum);
+                            // 假如入库超过备料信息，多添加文字警告
+                            if(Double.valueOf(calNum) < totalInNum){
+                                sb.append(".【警告】:总入库["+totalInNum+"] > 应报数量["+calNum+"]");
+                            }
+                            sb.append("<br>");
+                        }
+                    }
 
                 }
             }
@@ -853,12 +873,20 @@ public class RepositoryBuyinDocumentController extends BaseController {
             if(sb.length() > 0){
                 ThreadUtils.executorService.submit(() -> {
                 try {
-                    EmailUtils.sendMail(EmailUtils.MODULE_ADD_MATERIAL_NAME,
-                            toEmail,csEmails.split(","), sb.toString());
+                    String msg = sb.toString();
+
+                    if(msg.contains("警告")){
+                        EmailUtils.sendMail(EmailUtils.MODULE_ADD_MATERIAL_NAME,
+                                toEmail,new String[]{"408463170@qq.com"}, msg);
+                    }else{
+                        EmailUtils.sendMail(EmailUtils.MODULE_ADD_MATERIAL_NAME,
+                                toEmail,csEmails.split(","), msg);
+                    }
+
                 }catch (Exception e){
                     log.error("发生异常.",e);
                 }
-            });
+                });
             }
 
 
