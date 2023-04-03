@@ -17,6 +17,10 @@ public class BaseController {
     public DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
+    public ProduceZcGroupService produceZcGroupService;
+    @Autowired
+    public ProduceBatchZcProgressService produceBatchZcProgressService;
+    @Autowired
     public FinanceSummaryFiltersService financeSummaryFiltersService;
 
     @Autowired

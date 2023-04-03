@@ -52,4 +52,6 @@ public interface ProduceBatchService extends IService<ProduceBatch> {
     List<ProduceBatch> listByOutDateIsNullWithDataDate(String dataDate);
 
     Double sumByBatchIdPres(Set<String> batchIdPres);
+
+    List<ProduceBatch> listByWithZCDataDate(String date);
 }

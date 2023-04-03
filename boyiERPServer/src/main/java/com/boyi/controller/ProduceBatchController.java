@@ -49,6 +49,71 @@ public class ProduceBatchController extends BaseController {
     @Value("${poi.produceBatchImportDemoPath}")
     private String poiImportDemoPath;
 
+
+
+    @PostMapping("/zcProgressList")
+    @PreAuthorize("hasAuthority('produce:batch:list')")
+    public ResponseResult zcProgressList(Principal principal,@RequestBody Map<String,Object> params) {
+        Object searchQueryStartDateStr = params.get("searchQueryStartDateStr");
+
+        List<ProduceBatch> progresses= new ArrayList<>();
+
+        List<ProduceBatch> progressesLists= new ArrayList<>();
+
+        String name = principal.getName();
+        progressesLists = this.produceBatchService.listByWithZCDataDate(searchQueryStartDateStr.toString());
+
+        // 将同batchId的去除,并且将-1这种消除
+        HashMap<String, Long> batchIdPre_number = new HashMap<>();
+
+        HashMap<String, ProduceBatch> batchIdPre_ownZCProgress = new HashMap<>();
+
+        for(ProduceBatch pb : progressesLists){
+            String batchIdPre = pb.getBatchId().split("-")[0];
+
+            if(!batchIdPre_ownZCProgress.containsKey(batchIdPre) && pb.getGroupName()!=null && !pb.getGroupName().isEmpty()){
+                batchIdPre_ownZCProgress.put(batchIdPre,pb);
+            }
+
+            // 查询该批次号前缀的数量
+            Long totalNum = batchIdPre_number.get(batchIdPre);
+            if(totalNum==null){
+                totalNum = produceBatchService.sumByBatchIdPre(batchIdPre);
+
+                batchIdPre_number.put(batchIdPre,totalNum);
+
+            }else{
+                continue;
+            }
+
+            pb.setMergeBatchNumber(totalNum+"");
+            pb.setBatchId(batchIdPre);
+            progresses.add(pb);
+        }
+        for(ProduceBatch pb : progresses) {
+            String batchIdPre = pb.getBatchId().split("-")[0];
+
+            String groupName = pb.getGroupName();
+            if(groupName==null || groupName.isEmpty()){
+                ProduceBatch ownZCProgress = batchIdPre_ownZCProgress.get(batchIdPre);
+                if(ownZCProgress!=null){
+                    pb.setGroupName(ownZCProgress.getGroupName());
+                    pb.setSendForeignProductDate(ownZCProgress.getSendForeignProductDate());
+                    pb.setOutDate(ownZCProgress.getOutDate());
+                }
+            }
+        }
+
+
+            HashMap<String, Object> returnMap = new HashMap<>();
+        returnMap.put("progressData",progresses);
+
+
+        return ResponseResult.succ(returnMap);
+
+    }
+
+
     @PostMapping("/push")
     @PreAuthorize("hasAuthority('produce:batch:push')")
     @Transactional
@@ -657,6 +722,7 @@ public class ProduceBatchController extends BaseController {
             Long sum = produceBatchService.sumByBatchIdPre(pre);
             pb.setMergeBatchNumber(sum+"");
 
+            // 查询裁断的进度表
             List<ProduceBatchProgress> progresses = produceBatchProgressService.listByBatchId(pb.getId());
             if(progresses==null || progresses.isEmpty()){
                 progresses= new ArrayList<>();
@@ -670,6 +736,19 @@ public class ProduceBatchController extends BaseController {
                 }
             }
             pb.setProgresses(ownProgress);
+
+            // 查询针车的进度表
+            if(typeIds.contains(2L)){
+                List<ProduceBatchZcProgress> zcProgresses = produceBatchZcProgressService.listByBatchId(pb.getId());
+                for(ProduceBatchZcProgress progress : zcProgresses){
+                    ProduceZcGroup group = produceZcGroupService.getById(progress.getZcGroupId());
+                    progress.setZcGroupName(group.getGroupName());
+                }
+                pb.setZcProgresses(zcProgresses);
+
+            }else{
+                pb.setZcProgresses(new ArrayList<>());
+            }
 
             List<ProduceBatchDelay> delays = produceBatchDelayService.listByBatchId(pb.getId());
             if(delays==null || delays.isEmpty()){

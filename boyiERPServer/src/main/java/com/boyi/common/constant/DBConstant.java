@@ -25,6 +25,30 @@ public class DBConstant {
     }
 
 
+    public static class TABLE_PRODUCE_BATCH_ZC_PROGRESS{
+        public static final String ID_FIELDNAME = "id";
+        public static final String SEND_DATE_FIELDNAME = "send_date";
+        public static final String OUT_DATE_FIELDNAME = "out_date";
+        public static final String PRODUCE_BATCH_ID_FIELDNAME = "produce_batch_id";
+
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATE_USER_FIELDNAME = "update_user";
+
+
+        /**
+         *  0:代表 已被接收
+         */
+        public static final Integer ACCEPT_STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 未接收
+         */
+        public static final Integer ACCEPT_STATUS_FIELDVALUE_1 = 1;
+
+    }
+
     public static class TABLE_FINANCE_SUMMARY{
         public static final Map<Integer,String> statusMap;
 

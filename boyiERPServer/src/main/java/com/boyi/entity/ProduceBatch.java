@@ -131,4 +131,12 @@ public class ProduceBatch extends BaseEntity {
 
     @TableField(exist = false)
     private Long produceBatchProgressId;
+
+
+    @TableField(exist = false)
+    private List<ProduceBatchZcProgress> zcProgresses;
+
+
+    @TableField(exist = false)
+    private String groupName;
 }

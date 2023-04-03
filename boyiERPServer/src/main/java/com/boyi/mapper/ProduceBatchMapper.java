@@ -97,4 +97,23 @@ public interface ProduceBatchMapper extends BaseMapper<ProduceBatch> {
     @Select("<script> select sum(IFNULL(size34,0)+IFNULL(size35,0)+IFNULL(size36,0)+IFNULL(size37,0)+IFNULL(size38,0)+IFNULL(size39,0)+IFNULL(size40,0)+IFNULL(size41,0)+IFNULL(size42,0)+IFNULL(size43,0)+IFNULL(size44,0)+IFNULL(size45,0)+IFNULL(size46,0)+IFNULL(size47,0)) from produce_batch pb " +
             "where pb.batch_id in <foreach collection='batchIdPres' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach>  </script> ")
     Double sumByBatchIdPres(@Param("batchIdPres") Set<String> batchIdPres);
+
+
+    @Select(
+                    "select pzg.group_name, t1.* from " +
+                    "(" +
+                    "select pbp.zc_group_id," +
+                    " opo.end_date,opo.order_type," +
+                    " pb.id ,pbp.id produce_batch_progress_id,pbp.is_accept," +
+                    " opo.order_num,pb.batch_id,opo.product_num,opo.product_brand,pbp.out_date,pbp.send_date send_foreign_product_ate" +
+                    "             from produce_batch pb inner join" +
+                    "             order_product_order opo on pb.order_num = opo.order_num " +
+                    "             left join produce_batch_zc_progress pbp " +
+                    "             on pb.id = pbp.produce_batch_id " +
+                    " " +
+                    "             where  date_format(pb.created,'%Y-%m-%d') >= #{dataDate}" +
+                    " ) t1" +
+                    " left join produce_zc_group pzg " +
+                    " on t1.zc_group_id = pzg.id ")
+    List<ProduceBatch> listByWithZCDataDate(@Param("dataDate")String date);
 }

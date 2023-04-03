@@ -156,4 +156,9 @@ public class ProduceBatchServiceImpl extends ServiceImpl<ProduceBatchMapper, Pro
     public Double sumByBatchIdPres(Set<String> batchIdPres) {
         return this.produceBatchMapper.sumByBatchIdPres(batchIdPres);
     }
+
+    @Override
+    public List<ProduceBatch> listByWithZCDataDate(String date) {
+        return this.produceBatchMapper.listByWithZCDataDate(date);
+    }
 }
