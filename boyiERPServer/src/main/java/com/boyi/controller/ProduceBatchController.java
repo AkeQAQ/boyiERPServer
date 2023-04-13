@@ -507,7 +507,12 @@ public class ProduceBatchController extends BaseController {
                 for(ProduceBatch pb : pbs){
                     List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
                     if(progresses!=null&&progresses.size()>0){
-                        return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间进度表记录。不能删除");
+                        return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有裁断车间进度表记录。不能删除");
+                    }
+
+                    List<ProduceBatchZcProgress> zcProgress = produceBatchZcProgressService.listByBatchId(pb.getId());
+                    if(zcProgress!=null&&zcProgress.size()>0){
+                        return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有针车车间进度表记录。不能删除");
                     }
                 }
             }
@@ -559,8 +564,14 @@ public class ProduceBatchController extends BaseController {
                     for(ProduceBatch pb : pbs){
                         List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
                         if(progresses!=null&&progresses.size()>0){
-                            return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间进度表记录。不能删除");
+                            return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有裁断车间进度表记录。不能删除");
                         }
+
+                        List<ProduceBatchZcProgress> zcProgress = produceBatchZcProgressService.listByBatchId(pb.getId());
+                        if(zcProgress!=null&&zcProgress.size()>0){
+                            return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有针车车间进度表记录。不能删除");
+                        }
+
                         List<ProduceBatchDelay> delays = produceBatchDelayService.listByProduceBatchId(pb.getId());
                         if(delays!=null&&delays.size()>0){
                             return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有车间欠料进度表记录。不能删除");
@@ -633,7 +644,12 @@ public class ProduceBatchController extends BaseController {
                 for(ProduceBatch pb : pbs){
                     List<ProduceBatchProgress> progresses = produceBatchProgressService.listByProduceBatchId(pb.getId());
                     if(progresses!=null&&progresses.size()>0){
-                        return ResponseResult.fail("相关联的生产序号："+pb.getBatchId()+"已有车间进度表记录。不能反审核");
+                        return ResponseResult.fail("相关联的生产序号："+pb.getBatchId()+"已有裁断车间进度表记录。不能反审核");
+                    }
+
+                    List<ProduceBatchZcProgress> zcProgress = produceBatchZcProgressService.listByBatchId(pb.getId());
+                    if(zcProgress!=null&&zcProgress.size()>0){
+                        return ResponseResult.fail("生产序号："+pb.getBatchId()+"已有针车车间进度表记录。不能删除");
                     }
                 }
             }
@@ -741,8 +757,11 @@ public class ProduceBatchController extends BaseController {
             if(typeIds.contains(2L)){
                 List<ProduceBatchZcProgress> zcProgresses = produceBatchZcProgressService.listByBatchId(pb.getId());
                 for(ProduceBatchZcProgress progress : zcProgresses){
-                    ProduceZcGroup group = produceZcGroupService.getById(progress.getZcGroupId());
-                    progress.setZcGroupName(group.getGroupName());
+                    if(progress.getZcGroupId()!=null){
+                        ProduceZcGroup group = produceZcGroupService.getById(progress.getZcGroupId());
+                        progress.setZcGroupName(group.getGroupName());
+                    }
+
                 }
                 pb.setZcProgresses(zcProgresses);
 
