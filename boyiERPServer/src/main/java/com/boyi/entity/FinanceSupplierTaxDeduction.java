@@ -3,6 +3,7 @@ package com.boyi.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
@@ -32,6 +33,7 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
      * 开票单位
      */
     @ExcelAttribute(sort = 3)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String company;
 
     /**
@@ -48,6 +50,7 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
      * 发票号
      */
     @ExcelAttribute(sort = 4)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private String documentNum;
 
     /**
@@ -71,6 +74,7 @@ public class FinanceSupplierTaxDeduction extends BaseEntity {
      * 开票金额
      */
     @ExcelAttribute(sort = 5)
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private BigDecimal documentAmount;
 
     /**
