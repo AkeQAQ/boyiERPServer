@@ -67,7 +67,7 @@ public interface FinanceSupplierTaxSupplementMapper extends BaseMapper<FinanceSu
     @Select(wrapperSql)
     FinanceSupplierTaxSupplement one(@Param("ew") Wrapper queryWrapper);
 
-    @Select("select m.supplier_id,sum(m.tax_supplement_amount) total_amount from finance_supplier_tax_supplement m" +
+    @Select("select m.supplier_id,IFNULL( sum(m.tax_supplement_amount) ,0)total_amount from finance_supplier_tax_supplement m" +
             " where m.document_date >=#{startDate} and m.document_date <= #{endDate}" +
             " group by m.supplier_id")
     List<FinanceSupplierTaxSupplement> getSupplierTotalAmountBetweenDate(@Param("startDate") LocalDate startDateTime,@Param("endDate") LocalDate endDateTime);
