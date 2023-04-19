@@ -83,7 +83,8 @@ public class RepositoryPickMaterialController extends BaseController {
                 totalNum += detail.getNum();
             }
 
-            repositoryPickMaterial.setTotalNum( totalNum);
+
+            repositoryPickMaterial.setTotalNum( new BigDecimal(totalNum).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 
             repositoryPickMaterial.setDepartmentName(department.getName());
 

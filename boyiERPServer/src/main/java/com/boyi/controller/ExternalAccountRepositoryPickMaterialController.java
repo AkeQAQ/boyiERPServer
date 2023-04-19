@@ -23,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -79,7 +80,7 @@ public class ExternalAccountRepositoryPickMaterialController extends BaseControl
                 totalNum += detail.getNum();
             }
 
-            repositoryPickMaterial.setTotalNum( totalNum);
+            repositoryPickMaterial.setTotalNum( new BigDecimal(totalNum).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 
             repositoryPickMaterial.setDepartmentName(department.getName());
 

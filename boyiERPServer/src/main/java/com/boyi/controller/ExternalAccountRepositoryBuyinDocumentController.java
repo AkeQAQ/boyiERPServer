@@ -91,7 +91,7 @@ public class ExternalAccountRepositoryBuyinDocumentController extends BaseContro
                 totalNum += detail.getNum();
             }
 
-            repositoryBuyinDocument.setTotalNum( totalNum);
+            repositoryBuyinDocument.setTotalNum(new BigDecimal(totalNum).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue() );
             repositoryBuyinDocument.setTotalAmount(new BigDecimal(totalAmount).setScale(2,   BigDecimal.ROUND_HALF_UP).doubleValue());
 
 
