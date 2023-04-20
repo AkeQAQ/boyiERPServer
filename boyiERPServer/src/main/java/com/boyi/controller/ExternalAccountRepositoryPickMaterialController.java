@@ -350,10 +350,6 @@ public class ExternalAccountRepositoryPickMaterialController extends BaseControl
         repositoryPickMaterial.setStatus(DBConstant.TABLE_EA_REPOSITORY_BUYIN_DOCUMENT.STATUS_FIELDVALUE_2);
 
         try {
-            boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
-            if(!validIsClose){
-                return ResponseResult.fail("日期请设置在关账日之后.");
-            }
             if(repositoryPickMaterial.getBatchId()!=null && !repositoryPickMaterial.getBatchId().isEmpty()){
                 List<ExternalAccountRepositoryPickMaterial> pickM = externalAccountRepositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId(), repositoryPickMaterial.getDepartmentId());
                 if(pickM!=null && pickM.size()>0){
@@ -532,11 +528,6 @@ public class ExternalAccountRepositoryPickMaterialController extends BaseControl
         repositoryPickMaterial.setStatus(DBConstant.TABLE_EA_REPOSITORY_PICK_MATERIAL.STATUS_FIELDVALUE_2);
 
         try {
-
-            boolean validIsClose = validIsClose(repositoryPickMaterial.getPickDate());
-            if(!validIsClose){
-                return ResponseResult.fail("日期请设置在关账日之后.");
-            }
 
             if(repositoryPickMaterial.getBatchId()!=null && !repositoryPickMaterial.getBatchId().isEmpty()){
                 List<ExternalAccountRepositoryPickMaterial> pickM = externalAccountRepositoryPickMaterialService.getSameBatch(repositoryPickMaterial.getId(),repositoryPickMaterial.getBatchId(), repositoryPickMaterial.getDepartmentId());
