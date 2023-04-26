@@ -1,5 +1,6 @@
 package com.boyi.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.boyi.common.utils.ExcelAttribute;
 import com.boyi.entity.base.BaseEntity;
@@ -88,7 +89,10 @@ public class OrderProductOrder extends BaseEntity {
     @ExcelAttribute(sort = 1)
     private String shoeLast;
 
+    private Long materialBomId;
 
+    @TableField(exist = false)
+    private String materialBomName;
     /**
      *  批量备料多余字段
      *

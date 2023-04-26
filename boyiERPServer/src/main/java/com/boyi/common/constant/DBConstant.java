@@ -1399,6 +1399,7 @@ public class DBConstant {
         public static final String CREATED_FIELDNAME = "created";
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String ID_FIELDNAME = "id";
+        public static final String MATERIAL_BOM_ID_FIELDNAME = "material_bom_id";
 
         public static final String PREPARED_FIELDNAME = "prepared";
 

@@ -306,30 +306,31 @@ public class AnalysisController extends BaseController {
         List<OrderProductOrder> orders = orderProductOrderService.listByEndDate(sevenDateStr,nowDateStr);
 
         // 2. 对该些订单，有组成结构的进行物料计算，保留订单物料明细内容，
-        Map<String,ProduceProductConstituent> product_brand_ppc = new HashMap<String,ProduceProductConstituent>();// 货号_品牌
+        Map<Long,ProduceProductConstituent> product_brand_ppc = new HashMap<Long,ProduceProductConstituent>();// 货号_品牌
 
-        Map<String,List<ProduceProductConstituentDetail>> product_brand_ppcd = new HashMap<String,List<ProduceProductConstituentDetail>>();// 货号_品牌
+        Map<Long,List<ProduceProductConstituentDetail>> product_brand_ppcd = new HashMap<Long,List<ProduceProductConstituentDetail>>();// 货号_品牌
 
 
         HashMap<String, Map<String, Object>> returnMap = new HashMap<>();
 
         for(OrderProductOrder opo : orders){
             Integer orderNumber = opo.getOrderNumber();
-            String num_brand = opo.getProductNum() + "_" + opo.getProductBrand();
-
-            ProduceProductConstituent ppc = product_brand_ppc.get(num_brand);
+            Long materialBomId = opo.getMaterialBomId();
+            ProduceProductConstituent ppc = product_brand_ppc.get(materialBomId);
             if(ppc == null){
-                ppc = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
-                if(ppc==null){
+                if(materialBomId==null){
                     continue;
                 }
-                product_brand_ppc.put(num_brand,ppc);
+                ppc = produceProductConstituentService.getById(materialBomId);
 
-                List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(ppc.getId());
-                product_brand_ppcd.put(num_brand,details);
+                product_brand_ppc.put(materialBomId,ppc);
+
+                List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(materialBomId);
+                product_brand_ppcd.put(materialBomId,details);
             }
+
             // 订单和物料进行计算，存在returnMap中。
-            List<ProduceProductConstituentDetail> details = product_brand_ppcd.get(num_brand);
+            List<ProduceProductConstituentDetail> details = product_brand_ppcd.get(materialBomId);
             for(ProduceProductConstituentDetail detail : details){
                 String materialId = detail.getMaterialId();
                 String dosage = detail.getDosage();

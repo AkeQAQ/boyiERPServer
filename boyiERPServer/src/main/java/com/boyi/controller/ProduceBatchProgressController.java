@@ -209,11 +209,10 @@ public class ProduceBatchProgressController extends BaseController {
         if(opo==null){
             return;
         }
-        ProduceProductConstituent ppc = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
-        if(ppc==null){
+        if(opo.getMaterialBomId()==null){
             throw new RuntimeException("没有审核通过的组成结构信息!");
         }
-        List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(ppc.getId());
+        List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(opo.getMaterialBomId());
 
         // 假如已经存在该物料，则不新增
         for(ProduceProductConstituentDetail detail :details){
@@ -223,7 +222,7 @@ public class ProduceBatchProgressController extends BaseController {
 
         }
         ProduceProductConstituentDetail detail2 = new ProduceProductConstituentDetail();
-        detail2.setConstituentId(ppc.getId());
+        detail2.setConstituentId(opo.getMaterialBomId());
         detail2.setMaterialId(materialId);
         detail2.setDosage("1");
         detail2.setCanShowPrint("0");

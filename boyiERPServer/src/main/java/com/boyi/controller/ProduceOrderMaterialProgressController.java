@@ -392,7 +392,7 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                 return ResponseResult.fail("解析内容未空");
             }
             ArrayList<Map<String,String>> errorMsgs = new ArrayList<>();
-            HashSet<String> queriedSet = new HashSet<>();
+            HashSet<Long> queriedSet = new HashSet<>();
 
             // 查询是否有缺产品组成的，有则返回提示
             for (OrderProductOrder obj: orderProductOrders){
@@ -402,11 +402,10 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                 if(queriedSet.contains(theKey)){
                     continue;
                 }
-                ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrand(obj.getProductNum(), obj.getProductBrand());
-                queriedSet.add(theKey);
-                if(theConstituent == null){
+                queriedSet.add(obj.getMaterialBomId());
+                if(obj.getMaterialBomId() == null){
                     HashMap<String, String> errorMsg = new HashMap<>();
-                    errorMsg.put("content","公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"]没有审核通过的产品组成结构");
+                    errorMsg.put("content","公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"]没有选择物料BOM");
                     errorMsgs.add(errorMsg);
                 }
             }

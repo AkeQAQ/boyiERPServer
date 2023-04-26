@@ -2,6 +2,7 @@ package com.boyi.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.constant.DBConstant;
@@ -52,6 +53,52 @@ public class OrderProductOrderController extends BaseController {
         replaceMap.put("订单",0);
         replaceMap.put("回单",1);
     }
+
+
+
+    @Transactional
+    @GetMapping("updateMbom")
+    @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
+    public ResponseResult updateMbom(Principal principal,Long id,Long mBomId) throws Exception{
+        try {
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            // 假如订单备料有信息的话，则需要备料信息清空才可以
+            List<ProduceOrderMaterialProgress> pomps = produceOrderMaterialProgressService.listByOrderId(id);
+            if(pomps!=null && !pomps.isEmpty()){
+                // 假如备料信息有存在且>0 则不能更换
+                for(ProduceOrderMaterialProgress pomp : pomps){
+                    if(pomp.getPreparedNum()!=null && Double.valueOf(pomp.getPreparedNum())>0){
+                        return ResponseResult.fail("老BOM存在备料>0的内容，请清空!");
+                    }
+                }
+            }
+
+            if(mBomId==-1){
+                old.setMaterialBomId(null);
+
+                orderProductOrderService.update(new UpdateWrapper<OrderProductOrder>()
+                        .set(DBConstant.TABLE_ORDER_PRODUCT_ORDER.MATERIAL_BOM_ID_FIELDNAME,null)
+                        .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ID_FIELDNAME,id));
+
+            }else{
+
+                // 假如物料BOM 的工厂型号和品牌不一致，则不能选择
+                ProduceProductConstituent ppc = produceProductConstituentService.getById(mBomId);
+                if(!old.getProductBrand().equals(ppc.getProductBrand()) ||
+                        !old.getProductNum().equals(ppc.getProductNum())){
+                    return ResponseResult.fail("请选择一致的工厂货号和品牌!");
+                }
+
+                old.setMaterialBomId(mBomId);
+            }
+            orderProductOrderService.updateById(old);
+            return ResponseResult.succ("选择物料BOM成功!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
 
 
     @Transactional
@@ -513,11 +560,10 @@ public class OrderProductOrderController extends BaseController {
     @GetMapping("/listOrderConstituentProgress")
     public ResponseResult listOrderConstituentProgress(Principal principal, Long orderId)throws Exception {
         OrderProductOrder order = orderProductOrderService.getById(orderId);
-        ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrand(order.getProductNum(), order.getProductBrand());
-        if(theConstituent==null){
-            return ResponseResult.fail("没有审核通过的产品组成结构信息，请确认!");
+        if(order.getMaterialBomId()==null){
+            return ResponseResult.fail("没有选择物料BOM，请确认!");
         }
-        List<ProduceProductConstituentDetail> theConsitituentDetails = produceProductConstituentDetailService.listByForeignId(theConstituent.getId());
+        List<ProduceProductConstituentDetail> theConsitituentDetails = produceProductConstituentDetailService.listByForeignId(order.getMaterialBomId());
 
         List<ProduceOrderMaterialProgress> theProgress = produceOrderMaterialProgressService.listByOrderId(order.getId());
         HashMap<String, ProduceOrderMaterialProgress> theMaterialIdAndProgress = new HashMap<>();
@@ -727,19 +773,11 @@ public class OrderProductOrderController extends BaseController {
             if(!obj.getPrepared().equals(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1)){
                 canBatchPrepareFlag=false;
             }
-        }
-
-        // 查看是否该些订单存在对应审核通过的产品组成结构
-        List<OrderProductOrder> listsGroupProductNumBrands= orderProductOrderService.listProductNumBrand(Arrays.asList(ids));
-        if(listsGroupProductNumBrands==null || listsGroupProductNumBrands.isEmpty()){
-            return ResponseResult.fail("所需订单没有数据!");
-        }
-        for (OrderProductOrder obj : listsGroupProductNumBrands){
-            ProduceProductConstituent theConstituent = produceProductConstituentService.getValidByNumBrand(obj.getProductNum(), obj.getProductBrand());
-            if(theConstituent == null){
-                return ResponseResult.fail("公司货号["+obj.getProductNum()+"],品牌["+obj.getProductBrand()+"]没有审核通过的产品组成结构");
+            if(obj.getMaterialBomId() == null){
+                return ResponseResult.fail("订单号:["+obj.getOrderNum()+"]没有选择物料BOM");
             }
         }
+
 
         // 1. 根据批量订单ID，获取订单的组成信息，获取订单数量信息
         // 2. 获取进度表对应的信息
@@ -1645,9 +1683,15 @@ public class OrderProductOrderController extends BaseController {
 
         // 标识是否有产品组成结构
         for(OrderProductOrder opo :pageData.getRecords()){
-            ProduceProductConstituent productConsi = produceProductConstituentService.getValidByNumBrand(opo.getProductNum(), opo.getProductBrand());
-            opo.setHasProductConstituent(productConsi !=null); // 标记是否有组成结构
+            Long materialBomId = opo.getMaterialBomId();
+            opo.setHasProductConstituent(materialBomId !=null); // 标记是否有组成结构
+            if(materialBomId==null){
+                continue;
+            }
+            ProduceProductConstituent productConsi = produceProductConstituentService.getById(materialBomId);
+            String showStr = productConsi.getProductNum() + productConsi.getProductBrand();
 
+            opo.setMaterialBomName(showStr);
             int count = produceProductConstituentService.countProductNum(opo.getProductNum());
 
             opo.setHasProductNum(count > 0);
@@ -1714,8 +1758,7 @@ public class OrderProductOrderController extends BaseController {
 
             }
             // 假如是不存在组成结构的，也不能确认
-            ProduceProductConstituent isExist = produceProductConstituentService.getValidByNumBrand(old.getProductNum(), old.getProductBrand());
-            if(isExist ==null){
+            if(old.getMaterialBomId() ==null){
                 return ResponseResult.fail("备料:"+old.getOrderNum()+",要求是存在有组成结构的");
             }
             OrderProductOrder orderProductOrder = new OrderProductOrder();

@@ -1,11 +1,10 @@
 package com.boyi.mapper;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.boyi.common.vo.OrderProductCalVO;
-import com.boyi.entity.AnalysisProductOrderVO;
-import com.boyi.entity.OrderProductOrder;
+import com.boyi.entity.*;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.boyi.entity.ProduceOrderMaterialProgress;
-import com.boyi.entity.RepositoryStock;
 import com.boyi.service.ProduceOrderMaterialProgressService;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -26,6 +25,19 @@ import java.util.Set;
  */
 @Repository
 public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
+
+    String querySql =
+            " select opo.*  from order_product_order opo" +
+                    " left join " +
+                    " produce_product_constituent ppc " +
+                    " on opo.material_bom_id = ppc.id";
+    String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
+    /**
+     * 分页查询
+     */
+    @Select(wrapperSql)
+    Page<OrderProductOrder> page(Page page, @Param("ew") Wrapper queryWrapper);
+
 
     @Select("<script>" +
             "select t3.*,CONVERT(t3.order_number,DECIMAL(6)) * CONVERT(t3.dosage,DECIMAL(12,6)) cal_num ,pomp.prepared_num from " +

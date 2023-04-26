@@ -89,7 +89,7 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
 
 
 
-        Page page2 = this.page(page,
+        return this.innerQuery(page,
                 queryWrapper
                         .in(searchStatus != null && searchStatus.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDNAME, searchStatus)
                         .in(searchStatus2 != null && searchStatus2.size() > 0, DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDNAME, searchStatus2)
@@ -98,8 +98,11 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                         .orderByDesc(DBConstant.TABLE_ORDER_PRODUCT_ORDER.CREATED_FIELDNAME)
 
         );
+    }
 
-        return page2;
+    private Page<OrderProductOrder> innerQuery(Page page, QueryWrapper<OrderProductOrder> eq) {
+        return orderProductOrderMapper.page(page,eq);
+
     }
 
     @Override
