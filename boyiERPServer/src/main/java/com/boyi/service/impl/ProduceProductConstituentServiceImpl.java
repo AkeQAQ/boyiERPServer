@@ -134,4 +134,19 @@ public class ProduceProductConstituentServiceImpl extends ServiceImpl<ProducePro
 
         return this.getOne(queryWrapper);
     }
+
+    @Override
+    public ProduceProductConstituent getValidLatestByNumAndBrand(String productNum, String productBrand) {
+        QueryWrapper<ProduceProductConstituent> queryWrapper = new QueryWrapper<>();
+        queryWrapper
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_NUM_FIELDNAME,productNum)
+                .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.PRODUCT_BRAND_FIELDNAME,productBrand)
+                .orderByDesc(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.CREATED_FIELDNAME);
+
+        List<ProduceProductConstituent> list = this.list(queryWrapper);
+        if(list==null || list.isEmpty()){
+            return null;
+        }
+        return list.get(0);
+    }
 }

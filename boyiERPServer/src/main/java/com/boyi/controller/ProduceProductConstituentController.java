@@ -27,12 +27,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>
@@ -78,12 +76,6 @@ public class ProduceProductConstituentController extends BaseController {
     @Transactional
     @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
     public ResponseResult updateNumBrandSubmit(Principal principal,@RequestBody ProduceProductConstituent ppc) {
-        // 0. 看下新的货号、品牌是否有重复，重复不能修改
-
-        ProduceProductConstituent isNewExist = produceProductConstituentService.getByNumBrand(ppc.getProductNum(),ppc.getProductBrand());
-        if(isNewExist!=null){
-            return ResponseResult.fail("修改后会有重复的品牌和货号，不允许修改");
-        }
         ProduceProductConstituent old = produceProductConstituentService.getById(ppc.getId());
 
         if(old.getProductBrand().equals(ppc.getProductBrand()) && old.getProductNum().equals(ppc.getProductNum())){
@@ -91,7 +83,7 @@ public class ProduceProductConstituentController extends BaseController {
         }
         // 1. 允许修改的，把老的货号、品牌的订单信息，都一并改成新的货号、品牌、包括历史订单表。
 
-        List<OrderProductOrder> oldOrders = orderProductOrderService.getByNumBrand(old.getProductNum(), old.getProductBrand());
+        List<OrderProductOrder> oldOrders = orderProductOrderService.listByMBomId(ppc.getId());
         for(OrderProductOrder order : oldOrders){
             order.setProductNum(ppc.getProductNum());
             order.setProductBrand(ppc.getProductBrand());
@@ -100,14 +92,6 @@ public class ProduceProductConstituentController extends BaseController {
             orderProductOrderService.updateBatchById(oldOrders);
         }
 
-        List<HisOrderProductOrder> oldHisOrders = hisOrderProductOrderService.getByNumBrand(old.getProductNum(), old.getProductBrand());
-        for(HisOrderProductOrder order : oldHisOrders){
-            order.setProductNum(ppc.getProductNum());
-            order.setProductBrand(ppc.getProductBrand());
-        }
-        if(!oldHisOrders.isEmpty()){
-            hisOrderProductOrderService.updateBatchById(oldHisOrders);
-        }
 
         old.setProductNum(ppc.getProductNum());
         old.setProductBrand(ppc.getProductBrand());
@@ -487,64 +471,6 @@ public class ProduceProductConstituentController extends BaseController {
     /**
      * 计算用料
      */
-    /*@GetMapping("/calNumByBrandNumColor")
-    @PreAuthorize("hasAuthority('produce:productConstituent:list')")
-    @Transactional
-    public ResponseResult calNumById(Principal principal,String productNum,String productBrand,String productColor, Long orderNumber)throws Exception {
-        if(StringUtils.isBlank(productNum) || StringUtils.isBlank(productBrand) ||StringUtils.isBlank(productColor) ){
-            return ResponseResult.fail("公司货号，品牌，颜色不能有空");
-        }
-        try {
-
-            ProduceProductConstituent byNumBrandColor = produceProductConstituentService.getByNumBrandColor(productNum, productBrand);
-            if(byNumBrandColor == null){
-                return ResponseResult.fail("产品组成结构没有公司货号["+productNum+"],品牌["+productBrand+"] 对应的信息");
-            }
-            List<ProduceProductConstituentDetail> details = produceProductConstituentDetailService.listByForeignId(byNumBrandColor.getId());
-
-            ArrayList<Map<String, Object>> result = new ArrayList<>();
-            // 计算数目 * 每个物料的用量
-            for (ProduceProductConstituentDetail item : details){
-                HashMap<String, Object> calTheMap = new HashMap<>();
-                BaseMaterial material = baseMaterialService.getById(item.getMaterialId());
-                // 查看该物料，最近的供应商价目，
-                List<BaseSupplierMaterial> theSupplierPrices = baseSupplierMaterialService.myList(new QueryWrapper<BaseSupplierMaterial>()
-                        .eq(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.MATERIAL_ID_FIELDNAME, item.getMaterialId())
-                        .gt(DBConstant.TABLE_BASE_SUPPLIER_MATERIAL.END_DATE_FIELDNAME, LocalDate.now())
-                );
-                ArrayList<Map<String, Object>> supplierPrices = new ArrayList<>();
-                calTheMap.put("suppliers",supplierPrices);
-                for (BaseSupplierMaterial obj:theSupplierPrices){
-                    HashMap<String, Object> supplierPrice = new HashMap<>();
-                    supplierPrice.put("supplierName",obj.getSupplierName());
-                    supplierPrice.put("price",obj.getPrice());
-                    supplierPrice.put("startDate",obj.getStartDate());
-                    supplierPrice.put("endDate",obj.getEndDate());
-                    supplierPrices.add(supplierPrice);
-                }
-                calTheMap.put("materialId",material.getId());
-
-                calTheMap.put("materialName",material.getName());
-                double theOneCalNum = Double.valueOf(item.getDosage()) * orderNumber;
-                calTheMap.put("calNum",theOneCalNum);
-                calTheMap.put("materialUnit",material.getUnit());
-
-                result.add(calTheMap);
-            }
-
-            return ResponseResult.succ(result);
-        }
-
-        catch (Exception e) {
-            log.error("产品组成结构单，计算异常",e);
-            throw new RuntimeException(e.getMessage());
-        }
-    }
-*/
-
-    /**
-     * 计算用料
-     */
     @GetMapping("/calNumById")
     @PreAuthorize("hasAuthority('produce:productConstituent:list')")
     @Transactional
@@ -639,8 +565,7 @@ public class ProduceProductConstituentController extends BaseController {
             detail.setSpecs(material.getSpecs());
 
             // 假如是采购进度备料进度，入库数量>0的记录数量，则标注为不可以修改
-            List<ProduceOrderMaterialProgress> list = orderProductOrderService.listByProductNumBrandAndProgressMaterialId(productConstituent.getProductNum(),
-                    productConstituent.getProductBrand(),detail.getMaterialId());
+            List<ProduceOrderMaterialProgress> list = orderProductOrderService.listByMBomIdAndProgressMaterialId(productConstituent.getId(),detail.getMaterialId());
             Boolean canChange = true;
             for(ProduceOrderMaterialProgress progress: list){
                 String inNum = progress.getInNum();
@@ -791,8 +716,7 @@ public class ProduceProductConstituentController extends BaseController {
             // 老物料被修改的，要删除对应进度表记录
             for(String delMaterialId:delMaterialIds){
 
-                List<ProduceOrderMaterialProgress> list = orderProductOrderService.listByProductNumBrandAndProgressMaterialId(productConstituent.getProductNum(),
-                        productConstituent.getProductBrand(), delMaterialId);
+                List<ProduceOrderMaterialProgress> list = orderProductOrderService.listByMBomIdAndProgressMaterialId(productConstituent.getId(), delMaterialId);
 
                 for(ProduceOrderMaterialProgress progress : list){
                     if(progress.getInNum()!=null && Double.valueOf(progress.getInNum()).doubleValue() > 0D){
@@ -817,7 +741,7 @@ public class ProduceProductConstituentController extends BaseController {
                     if(newDetailObj.getDosage().equals(oldDetailObj.getDosage())){
                         continue;
                     }
-                    List<OrderProductOrder> orders = orderProductOrderService.getByNumBrand(productConstituent.getProductNum(), productConstituent.getProductBrand());
+                    List<OrderProductOrder> orders = orderProductOrderService.listByMBomId(productConstituent.getId());
                     for (int i = 0; i < orders.size(); i++) {
                         OrderProductOrder order = orders.get(i);
                         Long[] orderIds = new Long[]{order.getId()};
@@ -838,8 +762,7 @@ public class ProduceProductConstituentController extends BaseController {
                 LocalDateTime now = LocalDateTime.now();
                 ArrayList<ProduceOrderMaterialProgress> savePomps = new ArrayList<>();
                 // 假如有对应的订单、则生成进度表信息
-                List<OrderProductOrder> orders = orderProductOrderService.getByNumBrand(productConstituent.getProductNum(),
-                        productConstituent.getProductBrand());
+                List<OrderProductOrder> orders = orderProductOrderService.listByMBomId(productConstituent.getId());
                 if(orders !=null && !orders.isEmpty()){
                     for(OrderProductOrder order : orders){
                         for(String newMaterialId : newMaterialIds){
@@ -923,9 +846,6 @@ public class ProduceProductConstituentController extends BaseController {
             produceProductConstituentDetailService.saveBatch(productConstituent.getRowList());
 
             return ResponseResult.succ(ResponseResult.SUCCESS_CODE,"新增成功",productConstituent.getId());
-        }
-        catch (DuplicateKeyException de){
-            throw new RuntimeException("货号，品牌不能重复!");
         }
         catch (Exception e) {
             log.error("产品组成结构单，插入异常",e);
@@ -1076,6 +996,7 @@ public class ProduceProductConstituentController extends BaseController {
 
     @PostMapping("/statusPassBatch")
     @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
+    @Transactional
     public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
         ArrayList<ProduceProductConstituent> lists = new ArrayList<>();
 
@@ -1087,8 +1008,21 @@ public class ProduceProductConstituentController extends BaseController {
             produceProductConstituent.setStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDVALUE_0);
             lists.add(produceProductConstituent);
 
+            // 查看订单是否有没选择物料BOM的，有的则直接关联该款
+            List<OrderProductOrder> orders = orderProductOrderService.listByNoMBomByNumBrand(produceProductConstituent.getProductNum(),produceProductConstituent.getProductBrand());
+
+            if(orders!=null && !orders.isEmpty()){
+                for(OrderProductOrder opo : orders){
+                    opo.setMaterialBomId(produceProductConstituent.getId());
+                }
+            }
+            orderProductOrderService.updateBatchById(orders);
+
         }
         produceProductConstituentService.updateBatchById(lists);
+
+
+
         return ResponseResult.succ("审核通过");
     }
 
@@ -1097,6 +1031,7 @@ public class ProduceProductConstituentController extends BaseController {
      */
     @GetMapping("/statusPass")
     @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
+    @Transactional
     public ResponseResult statusPass(Principal principal,Long id)throws Exception {
 
         ProduceProductConstituent produceProductConstituent = new ProduceProductConstituent();
@@ -1105,6 +1040,17 @@ public class ProduceProductConstituentController extends BaseController {
         produceProductConstituent.setId(id);
         produceProductConstituent.setStatus(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT.STATUS_FIELDVALUE_0);
         produceProductConstituentService.updateById(produceProductConstituent);
+
+        // 查看订单是否有没选择物料BOM的，有的则直接关联该款
+        List<OrderProductOrder> orders = orderProductOrderService.listByNoMBomByNumBrand(produceProductConstituent.getProductNum(),produceProductConstituent.getProductBrand());
+
+        if(orders!=null && !orders.isEmpty()){
+            for(OrderProductOrder opo : orders){
+                opo.setMaterialBomId(produceProductConstituent.getId());
+            }
+        }
+        orderProductOrderService.updateBatchById(orders);
+
         log.info("生产模块-产品组成结构模块-审核通过内容:{}",produceProductConstituent);
 
         return ResponseResult.succ("审核通过");
@@ -1117,8 +1063,7 @@ public class ProduceProductConstituentController extends BaseController {
     @PreAuthorize("hasAuthority('produce:productConstituent:valid')")
     public ResponseResult statusReturn(Principal principal,Long id)throws Exception {
         // 假如有进度表关联了，不能反审核了。
-        ProduceProductConstituent old = produceProductConstituentService.getById(id);
-        List<OrderProductOrder> orders = orderProductOrderService.getByNumBrand(old.getProductNum(),old.getProductBrand());
+        List<OrderProductOrder> orders = orderProductOrderService.listByMBomId(id);
         if(orders != null && orders.size() > 0){
             HashSet<Long> orderIds = new HashSet<>();
             // 去查询是否有该订单号的进度表

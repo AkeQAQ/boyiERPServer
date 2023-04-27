@@ -54,14 +54,13 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " ) t1," +
             "" +
             " (" +
-            " select ppc.product_num,ppc.product_brand,ppc.product_color,ppcd.material_id,ppcd.dosage,bm.unit materialUnit,bm.name materialName from " +
+            " select ppc.id,ppc.product_num,ppc.product_brand,ppc.product_color,ppcd.material_id,ppcd.dosage,bm.unit materialUnit,bm.name materialName from " +
             " produce_product_constituent ppc," +
             " produce_product_constituent_detail ppcd ," +
             " base_material bm" +
             " where ppc.status=0 and  ppc.id = ppcd.constituent_id and ppcd.material_id = bm.id " +
             " )t2" +
-            " where t1.product_num = t2.product_num " +
-            " and t1.product_brand = t2.product_brand" +
+            " where t1.material_bom_id = t2.id " +
             " ) t3 left join " +
             " produce_order_material_progress pomp " +
             " on t3.order_id = pomp.order_id and t3.material_id = pomp.material_id order by t3.order_num,t3.material_id  " +
@@ -81,10 +80,10 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " order_product_order opo ," +
             " produce_order_material_progress pomp " +
             " where opo.id = pomp.order_id" +
-            " and opo.product_num = #{productNum} and opo.product_brand = #{productBrand} and material_id = #{materialId}" +
+            " and opo.material_bom_id = #{id}  and material_id = #{materialId}" +
             " ")
-    List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(@Param("productNum")String productNum,
-                                                                                  @Param("productBrand") String productBrand,
+    List<ProduceOrderMaterialProgress> listByMBomIdAndProgressMaterialId(@Param("id")Long id,
+
                                                                                   @Param("materialId") String materialId);
 
     @Select("select t.product_num, t.sum  from (" +
@@ -114,8 +113,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             "             select order_num from  " +
             "             produce_batch   " +
             "             )  " +
-            "             and opo.product_num = ppc.product_num  " +
-            "             and opo.product_brand = ppc.product_brand  " +
+            "             and opo.material_bom_id = ppc.id  " +
             "             and ppc.id = ppcd.constituent_id  " +
             "             and ppcd.material_id = bm.id  " +
             "             " +
@@ -138,7 +136,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " select t1.product_num,t1.product_brand,t2.*,t1.material_id,bm.`name` material_name,t1.dosage,CAST(t2.batch_number * t1.dosage as decimal(8,3)) pickNum  from  " +
             " ( " +
             "  select opo.order_num,opo.product_num,opo.product_brand,ppcd.material_id,ppcd.dosage from  order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd  " +
-            "  where ppc.id = ppcd.constituent_id and ppcd.material_id like '01.01%' and opo.product_num = ppc.product_num and opo.product_brand = ppc.product_brand  " +
+            "  where ppc.id = ppcd.constituent_id and ppcd.material_id like '01.01%' and opo.material_bom_id = ppc.id   " +
             " )t1 , " +
             " ( " +
             " select pb.batch_id,pb.order_num, " +
@@ -157,8 +155,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     @Select("select sum(opo.order_number*ppcd.dosage) order_number,ppcd.material_id from order_product_order opo ," +
             " produce_product_constituent ppc ," +
             " produce_product_constituent_detail ppcd" +
-            " where opo.product_num = ppc.product_num and opo.order_type!=2" +
-            " and opo.product_brand = ppc.product_brand" +
+            " where opo.material_bom_id = ppc.id and opo.order_type!=2" +
             " and ppc.id = ppcd.constituent_id" +
             " and (ppcd.material_id like '04.01%' or ppcd.material_id like '04.04%')" +
             " and (ppc.product_num like '%S%' or ppc.product_num like '%L%'  )    and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
@@ -179,9 +176,8 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             "                        select order_num from " +
             "                        produce_batch  " +
             "                        ) " +
-            "                        and opo.product_num = ppc.product_num " +
+            "                        and opo.material_bom_id = ppc.id " +
             "                        and ppc.status = 0 " +
-            "                        and opo.product_brand = ppc.product_brand " +
             "                        and ppc.id = ppcd.constituent_id " +
             "                        and ppcd.material_id = bm.id " +
             "                       " +
@@ -194,7 +190,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             "             select t1.product_num,t1.product_brand,t2.*,t1.material_id,bm.`name` material_name,t1.dosage,CAST(t2.batch_number * t1.dosage as decimal(8,1)) num  from  " +
             "             ( " +
             "              select opo.order_num,opo.product_num,opo.product_brand,ppcd.material_id,ppcd.dosage from  order_product_order opo,produce_product_constituent ppc,produce_product_constituent_detail ppcd  " +
-            "              where ppc.id = ppcd.constituent_id and ppcd.material_id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> and opo.product_num = ppc.product_num and opo.product_brand = ppc.product_brand and opo.order_type!=2 " +
+            "              where ppc.id = ppcd.constituent_id and ppcd.material_id in <foreach collection='materialIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> and opo.material_bom_id = ppc.id  and opo.order_type!=2 " +
             "             )t1 , " +
             "             ( " +
             "             select pb.batch_id,pb.order_num, " +
@@ -253,8 +249,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
             " produce_product_constituent ppc," +
             " produce_product_constituent_detail ppcd ," +
             " produce_batch pb " +
-            " where opo.product_num = ppc.product_num " +
-            " and opo.product_brand = ppc.product_brand" +
+            " where opo.material_bom_id = ppc.id " +
             " and ppc.id = ppcd.constituent_id" +
             " and pb.id in <foreach collection='batchIds' index='index' item='item' open='(' separator=',' close=')'>#{item}</foreach> and (ppcd.material_id like '04.%' or ppcd.material_id like '06.%') " +
             " and pb.order_num = opo.order_num " +
@@ -264,8 +259,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
     @Select("select sum(opo.order_number*ppcd.dosage) order_number,ppcd.material_id from order_product_order opo ," +
             " produce_product_constituent ppc ," +
             " produce_product_constituent_detail ppcd" +
-            " where opo.product_num = ppc.product_num and opo.order_type!=2" +
-            " and opo.product_brand = ppc.product_brand" +
+            " where opo.material_bom_id = ppc.id and opo.order_type!=2" +
             " and ppc.id = ppcd.constituent_id" +
             "    and opo.created>=#{searchStartDate} and opo.created<=#{searchEndDate}" +
             " group by ppcd.material_id")
@@ -273,7 +267,7 @@ public interface OrderProductOrderMapper extends BaseMapper<OrderProductOrder> {
 
     @Select("select * from (" +
             " select opo.id,opo.product_num,opo.product_brand,opo.order_number" +
-            " ,(select ppc.id from produce_product_constituent ppc where ppc.product_num=opo.product_num and ppc.product_brand=opo.product_brand) ppc_id" +
+            " ,(select ppc.id from produce_product_constituent ppc where ppc.id=opo.material_bom_id ) ppc_id" +
             "  from order_product_order  opo" +
             " where opo.order_type !=2 and opo.status = 0 and opo.id not in (" +
             " select DISTINCT(order_id) from produce_order_material_progress pomp where pomp.order_id is not null" +

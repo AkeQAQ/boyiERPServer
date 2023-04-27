@@ -42,4 +42,7 @@ public interface ProduceProductConstituentService extends IService<ProduceProduc
     void updateNullWithField(ProduceProductConstituent ppc, String videoUrlFieldname);
 
     ProduceProductConstituent getByNumBrand(String productNum, String productBrand);
+
+    ProduceProductConstituent getValidLatestByNumAndBrand(String productNum, String productBrand);
+
 }

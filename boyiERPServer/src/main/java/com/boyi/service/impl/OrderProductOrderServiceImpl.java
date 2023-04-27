@@ -1,6 +1,7 @@
 package com.boyi.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.db.sql.Order;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -113,13 +114,6 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
         this.update(update);
     }
 
-    @Override
-    public List<OrderProductOrder> getByNumBrand(String productNum, String productBrand) {
-        QueryWrapper<OrderProductOrder> queryW = new QueryWrapper<>();
-        queryW.eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_NUM_FIELDNAME,productNum)
-                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_BRAND_FIELDNAME,productBrand);
-        return this.list(queryW);
-    }
 
     @Override
     public List<OrderProductOrder> listBatchMaterialsByOrderIds(List<Long> orderIds) {
@@ -150,8 +144,8 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     }
 
     @Override
-    public List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(String productNum, String productBrand, String materialId) {
-        return orderProductOrderMapper.listByProductNumBrandAndProgressMaterialId(productNum,productBrand,materialId);
+    public List<ProduceOrderMaterialProgress> listByMBomIdAndProgressMaterialId(Long id, String materialId) {
+        return orderProductOrderMapper.listByMBomIdAndProgressMaterialId(id,materialId);
     }
 
     @Override
@@ -248,6 +242,20 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
     @Override
     public List<OrderProductOrder> groupByShoeLast() {
         return this.orderProductOrderMapper.groupByShoeLast();
+    }
+
+    @Override
+    public List<OrderProductOrder> listByNoMBomByNumBrand(String productNum, String productBrand) {
+        return this.list(new QueryWrapper<OrderProductOrder>()
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_NUM_FIELDNAME,productNum)
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_BRAND_FIELDNAME,productBrand)
+                .isNull(DBConstant.TABLE_ORDER_PRODUCT_ORDER.MATERIAL_BOM_ID_FIELDNAME));
+    }
+
+    @Override
+    public List<OrderProductOrder> listByMBomId(Long id) {
+        return this.list(new QueryWrapper<OrderProductOrder>()
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.MATERIAL_BOM_ID_FIELDNAME,id));
     }
 
 }

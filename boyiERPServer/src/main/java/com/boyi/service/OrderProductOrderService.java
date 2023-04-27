@@ -27,7 +27,6 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
     void updatePrepared(Long orderId, Integer preparedFieldvalue1);
 
-    List<OrderProductOrder> getByNumBrand(String productNum, String productBrand);
 
 
     List<OrderProductOrder> listBatchMaterialsByOrderIds(List<Long> orderIds);
@@ -40,7 +39,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
     List<OrderProductOrder> listByOrderNums(Set<String> orderNums);
 
-    List<ProduceOrderMaterialProgress> listByProductNumBrandAndProgressMaterialId(String productNum, String productBrand, String materialId);
+    List<ProduceOrderMaterialProgress> listByMBomIdAndProgressMaterialId(Long id, String materialId);
 
     List<AnalysisProductOrderVO> listGroupByProductNum(String searchStartDate, String searchEndDate);
 
@@ -80,4 +79,7 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
 
     List<OrderProductOrder> groupByShoeLast();
 
+    List<OrderProductOrder> listByNoMBomByNumBrand(String productNum, String productBrand);
+
+    List<OrderProductOrder> listByMBomId(Long id);
 }

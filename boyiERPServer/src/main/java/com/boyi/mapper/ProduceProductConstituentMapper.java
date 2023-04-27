@@ -72,8 +72,7 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
             "            repository_pick_material rpm," +
             "            repository_pick_material_detail rpmd ," +
             "            base_material bm " +
-            "            where opo.product_num = ppc.product_num" +
-            "            and opo.product_brand = ppc.product_brand" +
+            "            where opo.material_bom_id = ppc.id" +
             "            and ppc.id = #{id}" +
             "            and ppc.id = ppcd.constituent_id" +
             "            and ppcd.material_id = rpmd.material_id" +
@@ -149,8 +148,7 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
             " repository_pick_material_detail rpmd," +
             " base_material bm " +
             " WHERE" +
-            " opo.product_num = ppc.product_num " +
-            " AND opo.product_brand = ppc.product_brand " +
+            " opo.material_bom_id = ppc.id " +
             " AND ppc.id = ppcd.constituent_id " +
             " AND ppcd.material_id = rpmd.material_id " +
             " AND ppcd.material_id LIKE '01.%' " +
@@ -192,8 +190,7 @@ public interface ProduceProductConstituentMapper extends BaseMapper<ProduceProdu
             "            repository_pick_material rpm," +
             "            repository_pick_material_detail rpmd ," +
             "            base_material bm " +
-            "            where opo.product_num = ppc.product_num" +
-            "            and opo.product_brand = ppc.product_brand" +
+            "            where opo.material_bom_id = ppc.id" +
             "            and ppc.id = ppcd.constituent_id" +
             "            and ppcd.material_id = rpmd.material_id" +
             "            and ppcd.material_id like '01.%'" +

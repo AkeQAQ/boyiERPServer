@@ -1379,6 +1379,13 @@ public class OrderProductOrderController extends BaseController {
                 order.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0);
                 order.setPrepared(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PREPARED_FIELDVALUE_1);
                 saveOrders.add(order);
+
+                ProduceProductConstituent ppc = produceProductConstituentService.getValidLatestByNumAndBrand(order.getProductNum(), order.getProductBrand());
+                if(ppc!=null){
+                    order.setMaterialBomId(ppc.getId());
+                }
+
+
                 ids.add(order.getOrderNum());
             }
             List<OrderProductOrder> exist = orderProductOrderService.list(new QueryWrapper<OrderProductOrder>()
@@ -1775,6 +1782,7 @@ public class OrderProductOrderController extends BaseController {
 
     @PostMapping("/statusPassBatch")
     @PreAuthorize("hasAuthority('order:productOrder:valid')")
+    @Transactional
     public ResponseResult statusPassBatch(Principal principal,@RequestBody Long[] ids) {
         ArrayList<OrderProductOrder> lists = new ArrayList<>();
 
@@ -1784,6 +1792,14 @@ public class OrderProductOrderController extends BaseController {
             orderProductOrder.setUpdatedUser(principal.getName());
             orderProductOrder.setId(id);
             orderProductOrder.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0);
+
+
+            OrderProductOrder old = orderProductOrderService.getById(id);
+            ProduceProductConstituent ppc = produceProductConstituentService.getValidLatestByNumAndBrand(old.getProductNum(), old.getProductBrand());
+            if(ppc!=null){
+                orderProductOrder.setMaterialBomId(ppc.getId());
+            }
+
             lists.add(orderProductOrder);
 
         }
@@ -1803,7 +1819,16 @@ public class OrderProductOrderController extends BaseController {
         orderProductOrder.setUpdatedUser(principal.getName());
         orderProductOrder.setId(id);
         orderProductOrder.setStatus(DBConstant.TABLE_ORDER_PRODUCT_ORDER.STATUS_FIELDVALUE_0);
+
+        OrderProductOrder old = orderProductOrderService.getById(id);
+        ProduceProductConstituent ppc = produceProductConstituentService.getValidLatestByNumAndBrand(old.getProductNum(), old.getProductBrand());
+        if(ppc!=null){
+            orderProductOrder.setMaterialBomId(ppc.getId());
+        }
+
         orderProductOrderService.updateById(orderProductOrder);
+
+
 
         return ResponseResult.succ("审核通过");
     }
@@ -1838,6 +1863,11 @@ public class OrderProductOrderController extends BaseController {
         List<ProduceBatch> pbs = produceBatchService.listByOrderNum(order.getOrderNum());
         if(pbs != null && pbs.size() > 0){
             return ResponseResult.fail("【生产序号模块】已引用该订单号:"+order.getOrderNum());
+        }
+
+        // 假如有BOM关联，不能反审核
+        if(order.getMaterialBomId()!=null){
+            return ResponseResult.fail("【物料BOM】已引用。订单号:"+order.getOrderNum());
         }
 
         // 删除对应的进度表信息
