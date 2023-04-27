@@ -584,6 +584,13 @@ public class ProduceProductConstituentController extends BaseController {
                     detail.setCanChange(false);
                 }
             }
+            String supplierId = detail.getSupplierId();
+            if(supplierId!=null && !supplierId.isEmpty()){
+                BaseSupplier bs = baseSupplierService.getById(supplierId);
+                detail.setSupplierName(bs.getName());
+
+            }
+
 
         }
 

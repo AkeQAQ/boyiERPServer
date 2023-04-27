@@ -281,5 +281,11 @@ public class ProduceOrderMaterialProgressServiceImpl extends ServiceImpl<Produce
         return this.produceOrderMaterialProgressMapper.groupByMaterialId(materialId);
     }
 
+    @Override
+    public void removeByOrderId(Long id) {
+        this.remove(new QueryWrapper<ProduceOrderMaterialProgress>()
+                .eq(DBConstant.TABLE_PRODUCE_ORDER_MATERIAL_PROGRESS.ORDER_ID_FIELDNAME,id));
+    }
+
 
 }

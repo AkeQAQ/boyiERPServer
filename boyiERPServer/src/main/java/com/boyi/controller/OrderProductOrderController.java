@@ -91,6 +91,10 @@ public class OrderProductOrderController extends BaseController {
 
                 old.setMaterialBomId(mBomId);
             }
+
+            // 并且要删除老的进度表
+            produceOrderMaterialProgressService.removeByOrderId(id);
+
             orderProductOrderService.updateById(old);
             return ResponseResult.succ("选择物料BOM成功!");
         }catch (Exception e){

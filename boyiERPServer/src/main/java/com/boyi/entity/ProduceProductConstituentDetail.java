@@ -55,4 +55,12 @@ public class ProduceProductConstituentDetail extends BaseEntity {
     @TableField(exist = false)  // 字段数据库忽略
     private Boolean canChange;
 
+    private String supplierId;
+    private String specialContent1;
+    private String specialContent2;
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String supplierName;
+
+
 }

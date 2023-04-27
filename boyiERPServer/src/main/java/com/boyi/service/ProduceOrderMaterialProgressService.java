@@ -69,4 +69,7 @@ public interface ProduceOrderMaterialProgressService extends IService<ProduceOrd
     ProduceOrderMaterialProgress getByTheLatestByMaterialIdCreatedDescExcludeSelf(String materialId, Long id);
 
     ProduceOrderMaterialProgress groupByMaterialId(String materialId);
+
+    void removeByOrderId(Long id);
+
 }

@@ -23,6 +23,11 @@ public class ProduceProductConstituent extends BaseEntity {
     private static final long serialVersionUID = 1L;
 
     /**
+     * 设计师名称
+     */
+    private String designer;
+
+    /**
      * 公司货号
      */
     private String productNum;
