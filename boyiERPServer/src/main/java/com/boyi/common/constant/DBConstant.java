@@ -1303,6 +1303,74 @@ public class DBConstant {
 
     }
 
+    public static class TABLE_PRODUCE_TECHNOLOGY_BOM{
+        public static final Map<Integer,String> statusMap;
+
+        static{
+            Map<Integer,String> statusMap2 = new HashMap<Integer,String>();
+            statusMap2.put(0,"已审核");
+            statusMap2.put(1,"暂存");
+            statusMap2.put(2,"审核中");
+            statusMap2.put(3,"重新审核"); // 等同于 审核中。
+            statusMap = statusMap2;
+        }
+        public static final String PRODUCT_NUM_FIELDNAME = "product_num";
+        public static final String PRODUCT_BRAND_FIELDNAME = "product_brand";
+        public static final String PRODUCT_COLOR_FIELDNAME = "product_color";
+        public static final String STATUS_FIELDNAME = "status";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+        public static final String SHOE_HEIGHT_FIELDNAME = "shoe_height";
+        public static final String SHOE_NEEDLE_DISTANCE_FIELDNAME = "shoe_needle_distance";
+        public static final String SHOE_DOUDI_FIELDNAME = "shoe_doudi";
+        public static final String SHOE_LABANG_FIELDNAME = "shoe_labang";
+        public static final String SHOE_SUOTOU_FIELDNAME = "shoe_suotou";
+        public static final String SHOE_BAOBIAN_FIELDNAME = "shoe_baobian";
+        public static final String SHOE_CHEBUBIAN_FIELDNAME = "shoe_chebubian";
+        public static final String SHOE_TANGSONGJING_FIELDNAME = "shoe_tangsongjing";
+
+
+
+        /**
+         *  0:代表 审核通过
+         */
+        public static final Integer STATUS_FIELDVALUE_0 = 0;
+
+        /**
+         *  1:代表 暂存
+         */
+        public static final Integer STATUS_FIELDVALUE_1 = 1;
+        /**
+         *  2:代表 审核中
+         */
+        public static final Integer STATUS_FIELDVALUE_2 = 2;
+        /**
+         *  3:代表 重新审核
+         */
+        public static final Integer STATUS_FIELDVALUE_3 = 3;
+
+    }
+
+    public static class TABLE_PRODUCE_TECHNOLOGY_BOM_DETIAL{
+        public static final String MATERIAL_ID_FIELDNAME = "material_id";
+        public static final String DOSAGE_FIELDNAME = "dosage";
+        public static final String CONSTITUENT_ID_FIELDNAME = "constituent_id";
+
+        public static final String CREATED_USER_FIELDNAME = "created_user";
+        public static final String UPDATED_USER_FIELDNAME = "updated_user";
+        public static final String CREATED_FIELDNAME = "created";
+        public static final String UPDATED_FIELDNAME = "updated";
+        public static final String ID_FIELDNAME = "id";
+        public static final String SUPPLIER_ID_FIELDNAME = "supplier_id";
+        public static final String SPECIAL_CONTENT1_FIELDNAME = "special_content1";
+        public static final String SPECIAL_CONTENT2_FIELDNAME = "special_content2";
+
+    }
+
     public static class TABLE_PRODUCE_PRODUCT_CONSTITUENT{
         public static final Map<Integer,String> statusMap;
 
@@ -1400,6 +1468,7 @@ public class DBConstant {
         public static final String UPDATED_FIELDNAME = "updated";
         public static final String ID_FIELDNAME = "id";
         public static final String MATERIAL_BOM_ID_FIELDNAME = "material_bom_id";
+        public static final String T_BOM_ID_FIELDNAME = "technology_bom_id";
 
         public static final String PREPARED_FIELDNAME = "prepared";
 

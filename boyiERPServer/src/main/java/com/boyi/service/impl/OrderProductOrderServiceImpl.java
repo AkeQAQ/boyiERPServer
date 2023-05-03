@@ -258,4 +258,18 @@ public class OrderProductOrderServiceImpl extends ServiceImpl<OrderProductOrderM
                 .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.MATERIAL_BOM_ID_FIELDNAME,id));
     }
 
+    @Override
+    public List<OrderProductOrder> listByNoTBomByNumBrand(String productNum, String productBrand) {
+        return this.list(new QueryWrapper<OrderProductOrder>()
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_NUM_FIELDNAME,productNum)
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.PRODUCT_BRAND_FIELDNAME,productBrand)
+                .isNull(DBConstant.TABLE_ORDER_PRODUCT_ORDER.T_BOM_ID_FIELDNAME));
+    }
+
+    @Override
+    public List<OrderProductOrder> listByTBomId(Long id) {
+        return this.list(new QueryWrapper<OrderProductOrder>()
+                .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.T_BOM_ID_FIELDNAME,id));
+    }
+
 }

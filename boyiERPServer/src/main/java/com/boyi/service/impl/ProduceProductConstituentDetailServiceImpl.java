@@ -67,4 +67,9 @@ public class ProduceProductConstituentDetailServiceImpl extends ServiceImpl<Prod
                 .eq(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.CONSTITUENT_ID_FIELDNAME,id)
                 .likeRight(DBConstant.TABLE_PRODUCE_PRODUCT_CONSTITUENT_DETIAL.MATERIAL_ID_FIELDNAME,"11.01"));
     }
+
+    @Override
+    public List<OrderProductOrder> listByMBomId(Long materialBomId) {
+        return produceProductConstituentDetailMapper.listByMBomId(materialBomId);
+    }
 }

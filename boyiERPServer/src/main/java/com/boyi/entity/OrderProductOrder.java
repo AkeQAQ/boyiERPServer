@@ -91,6 +91,12 @@ public class OrderProductOrder extends BaseEntity {
 
     private Long materialBomId;
 
+    private Long technologyBomId;
+
+    @TableField(exist = false)
+    private String technologyBomName;
+
+
     @TableField(exist = false)
     private String materialBomName;
     /**

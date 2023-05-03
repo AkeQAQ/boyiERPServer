@@ -82,4 +82,8 @@ public interface OrderProductOrderService extends IService<OrderProductOrder> {
     List<OrderProductOrder> listByNoMBomByNumBrand(String productNum, String productBrand);
 
     List<OrderProductOrder> listByMBomId(Long id);
+
+    List<OrderProductOrder> listByNoTBomByNumBrand(String productNum, String productBrand);
+
+    List<OrderProductOrder> listByTBomId(Long id);
 }

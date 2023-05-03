@@ -28,4 +28,6 @@ public interface ProduceProductConstituentDetailService extends IService<Produce
     List<OrderProductOrder> listByNumBrand(String productNum, String productBrand);
 
     List<ProduceProductConstituentDetail> listByForeignIdAnd1101MaterialId(Long id);
+
+    List<OrderProductOrder> listByMBomId(Long materialBomId);
 }

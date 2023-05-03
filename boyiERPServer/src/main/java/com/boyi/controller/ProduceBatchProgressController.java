@@ -64,6 +64,16 @@ public class ProduceBatchProgressController extends BaseController {
     public ResponseResult del(@RequestBody Long id) throws Exception{
         try {
 
+            ProduceBatchProgress progress = produceBatchProgressService.getById(id);
+
+            ProduceBatch pb = produceBatchService.getById(progress.getProduceBatchId());
+            String batchIdStr = pb.getBatchId().split("-")[0];
+            // 假如有采购订单，则不能修改
+            long countBuyOrder = orderBuyorderDocumentService.countBySupplierIdMaterialIdOrderSeqInOneYear(progress.getSupplierId(), progress.getMaterialId(), batchIdStr);
+            if(countBuyOrder > 0){
+                return ResponseResult.fail("批次号:"+batchIdStr+",有"+countBuyOrder +" 个下推的采购订单，不允许删除!");
+            }
+
             boolean flag = produceBatchProgressService.removeById(id);
 
             log.info("删除【生成进度表】信息,id:{},是否成功：{}",id,flag?"成功":"失败");
@@ -130,10 +140,20 @@ public class ProduceBatchProgressController extends BaseController {
                     continue;
                 }
 
+                String batchIdStr = batchUniqueId_batchIdStr.get(progress.getProduceBatchId());
+
+                ProduceBatchProgress old = produceBatchProgressService.getById(progress.getId());
+                if(old!=null){
+                    // 假如有采购订单，则不能修改
+                    long countBuyOrder = orderBuyorderDocumentService.countBySupplierIdMaterialIdOrderSeqInOneYear(old.getSupplierId(), old.getMaterialId(), batchIdStr);
+                    if(countBuyOrder > 0){
+                        return ResponseResult.fail("批次号:"+batchIdStr+",有"+countBuyOrder +" 个下推的采购订单，不允许修改!");
+                    }
+                }
+
                 CostOfLabourType type = costOfLabourTypeService.getById(progress.getCostOfLabourTypeId());
                 progress.setCostOfLabourTypeName(type.getTypeName());
                 //新增
-
 
                 if(progress.getId()==null){
                     if((progress.getSupplierId()==null || progress.getSupplierId().isEmpty()) && progress.getSupplierName()!=null&&!progress.getSupplierName().isEmpty()){
@@ -146,7 +166,6 @@ public class ProduceBatchProgressController extends BaseController {
                         throw new RuntimeException(type.getTypeName()+",物料:"+progress.getMaterialName()+"，不是11.01分组下的，不能使用");
                     }
 
-                    String batchIdStr = batchUniqueId_batchIdStr.get(progress.getProduceBatchId());
 
 //                    ProduceBatch pb = produceBatchService.getById(progress.getProduceBatchId());
                     if(type.getSeq()> 1 ){
@@ -162,7 +181,6 @@ public class ProduceBatchProgressController extends BaseController {
                     produceBatchProgressService.save(progress);
 
                 }else{
-                    ProduceBatchProgress old = produceBatchProgressService.getById(progress.getId());
                     if(old.getSupplierId()!=null &&  !old.getSupplierId().isEmpty() && progress.getSupplierName()!=null && !progress.getSupplierName().isEmpty() && old.getSupplierId().equals(progress.getSupplierId())){
                         progress.setSupplierName(old.getSupplierName());
                     }

@@ -425,7 +425,9 @@ public class ProduceOrderMaterialProgressController extends BaseController {
                         long start = System.currentTimeMillis();
                         Map<String,Map<String, Object>> result2 = new HashMap<String,Map<String, Object>>();
 
-                        List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(),order.getProductBrand());
+//                        List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(),order.getProductBrand());
+                        List<OrderProductOrder> details = produceProductConstituentDetailService.listByMBomId(order.getMaterialBomId());
+
                         for (OrderProductOrder orderOneMaterial : details){
 
                             Map<String, Object> theMaterialIdMaps = result2.get(orderOneMaterial.getMaterialId());

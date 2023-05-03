@@ -953,7 +953,9 @@ public class ProduceBatchController extends BaseController {
 
 
                 // 2. 查询组成结构
-                List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+//                List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+                List<OrderProductOrder> details = produceProductConstituentDetailService.listByMBomId(order.getMaterialBomId());
+
                 for (OrderProductOrder detail : details){
                     String materialId = detail.getMaterialId();
                     // 筛选皮料，
@@ -1133,7 +1135,8 @@ public class ProduceBatchController extends BaseController {
 
 
                 // 2. 查询组成结构
-                List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+//                List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+                List<OrderProductOrder> details = produceProductConstituentDetailService.listByMBomId(order.getMaterialBomId());
                 for (OrderProductOrder detail : details){
                     String materialId = detail.getMaterialId();
 
@@ -1300,7 +1303,9 @@ public class ProduceBatchController extends BaseController {
 
 
             // 2. 查询组成结构
-            List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+//            List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+            List<OrderProductOrder> details = produceProductConstituentDetailService.listByMBomId(order.getMaterialBomId());
+
             for (OrderProductOrder detail : details){
                 String materialId = detail.getMaterialId();
                 // 筛选物料分组
@@ -1410,7 +1415,9 @@ public class ProduceBatchController extends BaseController {
 
 
             // 2. 查询组成结构
-            List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+//            List<OrderProductOrder> details = produceProductConstituentDetailService.listByNumBrand(order.getProductNum(), order.getProductBrand());
+            List<OrderProductOrder> details = produceProductConstituentDetailService.listByMBomId(order.getMaterialBomId());
+
             for (OrderProductOrder detail : details){
                 String materialId = detail.getMaterialId();
                 // 筛选皮料，
@@ -1625,10 +1632,10 @@ public class ProduceBatchController extends BaseController {
                         errorMsgs.add(errorMsg);
                     }
 
-                    // 2. 校验订单和生产序号的数量是否一致。
+                    // 2. 校验订单和生产序号的数量是否一致。(目前逻辑已修改：一个订单可能分多次投)
 
                     // 2.1 先查询db中，该生产序号开头的全部批次号，db的数量
-                    List<ProduceBatch> dbBatches = produceBatchService.listByLikeRightBatchId(batchIdPre);
+                    /*List<ProduceBatch> dbBatches = produceBatchService.listByLikeRightBatchId(batchIdPre);
                     Double dbNum = 0D;
                     for(ProduceBatch dbPb:dbBatches){
                         Double oneDbPbTotalNum = dbPbTotalNum(dbPb);
@@ -1650,7 +1657,7 @@ public class ProduceBatchController extends BaseController {
                                 +",求和："+produceBatchTotalNumber+"...请注意!!!");
                         errorMsgs.add(errorMsg);
 
-                    }
+                    }*/
 
                 }
                 for (String uploadOrderNum : orderNums){

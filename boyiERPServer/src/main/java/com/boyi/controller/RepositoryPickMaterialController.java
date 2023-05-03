@@ -521,7 +521,9 @@ public class RepositoryPickMaterialController extends BaseController {
                 // 查询对应产品组成结构，假如不存在对应物料（皮料），不能出库
                 OrderProductOrder productOrder = orderProductOrderService.getByOrderNum(pb.getOrderNum());
 
-                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+//                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByMBomId(productOrder.getMaterialBomId());
+
                 for (OrderProductOrder order : orders){
                     if(isExistMaterial.containsKey(order.getMaterialId())){
                         isExistMaterial.put(order.getMaterialId(),true);
@@ -729,7 +731,9 @@ public class RepositoryPickMaterialController extends BaseController {
                 // 查询对应产品组成结构，假如不存在对应物料（皮料），不能出库
                 OrderProductOrder productOrder = orderProductOrderService.getByOrderNum(pb.getOrderNum());
 
-                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+//                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByNumBrand(productOrder.getProductNum(), productOrder.getProductBrand());
+                List<OrderProductOrder> orders = produceProductConstituentDetailService.listByMBomId(productOrder.getMaterialBomId());
+
                 for (OrderProductOrder order : orders){
                     if(isExistMaterial.containsKey(order.getMaterialId())){
                         isExistMaterial.put(order.getMaterialId(),true);

@@ -55,6 +55,42 @@ public class OrderProductOrderController extends BaseController {
     }
 
 
+    @Transactional
+    @GetMapping("updateTbom")
+    @PreAuthorize("hasAuthority('produce:technologyBOM:valid')")
+    public ResponseResult updateTbom(Principal principal,Long id,Long tBomId) throws Exception{
+        try {
+            OrderProductOrder old = orderProductOrderService.getById(id);
+
+            if(tBomId==-1){
+                old.setTechnologyBomId(null);
+
+                orderProductOrderService.update(new UpdateWrapper<OrderProductOrder>()
+                        .set(DBConstant.TABLE_ORDER_PRODUCT_ORDER.T_BOM_ID_FIELDNAME,null)
+                        .eq(DBConstant.TABLE_ORDER_PRODUCT_ORDER.ID_FIELDNAME,id));
+
+            }else{
+
+                // 假如物料BOM 的工厂型号和品牌不一致，则不能选择
+                ProduceTechnologyBom ppc = produceTechnologyBomService.getById(tBomId);
+                if(!old.getProductBrand().equals(ppc.getProductBrand()) ||
+                        !old.getProductNum().equals(ppc.getProductNum())){
+                    return ResponseResult.fail("请选择一致的工厂货号和品牌!");
+                }
+
+                old.setTechnologyBomId(tBomId);
+                orderProductOrderService.updateById(old);
+
+            }
+
+            return ResponseResult.succ("选择工艺BOM成功!");
+        }catch (Exception e){
+            log.error("报错.",e);
+            throw new RuntimeException("服务器报错");
+        }
+    }
+
+
 
     @Transactional
     @GetMapping("updateMbom")
@@ -90,12 +126,13 @@ public class OrderProductOrderController extends BaseController {
                 }
 
                 old.setMaterialBomId(mBomId);
+                orderProductOrderService.updateById(old);
+
             }
 
             // 并且要删除老的进度表
             produceOrderMaterialProgressService.removeByOrderId(id);
 
-            orderProductOrderService.updateById(old);
             return ResponseResult.succ("选择物料BOM成功!");
         }catch (Exception e){
             log.error("报错.",e);
@@ -1703,6 +1740,16 @@ public class OrderProductOrderController extends BaseController {
             String showStr = productConsi.getProductNum() + productConsi.getProductBrand();
 
             opo.setMaterialBomName(showStr);
+
+            Long tBomId = opo.getTechnologyBomId();
+            if(tBomId!=null){
+                ProduceTechnologyBom tBom = produceTechnologyBomService.getById(tBomId);
+                String showStr2 = tBom.getProductNum() + tBom.getProductBrand();
+                opo.setTechnologyBomName(showStr2);
+            }
+
+
+
             int count = produceProductConstituentService.countProductNum(opo.getProductNum());
 
             opo.setHasProductNum(count > 0);

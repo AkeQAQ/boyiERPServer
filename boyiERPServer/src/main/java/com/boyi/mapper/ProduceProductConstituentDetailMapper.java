@@ -28,4 +28,13 @@ public interface ProduceProductConstituentDetailMapper extends BaseMapper<Produc
             " where ppc.id = ppcd.constituent_id   and ppcd.material_id = bm.id " +
             " and product_num =#{productNum} and product_brand=#{productBrand}")
     List<OrderProductOrder> listByNumBrand(@Param("productNum") String productNum,@Param("productBrand") String productBrand);
+
+    @Select("select ppc.product_num,ppc.product_brand,ppc.product_color,ppcd.dosage ,bm.id material_id,bm.unit material_unit,bm.name material_name,ppcd.can_show_print,ppcd.content  from" +
+            "" +
+            " produce_product_constituent ppc , " +
+            " produce_product_constituent_detail ppcd  ," +
+            "base_material bm" +
+            " where ppc.id = ppcd.constituent_id   and ppcd.material_id = bm.id " +
+            " and ppc.id=#{materialBomId}")
+    List<OrderProductOrder> listByMBomId(@Param("materialBomId")Long materialBomId);
 }
