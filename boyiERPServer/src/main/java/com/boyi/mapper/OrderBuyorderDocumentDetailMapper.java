@@ -28,7 +28,7 @@ public interface OrderBuyorderDocumentDetailMapper extends BaseMapper<OrderBuyor
             " obdd.material_id = bsm.material_id and" +
             " obdd.supplier_id = bsm.supplier_id and " +
             " obdd.order_date >= bsm.start_date and " +
-            " obdd.order_date < bsm.end_date " +
+            " obdd.order_date <= bsm.end_date " +
             " where bsm.price is null" +
             " group by obdd.material_id,obdd.supplier_id" +
             " ) t1,base_material bm ,base_supplier bs" +

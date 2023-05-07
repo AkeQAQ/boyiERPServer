@@ -28,4 +28,6 @@ public interface RepositoryBuyinDocumentDetailService extends IService<Repositor
     List<RepositoryBuyinDocumentDetail> listByOrderDetailId(Long[] orderDetailIds);
 
     void removeByDocIdAndInIds(Long id, List<Long> detailIds);
+
+    List<RepositoryBuyinDocumentDetail> listNoPriceForeignMaterials();
 }

@@ -91,4 +91,8 @@ public class RepositoryBuyinDocumentDetail {
     @TableField(exist = false)  // 字段数据库忽略
     private Double amount;
 
+
+    @TableField(exist = false)  // 字段数据库忽略
+    private String supplierName;
+
 }

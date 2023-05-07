@@ -67,6 +67,41 @@ public class RepositoryBuyinDocumentController extends BaseController {
     private boolean isStartMaterialProgress;
 
 
+    @GetMapping("/getNoPriceLists")
+    @PreAuthorize("hasAuthority('repository:buyIn:save')")
+    public ResponseResult getNoPriceLists(){
+        Map<String, List<NoPricePrintBuyInVO>> returnMap = new HashMap<>();
+        List<NoPricePrintBuyInVO> lists = new ArrayList<>();
+        HashMap<String, List<RepositoryBuyinDocumentDetail>> supplier_materials = new HashMap<>();
+
+//        List<OrderBuyorderDocumentDetail> details = orderBuyorderDocumentDetailService.listNoPriceForeignMaterials();
+
+        List<RepositoryBuyinDocumentDetail>  details = repositoryBuyinDocumentDetailService.listNoPriceForeignMaterials();
+        //进行分组
+
+        for (RepositoryBuyinDocumentDetail detail : details){
+            String supplierName = detail.getSupplierName();
+            List<RepositoryBuyinDocumentDetail> baseMaterials = supplier_materials.get(supplierName);
+            if(baseMaterials == null || baseMaterials.size() == 0){
+                baseMaterials = new ArrayList<>();
+                supplier_materials.put(supplierName,baseMaterials);
+            }
+            baseMaterials.add(detail);
+        }
+        for(Map.Entry<String,List<RepositoryBuyinDocumentDetail>> entry : supplier_materials.entrySet()){
+            String key = entry.getKey();
+            List<RepositoryBuyinDocumentDetail> value = entry.getValue();
+            NoPricePrintBuyInVO vo = new NoPricePrintBuyInVO();
+            vo.setSupplierName(key);
+            vo.setRowList(value);
+            lists.add(vo);
+        }
+        returnMap.put("content",lists);
+        return ResponseResult.succ(returnMap);
+    }
+
+
+
     /**
      *  获取选中的批量打印的数据
      * @param principal

@@ -29,6 +29,9 @@ public class RepositoryBuyinDocumentDetailServiceImpl extends ServiceImpl<Reposi
     @Autowired
     RepositoryStockService repositoryStockService;
 
+    @Autowired
+    RepositoryBuyinDocumentDetailMapper repositoryBuyinDocumentDetailMapper;
+
     @Override
     public boolean delByDocumentIds(Long[] ids) {
         return this.remove(new QueryWrapper<RepositoryBuyinDocumentDetail>()
@@ -64,5 +67,10 @@ public class RepositoryBuyinDocumentDetailServiceImpl extends ServiceImpl<Reposi
         this.remove(new QueryWrapper<RepositoryBuyinDocumentDetail>()
                 .in(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.ID_FIELDNAME,detailIds)
                 .eq(DBConstant.TABLE_ORDER_BUYORDER_DOCUMENT_DETAIL.DOCUMENT_ID_FIELDNAME,id));
+    }
+
+    @Override
+    public List<RepositoryBuyinDocumentDetail> listNoPriceForeignMaterials() {
+        return this.repositoryBuyinDocumentDetailMapper.listNoPriceForeignMaterials();
     }
 }
