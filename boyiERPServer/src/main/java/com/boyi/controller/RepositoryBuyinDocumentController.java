@@ -441,10 +441,10 @@ public class RepositoryBuyinDocumentController extends BaseController {
             detail.setUnitRadio(material.getUnitRadio());
             detail.setSpecs(material.getSpecs());
 
-            // 蜘蛛王核算用户，特殊判断
+            // 核算用户，特殊判断
             BaseSupplierMaterial one = null;
             BaseSupplierMaterialCopy oneCopy = null;
-            if(principal.getName().equals("林长生.")){
+            if(principal.getName().equals("lcs.")){
                 // 查询对应的价目记录
                 oneCopy = baseSupplierMaterialCopyService.getSuccessPrice(supplier.getId(),material.getId(),detail.getPriceDate());
             }else{
@@ -453,7 +453,7 @@ public class RepositoryBuyinDocumentController extends BaseController {
 
             }
 
-            // 蜘蛛王核算用户，特殊判断
+            // 核算用户，特殊判断
             if(one != null){
                 detail.setPrice(one.getPrice());
 //                double amount = detail.getPrice() * detail.getNum();
@@ -1116,9 +1116,9 @@ public class RepositoryBuyinDocumentController extends BaseController {
             return ResponseResult.fail("状态不能为空");
         }
 
-        // 蜘蛛王核算用户，特殊判断
-        // 假如是ZZW核算用户，则查询另外个价目表数据
-        if(principal.getName().equals("林长生.")){
+        // 核算用户，特殊判断
+        // 假如是核算用户，则查询另外个价目表数据
+        if(principal.getName().equals("lcs.")){
             pageData = repositoryBuyinDocumentService.innerQueryZZWByManySearch(getPage(),searchField,queryField,searchStr,searchStartDate,searchEndDate,searchStatusList,queryMap);
             Double allPageTotalAmount = repositoryBuyinDocumentService.getAllPageTotalAmountZZW(searchField, queryField, searchStr, searchStartDate, searchEndDate, searchStatusList, queryMap);
             BigDecimal value = new BigDecimal(allPageTotalAmount).setScale(2,BigDecimal.ROUND_HALF_UP);

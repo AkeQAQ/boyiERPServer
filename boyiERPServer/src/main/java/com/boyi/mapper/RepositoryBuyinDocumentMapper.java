@@ -62,7 +62,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " and t.price_date between  sm.start_date and sm.end_date order by id desc,detail_id desc";
     String wrapperSql = "SELECT * from ( " + querySql + " ) AS q ${ew.customSqlSegment}";
 
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
     String queryZZWSql = "" +
             "select t.*,(sm.price * num) amount ,sm.price price from (" +
             "select  doc.id id, " +
@@ -104,7 +104,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
     @Select(wrapperSql)
     Page<RepositoryBuyinDocument> page(Page page, @Param("ew") Wrapper queryWrapper);
 
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
     /**
      * 分页查询ZZW
      */
@@ -118,7 +118,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
     @Select(wrapperSql)
     List<RepositoryBuyinDocument> list(@Param("ew") Wrapper queryWrapper);
 
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
     /**
      * 普通查询
      */
@@ -138,7 +138,7 @@ public interface RepositoryBuyinDocumentMapper extends BaseMapper<RepositoryBuyi
             " and rbdd.material_id = #{materialId} and rbdd.price_date between #{startDate} and #{endDate}")
     Integer getSupplierMaterialPassBetweenDate(BaseSupplierMaterial baseSupplierMaterial);
 
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
 
     @Select("select count(1) from repository_buyin_document rbd," +
             "              repository_buyin_document_detail rbdd" +

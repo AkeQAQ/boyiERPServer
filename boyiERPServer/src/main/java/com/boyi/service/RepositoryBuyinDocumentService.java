@@ -23,13 +23,13 @@ import java.util.Map;
 public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyinDocument> {
 
     Page<RepositoryBuyinDocument> innerQuery(Page page, QueryWrapper<RepositoryBuyinDocument> like);
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
     Page<RepositoryBuyinDocument> innerQueryZZW(Page page, QueryWrapper<RepositoryBuyinDocument> like);
 
     RepositoryBuyinDocument one(QueryWrapper<RepositoryBuyinDocument> id);
 
     Integer getSupplierMaterialPassBetweenDate(BaseSupplierMaterial baseSupplierMaterial);
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
     Integer getSupplierMaterialCopyPassBetweenDate(BaseSupplierMaterialCopy baseSupplierMaterial);
 
 
@@ -40,7 +40,7 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
 
     Page<RepositoryBuyinDocument> innerQueryBySearch(Page page,String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate,List<Long> searchStatus);
     Page<RepositoryBuyinDocument> innerQueryByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String,String> otherSearch);
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
     Page<RepositoryBuyinDocument> innerQueryZZWByManySearch(Page page, String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatus, Map<String,String> otherSearch);
 
     int countBySupplierId(String ids[]);
@@ -54,7 +54,7 @@ public interface RepositoryBuyinDocumentService extends IService<RepositoryBuyin
     List<RepositoryBuyinDocument> getListFromOrderBetweenDate(LocalDate startDate, LocalDate endDate);
 
     Double getAllPageTotalAmount(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatusList, Map<String, String> queryMap);
-    // 蜘蛛王核算用户，特殊SQL
+    // 特殊核算用户，特殊SQL
     Double getAllPageTotalAmountZZW(String searchField, String queryField, String searchStr, String searchStartDate, String searchEndDate, List<Long> searchStatusList, Map<String, String> queryMap);
 
     RepositoryBuyinDocument getNetInFromOrderBetweenDate(LocalDate startD, LocalDate endD,String materialId);
