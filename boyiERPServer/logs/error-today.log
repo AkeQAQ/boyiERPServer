@@ -1,0 +1,2 @@
+2023-05-07 11:17:45,956 ERROR [restartedMain] c.b.m.c.MybatisConfiguration - mapper[com.boyi.mapper.SysUserMapper.listByMenuId] is ignored, because it exists, maybe from xml file
+2023-05-07 11:28:37,491 ERROR [restartedMain] c.b.m.c.MybatisConfiguration - mapper[com.boyi.mapper.SysUserMapper.listByMenuId] is ignored, because it exists, maybe from xml file
