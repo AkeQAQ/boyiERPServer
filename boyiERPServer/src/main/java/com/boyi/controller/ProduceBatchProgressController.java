@@ -144,10 +144,15 @@ public class ProduceBatchProgressController extends BaseController {
 
                 ProduceBatchProgress old = produceBatchProgressService.getById(progress.getId());
                 if(old!=null){
-                    // 假如有采购订单，则不能修改
-                    long countBuyOrder = orderBuyorderDocumentService.countBySupplierIdMaterialIdOrderSeqInOneYear(old.getSupplierId(), old.getMaterialId(), batchIdStr);
-                    if(countBuyOrder > 0){
-                        return ResponseResult.fail("批次号:"+batchIdStr+",有"+countBuyOrder +" 个下推的采购订单，不允许修改!");
+                    // 假如修改供应商或者物料的
+                    if(old.getSupplierId()!=null && old.getMaterialId()!=null
+                        && (!old.getSupplierId().equals(progress.getSupplierId())
+                        || !old.getMaterialId().equals(progress.getMaterialId()) )){
+                        // 假如有采购订单，则不能修改
+                        long countBuyOrder = orderBuyorderDocumentService.countBySupplierIdMaterialIdOrderSeqInOneYear(old.getSupplierId(), old.getMaterialId(), batchIdStr);
+                        if(countBuyOrder > 0){
+                            return ResponseResult.fail("批次号:"+batchIdStr+",有"+countBuyOrder +" 个下推的采购订单，不允许修改!");
+                        }
                     }
                 }
 
